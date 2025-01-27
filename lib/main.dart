@@ -6,10 +6,10 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 
 import 'adapter/locale_adapter.dart';
 import 'adapter/theme_mode_adapter.dart';
+import 'adapter/track_adapter.dart';
 import 'screen/home_screen.dart';
 import 'screen/settings_screen.dart';
-import 'screen/track_screen.dart';
-import 'src/config.dart';
+import 'config/config.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,6 +23,7 @@ Future<void> main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(LocaleAdapter());
   Hive.registerAdapter(ThemeModeAdapter());
+  Hive.registerAdapter(TrackAdapter());
   Hive.registerAdapter(ColorAdapter());
   Box globalSettingsBox = await Hive.openBox('settings');
   Box trackSettingsBox = await Hive.openBox('tracks');
@@ -38,19 +39,22 @@ class SplashScreenApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        home: Scaffold(
-            body: Center(
-                child: Column(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.center, children: [
-      Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.dashboard_customize_rounded, size: 48),
-          Text('Tune Tangler', style: TextStyle(fontSize: 48)),
-        ],
+      home: Scaffold(
+        body: Center(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.center, children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.dashboard_customize_rounded, size: 48),
+                Text('Tune Tangler', style: TextStyle(fontSize: 48)),
+              ],
+            ),
+            CircularProgressIndicator(strokeWidth: 8),
+          ]),
+        ),
       ),
-      CircularProgressIndicator(strokeWidth: 8),
-    ]))));
+    );
   }
 }
 
@@ -67,34 +71,43 @@ class MainScreenApp extends StatefulWidget {
 class _MainScreenAppState extends State<MainScreenApp> {
   _MainScreenAppState();
 
-  _settingsGet(key, {space = ConfigSpace.global}) => switch (key) {
+  _settingsGet(key, {space = ConfigSpace.global, dynamic defaultValue}) => switch (key) {
         GlobalConfigKey.isThemeModeDark => _settingsGet(GlobalConfigKey.themeMode) == ThemeMode.dark,
         GlobalConfigKey.isThemeModeLight => _settingsGet(GlobalConfigKey.themeMode) == ThemeMode.light,
         GlobalConfigKey.isThemeModeSystem => _settingsGet(GlobalConfigKey.themeMode) == ThemeMode.system,
         _ => switch (space) {
-            ConfigSpace.global => widget.globalSettingsBox.get(GlobalConfig.name(key), defaultValue: GlobalConfig.defaultValue(key)),
-            ConfigSpace.track => widget.trackSettingsBox.get(key),
+            ConfigSpace.global =>
+              widget.globalSettingsBox.get(Config.settingField(key).boxFieldName, defaultValue: Config.settingField(key).defaultValue),
+            ConfigSpace.track => widget.trackSettingsBox.get(key, defaultValue: defaultValue),
             Object() => throw UnimplementedError(),
             null => throw UnimplementedError(),
           },
       };
 
-  void _settingsPut(key, value, {space = ConfigSpace.global}) {
-    setState(() {
-      switch (space) {
-        case ConfigSpace.global:
-          widget.globalSettingsBox.put(GlobalConfig.name(key), value);
-          switch (key) {
-            case GlobalConfigKey.wakelockEnabled:
-              WakelockPlus.toggle(enable: value);
-              break;
-          }
-          break;
-        case ConfigSpace.track:
-          widget.trackSettingsBox.put(key, value);
-          break;
-      }
-    });
+  void _settingsSet(key, value, {space = ConfigSpace.global, bool updateState = false}) {
+    if (updateState == true) {
+      setState(() {
+        _settingsSetStateLess(key, value, space: space);
+      });
+    } else {
+      _settingsSetStateLess(key, value, space: space);
+    }
+  }
+
+  void _settingsSetStateLess(key, value, {space = ConfigSpace.global}) {
+    switch (space) {
+      case ConfigSpace.global:
+        widget.globalSettingsBox.put(Config.settingField(key).boxFieldName, value);
+        switch (key) {
+          case GlobalConfigKey.wakelockEnabled:
+            WakelockPlus.toggle(enable: value);
+            break;
+        }
+        break;
+      case ConfigSpace.track:
+        widget.trackSettingsBox.put(key, value);
+        break;
+    }
   }
 
   @override
@@ -105,7 +118,7 @@ class _MainScreenAppState extends State<MainScreenApp> {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: Config.languageValues(),
+      supportedLocales: Config.languages.values,
       locale: _settingsGet(GlobalConfigKey.locale),
       themeAnimationDuration: Duration(seconds: 0),
       theme: ThemeData(
@@ -125,8 +138,7 @@ class _MainScreenAppState extends State<MainScreenApp> {
       themeMode: _settingsGet(GlobalConfigKey.themeMode),
       initialRoute: '/',
       routes: {
-        '/': (context) => HomeScreen(settingsGet: _settingsGet, settingsPut: _settingsPut),
-        '/settings': (context) => SettingsScreen(settingsGet: _settingsGet, settingsSet: _settingsPut),
-        '/track': (context) => TrackScreen(settingsGet: _settingsGet, settingsSet: _settingsPut),
+        '/': (context) => HomeScreen(settingsGet: _settingsGet, settingsSet: _settingsSet),
+        '/settings': (context) => SettingsScreen(settingsGet: _settingsGet, settingsSet: _settingsSet),
       });
 }

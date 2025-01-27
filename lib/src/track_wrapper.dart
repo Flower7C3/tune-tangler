@@ -1,105 +1,130 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import 'io.dart';
-import 'track.dart';
+import '../screen/screen.dart';
+import '../config/config.dart';
+import 'ui_wrapper.dart';
+import '../entity/track.dart';
 
 class TrackWrapper {
   final BuildContext context;
+  final ScreenInterface widget;
   final AppLocalizations _trans;
-  final IO _io;
+  final UIWrapper _ui;
 
-  final double _trackItemMargin = 4;
-  final double _trackItemWidth = 70;
-  final double _trackPadding = 4;
-  final double _trackBorderRadius = 10;
-  final double _trackButtonFontSize = 26.0;
-  final double _trackButtonRoundRadius = 3;
-  final double _trackButtonRoundSize = 18.0;
-  final double _trackButtonIconSize = 20.0;
-  final double _trackInfoFontSize = 14.0;
-  final double _trackInfoIconSize = 12.0;
+  final List<String> _allTracksIds;
 
-  const TrackWrapper(this.context, this._trans, this._io);
+  const TrackWrapper(this.context, this.widget, this._trans, this._ui, this._allTracksIds);
 
-  Container build(track) {
-    return Container(
-        margin: EdgeInsets.all(_trackItemMargin),
-        width: _trackItemWidth,
-        child: ElevatedButton(
-            onPressed: () {
-              _trackAction(track);
-            },
-            onLongPress: () {
-              Navigator.pushNamed(context, '/track', arguments: {'track': track});
-            },
-            style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.all(_trackPadding),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_trackBorderRadius)),
-                backgroundColor: track.getStateBgColor(),
-                foregroundColor: track.getStateFgColor()),
-            child: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: _buildTrackButton(track))));
+  void save(Track track) {
+    widget.settingsSet(track.id(), track, space: ConfigSpace.track);
   }
 
-  void _trackAction(Track track) {
-    switch (track.getState()) {
-      case TrackState.empty:
-        _io.alertDialog(Icons.graphic_eq, _trans.track_title(track.getName()), contentWidget: LinearProgressIndicator(), actions: [
-          TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(_trans.stop_recording_track);
-                stopRecording(track);
-              },
-              child: Text(_trans.stop_recording_track))
-        ], thenCallback: (result) {
-          stopRecording(track);
-        });
-        break;
-      default:
-        // var state = track.getState();
-        // _io.toast('$state', color: Theme.of(context).colorScheme.secondary, icon: Icons.add);
-        break;
+  List<Track> _tracksListByName(List<String> tracksIds) {
+    var tracks = <Track>[];
+    for (var trackId in tracksIds) {
+      Track? track = widget.settingsGet(trackId, space: ConfigSpace.track);
+      if (track != null) {
+        tracks.add(track);
+      }
+    }
+    return tracks.toList();
+  }
+
+  void startRecording(Track track) {
+    for (Track track in _tracksListByName(_allTracksIds)) {
+      stopTrackPlaying(track);
+    }
+    track.setState(TrackState.recording);
+    save(track);
+  }
+
+  void stopRecordingAndSave(Track track) {
+    _ui.toast(_trans.stop_recording_track_success(track.name()), icon: Icons.check_circle_rounded);
+    track.setState(TrackState.stopped);
+    save(track);
+  }
+
+  void removeRecordingAndSave(Track track) {
+    if (track.state() != TrackState.empty) {
+      track.setState(TrackState.empty);
+      save(track);
     }
   }
 
-  void stopRecording(Track track) {
-    // TODO
-    _io.toast(_trans.stop_recording_track_done(track.getName()), icon: Icons.check_circle_rounded);
+  void removeTracksRecordings(List<String> tracksIds) {
+    for (Track track in _tracksListByName(tracksIds)) {
+      removeRecordingAndSave(track);
+    }
   }
 
-  List<Widget> _buildTrackButton(Track track) {
-    Color foregroundColor = track.getStateFgColor();
-    var items = <Widget>[];
-    items.add(SizedBox(
-        height: _trackItemWidth - _trackPadding,
-        child: Stack(fit: StackFit.expand, children: [
-          Align(alignment: Alignment.topLeft, child: Icon(track.getStateIcon(), size: _trackButtonIconSize, color: foregroundColor)),
-          Align(
-            alignment: Alignment.topRight,
-            child: Container(
-                width: _trackButtonRoundSize,
-                height: _trackButtonRoundSize,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                    color: foregroundColor, borderRadius: BorderRadius.all(Radius.circular(_trackButtonRoundRadius)), shape: BoxShape.rectangle),
-                child:
-                    Text(track.getKeyboardKey(), style: TextStyle(fontSize: _trackButtonRoundSize, height: 1.0, color: track.getStateBgColor()))),
-          ),
-          Align(alignment: Alignment.bottomCenter, child: Icon(track.getSpeedIcon(), size: _trackButtonIconSize, color: foregroundColor)),
-          Align(alignment: Alignment.bottomLeft, child: Icon(track.playbackModeIcon(), size: _trackButtonIconSize, color: foregroundColor)),
-          Align(alignment: Alignment.bottomRight, child: Icon(track.volumeIcon(), size: _trackButtonIconSize, color: foregroundColor)),
-          Align(
-              alignment: Alignment.center,
-              child: Text(_trans.cell(track.getName()), style: TextStyle(fontSize: _trackButtonFontSize, fontWeight: FontWeight.bold))),
-        ])));
-    items.add(LinearProgressIndicator(value: Random().nextDouble(), color: foregroundColor, backgroundColor: track.getStateProgressColor()));
-    items.add(_infoRow(foregroundColor, Icons.timelapse_rounded, '00:00:00'));
-    return items.toList();
+  void startTrackPlaying(Track track) {
+    if (track.state() != TrackState.empty) {
+      track.setState(TrackState.playing);
+      save(track);
+    }
   }
 
-  Row _infoRow(Color foregroundColor, IconData icon, String text) {
-    return Row(children: [Icon(icon, size: _trackInfoIconSize, color: foregroundColor), Text(text, style: TextStyle(fontSize: _trackInfoFontSize))]);
+  void pauseTrackPlaying(Track track) {
+    if (track.state() != TrackState.empty) {
+      track.setState(TrackState.paused);
+      save(track);
+    }
+  }
+
+  void resumeTrackPlaying(Track track) {
+    if (track.state() != TrackState.empty) {
+      track.setState(TrackState.playing);
+      save(track);
+    }
+  }
+
+  void stopTrackPlaying(Track track) {
+    if (track.state() != TrackState.empty) {
+      track.setState(TrackState.stopped);
+      save(track);
+    }
+  }
+
+  void startTracksPlaying(List<String> tracksIds) {
+    for (Track track in _tracksListByName(tracksIds)) {
+      startTrackPlaying(track);
+    }
+  }
+
+  void stopTracksPlaying(List<String> tracksIds) {
+    for (Track track in _tracksListByName(tracksIds)) {
+      stopTrackPlaying(track);
+    }
+  }
+
+  void setTracksPlaybackMode(List<String> tracksIds, bool value) {
+    for (Track track in _tracksListByName(tracksIds)) {
+      track.setPlaybackMode(value);
+    }
+  }
+
+  void setTracksPlaybackSpeed(List<String> tracksIds, double value) {
+    for (Track track in _tracksListByName(tracksIds)) {
+      track.setPlaybackSpeed(value);
+    }
+  }
+
+  void setTracksPlaybackVolume(List<String> allTracksIds, double value) {
+    for (Track track in _tracksListByName(allTracksIds)) {
+      track.setPlaybackVolume(value);
+    }
+  }
+
+  void resetTracksName(List<String> tracksIds) {
+    for (Track track in _tracksListByName(tracksIds)) {
+      track.setName(track.id());
+    }
+  }
+
+  void resetTracksKeyboardKey(List<String> tracksIds) {
+    for (Track track in _tracksListByName(tracksIds)) {
+      track.resetKeyboardKey();
+    }
   }
 }
