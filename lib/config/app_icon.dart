@@ -1,0 +1,74 @@
+import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
+import 'package:tune_tangler/src/ui_wrapper.dart';
+
+import '../entity/track.dart';
+
+class AppIcon {
+  static IconData logoKeepScreenOnEnabled = Icons.dashboard_customize;
+  static IconData logoKeepScreenOnDisabled = Icons.dashboard_customize_outlined;
+  static IconData settings = Icons.settings_rounded;
+  static IconData language = Icons.language_rounded;
+  static IconData help = Icons.help_rounded;
+
+  static IconData screenThemeMode = Icons.brightness_4;
+  static IconData screenLightThemeMode = Icons.light_mode_rounded;
+  static IconData screenDarkThemeMode = Icons.dark_mode_rounded;
+  static IconData screenThemeColor = Icons.palette_rounded;
+  static IconData keepScreenOn = Icons.monitor;
+  static IconData keepScreenOnDisabled = Icons.lightbulb_outline_rounded;
+  static IconData keepScreenOnEnabled = Icons.lightbulb_rounded;
+  static IconData gridRowsAmount = Icons.table_rows_rounded;
+  static IconData gridColsAmount = Icons.view_column_rounded;
+
+  static IconData trackTitleEmojis = Icons.emoji_emotions_rounded;
+  static IconData trackTitle = Icons.text_fields;
+  static IconData recordingFile = Icons.audio_file_outlined;
+  static IconData trackKeyboardKey = Icons.keyboard_alt_rounded;
+
+  static Container trackKeyboardKeyBox(Track track, {required UIWrapper ui, required BuildContext context, required Color foregroundColor}) => Container(
+      width: ui.trackButtonRoundSize,
+      height: ui.trackButtonRoundSize,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+          color: foregroundColor, borderRadius: BorderRadius.all(Radius.circular(ui.trackButtonRoundRadius)), shape: BoxShape.rectangle),
+      child: Text(track.keyboardKey, style: TextStyle(fontSize: ui.trackButtonRoundSize, height: 1.0, color: track.stateBackgroundColor(context))));
+
+  static IconData trackPlaybackMode = Icons.repeat_on_rounded;
+  static IconData trackSinglePlaybackMode = Icons.repeat_one_rounded;
+  static IconData trackRepeatPlaybackMode = Icons.repeat_rounded;
+  static IconData trackPlaybackVolume = Icons.volume_up_rounded;
+  static IconData trackPlaybackBalance = Icons.headphones_rounded;
+  static IconData trackPlaybackSpeed = Icons.speed_rounded;
+  static IconData trackDuration = Icons.timelapse_rounded;
+
+  static IconData recordingAudioEncoder = Icons.settings_input_component;
+  static IconData recordingSampleRate = Symbols.sound_sampler_rounded;
+  static IconData recordingBitRate = Icons.network_check_rounded;
+  static IconData recordingAudioMode = Icons.mic_external_on_rounded;
+  static IconData recordingAudioModeMono = Icons.mic_rounded;
+  static IconData recordingAudioModeStereo = Symbols.mic_double_rounded;
+  static IconData recordingAudioGain = Symbols.adjust_rounded;
+  static IconData recordingEchoCancel = Symbols.record_voice_over;
+  static IconData recordingNoiseSuppress = Symbols.noise_aware_rounded;
+
+  static IconData deleteForever = Icons.delete_forever_rounded;
+  static IconData resetAllSettings = Icons.settings_backup_restore_rounded;
+
+  static IconData no = Icons.cancel_outlined;
+  static IconData yes = Icons.check_circle_outline_outlined;
+
+  static IconData trackPlayingStart = Icons.play_arrow_rounded;
+  static IconData trackPlayingStop = Icons.stop_rounded;
+  static IconData trackPlayingPause = Icons.pause_rounded;
+  static IconData trackPlayingResume = Symbols.play_pause_rounded;
+  static IconData trackRecordingStart = Icons.radio_button_checked_rounded;
+  static IconData trackRecordingImport = Icons.file_open_rounded;
+  static IconData trackRecordingShare = Icons.share_outlined;
+
+  static IconData moreMenu = Icons.more_vert;
+
+  static IconData displaySettings = Icons.display_settings;
+  static IconData trackSettings = Icons.graphic_eq_rounded;
+  static IconData recordSettings = Icons.settings_voice;
+}

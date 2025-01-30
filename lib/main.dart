@@ -4,12 +4,13 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
+import 'adapter/audio_encoder_adapter.dart';
 import 'adapter/locale_adapter.dart';
 import 'adapter/theme_mode_adapter.dart';
 import 'adapter/track_adapter.dart';
+import 'config/config.dart';
 import 'screen/home_screen.dart';
 import 'screen/settings_screen.dart';
-import 'config/config.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +25,7 @@ Future<void> main() async {
   Hive.registerAdapter(LocaleAdapter());
   Hive.registerAdapter(ThemeModeAdapter());
   Hive.registerAdapter(TrackAdapter());
+  Hive.registerAdapter(AudioEncoderAdapter());
   Hive.registerAdapter(ColorAdapter());
   Box globalSettingsBox = await Hive.openBox('settings');
   Box trackSettingsBox = await Hive.openBox('tracks');
@@ -71,13 +73,20 @@ class MainScreenApp extends StatefulWidget {
 class _MainScreenAppState extends State<MainScreenApp> {
   _MainScreenAppState();
 
+  @override
+  void dispose() {
+    super.dispose();
+    widget.globalSettingsBox.close();
+    widget.trackSettingsBox.close();
+  }
+
   _settingsGet(key, {space = ConfigSpace.global, dynamic defaultValue}) => switch (key) {
         GlobalConfigKey.isThemeModeDark => _settingsGet(GlobalConfigKey.themeMode) == ThemeMode.dark,
         GlobalConfigKey.isThemeModeLight => _settingsGet(GlobalConfigKey.themeMode) == ThemeMode.light,
         GlobalConfigKey.isThemeModeSystem => _settingsGet(GlobalConfigKey.themeMode) == ThemeMode.system,
         _ => switch (space) {
             ConfigSpace.global =>
-              widget.globalSettingsBox.get(Config.settingField(key).boxFieldName, defaultValue: Config.settingField(key).defaultValue),
+              widget.globalSettingsBox.get(AppGlobalConfig.settingField(key).boxFieldName, defaultValue: AppGlobalConfig.settingField(key).defaultValue),
             ConfigSpace.track => widget.trackSettingsBox.get(key, defaultValue: defaultValue),
             Object() => throw UnimplementedError(),
             null => throw UnimplementedError(),
@@ -94,10 +103,10 @@ class _MainScreenAppState extends State<MainScreenApp> {
     }
   }
 
-  void _settingsSetStateLess(key, value, {space = ConfigSpace.global}) {
+  Future<void> _settingsSetStateLess(key, value, {space = ConfigSpace.global}) async {
     switch (space) {
       case ConfigSpace.global:
-        widget.globalSettingsBox.put(Config.settingField(key).boxFieldName, value);
+        await widget.globalSettingsBox.put(AppGlobalConfig.settingField(key).boxFieldName, value);
         switch (key) {
           case GlobalConfigKey.wakelockEnabled:
             WakelockPlus.toggle(enable: value);
@@ -105,7 +114,7 @@ class _MainScreenAppState extends State<MainScreenApp> {
         }
         break;
       case ConfigSpace.track:
-        widget.trackSettingsBox.put(key, value);
+        await widget.trackSettingsBox.put(key, value);
         break;
     }
   }
@@ -118,7 +127,7 @@ class _MainScreenAppState extends State<MainScreenApp> {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: Config.languages.values,
+      supportedLocales: AppGlobalConfig.languages.values,
       locale: _settingsGet(GlobalConfigKey.locale),
       themeAnimationDuration: Duration(seconds: 0),
       theme: ThemeData(

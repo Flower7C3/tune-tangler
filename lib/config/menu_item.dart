@@ -18,5 +18,6 @@ enum RowMenuItem {
   playbackMode,
   playbackSpeed,
   playbackVolume,
+  playbackBalance,
   delete,
 }
