@@ -224,6 +224,7 @@
   "orange": "pomarańczowy",
   "cyan": "cyjan",
   "pink": "różowy",
+  "permissions": "Uprawnienia",
   "audioPermission": "Odczyt pliku audio z urządzenia",
   "microphonePermission": "Nagrywanie dźwięku przez mikrofon",
   "notificationPermission": "Wyświetlanie powiadomienia o stanie nagrywania",

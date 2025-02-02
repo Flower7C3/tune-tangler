@@ -520,7 +520,7 @@ class TrackWrapper {
                                 controller: scrollController,
                                 child: Column(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.end, children: [
                                   SizedBox(height: _uiWrapper.trackDetailsPadding1x),
-                                  if (track.path == null)
+                                  if (track.path != null)
                                     _uiWrapper.statusIconRow(
                                       AppIcon.recordingFile,
                                       path.basename(track.path.toString()),
