@@ -52,7 +52,7 @@ class TrackAdapter extends TypeAdapter<Track> {
     writer.writeMap({
       TrackAdapterKey.rowIndex.toString(): obj.rowIndex,
       TrackAdapterKey.colIndex.toString(): obj.colIndex,
-      TrackAdapterKey.name.toString(): obj.name,
+      TrackAdapterKey.name.toString(): obj.name.value,
       TrackAdapterKey.path.toString(): obj.path,
       TrackAdapterKey.audioEncoder.toString(): (obj.audioEncoder == null) ? 0 : obj.audioEncoder?.index,
       TrackAdapterKey.sampleRate.toString(): obj.sampleRate,
@@ -62,7 +62,7 @@ class TrackAdapter extends TypeAdapter<Track> {
       TrackAdapterKey.playbackVolume.toString(): obj.playbackVolume.value,
       TrackAdapterKey.playbackBalance.toString(): obj.playbackBalance.value,
       TrackAdapterKey.playbackSpeed.toString(): obj.playbackSpeed.value,
-      TrackAdapterKey.keyboardKey.toString(): obj.keyboardKey,
+      TrackAdapterKey.keyboardKey.toString(): obj.keyboardKey.value,
     });
   }
 }

@@ -20,4 +20,4 @@ samples, guidance on mobile development, and a full API reference.
 
 Regenerate icons:
 
-`bcdart run flutter_launcher_icons`
+`dart run flutter_launcher_icons`

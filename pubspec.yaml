@@ -49,6 +49,8 @@ dependencies:
   share_plus: ^10.1.4
   path: ^1.9.0
   emoji_picker_flutter: ^4.3.0
+  flutter_local_notifications: ^18.0.1
+  flutter_foreground_task: ^8.17.0
 
 dev_dependencies:
   flutter_test:
@@ -65,7 +67,7 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/icons/dashboard_customize_128dp_5F6368.png"
+  image_path: "assets/icons/material-symbols--dashboard-customize.png"
 
 
 # For information on the generic Dart part of this file, see the

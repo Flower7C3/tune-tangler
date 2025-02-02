@@ -8,7 +8,7 @@ class AppIcon {
   static IconData logoKeepScreenOnEnabled = Icons.dashboard_customize;
   static IconData logoKeepScreenOnDisabled = Icons.dashboard_customize_outlined;
   static IconData settings = Icons.settings_rounded;
-  static IconData language = Icons.language_rounded;
+  static IconData language = Icons.translate_rounded;
   static IconData help = Icons.help_rounded;
 
   static IconData screenThemeMode = Icons.brightness_4;
@@ -26,24 +26,27 @@ class AppIcon {
   static IconData recordingFile = Icons.audio_file_outlined;
   static IconData trackKeyboardKey = Icons.keyboard_alt_rounded;
 
-  static Container trackKeyboardKeyBox(Track track, {required UIWrapper ui, required BuildContext context, required Color foregroundColor}) => Container(
-      width: ui.trackButtonRoundSize,
-      height: ui.trackButtonRoundSize,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-          color: foregroundColor, borderRadius: BorderRadius.all(Radius.circular(ui.trackButtonRoundRadius)), shape: BoxShape.rectangle),
-      child: Text(track.keyboardKey, style: TextStyle(fontSize: ui.trackButtonRoundSize, height: 1.0, color: track.stateBackgroundColor(context))));
+  static Container trackKeyboardKeyBox(Track track, {required UIWrapper ui, required BuildContext context, required Color foregroundColor}) =>
+      Container(
+          width: ui.trackButtonRoundSize,
+          height: ui.trackButtonRoundSize,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+              color: foregroundColor, borderRadius: BorderRadius.all(Radius.circular(ui.trackButtonRoundRadius)), shape: BoxShape.rectangle),
+          child: Text(track.keyboardKey.value,
+              style: TextStyle(fontSize: ui.trackButtonRoundSize, height: 1.0, color: track.stateBackgroundColor(context))));
 
   static IconData trackPlaybackMode = Icons.repeat_on_rounded;
   static IconData trackSinglePlaybackMode = Icons.repeat_one_rounded;
   static IconData trackRepeatPlaybackMode = Icons.repeat_rounded;
   static IconData trackPlaybackVolume = Icons.volume_up_rounded;
   static IconData trackPlaybackBalance = Icons.headphones_rounded;
-  static IconData trackPlaybackSpeed = Icons.speed_rounded;
+  static IconData trackPlaybackSpeed = Icons.slow_motion_video_rounded;
   static IconData trackDuration = Icons.timelapse_rounded;
 
-  static IconData recordingAudioEncoder = Icons.settings_input_component;
-  static IconData recordingSampleRate = Symbols.sound_sampler_rounded;
+  static IconData recordingInputDevice = Symbols.settings_input_component;
+  static IconData recordingAudioEncoder = Icons.integration_instructions_outlined;
+  static IconData recordingSampleRate = Icons.av_timer_rounded;
   static IconData recordingBitRate = Icons.network_check_rounded;
   static IconData recordingAudioMode = Icons.mic_external_on_rounded;
   static IconData recordingAudioModeMono = Icons.mic_rounded;
@@ -71,4 +74,7 @@ class AppIcon {
   static IconData displaySettings = Icons.display_settings;
   static IconData trackSettings = Icons.graphic_eq_rounded;
   static IconData recordSettings = Icons.settings_voice;
+
+  static IconData exception = Icons.error_outline_rounded;
+
 }

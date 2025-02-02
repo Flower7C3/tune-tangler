@@ -1,13 +1,13 @@
-import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
-import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
 import 'package:tune_tangler/screen/screen.dart';
 
 import '../config/app_icon.dart';
 import '../config/config.dart';
 import '../entity/track.dart';
+import '../entity/track_row.dart';
 import '../src/track_wrapper.dart';
 import '../src/ui_wrapper.dart';
 
@@ -16,122 +16,155 @@ class SettingsScreen extends StatefulWidget implements ScreenInterface {
     super.key,
     required this.settingsGet,
     required this.settingsSet,
+    required this.audioRecorder,
+    required this.tracksList,
   });
 
   @override
   final Function(dynamic key, {ConfigSpace space, dynamic defaultValue}) settingsGet;
-
   @override
   final void Function(dynamic key, dynamic value, {ConfigSpace space, bool updateState}) settingsSet;
+  @override
+  final AudioRecorder audioRecorder;
+  @override
+  final TracksCollection tracksList;
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProviderStateMixin {
   late AppLocalizations _trans;
-  late UIWrapper _ui;
+  late UIWrapper _uiWrapper;
   late TrackWrapper _trackWrapper;
-  late Set<String> _allTracksIds;
 
-  late final AudioRecorder _audioRecorder;
+  late TabController _tabController;
+  int? selectedTab;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args = ModalRoute.of(context)?.settings.arguments as int?;
+    if (args != null && selectedTab == null) {
+      selectedTab = args;
+      _tabController.animateTo(args);
+    }
+  }
 
   @override
   void initState() {
-    _audioRecorder = AudioRecorder();
     super.initState();
+    _checkPermissions();
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
   void dispose() {
-    _audioRecorder.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) => Builder(builder: (context) {
-        final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
-        _allTracksIds = args['allTracksIds'];
-
         _trans = AppLocalizations.of(context)!;
-        _ui = UIWrapper(context);
-        _trackWrapper = TrackWrapper(context, widget, _trans, _ui, _audioRecorder, _allTracksIds);
+        _uiWrapper = UIWrapper(context);
+        _trackWrapper = TrackWrapper(context, widget, _trans, _uiWrapper);
 
-        return DefaultTabController(
-          length: 3,
-          child: Scaffold(
-            appBar: AppBar(
-              bottom: TabBar(
-                tabs: [
-                  Tab(icon: Icon(AppIcon.displaySettings)),
-                  Tab(icon: Icon(AppIcon.trackSettings)),
-                  Tab(icon: Icon(AppIcon.recordSettings)),
-                ],
-              ),
-              backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-              title: Text(_trans.settings),
-              centerTitle: true,
-              actions: [
-                IconButton(
-                    icon: Icon(AppIcon.resetAllSettings),
-                    onPressed: () {
-                      _ui.alertDialog(
-                        AppIcon.resetAllSettings,
-                        _trans.allSettingsResetTitle,
-                        contentText: _trans.allSettingsResetInfo,
-                        actions: <Widget>[
-                          _ui.simpleButton(_trans.buttonNo, () {
-                            Navigator.pop(context, 'No');
-                          }),
-                          _ui.errorButton(_trans.buttonYes, () {
-                            setState(() {
-                              _trackWrapper.resetTracksName(_allTracksIds);
-                              _trackWrapper.resetTracksKeyboardKey(_allTracksIds);
-                              _trackWrapper.setTracksPlaybackMode(_allTracksIds, Track.defaultPlaybackModeSingle);
-                              _trackWrapper.setTracksPlaybackVolume(_allTracksIds, Track.defaultPlaybackVolume);
-                              _trackWrapper.setTracksPlaybackBalance(_allTracksIds, Track.defaultPlaybackBalance);
-                              _trackWrapper.setTracksPlaybackSpeed(_allTracksIds, Track.defaultPlaybackSpeed);
-                              AppGlobalConfig.settingsFields().forEach((GlobalConfigKeyNameDefaults field) {
-                                widget.settingsSet(field.key, field.defaultValue, updateState: true);
-                              });
-                              _ui.toast(_trans.allSettingsResetSuccess, icon: AppIcon.resetAllSettings);
-                              Navigator.pop(context, 'Yes');
-                            });
-                          }),
-                        ],
-                      );
-                    })
+        return Scaffold(
+          appBar: AppBar(
+            bottom: TabBar(
+              controller: _tabController,
+              tabs: [
+                Tab(icon: Icon(AppIcon.displaySettings), text: _trans.screen),
+                Tab(icon: Icon(AppIcon.trackSettings), text: _trans.track),
+                Tab(icon: Icon(AppIcon.recordSettings), text: _trans.recording),
               ],
             ),
-            body: TabBarView(children: [
-              ListView(children: _bodyScreen()),
-              ListView(children: _bodyTrack()),
-              ListView(children: _bodyRecording()),
-            ]),
+            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+            title: Text(_trans.settings),
+            centerTitle: true,
+            actions: [
+              IconButton(
+                  icon: Icon(AppIcon.resetAllSettings),
+                  tooltip: _trans.allSettingsResetTitle,
+                  onPressed: () {
+                    _uiWrapper.alertDialog(
+                      AppIcon.resetAllSettings,
+                      _trans.allSettingsResetTitle,
+                      contentText: _trans.allSettingsResetInfo,
+                      actions: <Widget>[
+                        _uiWrapper.simpleButton(_trans.buttonNo, () {
+                          Navigator.pop(context, 'No');
+                        }),
+                        _uiWrapper.errorButton(_trans.buttonYes, () {
+                          setState(() {
+                            _trackWrapper.resetTracksName(widget.tracksList.all());
+                            _trackWrapper.resetTracksKeyboardKey(widget.tracksList.all());
+                            _trackWrapper.setTracksPlaybackMode(widget.tracksList.all(), Track.defaultPlaybackModeSingle);
+                            _trackWrapper.setTracksPlaybackVolume(widget.tracksList.all(), Track.defaultPlaybackVolume);
+                            _trackWrapper.setTracksPlaybackBalance(widget.tracksList.all(), Track.defaultPlaybackBalance);
+                            _trackWrapper.setTracksPlaybackSpeed(widget.tracksList.all(), Track.defaultPlaybackSpeed);
+                            AppGlobalConfig.settingsFields().forEach((GlobalConfigKeyNameDefaults field) {
+                              widget.settingsSet(field.key, field.defaultValue, updateState: true);
+                            });
+                            _uiWrapper.toast(_trans.allSettingsResetSuccess, icon: AppIcon.resetAllSettings);
+                            Navigator.pop(context, 'Yes');
+                          });
+                        }),
+                      ],
+                    );
+                  }),
+            ],
           ),
+          body: TabBarView(controller: _tabController, children: [
+            ListView(children: _bodyScreen()),
+            ListView(children: _bodyTrack()),
+            ListView(children: _bodyRecording()),
+          ]),
         );
       });
 
+  Map<Permission, PermissionStatus> _permissionStatuses = {};
+
+  Future<void> _checkPermissions() async {
+    Map<Permission, PermissionStatus> statuses = {};
+    for (var permission in AppGlobalConfig.permissions) {
+      statuses[permission] = await permission.status;
+    }
+    setState(() {
+      _permissionStatuses = statuses;
+    });
+  }
+
+  /// Poproszenie o uprawnienia
+  Future<void> _requestPermission(Permission permission) async {
+    final status = await permission.request();
+    setState(() {
+      _permissionStatuses[permission] = status;
+    });
+  }
+
   List<Widget> _bodyScreen() => [
-        _ui.settingsTileTitle(_trans.screenSettings),
+        _uiWrapper.settingsTileTitle(_trans.screenSettings),
         ListTile(
             leading: Icon(AppIcon.language),
             title: Text(_trans.languageVersion),
-            trailing: _ui.trailingLabel(widget.settingsGet(GlobalConfigKey.locale).toLanguageTag()),
+            trailing: _uiWrapper.trailingLabel(widget.settingsGet(GlobalConfigKey.locale).toLanguageTag()),
             onTap: () {
               var options = <Widget>[];
               AppGlobalConfig.languages.forEach((String name, Locale locale) {
                 var code = locale.toLanguageTag();
                 options.add(SimpleDialogOption(
+                    padding: EdgeInsets.all(16),
                     onPressed: () {
                       Navigator.pop(context, locale);
                       widget.settingsSet(GlobalConfigKey.locale, locale, updateState: true);
                     },
                     child: Text('$name ($code)')));
               });
-              _ui.listDialog(AppIcon.language, _trans.changeLanguage, actions: options.toList());
+              _uiWrapper.listDialog(AppIcon.language, _trans.changeLanguage, actions: options.toList());
             }),
-        _ui.listTileSwitch(AppIcon.screenThemeMode, _trans.screenThemeMode, AppIcon.screenLightThemeMode, _trans.lightMode,
+        _uiWrapper.listTileSwitch(AppIcon.screenThemeMode, _trans.screenThemeMode, AppIcon.screenLightThemeMode, _trans.lightMode,
             AppIcon.screenDarkThemeMode, _trans.darkMode, widget.settingsGet(GlobalConfigKey.isThemeModeDark), (bool value) {
           widget.settingsSet(GlobalConfigKey.themeMode, value ? ThemeMode.dark : ThemeMode.light, updateState: true);
           return null;
@@ -147,13 +180,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   borderRadius: BorderRadius.circular(24),
                 )),
             onTap: () {
-              _ui.alertDialog(AppIcon.screenThemeColor, _trans.screenThemeColorTitle,
+              _uiWrapper.alertDialog(AppIcon.screenThemeColor, _trans.screenThemeColorTitle,
                   contentText: _trans.screenThemeColorInfo,
-                  contentWidget: _ui.gridBuilder(
-                      itemCount: AppGlobalConfig.userInterfaceColors.length,
+                  contentWidget: _uiWrapper.gridBuilder(
+                      itemCount: AppGlobalConfig.userInterfaceColors.values.length,
                       itemBuilder: (context, index) {
                         Color color = AppGlobalConfig.userInterfaceColors.values.elementAt(index);
-                        String name = AppGlobalConfig.userInterfaceColors.keys.elementAt(index);
                         return ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: color,
@@ -163,17 +195,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             onPressed: () {
                               widget.settingsSet(GlobalConfigKey.themeSeedColor, color, updateState: true);
                               Navigator.pop(context, color.toString());
-                              _ui.toast(_trans.screenThemeColorSuccess(name), icon: AppIcon.screenThemeColor);
+                              _uiWrapper.toast(_trans.screenThemeColorSuccess(
+                                      // double.tryParse(index.toString())??-1
+                                      AppGlobalConfig.userInterfaceColors.codec.valueTranslator(double.tryParse(index.toString()) ?? -1, _trans)),
+                                  icon: AppIcon.screenThemeColor);
                             },
                             child: null);
                       }));
             }),
-        _ui.listTileSwitch(AppIcon.keepScreenOn, _trans.keepScreenOn, AppIcon.keepScreenOnDisabled, _trans.disabled, AppIcon.keepScreenOnEnabled,
-            _trans.enabled, widget.settingsGet(GlobalConfigKey.wakelockEnabled), (bool value) {
+        _uiWrapper.listTileSwitch(AppIcon.keepScreenOn, _trans.keepScreenOn, AppIcon.keepScreenOnDisabled, _trans.disabled,
+            AppIcon.keepScreenOnEnabled, _trans.enabled, widget.settingsGet(GlobalConfigKey.wakelockEnabled), (bool value) {
           widget.settingsSet(GlobalConfigKey.wakelockEnabled, value, updateState: true);
           return value ? _trans.keepScreenOnIsDisabledSuccess : _trans.keepScreenOnIsEnabledSuccess;
         }),
-        _ui.listTileSlider(
+        _uiWrapper.listTileSlider(
           AppIcon.gridRowsAmount,
           _trans.gridRowsAmount,
           _trans.gridRowsAmountTitle,
@@ -190,7 +225,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           },
           valueFormatter: AppGlobalConfig.gridRows.codec.valueFormatter,
         ),
-        _ui.listTileSlider(
+        _uiWrapper.listTileSlider(
           AppIcon.gridColsAmount,
           _trans.gridColsAmount,
           _trans.gridColsAmountTitle,
@@ -210,124 +245,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ];
 
   List<Widget> _bodyTrack() => [
-        _ui.settingsTileTitle(_trans.trackSettings),
-        ListTile(
-            leading: Icon(AppIcon.trackTitleEmojis),
-            title: Text(_trans.trackTitleEmojis),
-            subtitle: Text(widget.settingsGet(GlobalConfigKey.emojis), style: TextStyle(fontSize: _ui.settingsSubtitleFontSize)),
-            onTap: () {
-              final TextEditingController textController = TextEditingController(text: widget.settingsGet(GlobalConfigKey.emojis));
-              _ui.alertDialog(AppIcon.trackTitleEmojis, _trans.trackTitleEmojisTitle,
-                  contentText: _trans.trackTitleEmojisInfo,
-                  contentWidget: Column(children: [
-                    ValueListenableBuilder(
-                      valueListenable: textController,
-                      builder: (context, text, child) {
-                        return TextField(
-                            controller: textController,
-                            maxLines: 4,
-                            decoration: InputDecoration(hintText: _trans.trackTitleEmojisInfo, border: OutlineInputBorder()));
-                      },
-                    ),
-                    // SizedBox(height: 16),
-                    // SizedBox(
-                    //   width: double.maxFinite,
-                    //   height: 200,
-                    //   child: EmojiPicker(
-                    //     textEditingController: textController,
-                    //     scrollController: ScrollController(),
-                    //     config: Config(
-                    //       height: 200,
-                    //       checkPlatformCompatibility: true,
-                    //       viewOrderConfig: const ViewOrderConfig(),
-                    //       emojiViewConfig: EmojiViewConfig(
-                    //         // Issue: https://github.com/flutter/flutter/issues/28894
-                    //         emojiSizeMax: 20 * (foundation.defaultTargetPlatform == TargetPlatform.iOS ? 1.2 : 1.0),
-                    //       ),
-                    //       locale: widget.settingsGet(GlobalConfigKey.locale),
-                    //       skinToneConfig: const SkinToneConfig(),
-                    //       categoryViewConfig: const CategoryViewConfig(),
-                    //       bottomActionBarConfig: const BottomActionBarConfig(),
-                    //       searchViewConfig: const SearchViewConfig(),
-                    //     ),
-                    //   ),
-                    // ),
-                  ]),
-                  actions: <Widget>[
-                    _ui.simpleButton(_trans.buttonCancel, () {
-                      Navigator.pop(context, _trans.buttonCancel);
-                    }),
-                    _ui.primaryButton(_trans.buttonSave, () {
-                      setState(() {
-                        widget.settingsSet(GlobalConfigKey.emojis, textController.text.replaceAll(' ', ''), updateState: true);
-                        _ui.toast(_trans.trackTitleEmojisSuccess, icon: AppIcon.trackTitleEmojis);
-                        Navigator.pop(context, _trans.buttonSave);
-                      });
-                    }),
-                  ]);
-            }),
-        // Expanded(
-        //   child: Center(
-        //     child: ValueListenableBuilder(
-        //       valueListenable: _controller,
-        //       builder: (context, text, child) {
-        //         return Text(
-        //           _controller.text,
-        //         );
-        //       },
-        //     ),
-        //   ),
-        // ),
-        // Material(
-        //   color: Colors.transparent,
-        //   child: IconButton(
-        //     onPressed: () {
-        //       setState(() {
-        //         _emojiShowing = !_emojiShowing;
-        //       });
-        //     },
-        //     icon: const Icon(
-        //       Icons.emoji_emotions,
-        //       color: Colors.white,
-        //     ),
-        //   ),
-        // ),
-        // Expanded(
-        //   child: Padding(
-        //     padding: const EdgeInsets.symmetric(vertical: 8.0),
-        //     child: TextField(
-        //         controller: _controller,
-        //         scrollController: _scrollController,
-        //         style: const TextStyle(
-        //           fontSize: 20.0,
-        //           color: Colors.black87,
-        //         ),
-        //         maxLines: 1,
-        //         decoration: InputDecoration(
-        //           hintText: 'Type a message',
-        //           filled: true,
-        //           fillColor: Colors.white,
-        //           contentPadding: const EdgeInsets.only(
-        //             left: 16.0,
-        //             bottom: 8.0,
-        //             top: 8.0,
-        //             right: 16.0,
-        //           ),
-        //           border: OutlineInputBorder(
-        //             borderRadius: BorderRadius.circular(50.0),
-        //           ),
-        //         )),
-        //   ),
-        // ),
-
-        _ui.listTileReset(AppIcon.trackTitle, _trans.allTracksTitleReset, _trans.allTracksTitleResetTitle, _trans.allTracksTitleResetInfo,
+        _uiWrapper.settingsTileTitle(_trans.trackSettings),
+        _uiWrapper.listTileReset(AppIcon.trackTitle, _trans.allTracksTitleReset, _trans.allTracksTitleResetTitle, _trans.allTracksTitleResetInfo,
             _trans.buttonNo, _trans.buttonYes, () {
-          _trackWrapper.resetTracksName(_allTracksIds);
+          _trackWrapper.resetTracksName(widget.tracksList.all());
           return _trans.allTracksTitleResetSuccess;
         }),
-        _ui.listTileReset(AppIcon.trackKeyboardKey, _trans.allTracksShortcutKeyReset, _trans.allTracksShortcutKeyResetTitle,
+        _uiWrapper.listTileReset(AppIcon.trackKeyboardKey, _trans.allTracksShortcutKeyReset, _trans.allTracksShortcutKeyResetTitle,
             _trans.allTracksShortcutKeyResetInfo, _trans.buttonNo, _trans.buttonYes, () {
-          _trackWrapper.resetTracksKeyboardKey(_allTracksIds);
+          _trackWrapper.resetTracksKeyboardKey(widget.tracksList.all());
           return _trans.allTracksShortcutKeyResetSuccess;
         }),
         ListTile(
@@ -336,31 +262,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: () {
               var options = <Widget>[];
               options.add(SimpleDialogOption(
+                  padding: EdgeInsets.all(16),
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [Icon(AppIcon.trackSinglePlaybackMode, size: 16), Text(' '), Text(_trans.singlePlaybackMode)]),
                   onPressed: () {
                     setState(() {
-                      _trackWrapper.setTracksPlaybackMode(_allTracksIds, true);
-                      _ui.toast(_trans.allTracksPlaybackModeSuccessSet(_trans.singlePlaybackMode), icon: AppIcon.trackSinglePlaybackMode);
+                      _trackWrapper.setTracksPlaybackMode(widget.tracksList.all(), true);
+                      _uiWrapper.toast(_trans.allTracksPlaybackModeSuccessSet(_trans.singlePlaybackMode), icon: AppIcon.trackSinglePlaybackMode);
                       Navigator.pop(context, _trans.singlePlaybackMode);
                     });
                   }));
               options.add(SimpleDialogOption(
+                  padding: EdgeInsets.all(16),
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [Icon(AppIcon.trackRepeatPlaybackMode, size: 16), Text(' '), Text(_trans.repeatPlaybackMode)]),
                   onPressed: () {
                     setState(() {
-                      _trackWrapper.setTracksPlaybackMode(_allTracksIds, false);
-                      _ui.toast(_trans.allTracksPlaybackModeSuccessSet(_trans.repeatPlaybackMode), icon: AppIcon.trackRepeatPlaybackMode);
+                      _trackWrapper.setTracksPlaybackMode(widget.tracksList.all(), false);
+                      _uiWrapper.toast(_trans.allTracksPlaybackModeSuccessSet(_trans.repeatPlaybackMode), icon: AppIcon.trackRepeatPlaybackMode);
                       Navigator.pop(context, _trans.repeatPlaybackMode);
                     });
                   }));
-              _ui.listDialog(AppIcon.trackPlaybackMode, _trans.allTracksPlaybackModeTitleSet,
+              _uiWrapper.listDialog(AppIcon.trackPlaybackMode, _trans.allTracksPlaybackModeTitleSet,
                   contentText: _trans.allTracksPlaybackModeInfoSet, actions: options.toList());
             }),
-        _ui.listTileSlider(
+        _uiWrapper.listTileSlider(
           AppIcon.trackPlaybackVolume,
           _trans.allTracksPlaybackVolumeSet,
           _trans.allTracksPlaybackVolumeTitleSet,
@@ -373,12 +301,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _trans.buttonSave,
           withTrailing: false,
           successAction: (double value, String formattedValue) {
-            _trackWrapper.setTracksPlaybackVolume(_allTracksIds, value);
+            _trackWrapper.setTracksPlaybackVolume(widget.tracksList.all(), value);
             return _trans.allTracksPlaybackVolumeSuccessSet(formattedValue);
           },
           valueFormatter: AppGlobalConfig.trackPlaybackVolumeSliderValues.codec.valueFormatter,
         ),
-        _ui.listTileSlider(
+        _uiWrapper.listTileSlider(
           AppIcon.trackPlaybackBalance,
           _trans.allTracksPlaybackBalanceSet,
           _trans.allTracksPlaybackBalanceTitleSet,
@@ -390,7 +318,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _trans.buttonCancel,
           _trans.buttonSave,
           successAction: (double value, String formattedValue) {
-            _trackWrapper.setTracksPlaybackBalance(_allTracksIds, value);
+            _trackWrapper.setTracksPlaybackBalance(widget.tracksList.all(), value);
             return _trans.allTracksPlaybackBalanceSuccessSet(AppGlobalConfig.trackPlaybackBalanceSliderValues.codec.valueTranslator(value, _trans));
           },
           valueFormatter: AppGlobalConfig.trackPlaybackBalanceSliderValues.codec.valueFormatter,
@@ -398,7 +326,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           trans: _trans,
           withTrailing: false,
         ),
-        _ui.listTileSlider(
+        _uiWrapper.listTileSlider(
           AppIcon.trackPlaybackSpeed,
           _trans.allTracksPlaybackSpeedSet,
           _trans.allTracksPlaybackSpeedTitleSet,
@@ -411,22 +339,60 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _trans.buttonSave,
           withTrailing: false,
           successAction: (double value, String formattedValue) {
-            _trackWrapper.setTracksPlaybackSpeed(_allTracksIds, value);
+            _trackWrapper.setTracksPlaybackSpeed(widget.tracksList.all(), value);
             return _trans.allTracksPlaybackSpeedSuccessSet(formattedValue);
           },
           valueFormatter: AppGlobalConfig.trackPlaybackSpeedSliderValues.codec.valueFormatter,
         ),
-        _ui.settingsTileDivider(),
-        _ui.listTileReset(AppIcon.deleteForever, _trans.allTracksRecordingsDelete, _trans.allTracksRecordingsDeleteTitle,
+        _uiWrapper.settingsTileDivider(),
+        _uiWrapper.listTileReset(AppIcon.deleteForever, _trans.allTracksRecordingsDelete, _trans.allTracksRecordingsDeleteTitle,
             _trans.allTracksRecordingsDeleteInfo, _trans.buttonNo, _trans.buttonYes, () {
-          _trackWrapper.removeTracksRecordings(_allTracksIds);
+          _trackWrapper.removeTracksRecordings(widget.tracksList.all());
           return _trans.allTracksRecordingsDeleteSuccess;
         }),
       ];
 
   List<Widget> _bodyRecording() => [
-        _ui.settingsTileTitle(_trans.recordingSettings),
-        _ui.listTileRadio(
+        _uiWrapper.settingsTileTitle(_trans.recordingSettings),
+        ListTile(
+            leading: Icon(AppIcon.recordingInputDevice),
+            title: Text(_trans.recordingInputDevice),
+            subtitle: Text(
+              widget.settingsGet(GlobalConfigKey.recordingInputDevice) != null
+                  ? widget.settingsGet(GlobalConfigKey.recordingInputDevice).label
+                  : _trans.defaultDevice,
+            ),
+            trailing: _uiWrapper.trailingLabel(
+              widget.settingsGet(GlobalConfigKey.recordingInputDevice) != null
+                  ? widget.settingsGet(GlobalConfigKey.recordingInputDevice).id.toString()
+                  : '0',
+            ),
+            onTap: () async {
+              var options = <Widget>[];
+              options.add(SimpleDialogOption(
+                  padding: EdgeInsets.all(16),
+                  onPressed: () {
+                    Navigator.pop(context, 'recordingInputDevice');
+                    widget.settingsSet(GlobalConfigKey.recordingInputDevice, null, updateState: true);
+                  },
+                  child: Text(_trans.defaultDevice)));
+              await widget.audioRecorder.listInputDevices().then((List<InputDevice> inputDevices) {
+                for (var inputDevice in inputDevices) {
+                  options.add(SimpleDialogOption(
+                      padding: EdgeInsets.all(16),
+                      onPressed: () {
+                        setState(() {
+                          widget.settingsSet(GlobalConfigKey.recordingInputDevice, inputDevice, updateState: true);
+                        });
+                        Navigator.pop(context, 'recordingInputDevice');
+                      },
+                      child: Text(_trans.recordingInputDeviceValue(inputDevice.label))));
+                }
+              });
+              _uiWrapper.listDialog(AppIcon.recordingInputDevice, _trans.recordingInputDeviceTitle,
+                  contentText: _trans.recordingInputDeviceInfo, actions: options.toList());
+            }),
+        _uiWrapper.listTileRadio(
           AppIcon.recordingAudioEncoder,
           _trans.recordingAudioEncoder,
           null,
@@ -436,7 +402,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           AppGlobalConfig.recordingAudioEncoderValues.values,
           _trans.buttonCancel,
           _trans.buttonSave,
-          successAction: (double value, String formattedValue) {
+          successAction: (dynamic value, String formattedValue) {
             widget.settingsSet(
               GlobalConfigKey.recordingAudioEncoder,
               value,
@@ -448,7 +414,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           valueTranslator: AppGlobalConfig.recordingAudioEncoderValues.codec.valueTranslator,
           trans: _trans,
         ),
-        _ui.listTileRadio(
+        _uiWrapper.listTileRadio(
           AppIcon.recordingSampleRate,
           _trans.recordingSampleRate,
           _trans.recordingSampleRateInfo,
@@ -458,15 +424,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
           AppGlobalConfig.recordingSampleRateValues.values,
           _trans.buttonCancel,
           _trans.buttonSave,
-          successAction: (double value, String formattedValue) {
+          successAction: (dynamic value, String formattedValue) {
             widget.settingsSet(GlobalConfigKey.recordingSampleRate, value, updateState: true);
             return _trans.recordingAudioEncoderSuccess(formattedValue);
           },
           valueFormatter: AppGlobalConfig.recordingSampleRateValues.codec.valueFormatter,
-          valueTranslator: AppGlobalConfig.recordingSampleRateValues.codec.valueTranslator,
-          trans: _trans,
         ),
-        _ui.listTileRadio(
+        _uiWrapper.listTileRadio(
           AppIcon.recordingBitRate,
           _trans.recordingBitRate,
           _trans.recordingBitRateInfo,
@@ -476,15 +440,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
           AppGlobalConfig.recordingBitRateValues.values,
           _trans.buttonCancel,
           _trans.buttonSave,
-          successAction: (double value, String formattedValue) {
+          successAction: (dynamic value, String formattedValue) {
             widget.settingsSet(GlobalConfigKey.recordingBitRate, value, updateState: true);
             return _trans.recordingAudioEncoderSuccess(formattedValue);
           },
           valueFormatter: AppGlobalConfig.recordingBitRateValues.codec.valueFormatter,
-          valueTranslator: AppGlobalConfig.recordingBitRateValues.codec.valueTranslator,
-          trans: _trans,
         ),
-        _ui.listTileSwitch(
+        _uiWrapper.listTileSwitch(
             AppIcon.recordingAudioMode,
             _trans.recordingAudioMode,
             AppIcon.recordingAudioModeMono,
@@ -495,20 +457,47 @@ class _SettingsScreenState extends State<SettingsScreen> {
           widget.settingsSet(GlobalConfigKey.recordingAudioModeStereo, value, updateState: true);
           return _trans.recordingAudioModeSuccess(value ? _trans.recordingAudioModeOptionStereo : _trans.recordingAudioModeOptionMono);
         }),
-        _ui.listTileSwitch(AppIcon.recordingAudioGain, _trans.recordingAutoGain, AppIcon.no, _trans.no, AppIcon.yes, _trans.yes,
-            widget.settingsGet(GlobalConfigKey.recordingAutoGain), (bool value) {
+        _uiWrapper.listTileSwitch(AppIcon.recordingAudioGain, _trans.recordingAutoGain, AppIcon.no, _trans.no, AppIcon.yes, _trans.yes,
+            widget.settingsGet(GlobalConfigKey.recordingAutoGain),
+            subtitleText: _trans.recordingAutoGainInfo, (bool value) {
           widget.settingsSet(GlobalConfigKey.recordingAutoGain, value, updateState: true);
           return _trans.recordingAutoGainSuccess(value ? _trans.yes : _trans.no);
-        }, subtitleText: _trans.recordingAutoGainInfo),
-        _ui.listTileSwitch(AppIcon.recordingEchoCancel, _trans.recordingEchoCancel, AppIcon.no, _trans.no, AppIcon.yes, _trans.yes,
-            widget.settingsGet(GlobalConfigKey.recordingEchoCancel), (bool value) {
+        }),
+        _uiWrapper.listTileSwitch(AppIcon.recordingEchoCancel, _trans.recordingEchoCancel, AppIcon.no, _trans.no, AppIcon.yes, _trans.yes,
+            widget.settingsGet(GlobalConfigKey.recordingEchoCancel),
+            subtitleText: _trans.recordingEchoCancelInfo, (bool value) {
           widget.settingsSet(GlobalConfigKey.recordingEchoCancel, value, updateState: true);
           return _trans.recordingEchoCancelSuccess(value ? _trans.yes : _trans.no);
-        }, subtitleText: _trans.recordingEchoCancelInfo),
-        _ui.listTileSwitch(AppIcon.recordingNoiseSuppress, _trans.recordingNoiseSuppress, AppIcon.no, _trans.no, AppIcon.yes, _trans.yes,
-            widget.settingsGet(GlobalConfigKey.recordingNoiseSuppress), (bool value) {
+        }),
+        _uiWrapper.listTileSwitch(AppIcon.recordingNoiseSuppress, _trans.recordingNoiseSuppress, AppIcon.no, _trans.no, AppIcon.yes, _trans.yes,
+            widget.settingsGet(GlobalConfigKey.recordingNoiseSuppress),
+            subtitleText: _trans.recordingNoiseSuppressInfo, (bool value) {
           widget.settingsSet(GlobalConfigKey.recordingNoiseSuppress, value, updateState: true);
           return _trans.recordingNoiseSuppressSuccess(value ? _trans.yes : _trans.no);
-        }, subtitleText: _trans.recordingNoiseSuppressInfo),
+        }),
+        _uiWrapper.settingsTileTitle(_trans.permissions),
+        ...AppGlobalConfig.permissions.map((permission) {
+          final status = _permissionStatuses[permission] ?? PermissionStatus.denied;
+          return ListTile(
+            leading: Icon(AppGlobalConfig.permissionsCodec.valueIcon(permission.value.toDouble())),
+            title: Text(AppGlobalConfig.permissionsCodec.valueTranslator(permission, _trans)),
+            subtitle: Text(AppGlobalConfig.permissionsStatusCodec.valueTranslator(status, _trans)),
+            trailing: status.isGranted
+                ? Icon(AppIcon.yes, color: Theme.of(context).colorScheme.primary)
+                : ElevatedButton(
+                    onPressed: () async {
+                      if (status.isDenied) {
+                        setState(() {
+                          _requestPermission(permission);
+                        });
+                      } else {
+                        await openAppSettings();
+                        setState(() {});
+                      }
+                    },
+                    child: Text(_trans.grantPermission),
+                  ),
+          );
+        }),
       ];
 }

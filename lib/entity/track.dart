@@ -7,6 +7,7 @@ import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:record/record.dart';
 import 'package:tune_tangler/config/config.dart';
 
+import '../config/keyboard.dart';
 import 'track_row.dart';
 
 enum RecorderState {
@@ -90,12 +91,10 @@ class Track {
   ///*************************************************************************************************************************************************
   /// NAME
 
-  String _name = '';
+  ValueNotifier<String> name = ValueNotifier('');
 
-  String get name => _name;
-
-  void setName(String name) {
-    _name = name;
+  void setName(String value) {
+    name.value = value;
   }
 
   ///*************************************************************************************************************************************************
@@ -168,37 +167,44 @@ class Track {
 
   String? get path => _path;
 
-  void setPath(String? path) {
-    _path = path;
-    if (path == null) {
-      String? p = path;
-      if (p != null) {
-        File(p).exists().then((exists) {
-          if (exists == true) {
-            File(p).delete();
-          }
-        });
+  Future<void> setPath(String? newPath) async {
+    if (newPath == null) {
+      if (path != null && File(path!).existsSync()) {
+        File(path!).delete();
       }
-      setRecordingState(RecorderState.empty);
-      setPlayerState(PlayerState.disposed);
-      setAudioEncoder(null);
-      setSampleRate(null);
-      setBitRate(null);
-      setRecordingState(RecorderState.empty);
-      setPlayerState(null);
-      setPosition(null);
-      setDuration(null);
-      _player.setSourceUrl('');
-    } else {
+      _clearPath();
+      return;
+    }
+
+    if (!File(newPath).existsSync()) {
+      _clearPath();
+      return;
+    }
+
+    _path = newPath;
+    await _player.setSourceDeviceFile(newPath).then((dynamic response) {
       setRecordingState(RecorderState.ready);
       setPlayerState(PlayerState.stopped);
+      _player.getDuration().then((value) => (duration.value == value) ? null : setDuration(value));
       _player.setVolume(playbackVolume.value);
       _player.setBalance(playbackBalance.value);
       _player.setReleaseMode(playbackModeSingle.value ? ReleaseMode.stop : ReleaseMode.loop);
-      _player.setSourceDeviceFile(path);
       _player.setPlaybackRate(playbackSpeed.value);
-      _player.getDuration().then((value) => (duration.value == value) ? null : setDuration(value));
-    }
+    });
+  }
+
+  _clearPath() {
+    setRecordingState(RecorderState.empty);
+    setPlayerState(PlayerState.disposed);
+    setAudioEncoder(null);
+    setSampleRate(null);
+    setBitRate(null);
+    setRecordingState(RecorderState.empty);
+    setPlayerState(null);
+    setPosition(null);
+    setDuration(null);
+    _player.setSourceUrl('');
+    _path = null;
   }
 
   ///*************************************************************************************************************************************************
@@ -288,12 +294,15 @@ class Track {
   }
 
   IconData get playbackVolumeIcon {
-    for (var data in AppGlobalConfig.trackPlaybackVolumeValueIcons) {
-      if (playbackVolume.value <= data.value) {
-        return data.icon;
+    IconData volumeIcon = Symbols.add;
+    AppGlobalConfig.trackPlaybackVolumeSliderValues.codec.valueIcons.entries.any((MapEntry<double, IconData> data) {
+      if (playbackVolume.value <= data.key) {
+        volumeIcon = data.value;
+        return true;
       }
-    }
-    return Symbols.brand_awareness_rounded;
+      return false;
+    });
+    return volumeIcon;
   }
 
   ///*************************************************************************************************************************************************
@@ -350,15 +359,13 @@ class Track {
   ///*************************************************************************************************************************************************
   /// KEYBOARD KEY
 
-  String _keyboardKey = '';
-
-  String get keyboardKey => _keyboardKey;
+  ValueNotifier<String> keyboardKey = ValueNotifier('');
 
   void setKeyboardKey(String key) {
-    _keyboardKey = key;
+    keyboardKey.value = key;
   }
 
   void get resetKeyboardKey {
-    setKeyboardKey(AppGlobalConfig.keyboardKeysRows[TrackRow.name(_rowIndex)]?.elementAt(_colIndex) ?? '');
+    setKeyboardKey(AppKeyboardKeyMap.trackKeyboardKeyName(TrackRow.name(_rowIndex), _colIndex));
   }
 }

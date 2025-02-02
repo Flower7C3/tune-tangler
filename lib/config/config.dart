@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
 
 import '../entity/track.dart';
@@ -24,7 +25,8 @@ enum GlobalConfigKey {
   isThemeModeSystem,
   themeSeedColor,
   wakelockEnabled,
-  emojis,
+  recording,
+  recordingInputDevice,
   recordingAudioEncoder,
   recordingSampleRate,
   recordingBitRate,
@@ -45,15 +47,29 @@ final class GlobalConfigKeyNameDefaults {
 }
 
 final class ConfigDataCodec {
-  final String Function(double value) valueFormatter;
-  final dynamic Function(double value) valueDecoder;
-  String Function(double value, AppLocalizations trans) valueTranslator;
+  final dynamic Function(dynamic value) valueFormatter;
+  final dynamic Function(dynamic value) valueDecoder;
+  final String Function(dynamic value, AppLocalizations trans) valueTranslator;
+  late Map<double, IconData> _valueIcons;
 
-  static dynamic _defaultValueDecoder(double value) => value;
+  Map<double, IconData> get valueIcons => _valueIcons;
 
-  static String _defaultValueTrans(double value, AppLocalizations trans) => '';
+  IconData valueIcon(double index) => _valueIcons[index] ?? Icons.add;
 
-  ConfigDataCodec({required this.valueFormatter, this.valueDecoder = _defaultValueDecoder, this.valueTranslator = _defaultValueTrans});
+  static dynamic _defaultValueFormatter(dynamic value) => value;
+
+  static dynamic _defaultValueDecoder(dynamic value) => value;
+
+  static String _defaultValueTrans(dynamic value, AppLocalizations trans) => '';
+
+  ConfigDataCodec({
+    this.valueFormatter = _defaultValueFormatter,
+    this.valueDecoder = _defaultValueDecoder,
+    this.valueTranslator = _defaultValueTrans,
+    Map<double, IconData>? valueIcons,
+  }) {
+    _valueIcons = valueIcons ?? <double, IconData>{};
+  }
 }
 
 final class ConfigDataSliderValues {
@@ -73,8 +89,8 @@ final class ConfigDataSliderValues {
 }
 
 final class ConfigDataRadioValues {
-  final List<double> values;
-  double defaultValue;
+  final List<dynamic> values;
+  dynamic defaultValue;
   ConfigDataCodec codec;
 
   ConfigDataRadioValues({
@@ -95,8 +111,9 @@ final class AppGlobalConfig {
   static final List<GlobalConfigKeyNameDefaults> _fields = <GlobalConfigKeyNameDefaults>[
     GlobalConfigKeyNameDefaults(GlobalConfigKey.locale, 'locale', Locale('en', 'US')),
     GlobalConfigKeyNameDefaults(GlobalConfigKey.themeMode, 'theme_mode', ThemeMode.dark),
-    GlobalConfigKeyNameDefaults(GlobalConfigKey.themeSeedColor, 'theme_color', Colors.purple),
+    GlobalConfigKeyNameDefaults(GlobalConfigKey.themeSeedColor, 'theme_color', AppGlobalConfig.userInterfaceColors.defaultValue),
     GlobalConfigKeyNameDefaults(GlobalConfigKey.wakelockEnabled, 'keepScreenOnEnabled', false),
+    GlobalConfigKeyNameDefaults(GlobalConfigKey.recordingInputDevice, 'recordingInputDevice', null),
     GlobalConfigKeyNameDefaults(
         GlobalConfigKey.recordingAudioEncoder, 'recordingAudioEncoder', AppGlobalConfig.recordingAudioEncoderValues.defaultValue),
     GlobalConfigKeyNameDefaults(GlobalConfigKey.recordingSampleRate, 'recordingSampleRate', AppGlobalConfig.recordingSampleRateValues.defaultValue),
@@ -105,7 +122,6 @@ final class AppGlobalConfig {
     GlobalConfigKeyNameDefaults(GlobalConfigKey.recordingAutoGain, 'recordingAudioAutoGain', false),
     GlobalConfigKeyNameDefaults(GlobalConfigKey.recordingEchoCancel, 'recordingAudioEchoCancel', false),
     GlobalConfigKeyNameDefaults(GlobalConfigKey.recordingNoiseSuppress, 'recordingAudioNoiseSuppress', false),
-    GlobalConfigKeyNameDefaults(GlobalConfigKey.emojis, 'title_emojis', "❤️⭐️🎸🪕🎻🪘🥁🎷🎺🎹🪗🎤🎂🎉🎄😻😸😹😺😼😾😿🙀️"),
     GlobalConfigKeyNameDefaults(GlobalConfigKey.gridRowsAmount, 'grid_rows_amount', 6),
     GlobalConfigKeyNameDefaults(GlobalConfigKey.gridColsAmount, 'grid_cols_amount', 4),
   ];
@@ -114,73 +130,117 @@ final class AppGlobalConfig {
 
   static GlobalConfigKeyNameDefaults settingField(dynamic key) => settingsFields().firstWhere((item) => item.key == key);
 
-  static ConfigDataSliderValues gridRows = ConfigDataSliderValues(
+  static final ConfigDataSliderValues gridRows = ConfigDataSliderValues(
     minValue: 2,
     maxValue: 8,
     divisions: 6,
-    codec: ConfigDataCodec(valueFormatter: (double value) => value.toStringAsFixed(0)),
+    codec: ConfigDataCodec(valueFormatter: (dynamic value) => value.toStringAsFixed(0)),
   );
-  static ConfigDataSliderValues gridCols = ConfigDataSliderValues(
+
+  static final ConfigDataSliderValues gridCols = ConfigDataSliderValues(
     minValue: 2,
     maxValue: 10,
     divisions: 9,
-    codec: ConfigDataCodec(valueFormatter: (double value) => value.toStringAsFixed(0)),
+    codec: ConfigDataCodec(valueFormatter: (dynamic value) => value.toStringAsFixed(0)),
   );
-  static List<ConfigDataIcon> trackPlaybackModeValueIcons = [
-    ConfigDataIcon(1, AppIcon.trackSinglePlaybackMode),
-    ConfigDataIcon(0, AppIcon.trackRepeatPlaybackMode),
+
+  static final List<Permission> permissions = [
+    Permission.microphone,
+    Permission.notification,
+    Permission.audio,
   ];
-  static ConfigDataSliderValues trackPlaybackSpeedSliderValues = ConfigDataSliderValues(
+
+  static final ConfigDataCodec permissionsStatusCodec = ConfigDataCodec(
+      valueTranslator: (dynamic status, AppLocalizations trans) => switch (status) {
+            PermissionStatus.granted => trans.permissionStatusGranted,
+            PermissionStatus.denied => trans.permissionStatusDenied,
+            PermissionStatus.permanentlyDenied => trans.permissionStatusPermanentlyDenied,
+            PermissionStatus.restricted => trans.permissionStatusRestricted,
+            _ => trans.permissionStatusUndefined,
+          });
+
+  static final ConfigDataCodec permissionsCodec = ConfigDataCodec(
+      valueIcons: {
+        Permission.audio.value.toDouble(): Icons.speaker_rounded,
+        Permission.microphone.value.toDouble(): Icons.mic_rounded,
+        Permission.notification.value.toDouble(): Icons.notifications_on_rounded,
+      },
+      valueTranslator: (dynamic value, AppLocalizations trans) => switch (value) {
+            Permission.audio => trans.audioPermission,
+            Permission.microphone => trans.microphonePermission,
+            Permission.notification => trans.notificationPermission,
+            _ => value.toString(),
+          });
+
+  static final ConfigDataCodec trackPlaybackModeCodec = ConfigDataCodec(valueIcons: {
+    1: AppIcon.trackSinglePlaybackMode,
+    0: AppIcon.trackRepeatPlaybackMode,
+  });
+
+  static final ConfigDataSliderValues trackPlaybackSpeedSliderValues = ConfigDataSliderValues(
     minValue: 0.1,
     maxValue: 2.0,
     divisions: 19,
     defaultValue: 1.0,
-    codec: ConfigDataCodec(valueFormatter: (double value) => '{value}x'.replaceAll('{value}', value.toStringAsFixed(1))),
+    codec: ConfigDataCodec(
+      valueIcons: {
+        0.5: Symbols.speed_0_5x_rounded,
+        1.0: Symbols.one_x_mobiledata_rounded,
+        1.5: Symbols.speed_1_5x_rounded,
+        2.0: Symbols.speed_2x_rounded,
+      },
+      valueFormatter: (dynamic value) => '{value}x'.replaceAll('{value}', value.toStringAsFixed(1)),
+    ),
   );
-  static List<ConfigDataIcon> trackPlaybackSpeedValueIcons = [
-    ConfigDataIcon(0.5, Symbols.speed_0_5x_rounded),
-    ConfigDataIcon(1.0, Symbols.one_x_mobiledata_rounded),
-    ConfigDataIcon(1.5, Symbols.speed_1_5x_rounded),
-    ConfigDataIcon(2.0, Symbols.speed_2x_rounded),
-  ];
-  static ConfigDataSliderValues trackPlaybackVolumeSliderValues = ConfigDataSliderValues(
+
+  static final ConfigDataSliderValues trackPlaybackVolumeSliderValues = ConfigDataSliderValues(
     minValue: 0,
     maxValue: 1,
     divisions: 100,
     defaultValue: 1,
-    codec: ConfigDataCodec(valueFormatter: (double value) => '{value}%'.replaceAll('{value}', (value * 100).toStringAsFixed(0).padLeft(3, '0'))),
+    codec: ConfigDataCodec(
+      valueIcons: {
+        0.00: Icons.volume_off_rounded,
+        0.25: Icons.volume_mute_rounded,
+        0.50: Icons.volume_down_rounded,
+        0.75: Icons.volume_up_rounded,
+        1.00: Symbols.brand_awareness_rounded,
+      },
+      valueFormatter: (dynamic value) => '{value}%'.replaceAll('{value}', (value * 100).toStringAsFixed(0).padLeft(3, '0')),
+    ),
   );
-  static List<ConfigDataIcon> trackPlaybackVolumeValueIcons = [
-    ConfigDataIcon(0.00, Icons.volume_off_rounded),
-    ConfigDataIcon(0.25, Icons.volume_mute_rounded),
-    ConfigDataIcon(0.50, Icons.volume_down_rounded),
-    ConfigDataIcon(0.75, Icons.volume_up_rounded),
-    ConfigDataIcon(1.00, Symbols.brand_awareness_rounded),
-  ];
-  static ConfigDataSliderValues trackPlaybackBalanceSliderValues = ConfigDataSliderValues(
+
+  static final ConfigDataSliderValues trackPlaybackBalanceSliderValues = ConfigDataSliderValues(
     minValue: -1,
     maxValue: 1,
     divisions: 4,
     defaultValue: 0.0,
     codec: ConfigDataCodec(
-        valueFormatter: (double value) => switch (value) {
-              -1.00 => 'L100',
-              -0.75 => 'L75',
-              -0.50 => 'L50',
-              -0.25 => 'L25',
-              0.00 => 'C',
-              0.25 => 'R1',
-              0.50 => 'R2',
-              0.75 => 'R3',
-              1.00 => 'R4',
+        valueIcons: {
+          -1.0: Icons.join_left_rounded,
+          -0.5: Icons.join_left_rounded,
+          0.0: Icons.join_full_rounded,
+          0.5: Icons.join_right_outlined,
+          1.0: Icons.join_right_outlined,
+        },
+        valueFormatter: (dynamic value) => switch (value) {
+              -1.00 => 'LL',
+              -0.75 => 'L',
+              -0.50 => 'CL',
+              -0.25 => 'CCL',
+              0.00 => 'CC',
+              0.25 => 'CCR',
+              0.50 => 'CR',
+              0.75 => 'R',
+              1.00 => 'RR',
               _ => '??',
             },
-        valueTranslator: (double value, AppLocalizations trans) => switch (value) {
+        valueTranslator: (dynamic value, AppLocalizations trans) => switch (value) {
               -1.00 => trans.balanceLeft100,
               -0.75 => trans.balanceLeft75,
               -0.50 => trans.balanceLeft50,
               -0.25 => trans.balanceLeft25,
-              0.0 => trans.balanceCenter,
+              0.00 => trans.balanceCenter,
               0.25 => trans.balanceRight25,
               0.50 => trans.balanceRight50,
               0.75 => trans.balanceRight75,
@@ -188,14 +248,8 @@ final class AppGlobalConfig {
               _ => AppGlobalConfig.trackPlaybackBalanceSliderValues.codec.valueFormatter(value),
             }),
   );
-  static List<ConfigDataIcon> trackPlaybackBalanceValueIcons = [
-    ConfigDataIcon(-1.0, Icons.join_left_rounded),
-    ConfigDataIcon(-0.5, Icons.join_left_rounded),
-    ConfigDataIcon(0.0, Icons.join_full_rounded),
-    ConfigDataIcon(0.5, Icons.join_right_outlined),
-    ConfigDataIcon(1.0, Icons.join_right_outlined),
-  ];
-  static ConfigDataRadioValues recordingAudioEncoderValues = ConfigDataRadioValues(
+
+  static final ConfigDataRadioValues recordingAudioEncoderValues = ConfigDataRadioValues(
     values: [
       AudioEncoder.aacHe.index.toDouble(),
       AudioEncoder.aacEld.index.toDouble(),
@@ -205,9 +259,9 @@ final class AppGlobalConfig {
     ],
     defaultValue: AudioEncoder.wav.index.toDouble(),
     codec: ConfigDataCodec(
-        valueFormatter: (double value) => AudioEncoder.values[value.toInt()].toString().replaceAll('AudioEncoder.', ''),
-        valueDecoder: (double value) => AudioEncoder.values[value.toInt()],
-        valueTranslator: (double value, AppLocalizations trans) => switch (AudioEncoder.values[value.toInt()]) {
+        valueFormatter: (dynamic value) => AudioEncoder.values[value.toInt()].toString().replaceAll('AudioEncoder.', ''),
+        valueDecoder: (dynamic value) => AudioEncoder.values[value.toInt()],
+        valueTranslator: (dynamic value, AppLocalizations trans) => switch (AudioEncoder.values[value.toInt()]) {
               AudioEncoder.aacLc => trans.audioRecorderAacLc,
               AudioEncoder.aacEld => trans.audioRecorderAacEld,
               AudioEncoder.aacHe => trans.audioRecorderAacHe,
@@ -216,57 +270,56 @@ final class AppGlobalConfig {
               _ => throw UnimplementedError(),
             }),
   );
-  static ConfigDataRadioValues recordingSampleRateValues = ConfigDataRadioValues(
+
+  static final ConfigDataRadioValues recordingSampleRateValues = ConfigDataRadioValues(
     values: [44100, 48000, 96000],
     defaultValue: 48000,
     codec: ConfigDataCodec(
-      valueFormatter: (double value) => '{value} kHz'.replaceAll('{value}', (value / 1000).toStringAsFixed(0)),
-      valueDecoder: (double value) => value.toInt(),
+      valueFormatter: (dynamic value) => '{value} kHz'.replaceAll('{value}', (value / 1000).toStringAsFixed(0)),
+      valueDecoder: (dynamic value) => value.toInt(),
     ),
   );
-  static ConfigDataRadioValues recordingBitRateValues = ConfigDataRadioValues(
+
+  static final ConfigDataRadioValues recordingBitRateValues = ConfigDataRadioValues(
     values: [32000, 64000, 128000, 192000, 320000],
     defaultValue: 192000,
     codec: ConfigDataCodec(
-      valueFormatter: (double value) => '{value} kbps'.replaceAll('{value}', (value / 1000).toStringAsFixed(0)),
-      valueDecoder: (double value) => value.toInt(),
+      valueFormatter: (dynamic value) => '{value} kbps'.replaceAll('{value}', (value / 1000).toStringAsFixed(0)),
+      valueDecoder: (dynamic value) => value.toInt(),
     ),
   );
 
-  static const Map<String, Set<String>> keyboardKeysRows = {
-    'A': {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0'},
-    'B': {'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'},
-    'C': {'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';'},
-    'D': {'z', 'x', 'c', 'v', 'b', 'n', 'm', '.', ',', '/'},
-    'E': {'!', '@', '#', '\$', '%', '^', '&', '*', '(', ')'},
-    'F': {'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'},
-    'G': {'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':'},
-    'H': {'Z', 'X', 'C', 'V', 'B', 'N', 'M', '<', '>', '?'},
-  };
-
-  static Iterable<String> gridRowNames() => keyboardKeysRows.keys;
-
-  static Iterable<String> keyboardKeys() {
-    var keyboardKeys = <String>[];
-    keyboardKeysRows.forEach((row, keys) => keyboardKeys.addAll(keys));
-    return keyboardKeys;
-  }
-
-  static const Map<String, Locale> languages = {
+  static final Map<String, Locale> languages = {
     'English': Locale('en', 'US'),
     'Polski': Locale('pl', 'PL'),
   };
 
-  static const Map<String, Color> userInterfaceColors = {
-    "red": Colors.red,
-    "green": Colors.green,
-    "blue": Colors.blue,
-    "yellow": Colors.yellow,
-    "purple": Colors.purple,
-    "orange": Colors.orange,
-    "cyan": Colors.cyan,
-    "pink": Colors.pink,
-  };
+  static final ConfigDataRadioValues userInterfaceColors = ConfigDataRadioValues(
+    values: [
+      Colors.red,
+      Colors.green,
+      Colors.blue,
+      Colors.yellow,
+      Colors.purple,
+      Colors.orange,
+      Colors.cyan,
+      Colors.pink,
+    ],
+    defaultValue: Colors.purple,
+    codec: ConfigDataCodec(
+        valueFormatter: (value) => value.toString(),
+        valueTranslator: (value, AppLocalizations trans) => switch (userInterfaceColors.values[value.toInt()]) {
+              Colors.red => trans.red,
+              Colors.green => trans.green,
+              Colors.blue => trans.blue,
+              Colors.yellow => trans.yellow,
+              Colors.purple => trans.purple,
+              Colors.orange => trans.orange,
+              Colors.cyan => trans.cyan,
+              Colors.pink => trans.pink,
+              _ => throw UnimplementedError(),
+            }),
+  );
 
   static Map<TrackState, IconData> trackStateIcons() => {
         TrackState.empty: Icons.cancel_outlined,
