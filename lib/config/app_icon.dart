@@ -60,12 +60,15 @@ class AppIcon {
 
   static IconData no = Icons.cancel_outlined;
   static IconData yes = Icons.check_circle_outline_outlined;
+  static IconData exception = Icons.error_outline_rounded;
 
   static IconData trackPlayingStart = Icons.play_arrow_rounded;
   static IconData trackPlayingStop = Icons.stop_rounded;
   static IconData trackPlayingPause = Icons.pause_rounded;
   static IconData trackPlayingResume = Symbols.play_pause_rounded;
-  static IconData trackRecordingStart = Icons.radio_button_checked_rounded;
+  static IconData trackRecordingStart = Icons.fiber_manual_record_rounded;
+  static IconData trackRecordingStop = Icons.stop_rounded;
+  static IconData trackRecordingCancel = Icons.cancel_rounded;
   static IconData trackRecordingImport = Icons.file_open_rounded;
   static IconData trackRecordingShare = Icons.share_outlined;
 
@@ -74,7 +77,4 @@ class AppIcon {
   static IconData displaySettings = Icons.display_settings;
   static IconData trackSettings = Icons.graphic_eq_rounded;
   static IconData recordSettings = Icons.settings_voice;
-
-  static IconData exception = Icons.error_outline_rounded;
-
 }

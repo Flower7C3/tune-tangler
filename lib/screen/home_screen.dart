@@ -97,7 +97,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   icon:
                       Icon(widget.settingsGet(GlobalConfigKey.wakelockEnabled) ? AppIcon.logoKeepScreenOnEnabled : AppIcon.logoKeepScreenOnDisabled),
                   onPressed: () {
-                    _uiWrapper.recordConfigDialog(_trans.recordingSettings, recordConfig: widget.settingsGet(GlobalConfigKey.recording), trans: _trans);
+                    _uiWrapper.recordConfigDialog(_trans.recordingSettings,
+                        recordConfig: widget.settingsGet(GlobalConfigKey.recording), trans: _trans);
                   }),
               title: Text(_trans.appTitle),
               actions: _buildTopMenu(),
@@ -164,7 +165,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     switch (selection) {
       case TopMenuItem.changeLanguage:
         var options = <Widget>[];
-        AppGlobalConfig.languages.forEach((String name, Locale locale) {
+        AppGlobalConfig.languages.values<Locale>().forEach((Locale locale) {
+          var name = AppGlobalConfig.languages.name(locale);
           var code = locale.toLanguageTag();
           options.add(SimpleDialogOption(
             padding: EdgeInsets.all(16),
@@ -202,29 +204,32 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       case TopMenuItem.help:
         PackageInfo packageInfo = await PackageInfo.fromPlatform();
         _uiWrapper.aboutDialog(
-            packageInfo,
-            [
-              _uiWrapper.helpSection(_trans.helpScreenMessageAboutTitle, [
-                Text(_trans.helpScreenMessageAboutContent),
-              ]),
-              _uiWrapper.helpSection(_trans.helpScreenMessageUsageTitle, [
-                Text(_trans.helpScreenMessageUsageContent),
-              ]),
-              _uiWrapper.helpSection(_trans.helpScreenMessageTrackActions, [
-                _uiWrapper.helpTrackState(TrackState.empty, _trans.helpScreenMessageTrackActions_state_empty),
-                _uiWrapper.helpTrackState(TrackState.recording, _trans.helpScreenMessageTrackActions_state_recording),
-                _uiWrapper.helpTrackState(TrackState.stopped, _trans.helpScreenMessageTrackActions_state_stopped),
-                _uiWrapper.helpTrackState(TrackState.playing, _trans.helpScreenMessageTrackActions_state_playing),
-                _uiWrapper.helpTrackState(TrackState.paused, _trans.helpScreenMessageTrackActions_state_paused),
-              ]),
-              _uiWrapper.helpSection(_trans.helpScreenRecordingCodecsInfoTitle, [
-                Text(_trans.helpScreenRecordingCodecsInfoContent),
-              ]),
-              _uiWrapper.helpSection(_trans.helpScreenRecordingCodecsChooseTitle, [
-                Text(_trans.helpScreenRecordingCodecsChooseContent),
-              ]),
-            ],
-            applicationLegalese: _trans.legalNote);
+          packageInfo,
+          [
+            _uiWrapper.helpSection(_trans.helpScreenMessageAboutTitle, [
+              Text(_trans.helpScreenMessageAboutContent),
+            ]),
+            _uiWrapper.helpSection(_trans.helpScreenMessageUsageTitle, [
+              Text(_trans.helpScreenMessageUsageContent),
+            ]),
+            _uiWrapper.helpSection(_trans.helpScreenMessageTrackActions, [
+              _uiWrapper.helpTrackState(TrackState.empty, _trans.helpScreenMessageTrackActions_state_empty),
+              _uiWrapper.helpTrackState(TrackState.recording, _trans.helpScreenMessageTrackActions_state_recording),
+              _uiWrapper.helpTrackState(TrackState.stopped, _trans.helpScreenMessageTrackActions_state_stopped),
+              _uiWrapper.helpTrackState(TrackState.playing, _trans.helpScreenMessageTrackActions_state_playing),
+              _uiWrapper.helpTrackState(TrackState.paused, _trans.helpScreenMessageTrackActions_state_paused),
+            ]),
+            _uiWrapper.helpSection(_trans.helpScreenRecordingCodecsInfoTitle, [
+              Text(_trans.helpScreenRecordingCodecsInfoContent),
+            ]),
+            _uiWrapper.helpSection(_trans.helpScreenRecordingCodecsChooseTitle, [
+              Text(_trans.helpScreenRecordingCodecsChooseContent),
+            ]),
+          ],
+          applicationIcon:
+              Icon(widget.settingsGet(GlobalConfigKey.wakelockEnabled) ? AppIcon.logoKeepScreenOnEnabled : AppIcon.logoKeepScreenOnDisabled),
+          applicationLegalese: _trans.legalNote,
+        );
         break;
     }
   }
@@ -234,7 +239,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   dynamic _buildTracksGrid() => ListView.builder(
         itemCount: widget.settingsGet(GlobalConfigKey.gridRowsAmount),
         itemBuilder: (context, rowIndex) => Row(children: [
-          _trackWrapper.buildRowButtons(rowIndex),
+          _trackWrapper.buildRowButtons(rowIndex, TrackRow.name(rowIndex)),
           Expanded(
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,

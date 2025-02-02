@@ -9,6 +9,7 @@ import 'package:tune_tangler/entity/track.dart';
 
 import '../config/app_icon.dart';
 import '../config/config.dart';
+import '../config/config_collection.dart';
 import '../config/menu_item.dart';
 
 enum DialogType {
@@ -56,7 +57,15 @@ class UIWrapper {
 
   UIWrapper(this.context);
 
-  ListTile statusIconTile(IconData icon, String text, {Color? iconColor, double? iconSize, Color? textColor, double? fontSize}) => ListTile(
+  ListTile statusIconTile(
+    IconData icon,
+    String text, {
+    Color? iconColor,
+    double? iconSize,
+    Color? textColor,
+    double? fontSize,
+  }) =>
+      ListTile(
         leading: Icon(icon, size: fontSize, color: iconColor),
         title: Text(text, style: TextStyle(color: textColor, fontSize: fontSize)),
       );
@@ -68,19 +77,42 @@ class UIWrapper {
         Expanded(child: Text(text, style: TextStyle(color: textColor, fontSize: fontSize))),
       ]);
 
-  SizedBox trackDetailsLine(List<Widget> items, {MainAxisAlignment mainAxisAlignment = MainAxisAlignment.center}) => items.isEmpty
-      ? SizedBox(child: null)
-      : SizedBox(width: double.maxFinite, child: Row(mainAxisSize: MainAxisSize.max, mainAxisAlignment: mainAxisAlignment, children: items));
+  SizedBox trackDetailsLine(
+    List<Widget> items, {
+    MainAxisAlignment mainAxisAlignment = MainAxisAlignment.center,
+  }) =>
+      items.isEmpty
+          ? SizedBox(child: null)
+          : SizedBox(width: double.maxFinite, child: Row(mainAxisSize: MainAxisSize.max, mainAxisAlignment: mainAxisAlignment, children: items));
 
-  PopupMenuItem<String> topPopupMenuItem(TopMenuItem value, IconData icon, String text, {bool? checked}) => PopupMenuItem(
-      value: value.toString(),
-      child: ListTile(
-        leading: Icon(icon),
-        title: Text(text),
-        trailing: (checked == null) ? null : Icon((checked == true) ? Symbols.check_box_rounded : Symbols.square_rounded),
-      ));
+  PopupMenuItem<String> topPopupMenuItem(
+    TopMenuItem value,
+    IconData icon,
+    String text, {
+    bool? checked,
+  }) =>
+      PopupMenuItem(
+          value: value.toString(),
+          child: ListTile(
+            leading: Icon(icon),
+            title: Text(text),
+            trailing: (checked == null) ? null : Icon((checked == true) ? Symbols.check_box_rounded : Symbols.square_rounded),
+          ));
 
-  PopupMenuItem rowPopupMenuItem(dynamic value, IconData icon, String title) => PopupMenuItem<dynamic>(
+  Container rowButton(Widget content) => Container(
+        margin: EdgeInsets.all(0),
+        width: rowButtonIconSize + rowContainerPadding * 2,
+        height: rowButtonIconSize + rowContainerPadding * 2,
+        padding: EdgeInsets.all(rowContainerPadding),
+        child: content,
+      );
+
+  PopupMenuItem rowPopupMenuItem(
+    dynamic value,
+    IconData icon,
+    String title,
+  ) =>
+      PopupMenuItem<dynamic>(
         value: value,
         child: statusIconTile(icon, title, iconSize: rowMenuIconSize, fontSize: rowMenuFontSize),
       );
@@ -101,7 +133,12 @@ class UIWrapper {
         ),
       );
 
-  PopupMenuItem<TrackMenuItem> trackMenuItem(TrackMenuItem value, IconData icon, String title) => PopupMenuItem<TrackMenuItem>(
+  PopupMenuItem<TrackMenuItem> trackMenuItem(
+    TrackMenuItem value,
+    IconData icon,
+    String title,
+  ) =>
+      PopupMenuItem<TrackMenuItem>(
         value: value,
         child: statusIconTile(icon, title, iconSize: trackMenuIconSize, fontSize: trackMenuFontSize),
       );
@@ -210,7 +247,10 @@ class UIWrapper {
             }
           }).then(thenCallback ?? (result) {});
 
-  String formatTime(int milliseconds, {String format = '{h}:{m}:{s}.{ds}'}) {
+  String formatTime(
+    int milliseconds, {
+    String format = '{h}:{m}:{s}.{ds}',
+  }) {
     final duration = Duration(milliseconds: milliseconds);
     final hours = duration.inHours.toString().padLeft(2, '0');
     final minutes = (duration.inMinutes % 60).toString().padLeft(2, '0');
@@ -228,22 +268,22 @@ class UIWrapper {
         .replaceAll('{MS}', duration.inMilliseconds.toString());
   }
 
-  Widget _recordConfig(RecordConfig recordConfig, AppLocalizations trans) => Column(mainAxisSize: MainAxisSize.min, children: [
+  Widget _recordConfig(
+    RecordConfig recordConfig,
+    AppLocalizations trans,
+  ) =>
+      Column(mainAxisSize: MainAxisSize.min, children: [
         statusIconRow(AppIcon.recordingInputDevice,
             trans.recordingInputDeviceValue(recordConfig.device == null ? trans.defaultDevice : recordConfig.device!.label),
             iconSize: 16, fontSize: 14, separatorSize: iconToTextOffset),
-        statusIconRow(
-            AppIcon.recordingAudioEncoder,
-            trans.recordingAudioEncoderValue(
-                AppGlobalConfig.recordingAudioEncoderValues.codec.valueTranslator(recordConfig.encoder.index.toDouble(), trans)),
-            iconSize: 16,
-            fontSize: 14,
-            separatorSize: iconToTextOffset),
-        statusIconRow(AppIcon.recordingSampleRate,
-            trans.recordingSampleRateValue(AppGlobalConfig.recordingSampleRateValues.codec.valueFormatter(recordConfig.sampleRate.toDouble())),
+        statusIconRow(AppIcon.recordingAudioEncoder,
+            trans.recordingAudioEncoderValue(AppGlobalConfig.recordingAudioEncoder.translation(recordConfig.encoder.index.toDouble(), trans: trans)),
             iconSize: 16, fontSize: 14, separatorSize: iconToTextOffset),
-        statusIconRow(AppIcon.recordingBitRate,
-            trans.recordingBitRateValue(AppGlobalConfig.recordingBitRateValues.codec.valueFormatter(recordConfig.bitRate.toDouble())),
+        statusIconRow(AppIcon.recordingSampleRate,
+            trans.recordingSampleRateValue(AppGlobalConfig.recordingSampleRate.valueFormatter(recordConfig.sampleRate.toDouble())),
+            iconSize: 16, fontSize: 14, separatorSize: iconToTextOffset),
+        statusIconRow(
+            AppIcon.recordingBitRate, trans.recordingBitRateValue(AppGlobalConfig.recordingBitRate.valueFormatter(recordConfig.bitRate.toDouble())),
             iconSize: 16, fontSize: 14, separatorSize: iconToTextOffset),
         statusIconRow(AppIcon.recordingAudioGain, trans.recordingAutoGainValue(recordConfig.autoGain ? trans.yes : trans.no),
             iconSize: 16, fontSize: 14, separatorSize: iconToTextOffset),
@@ -271,69 +311,12 @@ class UIWrapper {
     );
   }
 
-  void recordingDialog(
-    String title, {
-    required RecordConfig recordConfig,
-    required AppLocalizations trans,
-    required String cancelLabel,
-    required String saveLabel,
-    required Function() onCancel,
-    required Function() onSave,
-    required Function() onDismiss,
+  void toast(
+    String text, {
+    int duration = 2,
+    IconData? icon,
+    ToastType type = ToastType.success,
   }) {
-    int clock = 0;
-    Timer? timer;
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            void startTimer() {
-              timer = Timer.periodic(Duration(milliseconds: 100), (Timer t) {
-                setState(() {
-                  clock++;
-                });
-              });
-            }
-
-            if (timer == null) {
-              startTimer();
-            }
-            return AlertDialog(
-              title: statusIconTile(AppIcon.trackSettings, title),
-              content: SingleChildScrollView(
-                child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  Text(formatTime(clock * 100)),
-                  SizedBox(height: 16),
-                  LinearProgressIndicator(),
-                  SizedBox(height: 16),
-                  _recordConfig(recordConfig, trans),
-                ]),
-              ),
-              actions: [
-                errorButton(cancelLabel, () {
-                  Navigator.pop(context, 'trackRecordingCancel');
-                  onCancel();
-                }),
-                primaryButton(saveLabel, () {
-                  Navigator.pop(context, 'trackRecordingStop');
-                  onSave();
-                }),
-              ],
-            );
-          },
-        );
-      },
-    ).then((status) {
-      timer?.cancel();
-      if (status == null) {
-        onDismiss();
-      }
-    });
-  }
-
-  void toast(String text, {int duration = 2, IconData? icon, ToastType type = ToastType.success}) {
     Color foregroundColor;
     Color backgroundColor;
     switch (type) {
@@ -457,9 +440,12 @@ class UIWrapper {
 
   Container helpTrackState(TrackState state, String message) => Container(
         padding: EdgeInsets.all(4),
-        color: AppGlobalConfig.trackStateBackgroundColors(context)[state],
-        child:
-            statusIconTile(AppGlobalConfig.trackStateIcons()[state]!, message, textColor: AppGlobalConfig.trackStateForegroundColors(context)[state]),
+        color: AppGlobalConfig.trackStateBackgroundColor.colorOrNull(state, context: context),
+        child: statusIconTile(
+          AppGlobalConfig.trackState.icon(state, defaultValue: Icons.error_outline_rounded),
+          message,
+          textColor: AppGlobalConfig.trackStateForegroundColor.colorOrNull(state, context: context),
+        ),
       );
 
   Divider settingsTileDivider() => Divider(height: 0, thickness: 1, indent: 20, endIndent: 20, color: Colors.black);
@@ -467,7 +453,14 @@ class UIWrapper {
   ListTile settingsTileTitle(title) => ListTile(title: Center(child: Text(title, style: TextStyle(fontSize: settingsTitleFontSize))));
 
   ListTile listTileReset(
-          IconData icon, String listTitle, String dialogTitle, String dialogInfo, String cancelLabel, String saveLabel, Function() successAction) =>
+    IconData icon,
+    String listTitle,
+    String dialogTitle,
+    String dialogInfo,
+    String cancelLabel,
+    String saveLabel,
+    Function() successAction,
+  ) =>
       ListTile(
           leading: Icon(icon),
           title: Text(listTitle),
@@ -495,58 +488,62 @@ class UIWrapper {
     String cancelLabel,
     String saveLabel, {
     required String Function(double value, String formattedValue) successAction,
-    required dynamic Function(double value) valueFormatter,
-    String Function(double value, AppLocalizations trans)? valueTranslator,
-    AppLocalizations? trans,
     bool withTrailing = true,
-  }) {
-    return ListTile(
-        leading: Icon(icon),
-        title: Text(listTitle),
-        trailing: (withTrailing == true) ? trailingLabel(valueFormatter(currentValue)) : null,
-        onTap: () {
-          showDialog(
-              context: context,
-              builder: (context) => StatefulBuilder(
-                  builder: (BuildContext context, StateSetter setModalState) => AlertDialog(
-                          title: statusIconTile(icon, dialogTitle),
-                          content: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
-                            Text(dialogInfo),
-                            Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
-                              Slider(
-                                  value: currentValue,
-                                  min: minValue,
-                                  max: maxValue,
-                                  divisions: divisions.toInt(),
-                                  label:
-                                      (trans.toString() != 'null' && valueTranslator.toString() != 'null' && valueTranslator != null && trans != null)
-                                          ? valueTranslator(currentValue, trans)
-                                          : valueFormatter(currentValue),
-                                  onChanged: (double newValue) {
-                                    setModalState(() {
-                                      currentValue = newValue;
-                                    });
-                                  }),
-                              Text(valueFormatter(currentValue)),
+    ConfigCollection? configCollection,
+    AppLocalizations? trans,
+  }) =>
+      ListTile(
+          leading: Icon(icon),
+          title: Text(listTitle),
+          trailing: (withTrailing == true)
+              ? trailingLabel(configCollection != null ? configCollection.valueFormatter(currentValue) : currentValue.toString())
+              : null,
+          onTap: () {
+            showDialog(
+                context: context,
+                builder: (context) => StatefulBuilder(
+                    builder: (BuildContext context, StateSetter setModalState) => AlertDialog(
+                            title: statusIconTile(icon, dialogTitle),
+                            content: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
+                              Text(dialogInfo),
+                              Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
+                                Slider(
+                                    value: currentValue,
+                                    min: minValue,
+                                    max: maxValue,
+                                    divisions: divisions.toInt(),
+                                    label: ((configCollection == null)
+                                        ? currentValue.toString()
+                                        : ((trans.toString() != 'null' && trans != null)
+                                            ? configCollection.translation(currentValue, trans: trans)
+                                            : configCollection.valueFormatter(currentValue))),
+                                    onChanged: (double newValue) {
+                                      setModalState(() {
+                                        currentValue = newValue;
+                                      });
+                                    }),
+                                Text(configCollection != null ? configCollection.valueFormatter(currentValue) : currentValue.toString()),
+                              ]),
                             ]),
-                          ]),
-                          actions: [
-                            simpleButton(cancelLabel, () {
-                              Navigator.pop(context, cancelLabel);
-                            }),
-                            primaryButton(saveLabel, () {
-                              Navigator.pop(context, saveLabel);
-                              toast(
-                                  successAction(
+                            actions: [
+                              simpleButton(cancelLabel, () {
+                                Navigator.pop(context, cancelLabel);
+                              }),
+                              primaryButton(saveLabel, () {
+                                Navigator.pop(context, saveLabel);
+                                toast(
+                                    successAction(
                                       currentValue,
-                                      (trans.toString() != 'null' && valueTranslator.toString() != 'null' && valueTranslator != null && trans != null)
-                                          ? valueTranslator(currentValue, trans)
-                                          : valueFormatter(currentValue)),
-                                  icon: icon);
-                            }),
-                          ])));
-        });
-  }
+                                      ((configCollection == null)
+                                          ? currentValue.toString()
+                                          : ((trans.toString() != 'null' && trans != null)
+                                              ? configCollection.translation(currentValue, trans: trans)
+                                              : configCollection.valueFormatter(currentValue))),
+                                    ),
+                                    icon: icon);
+                              }),
+                            ])));
+          });
 
   ListTile listTileRadio(
     IconData icon,
@@ -560,8 +557,7 @@ class UIWrapper {
     String saveLabel, {
     required String Function(dynamic value, String formattedValue) successAction,
     bool withTrailing = true,
-    required dynamic Function(dynamic value) valueFormatter,
-    String Function(dynamic value, AppLocalizations trans)? valueTranslator,
+    ConfigCollection? configCollection,
     AppLocalizations? trans,
   }) {
     double sliderValue = values.indexOf(currentValue).toDouble();
@@ -570,9 +566,8 @@ class UIWrapper {
     if (listSubtitle != null) {
       subtitle.add(Text(listSubtitle, style: TextStyle(fontSize: settingsSubtitleFontSize)));
     }
-    String translatedValue = (trans.toString() != 'null' && valueTranslator.toString() != 'null' && valueTranslator != null && trans != null)
-        ? valueTranslator(currentValue, trans)
-        : '';
+    String translatedValue =
+        (trans.toString() != 'null' && configCollection != null && trans != null) ? configCollection.translation(currentValue, trans: trans) : '';
     if (translatedValue != '') {
       subtitle.add(Text(translatedValue, style: TextStyle(fontSize: settingsSubtitleFontSize)));
     }
@@ -580,7 +575,7 @@ class UIWrapper {
         leading: Icon(icon),
         title: Text(listTitle),
         subtitle: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: subtitle.toList()),
-        trailing: (withTrailing == true) ? trailingLabel(valueFormatter(currentValue)) : null,
+        trailing: (withTrailing == true && configCollection != null) ? trailingLabel(configCollection.valueFormatter(currentValue)) : null,
         onTap: () {
           showDialog(
             context: context,
@@ -595,16 +590,18 @@ class UIWrapper {
                         min: 0,
                         max: (values.length - 1).toDouble(),
                         divisions: (values.length - 1),
-                        label: (trans.toString() != 'null' && valueTranslator.toString() != 'null' && valueTranslator != null && trans != null)
-                            ? valueTranslator(currentValue, trans)
-                            : valueFormatter(currentValue),
+                        label: ((configCollection == null)
+                            ? currentValue.toString()
+                            : ((trans.toString() != 'null' && trans != null)
+                                ? configCollection.translation(currentValue, trans: trans)
+                                : configCollection.valueFormatter(currentValue))),
                         onChanged: (double newValue) {
                           setModalState(() {
                             sliderValue = newValue;
                             currentValue = values[sliderValue.toInt()];
                           });
                         }),
-                    Text(valueFormatter(currentValue)),
+                    Text(configCollection != null ? configCollection.valueFormatter(currentValue) : currentValue.toString()),
                   ]),
                 ]),
                 actions: [
@@ -615,10 +612,13 @@ class UIWrapper {
                     Navigator.pop(context, saveLabel);
                     toast(
                         successAction(
-                            currentValue,
-                            (trans.toString() != 'null' && valueTranslator.toString() != 'null' && valueTranslator != null && trans != null)
-                                ? valueTranslator(currentValue, trans)
-                                : valueFormatter(currentValue)),
+                          currentValue,
+                          ((configCollection == null)
+                              ? currentValue.toString()
+                              : ((trans.toString() != 'null' && trans != null)
+                                  ? configCollection.translation(currentValue, trans: trans)
+                                  : configCollection.valueFormatter(currentValue))),
+                        ),
                         icon: icon);
                   }),
                 ],
@@ -628,19 +628,24 @@ class UIWrapper {
         });
   }
 
-  ListTile listTileSwitch(IconData icon, String listTitle, IconData disabledIcon, String disabledLabel, IconData enabledIcon, String enabledLabel,
-      bool switchValue, String? Function(bool value) successAction,
-      {String? subtitleText}) {
+  ListTile listTileSwitch(
+    IconData icon,
+    String listTitle, {
+    String? subtitleText,
+    required IconData disabledIcon,
+    String? disabledLabel,
+    required IconData enabledIcon,
+    String? enabledLabel,
+    required bool switchValue,
+    required String? Function(bool value) successAction,
+  }) {
     List<Widget> subtitle = [];
     if (subtitleText != null) {
       subtitle.add(Text(subtitleText, style: TextStyle(fontSize: settingsSubtitleFontSize)));
     }
-    subtitle.add(Row(children: [
-      Icon(disabledIcon, size: settingsSubtitleIconSize),
-      Text(disabledLabel, style: TextStyle(fontSize: settingsSubtitleFontSize)),
-      Text(' '),
-      Icon(enabledIcon, size: settingsSubtitleIconSize),
-      Text(enabledLabel, style: TextStyle(fontSize: settingsSubtitleFontSize)),
+    subtitle.add(Column(children: [
+      if (disabledLabel != null) statusIconRow(disabledIcon, disabledLabel, iconSize: settingsSubtitleIconSize, fontSize: settingsSubtitleFontSize),
+      if (enabledLabel != null) statusIconRow(enabledIcon, enabledLabel, iconSize: settingsSubtitleIconSize, fontSize: settingsSubtitleFontSize),
     ]));
     return ListTile(
         leading: Icon(icon),
@@ -662,21 +667,23 @@ class UIWrapper {
             }));
   }
 
-  Flexible gridBuilder({required int itemCount, required Widget Function(dynamic context, dynamic index) itemBuilder}) {
-    return Flexible(
-        child: SizedBox(
-            width: double.maxFinite,
-            child: GridView.builder(
-              shrinkWrap: true,
-              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                maxCrossAxisExtent: 32,
-                mainAxisExtent: 32,
-              ),
-              padding: const EdgeInsets.all(0),
-              itemCount: itemCount,
-              itemBuilder: itemBuilder,
-            )));
-  }
+  Flexible gridBuilder({
+    required int itemCount,
+    required Widget Function(dynamic context, dynamic index) itemBuilder,
+  }) =>
+      Flexible(
+          child: SizedBox(
+              width: double.maxFinite,
+              child: GridView.builder(
+                shrinkWrap: true,
+                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  maxCrossAxisExtent: 32,
+                  mainAxisExtent: 32,
+                ),
+                padding: const EdgeInsets.all(0),
+                itemCount: itemCount,
+                itemBuilder: itemBuilder,
+              )));
 }

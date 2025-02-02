@@ -17,7 +17,6 @@ class TracksCollection {
   void _add(String name, Track track) {
     if (!_collections.containsKey(name)) {
       _collections[name] = {};
-      debugPrint('add $name row');
     }
     _collections[name]!.add(track);
   }

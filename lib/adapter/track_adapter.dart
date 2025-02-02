@@ -57,7 +57,7 @@ class TrackAdapter extends TypeAdapter<Track> {
       TrackAdapterKey.audioEncoder.toString(): (obj.audioEncoder == null) ? 0 : obj.audioEncoder?.index,
       TrackAdapterKey.sampleRate.toString(): obj.sampleRate,
       TrackAdapterKey.bitRate.toString(): obj.bitRate,
-      TrackAdapterKey.recorderState.toString(): obj.recorderState.index,
+      TrackAdapterKey.recorderState.toString(): obj.recorderState.value.index,
       TrackAdapterKey.playbackMode.toString(): obj.playbackModeSingle.value,
       TrackAdapterKey.playbackVolume.toString(): obj.playbackVolume.value,
       TrackAdapterKey.playbackBalance.toString(): obj.playbackBalance.value,

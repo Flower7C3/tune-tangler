@@ -21,7 +21,6 @@ import '../config/config.dart';
 import '../config/keyboard.dart';
 import '../config/menu_item.dart';
 import '../entity/track.dart';
-import '../entity/track_row.dart';
 import '../main.dart';
 
 class TrackWrapper {
@@ -44,20 +43,41 @@ class TrackWrapper {
     widget.settingsSet(track.id, track, space: ConfigSpace.track, updateState: updateState);
   }
 
-  String _extensionName(AudioEncoder encoder) => switch (encoder) {
-        AudioEncoder.aacLc => 'm4a',
-        AudioEncoder.aacEld => 'm4a',
-        AudioEncoder.aacHe => 'm4a',
-        AudioEncoder.amrNb => '3gp',
-        AudioEncoder.amrWb => '3gp',
-        AudioEncoder.opus => 'opus',
-        AudioEncoder.flac => 'flac',
-        AudioEncoder.wav => 'wav',
-        AudioEncoder.pcm16bits => 'pcm',
-      };
+  Future<void> _importRecording(Track track) async {
+    if (await Permission.audio.request().isGranted == false) {
+      _uiWrapper.toast(_trans.trackRecordingImportNoPermissions(track.name.value),
+          icon: AppIcon.trackRecordingImport, type: ToastType.error, duration: 4);
+      return;
+    }
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.audio,
+    );
 
-  Future<void> startRecording(Track track) async {
+    if (result == null) {
+      _uiWrapper.toast(_trans.trackRecordingImportCancelled(track.name.value),
+          icon: AppIcon.trackRecordingImport, type: ToastType.error, duration: 4);
+      return;
+    }
+    String sourcePath = result.files.single.path!;
+    String fileName = result.files.single.name;
+
+    Directory appDir = await getApplicationDocumentsDirectory();
+    String destinationPath = "${appDir.path}/${track.id}.$fileName";
+
+    File sourceFile = File(sourcePath);
+    await sourceFile.copy(destinationPath);
+
+    track.setPath(destinationPath);
+    save(track);
+
+    _uiWrapper.toast(_trans.trackRecordingImported(track.name.value), icon: AppIcon.trackRecordingImport);
+  }
+
+  Future<void> _startRecording(Track track) async {
     try {
+      if (await widget.audioRecorder.isRecording()) {
+        throw Exception(_trans.trackRecordingAlreadyStarted);
+      }
       if (!await widget.audioRecorder.hasPermission()) {
         throw Exception(_trans.trackRecordingStartNoAudioPermission);
       }
@@ -66,7 +86,7 @@ class TrackWrapper {
       }
 
       RecordConfig recordConfig = widget.settingsGet(GlobalConfigKey.recording);
-      String fileExtension = _extensionName(recordConfig.encoder);
+      String fileExtension = AppGlobalConfig.readerEncoderExtension.name(recordConfig.encoder);
       String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
       String filePath = await getApplicationDocumentsDirectory().then((value) => '${value.path}/${track.id}.$timestamp.$fileExtension');
 
@@ -74,31 +94,16 @@ class TrackWrapper {
         recordConfig,
         path: filePath,
       );
-      await showRecordingNotification(track);
 
-      _uiWrapper.recordingDialog(
-        _trans.trackRecordingInfo(track.name.value),
-        recordConfig: recordConfig,
-        trans: _trans,
-        cancelLabel: _trans.trackRecordingCancel,
-        saveLabel: _trans.trackRecordingStop,
-        onCancel: () {
-          _cancelRecording(track);
-        },
-        onSave: () {
-          _stopAndSaveRecording(track);
-        },
-        onDismiss: () {
-          _stopAndSaveRecording(track);
-        },
-      );
+      track.startTimer();
 
       track.setAudioEncoder(recordConfig.encoder);
       track.setSampleRate(recordConfig.sampleRate);
       track.setBitRate(recordConfig.bitRate);
-
       track.setRecordingState(RecorderState.recording);
       save(track);
+
+      await showRecordingNotification(track);
     } catch (e) {
       _uiWrapper.toast(_trans.trackRecordingStartError(e.toString(), track.name.value), icon: AppIcon.exception, type: ToastType.error, duration: 4);
     }
@@ -128,21 +133,25 @@ class TrackWrapper {
   Future<void> _cancelRecording(Track track) async {
     await widget.audioRecorder.cancel();
     await flutterLocalNotificationsPlugin.cancel(0);
+    track.stopTimer();
     track.setPath(null);
     save(track);
-    _uiWrapper.toast(_trans.trackRecordingCancelled(track.name.value), icon: AppIcon.no);
+    _uiWrapper.toast(_trans.trackRecordingCancelled(track.name.value),
+        icon: AppGlobalConfig.trackState.icon(TrackState.empty, defaultValue: Icons.error_outline_rounded));
   }
 
   Future<void> _stopAndSaveRecording(Track track) async {
     try {
       String? path = await widget.audioRecorder.stop();
       track.setPath(path);
-      _uiWrapper.toast(_trans.trackRecordingStopSuccess(track.name.value), icon: AppIcon.yes);
+      _uiWrapper.toast(_trans.trackRecordingStopSuccess(track.name.value),
+          icon: AppGlobalConfig.trackState.icon(TrackState.ready, defaultValue: Icons.error_outline_rounded));
     } catch (e) {
       track.setRecordingState(RecorderState.empty);
-      _uiWrapper.toast(_trans.trackRecordingStopError(e.toString(), track.name.value), icon: AppIcon.exception, type: ToastType.error);
+      _uiWrapper.toast(_trans.trackRecordingStopError(e.toString(), track.name.value), icon: AppIcon.exception, type: ToastType.error, duration: 4);
     }
     await flutterLocalNotificationsPlugin.cancel(0);
+    track.stopTimer();
     save(track);
   }
 
@@ -249,7 +258,10 @@ class TrackWrapper {
   void trackPressed(Track track) {
     switch (track.state.value) {
       case TrackState.empty:
-        startRecording(track);
+        _startRecording(track);
+        break;
+      case TrackState.recording:
+        _stopAndSaveRecording(track);
         break;
       case TrackState.stopped:
         track.startPlaying();
@@ -270,131 +282,114 @@ class TrackWrapper {
 
   /// *************************************************************************
   /// ROW
-  Container buildRowButtons(rowIndex) {
-    var rowName = TrackRow.name(rowIndex);
-    var buttons = <Widget>[];
-    buttons.add(Container(
-        margin: EdgeInsets.all(0),
-        width: _uiWrapper.rowButtonIconSize + _uiWrapper.rowContainerPadding * 2,
-        height: _uiWrapper.rowButtonIconSize + _uiWrapper.rowContainerPadding * 2,
-        padding: EdgeInsets.all(_uiWrapper.rowContainerPadding),
-        child: _uiWrapper.mediaPlayerButton(AppIcon.trackPlayingStart, _trans.rowTracksPlayingStart(rowName), onPressed: () {
-          // setState(() {
-          startTracksPlaying(widget.tracksList.row(rowIndex));
-          // });
-        })));
-    buttons.add(Container(
-        margin: EdgeInsets.all(0),
-        width: _uiWrapper.rowButtonIconSize + _uiWrapper.rowContainerPadding * 2,
-        height: _uiWrapper.rowButtonIconSize + _uiWrapper.rowContainerPadding * 2,
-        padding: EdgeInsets.all(_uiWrapper.rowContainerPadding),
-        child: _uiWrapper.mediaPlayerButton(AppIcon.trackPlayingStop, _trans.rowTracksPlayingStop(rowName), onPressed: () {
-          // setState(() {
-          stopTracksPlaying(widget.tracksList.row(rowIndex));
-          // });
-        })));
-    buttons.add(Container(
-        margin: EdgeInsets.all(0),
-        width: _uiWrapper.rowButtonIconSize + _uiWrapper.rowContainerPadding * 2,
-        height: _uiWrapper.rowButtonIconSize + _uiWrapper.rowContainerPadding * 2,
-        padding: EdgeInsets.all(_uiWrapper.rowContainerPadding),
-        child: _rowMenu(rowName, widget.tracksList.row(rowIndex))));
-    return Container(
-        width: _uiWrapper.gridFirstColumnWidth,
-        padding: EdgeInsets.zero,
-        child: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: buttons.toList()));
-  }
+  Container buildRowButtons(
+    int rowIndex,
+    String rowName,
+  ) =>
+      Container(
+          width: _uiWrapper.gridFirstColumnWidth,
+          padding: EdgeInsets.zero,
+          child: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
+            _uiWrapper.rowButton(_uiWrapper.mediaPlayerButton(AppIcon.trackPlayingStart, _trans.rowTracksPlayingStart(rowName), onPressed: () {
+              startTracksPlaying(widget.tracksList.row(rowIndex));
+            })),
+            _uiWrapper.rowButton(_uiWrapper.mediaPlayerButton(AppIcon.trackPlayingStop, _trans.rowTracksPlayingStop(rowName), onPressed: () {
+              stopTracksPlaying(widget.tracksList.row(rowIndex));
+            })),
+            _uiWrapper.rowButton(_rowMenu(rowName, widget.tracksList.row(rowIndex))),
+          ]));
 
-  PopupMenuButton _rowMenu(String rowName, Set<Track> tracksList) => PopupMenuButton<dynamic>(
-      style: _uiWrapper.circledButtonStyle(),
-      icon: Icon(AppIcon.moreMenu, size: _uiWrapper.rowButtonIconSize, color: Theme.of(context).colorScheme.secondary),
-      itemBuilder: (BuildContext context) => _rowMenuItems(rowName, tracksList),
-      onSelected: (dynamic selection) {
-        _rowMenuItemSelected(selection, rowName, tracksList);
-      });
+  PopupMenuButton _rowMenu(
+    String rowName,
+    Set<Track> tracksList,
+  ) =>
+      PopupMenuButton<dynamic>(
+          style: _uiWrapper.circledButtonStyle(),
+          icon: Icon(AppIcon.moreMenu, size: _uiWrapper.rowButtonIconSize, color: Theme.of(context).colorScheme.secondary),
+          itemBuilder: (BuildContext context) => _rowMenuItems(rowName, tracksList),
+          onSelected: (dynamic selection) {
+            _rowMenuItemSelected(selection, rowName, tracksList);
+          });
 
-  List<PopupMenuEntry<dynamic>> _rowMenuItems(String rowName, Set<Track> tracksList) => <PopupMenuEntry<dynamic>>[
+  List<PopupMenuEntry<dynamic>> _rowMenuItems(
+    String rowName,
+    Set<Track> tracksList,
+  ) =>
+      <PopupMenuEntry<dynamic>>[
         _uiWrapper.rowMenuButton(RowMenuItem.playbackMode, AppIcon.trackPlaybackMode, _trans.rowTracksPlaybackModeSet, itemBuilder: () {
           var items = <PopupMenuItem<dynamic>>[];
-          AppGlobalConfig.trackPlaybackModeCodec.valueIcons.forEach((value, icon) {
+          AppGlobalConfig.trackPlaybackMode.values<int>().forEach((int value) {
             items.add(_uiWrapper.rowPopupMenuItem(
               value,
-              icon,
+              AppGlobalConfig.trackPlaybackMode.icon(value),
               _trans.rowTracksPlaybackModeSetTitle((value == 1) ? _trans.singlePlaybackMode : _trans.repeatPlaybackMode),
             ));
           });
           return items.toList();
         }, onSelected: (selection) {
-          // setState(() {
           setTracksPlaybackMode(tracksList, (selection == 1) ? true : false);
           _uiWrapper.toast(_trans.rowTracksPlaybackModeSetSuccess(rowName, (selection == 1) ? _trans.singlePlaybackMode : _trans.repeatPlaybackMode),
               icon: AppIcon.trackPlaybackMode);
-          // });
           Navigator.pop(context);
         }),
         _uiWrapper.rowMenuButton(RowMenuItem.playbackVolume, AppIcon.trackPlaybackVolume, _trans.rowTracksPlaybackVolumeSet, itemBuilder: () {
           var items = <PopupMenuItem<dynamic>>[];
-          AppGlobalConfig.trackPlaybackVolumeSliderValues.codec.valueIcons.forEach((value, icon) {
+          AppGlobalConfig.trackPlaybackVolume.values<double>().forEach((double value) {
             items.add(_uiWrapper.rowPopupMenuItem(
               value,
-              icon,
-              _trans.rowTracksPlaybackVolumeTitleSet(AppGlobalConfig.trackPlaybackVolumeSliderValues.codec.valueFormatter(value)),
+              AppGlobalConfig.trackPlaybackVolume.icon(value),
+              _trans.rowTracksPlaybackVolumeTitleSet(AppGlobalConfig.trackPlaybackVolume.valueFormatter(value)),
             ));
           });
           return items.toList();
         }, onSelected: (selection) {
-          // setState(() {
           setTracksPlaybackVolume(tracksList, selection);
-          _uiWrapper.toast(
-              _trans.rowTracksPlaybackVolumeSuccessSet(rowName, AppGlobalConfig.trackPlaybackVolumeSliderValues.codec.valueFormatter(selection)),
+          _uiWrapper.toast(_trans.rowTracksPlaybackVolumeSuccessSet(rowName, AppGlobalConfig.trackPlaybackVolume.valueFormatter(selection)),
               icon: AppIcon.trackPlaybackSpeed);
-          // });
           Navigator.pop(context);
         }),
         _uiWrapper.rowMenuButton(RowMenuItem.playbackBalance, AppIcon.trackPlaybackBalance, _trans.rowTracksPlaybackBalanceSet, itemBuilder: () {
           var items = <PopupMenuItem<dynamic>>[];
-          AppGlobalConfig.trackPlaybackBalanceSliderValues.codec.valueIcons.forEach((value, icon) {
+          AppGlobalConfig.trackPlaybackBalance.values<double>().forEach((double value) {
             items.add(_uiWrapper.rowPopupMenuItem(
               value,
-              icon,
-              _trans.rowTracksPlaybackBalanceTitleSet(AppGlobalConfig.trackPlaybackBalanceSliderValues.codec.valueTranslator(value, _trans)),
+              AppGlobalConfig.trackPlaybackBalance.icon(value),
+              _trans.rowTracksPlaybackBalanceTitleSet(AppGlobalConfig.trackPlaybackBalance.translation(value, trans: _trans)),
             ));
           });
           return items.toList();
         }, onSelected: (selection) {
-          // setState(() {
           setTracksPlaybackBalance(tracksList, selection);
           _uiWrapper.toast(
-              _trans.rowTracksPlaybackBalanceSuccessSet(
-                  rowName, AppGlobalConfig.trackPlaybackBalanceSliderValues.codec.valueTranslator(selection, _trans)),
+              _trans.rowTracksPlaybackBalanceSuccessSet(rowName, AppGlobalConfig.trackPlaybackBalance.translation(selection, trans: _trans)),
               icon: AppIcon.trackPlaybackBalance);
-          // });
           Navigator.pop(context);
         }),
         _uiWrapper.rowMenuButton(RowMenuItem.playbackSpeed, AppIcon.trackPlaybackSpeed, _trans.rowTracksPlaybackSpeedSet, itemBuilder: () {
           var items = <PopupMenuItem<dynamic>>[];
-          AppGlobalConfig.trackPlaybackSpeedSliderValues.codec.valueIcons.forEach((value, icon) {
+          AppGlobalConfig.trackPlaybackSpeed.values<double>().forEach((double value) {
             items.add(_uiWrapper.rowPopupMenuItem(
               value,
-              icon,
-              _trans.rowTracksPlaybackSpeedTitleSet(AppGlobalConfig.trackPlaybackSpeedSliderValues.codec.valueFormatter(value)),
+              AppGlobalConfig.trackPlaybackSpeed.iconOrNull(value)!,
+              _trans.rowTracksPlaybackSpeedTitleSet(AppGlobalConfig.trackPlaybackSpeed.valueFormatter(value)),
             ));
           });
           return items.toList();
         }, onSelected: (selection) {
-          // setState(() {
           setTracksPlaybackSpeed(tracksList, selection);
-          _uiWrapper.toast(
-              _trans.rowTracksPlaybackSpeedSuccessSet(rowName, AppGlobalConfig.trackPlaybackSpeedSliderValues.codec.valueFormatter(selection)),
+          _uiWrapper.toast(_trans.rowTracksPlaybackSpeedSuccessSet(rowName, AppGlobalConfig.trackPlaybackSpeed.valueFormatter(selection)),
               icon: AppIcon.trackPlaybackSpeed);
-          // });
           Navigator.pop(context);
         }),
         const PopupMenuDivider(),
         _uiWrapper.rowPopupMenuItem(RowMenuItem.delete, AppIcon.deleteForever, _trans.rowTracksRecordingsDelete),
       ];
 
-  void _rowMenuItemSelected(RowMenuItem selection, String rowName, Set<Track> tracksList) {
+  void _rowMenuItemSelected(
+    RowMenuItem selection,
+    String rowName,
+    Set<Track> tracksList,
+  ) {
     if (selection == RowMenuItem.delete) {
       _uiWrapper.alertDialog(AppIcon.deleteForever, _trans.rowTracksRecordingsDeleteTitle,
           contentText: _trans.rowTracksRecordingsDeleteInfo(rowName),
@@ -417,72 +412,92 @@ class TrackWrapper {
   List<Widget> trackButton(Track track) {
     Color foregroundColor = track.stateForegroundColor(context);
     var items = <Widget>[];
-    items.add(SizedBox(
-        height: _uiWrapper.trackItemWidth - _uiWrapper.trackPadding,
-        child: Stack(fit: StackFit.expand, children: [
-          Align(
-              alignment: Alignment.topLeft,
-              child: ValueListenableBuilder(
-                  valueListenable: track.stateIcon,
-                  builder: (context, stateIcon, child) => Icon(stateIcon, size: _uiWrapper.trackButtonIconSize, color: foregroundColor))),
-          Align(
-              alignment: Alignment.topRight,
-              child: ValueListenableBuilder(
-                  valueListenable: track.keyboardKey,
-                  builder: (context, keyboardKey, child) =>
-                      AppIcon.trackKeyboardKeyBox(track, ui: _uiWrapper, context: context, foregroundColor: foregroundColor))),
-          Align(
-              alignment: Alignment.bottomLeft,
-              child: ValueListenableBuilder(
-                  valueListenable: track.playbackVolume,
-                  builder: (context, playbackVolume, child) =>
-                      Icon(track.playbackVolumeIcon, size: _uiWrapper.trackButtonIconSize, color: foregroundColor))),
-          Align(
-              alignment: Alignment.bottomRight,
-              child: ValueListenableBuilder(
-                  valueListenable: track.playbackBalance,
-                  builder: (context, playbackBalance, child) =>
-                      Icon(track.playbackBalanceIcon, size: _uiWrapper.trackButtonIconSize, color: foregroundColor))),
-          Align(
-              alignment: Alignment.bottomCenter,
-              child: ValueListenableBuilder(
-                  valueListenable: track.playbackBalance,
-                  builder: (context, playbackBalance, child) => Text(
-                      AppGlobalConfig.trackPlaybackBalanceSliderValues.codec.valueFormatter(playbackBalance),
-                      style: TextStyle(fontSize: _uiWrapper.trackInfoBalanceFontSize, color: foregroundColor)))),
-          Align(
-              alignment: Alignment.centerLeft,
-              child: ValueListenableBuilder(
-                  valueListenable: track.playbackSpeed,
-                  builder: (context, playbackSpeed, child) => Text(AppGlobalConfig.trackPlaybackSpeedSliderValues.codec.valueFormatter(playbackSpeed),
-                      style: TextStyle(fontSize: _uiWrapper.trackInfoSpeedFontSize, color: foregroundColor)))),
-          Align(
-              alignment: Alignment.centerRight,
-              child: ValueListenableBuilder(
-                  valueListenable: track.playbackModeSingle,
-                  builder: (context, playbackModeSingle, child) =>
-                      Icon(track.playbackModeIcon, size: _uiWrapper.trackButtonIconSize, color: foregroundColor))),
-          Align(
-              alignment: Alignment.center,
-              child: ValueListenableBuilder(
-                  valueListenable: track.name,
-                  builder: (context, name, child) =>
-                      Text(_trans.cell(name), style: TextStyle(fontSize: _uiWrapper.trackButtonTitleFontSize, fontWeight: FontWeight.bold)))),
-        ])));
-    items.add(ValueListenableBuilder<double>(
+    items.add(
+      SizedBox(
+          height: _uiWrapper.trackItemWidth - _uiWrapper.trackPadding,
+          child: Stack(fit: StackFit.expand, children: [
+            Align(
+                alignment: Alignment.topLeft,
+                child: ValueListenableBuilder(
+                    valueListenable: track.stateIcon,
+                    builder: (context, stateIcon, child) => Icon(stateIcon, size: _uiWrapper.trackButtonIconSize, color: foregroundColor))),
+            Align(
+                alignment: Alignment.topRight,
+                child: ValueListenableBuilder(
+                    valueListenable: track.keyboardKey,
+                    builder: (context, keyboardKey, child) =>
+                        AppIcon.trackKeyboardKeyBox(track, ui: _uiWrapper, context: context, foregroundColor: foregroundColor))),
+            Align(
+                alignment: Alignment.bottomLeft,
+                child: ValueListenableBuilder(
+                    valueListenable: track.playbackVolume,
+                    builder: (context, playbackVolume, child) =>
+                        Icon(track.playbackVolumeIcon, size: _uiWrapper.trackButtonIconSize, color: foregroundColor))),
+            Align(
+                alignment: Alignment.bottomRight,
+                child: ValueListenableBuilder(
+                    valueListenable: track.playbackBalance,
+                    builder: (context, playbackBalance, child) =>
+                        Icon(track.playbackBalanceIcon, size: _uiWrapper.trackButtonIconSize, color: foregroundColor))),
+            Align(
+                alignment: Alignment.bottomCenter,
+                child: ValueListenableBuilder(
+                    valueListenable: track.playbackBalance,
+                    builder: (context, playbackBalance, child) => Text(AppGlobalConfig.trackPlaybackBalance.name(playbackBalance),
+                        style: TextStyle(fontSize: _uiWrapper.trackInfoBalanceFontSize, color: foregroundColor)))),
+            Align(
+                alignment: Alignment.centerLeft,
+                child: ValueListenableBuilder(
+                    valueListenable: track.playbackSpeed,
+                    builder: (context, playbackSpeed, child) => Text(AppGlobalConfig.trackPlaybackSpeed.valueFormatter(playbackSpeed),
+                        style: TextStyle(fontSize: _uiWrapper.trackInfoSpeedFontSize, color: foregroundColor)))),
+            Align(
+                alignment: Alignment.centerRight,
+                child: ValueListenableBuilder(
+                    valueListenable: track.playbackModeSingle,
+                    builder: (context, playbackModeSingle, child) =>
+                        Icon(track.playbackModeIcon, size: _uiWrapper.trackButtonIconSize, color: foregroundColor))),
+            Align(
+                alignment: Alignment.center,
+                child: ValueListenableBuilder(
+                    valueListenable: track.name,
+                    builder: (context, name, child) =>
+                        Text(_trans.cell(name), style: TextStyle(fontSize: _uiWrapper.trackButtonTitleFontSize, fontWeight: FontWeight.bold)))),
+          ])),
+    );
+    items.add(
+      ValueListenableBuilder<double>(
         valueListenable: track.progress,
-        builder: (context, progress, child) =>
-            LinearProgressIndicator(value: progress, color: foregroundColor, backgroundColor: track.stateProgressColor(context))));
+        builder: (context, progress, child) => (track.state.value == TrackState.recording)
+            ? LinearProgressIndicator(color: foregroundColor, backgroundColor: track.stateProgressColor(context))
+            : LinearProgressIndicator(value: progress, color: foregroundColor, backgroundColor: track.stateProgressColor(context)),
+      ),
+    );
 
-    items.add(ValueListenableBuilder<Duration?>(
-        valueListenable: track.duration,
-        builder: (context, duration, child) => _uiWrapper.statusIconRow(
-              AppIcon.trackDuration,
-              _uiWrapper.formatTime((duration == null) ? 0 : duration.inMilliseconds),
-              iconColor: foregroundColor,
-              iconSize: _uiWrapper.trackInfoIconSize,
-              fontSize: _uiWrapper.trackInfoFontSize,
-            )));
+    items.add(
+      ValueListenableBuilder<TrackState>(
+        valueListenable: track.state,
+        builder: (context, state, child) => (state == TrackState.recording)
+            ? ValueListenableBuilder<double>(
+                valueListenable: track.clock,
+                builder: (context, clock, child) => _uiWrapper.statusIconRow(
+                      AppIcon.trackDuration,
+                      _uiWrapper.formatTime(clock.toInt()),
+                      iconColor: foregroundColor,
+                      iconSize: _uiWrapper.trackInfoIconSize,
+                      fontSize: _uiWrapper.trackInfoFontSize,
+                    ))
+            : ValueListenableBuilder<Duration?>(
+                valueListenable: track.duration,
+                builder: (context, duration, child) => _uiWrapper.statusIconRow(
+                      AppIcon.trackDuration,
+                      _uiWrapper.formatTime((duration == null) ? 0 : duration.inMilliseconds),
+                      iconColor: foregroundColor,
+                      iconSize: _uiWrapper.trackInfoIconSize,
+                      fontSize: _uiWrapper.trackInfoFontSize,
+                    )),
+      ),
+    );
     return items.toList();
   }
 
@@ -496,92 +511,104 @@ class TrackWrapper {
           borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
         ),
         context: context,
-        builder: (context) => StatefulBuilder(
-            builder: (BuildContext context, StateSetter setModalState) => LayoutBuilder(
-                builder: (context, constraints) => DraggableScrollableSheet(
-                    expand: false,
-                    initialChildSize: (500 / constraints.maxHeight).clamp(0.3, 0.9),
-                    minChildSize: (500 / constraints.maxHeight).clamp(0.3, 0.9),
-                    maxChildSize: (500 / constraints.maxHeight).clamp(0.3, 0.9),
-                    builder: (context, scrollController) => Padding(
-                          padding: EdgeInsets.all(_uiWrapper.trackDetailsPadding1x),
-                          child: Column(mainAxisSize: MainAxisSize.min, children: [
-                            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.center, children: [
-                              ValueListenableBuilder(valueListenable: track.stateIcon, builder: (context, icon, child) => Icon(icon)),
-                              Text(_trans.trackTitle(track.name.value),
-                                  style: TextStyle(fontSize: _uiWrapper.trackDetailsTitleFontSize, fontWeight: FontWeight.bold)),
-                              AppIcon.trackKeyboardKeyBox(track,
-                                  ui: _uiWrapper, context: context, foregroundColor: Theme.of(context).colorScheme.primary),
-                            ]),
-                            SizedBox(height: _uiWrapper.trackDetailsPadding1x),
-                            const Divider(height: 1),
-                            Expanded(
-                              child: SingleChildScrollView(
-                                controller: scrollController,
-                                child: Column(mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.end, children: [
-                                  SizedBox(height: _uiWrapper.trackDetailsPadding1x),
-                                  if (track.path != null)
-                                    _uiWrapper.statusIconRow(
-                                      AppIcon.recordingFile,
-                                      path.basename(track.path.toString()),
-                                      iconSize: 16,
-                                      fontSize: 14,
-                                      separatorSize: _uiWrapper.iconToTextOffset,
-                                    ),
-                                  if (track.audioEncoder != null)
-                                    _uiWrapper.statusIconRow(
-                                      AppIcon.recordingAudioEncoder,
-                                      AppGlobalConfig.recordingAudioEncoderValues.codec.valueTranslator(track.audioEncoder!.index.toDouble(), _trans),
-                                      iconSize: 16,
-                                      fontSize: 14,
-                                      separatorSize: _uiWrapper.iconToTextOffset,
-                                    ),
-                                  if (track.sampleRate != null)
-                                    _uiWrapper.statusIconRow(
-                                      AppIcon.recordingSampleRate,
-                                      _trans.recordingSampleRateValue(
-                                          AppGlobalConfig.recordingSampleRateValues.codec.valueFormatter(track.sampleRate!.toDouble())),
-                                      iconSize: 16,
-                                      fontSize: 14,
-                                      separatorSize: _uiWrapper.iconToTextOffset,
-                                    ),
-                                  if (track.bitRate != null)
-                                    _uiWrapper.statusIconRow(
-                                      AppIcon.recordingBitRate,
-                                      _trans.recordingBitRateValue(
-                                          AppGlobalConfig.recordingBitRateValues.codec.valueFormatter(track.bitRate!.toDouble())),
-                                      iconSize: 16,
-                                      fontSize: 14,
-                                      separatorSize: _uiWrapper.iconToTextOffset,
-                                    ),
-                                  if (track.recorderState != RecorderState.empty)
-                                    _uiWrapper.trackDetailsLine(_trackDetailsCurrentStateIndicator(track, setModalState)),
-                                  if (track.recorderState != RecorderState.ready)
-                                    _uiWrapper.trackDetailsLine(_trackDetailsSeek(track, setModalState)),
-                                  if (track.recorderState != RecorderState.ready)
-                                    _uiWrapper.trackDetailsLine(_trackDetailsProgress(track, setModalState),
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween),
-                                  SizedBox(height: _uiWrapper.trackDetailsPadding1x),
-                                  _uiWrapper.trackDetailsLine(_trackDetailsPlaybackSpeedControl(track, setModalState),
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween),
-                                  _uiWrapper.trackDetailsLine(_trackDetailsPlaybackVolumeControl(track, setModalState),
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween),
-                                  _uiWrapper.trackDetailsLine(_trackDetailsPlaybackBalanceControl(track, setModalState),
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween),
-                                  SizedBox(height: _uiWrapper.trackDetailsPadding1x),
-                                ]),
-                              ),
-                            ),
-                            const Divider(height: 1),
-                            SizedBox(height: _uiWrapper.trackDetailsPadding1x),
-                            _uiWrapper.trackDetailsLine(_trackDetailsPlayerIcons(track, setModalState)),
-                          ]),
-                        )))));
+        builder: (context) => LayoutBuilder(
+            builder: (context, constraints) => DraggableScrollableSheet(
+                  expand: false,
+                  initialChildSize: (500 / constraints.maxHeight).clamp(0.3, 0.9),
+                  minChildSize: (500 / constraints.maxHeight).clamp(0.3, 0.9),
+                  maxChildSize: (500 / constraints.maxHeight).clamp(0.3, 0.9),
+                  builder: (context, scrollController) => Padding(
+                      padding: EdgeInsets.all(_uiWrapper.trackDetailsPadding1x),
+                      child: Column(mainAxisSize: MainAxisSize.min, children: [
+                        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.center, children: [
+                          ValueListenableBuilder(
+                            valueListenable: track.stateIcon,
+                            builder: (context, icon, child) => Icon(icon),
+                          ),
+                          ValueListenableBuilder(
+                              valueListenable: track.name,
+                              builder: (context, name, child) => Text(_trans.trackTitle(name),
+                                  style: TextStyle(fontSize: _uiWrapper.trackDetailsTitleFontSize, fontWeight: FontWeight.bold))),
+                          ValueListenableBuilder(
+                              valueListenable: track.keyboardKey,
+                              builder: (context, keyboardKey, child) => AppIcon.trackKeyboardKeyBox(track,
+                                  ui: _uiWrapper, context: context, foregroundColor: Theme.of(context).colorScheme.primary)),
+                        ]),
+                        SizedBox(height: _uiWrapper.trackDetailsPadding1x),
+                        const Divider(height: 1),
+                        ValueListenableBuilder(
+                            valueListenable: track.recorderState,
+                            builder: (context, recorderState, child) => Expanded(
+                                  child: SingleChildScrollView(
+                                    reverse: true,
+                                    controller: scrollController,
+                                    child: Column(
+                                        mainAxisSize: MainAxisSize.max,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          SizedBox(height: _uiWrapper.trackDetailsPadding1x),
+                                          if (recorderState == RecorderState.ready && track.path != null)
+                                            _uiWrapper.statusIconRow(
+                                              AppIcon.recordingFile,
+                                              path.basename(track.path.toString()),
+                                              iconSize: 16,
+                                              fontSize: 14,
+                                              separatorSize: _uiWrapper.iconToTextOffset,
+                                            ),
+                                          if (track.audioEncoder != null)
+                                            _uiWrapper.statusIconRow(
+                                              AppIcon.recordingAudioEncoder,
+                                              AppGlobalConfig.recordingAudioEncoder.translation(track.audioEncoder!.index.toDouble(), trans: _trans),
+                                              iconSize: 16,
+                                              fontSize: 14,
+                                              separatorSize: _uiWrapper.iconToTextOffset,
+                                            ),
+                                          if (track.sampleRate != null)
+                                            _uiWrapper.statusIconRow(
+                                              AppIcon.recordingSampleRate,
+                                              _trans.recordingSampleRateValue(
+                                                  AppGlobalConfig.recordingSampleRate.valueFormatter(track.sampleRate!.toDouble())),
+                                              iconSize: 16,
+                                              fontSize: 14,
+                                              separatorSize: _uiWrapper.iconToTextOffset,
+                                            ),
+                                          if (track.bitRate != null)
+                                            _uiWrapper.statusIconRow(
+                                              AppIcon.recordingBitRate,
+                                              _trans
+                                                  .recordingBitRateValue(AppGlobalConfig.recordingBitRate.valueFormatter(track.bitRate!.toDouble())),
+                                              iconSize: 16,
+                                              fontSize: 14,
+                                              separatorSize: _uiWrapper.iconToTextOffset,
+                                            ),
+                                          if (recorderState == RecorderState.ready) _uiWrapper.trackDetailsLine(_trackDetailsSeek(track)),
+                                          if (recorderState == RecorderState.ready)
+                                            _uiWrapper.trackDetailsLine(_trackDetailsProgress(track),
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween),
+                                          SizedBox(height: _uiWrapper.trackDetailsPadding1x),
+                                          _uiWrapper.trackDetailsLine(_trackDetailsPlaybackSpeedControl(track),
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween),
+                                          _uiWrapper.trackDetailsLine(_trackDetailsPlaybackVolumeControl(track),
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween),
+                                          _uiWrapper.trackDetailsLine(_trackDetailsPlaybackBalanceControl(track),
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween),
+                                          SizedBox(height: _uiWrapper.trackDetailsPadding1x),
+                                        ]),
+                                  ),
+                                )),
+                        const Divider(height: 1),
+                        SizedBox(height: _uiWrapper.trackDetailsPadding1x),
+                        ValueListenableBuilder(
+                            valueListenable: track.recorderState,
+                            builder: (context, recorderState, child) => _uiWrapper.trackDetailsLine(_trackDetailsPlayerIcons(track))),
+                      ])),
+                )));
   }
 
   /// *************************************************************************
   /// TRACK DETAILS PLAYER ICONS
-  List<Widget> _trackDetailsSeek(Track track, StateSetter setModalState) => [
+  List<Widget> _trackDetailsSeek(Track track) => [
         ValueListenableBuilder<Duration?>(
             valueListenable: track.duration,
             builder: (context, duration, child) => ValueListenableBuilder<Duration?>(
@@ -601,246 +628,205 @@ class TrackWrapper {
                       )))
       ];
 
-  List<Widget> _trackDetailsProgress(Track track, StateSetter setModalState) => [
+  List<Widget> _trackDetailsProgress(Track track) => [
         ValueListenableBuilder<Duration?>(
             valueListenable: track.position, builder: (context, position, child) => Text(_uiWrapper.formatTime(position?.inMilliseconds ?? 0))),
         ValueListenableBuilder<Duration?>(
             valueListenable: track.duration, builder: (context, duration, child) => Text(_uiWrapper.formatTime(duration?.inMilliseconds ?? 0))),
       ];
 
-  List<Widget> _trackDetailsCurrentStateIndicator(Track track, StateSetter setModalState) => [
-        _uiWrapper.mediaPlayerButton(AppIcon.trackRecordingStart, _trans.trackRecordingStart(track.name.value), onPressed: () {
-          Navigator.pop(context);
-          startRecording(track);
-        }),
-        _uiWrapper.mediaPlayerButton(AppIcon.trackRecordingImport, _trans.trackRecordingImport(track.name.value), onPressed: () async {
-          if (await Permission.audio.request().isGranted == false) {
-            _uiWrapper.toast(_trans.trackRecordingImportNoPermissions(track.name.value), icon: AppIcon.trackRecordingImport, type: ToastType.error);
-            return;
-          }
-          FilePickerResult? result = await FilePicker.platform.pickFiles(
-            type: FileType.audio,
-          );
-
-          if (result == null) {
-            _uiWrapper.toast(_trans.trackRecordingImportCancelled(track.name.value), icon: AppIcon.trackRecordingImport, type: ToastType.error);
-            return;
-          }
-          String sourcePath = result.files.single.path!;
-          String fileName = result.files.single.name;
-
-          Directory appDir = await getApplicationDocumentsDirectory();
-          String destinationPath = "${appDir.path}/${track.id}.$fileName";
-
-          File sourceFile = File(sourcePath);
-          await sourceFile.copy(destinationPath);
-
-          track.setPath(destinationPath);
-          save(track);
-
-          _uiWrapper.toast(_trans.trackRecordingImported(track.name.value), icon: AppIcon.trackRecordingImport);
-        }),
-      ];
-
-  List<Widget> _trackDetailsPlayerIcons(Track track, StateSetter setModalState) => [
+  List<Widget> _trackDetailsPlayerIcons(Track track) => [
+        _uiWrapper.mediaPlayerButton(AppIcon.trackRecordingShare, _trans.trackRecordingShare(track.name.value),
+            onPressed: (track.recorderState.value == RecorderState.ready)
+                ? () async {
+                    if (track.path == null) {
+                      _uiWrapper.toast(_trans.trackRecordingShareNoFile(track.name.value),
+                          icon: AppIcon.trackRecordingShare, type: ToastType.error, duration: 4);
+                      return;
+                    }
+                    File file = File(track.path!);
+                    if (await file.exists() == false) {
+                      _uiWrapper.toast(_trans.trackRecordingShareNoFile(track.name.value),
+                          icon: AppIcon.trackRecordingShare, type: ToastType.error, duration: 4);
+                      return;
+                    }
+                    await Share.shareXFiles([XFile(track.path!)], text: _trans.trackRecordingShareMessage(track.name.value));
+                  }
+                : null),
         ValueListenableBuilder(
-            valueListenable: track.state,
-            builder: (context, state, child) =>
-                _uiWrapper.mediaPlayerButton(AppIcon.trackRecordingShare, _trans.trackRecordingShare(track.name.value),
-                    onPressed: (state != TrackState.empty && state != TrackState.recording)
-                        ? () async {
-                            if (track.path == null) {
-                              _uiWrapper.toast(_trans.trackRecordingShareNoFile(track.name.value),
-                                  icon: AppIcon.trackRecordingShare, type: ToastType.error);
-                              return;
-                            }
-                            File file = File(track.path!);
-                            if (await file.exists() == false) {
-                              _uiWrapper.toast(_trans.trackRecordingShareNoFile(track.name.value),
-                                  icon: AppIcon.trackRecordingShare, type: ToastType.error);
-                              return;
-                            }
-                            await Share.shareXFiles([XFile(track.path!)], text: _trans.trackRecordingShareMessage(track.name.value));
-                          }
-                        : null)),
-        _uiWrapper.mediaPlayerButton(track.playbackModeIcon, _trans.trackPlaybackModeToggle(track.name.value), onPressed: () {
-          setModalState(() {
-            track.togglePlaybackMode();
-            save(track);
-          });
-        }),
-        ValueListenableBuilder(
-            valueListenable: track.state,
-            builder: (context, state, child) => _uiWrapper.mediaPlayerButton(
-                  (state == TrackState.paused)
-                      ? AppIcon.trackPlayingResume
-                      : ((state == TrackState.playing) ? AppIcon.trackPlayingPause : AppIcon.trackPlayingStart),
-                  (state == TrackState.paused)
-                      ? _trans.trackPlayingResume(track.name.value)
-                      : ((state == TrackState.playing) ? _trans.trackPlayingPause(track.name.value) : _trans.trackPlayingStart(track.name.value)),
-                  onPressed: (state == TrackState.paused)
-                      ? () {
-                          setModalState(() {
+            valueListenable: track.playbackModeSingle,
+            builder: (context, playbackModeSingle, child) =>
+                _uiWrapper.mediaPlayerButton(track.playbackModeIcon, _trans.trackPlaybackModeToggle(track.name.value), onPressed: () {
+                  track.togglePlaybackMode();
+                  save(track);
+                })),
+        if (track.recorderState.value == RecorderState.empty)
+          _uiWrapper.mediaPlayerButton(AppIcon.trackRecordingStart, _trans.trackRecordingStart(track.name.value),
+              iconSize: _uiWrapper.mediaPlayerIconSize2x, onPressed: () {
+            _startRecording(track);
+          }),
+        if (track.recorderState.value == RecorderState.recording)
+          _uiWrapper.mediaPlayerButton(AppIcon.trackRecordingStop, _trans.trackRecordingStop(track.name.value),
+              iconSize: _uiWrapper.mediaPlayerIconSize2x, onPressed: () {
+            _stopAndSaveRecording(track);
+          }),
+        if (track.recorderState.value == RecorderState.recording)
+          _uiWrapper.mediaPlayerButton(AppIcon.trackRecordingCancel, _trans.trackRecordingCancel(track.name.value), onPressed: () {
+            _cancelRecording(track);
+          }),
+        if (track.recorderState.value == RecorderState.empty)
+          _uiWrapper.mediaPlayerButton(AppIcon.trackRecordingImport, _trans.trackRecordingImport(track.name.value), onPressed: () async {
+            _importRecording(track);
+          }),
+        if (track.recorderState.value == RecorderState.ready)
+          ValueListenableBuilder(
+              valueListenable: track.state,
+              builder: (context, state, child) => _uiWrapper.mediaPlayerButton(
+                    (state == TrackState.paused)
+                        ? AppIcon.trackPlayingResume
+                        : ((state == TrackState.playing) ? AppIcon.trackPlayingPause : AppIcon.trackPlayingStart),
+                    (state == TrackState.paused)
+                        ? _trans.trackPlayingResume(track.name.value)
+                        : ((state == TrackState.playing) ? _trans.trackPlayingPause(track.name.value) : _trans.trackPlayingStart(track.name.value)),
+                    onPressed: (state == TrackState.paused)
+                        ? () {
                             track.resumePlaying();
                             save(track);
-                          });
-                        }
-                      : ((state == TrackState.playing)
-                          ? () {
-                              setModalState(() {
+                          }
+                        : ((state == TrackState.playing)
+                            ? () {
                                 track.pausePLaying();
                                 save(track);
-                              });
-                            }
-                          : ((state == TrackState.stopped)
-                              ? () {
-                                  setModalState(() {
+                              }
+                            : ((state == TrackState.stopped)
+                                ? () {
                                     track.startPlaying();
                                     save(track);
-                                  });
-                                }
-                              : null)),
-                  iconSize: _uiWrapper.mediaPlayerIconSize2x,
-                )),
-        ValueListenableBuilder(
-            valueListenable: track.state,
-            builder: (context, state, child) => _uiWrapper.mediaPlayerButton(AppIcon.trackPlayingStop, _trans.trackPlayingStop(track.name.value),
-                onPressed: (track.state.value == TrackState.playing || track.state.value == TrackState.paused)
-                    ? () {
-                        setModalState(() {
+                                  }
+                                : null)),
+                    iconSize: _uiWrapper.mediaPlayerIconSize2x,
+                  )),
+        if (track.recorderState.value == RecorderState.ready)
+          ValueListenableBuilder(
+              valueListenable: track.state,
+              builder: (context, state, child) => _uiWrapper.mediaPlayerButton(AppIcon.trackPlayingStop, _trans.trackPlayingStop(track.name.value),
+                  onPressed: (state == TrackState.playing || state == TrackState.paused)
+                      ? () {
                           track.stopPlaying();
                           save(track);
-                        });
-                      }
-                    : null)),
+                        }
+                      : null)),
         PopupMenuButton<TrackMenuItem>(
           style: _uiWrapper.circledButtonStyle(),
           icon: Icon(AppIcon.moreMenu),
           itemBuilder: (BuildContext context) => _trackMenuItems(track),
-          onSelected: (TrackMenuItem selection) => _trackMenuItemSelected(track, selection, setModalState),
+          onSelected: (TrackMenuItem selection) => _trackMenuItemSelected(track, selection),
         ),
       ];
 
-  List<Widget> _trackDetailsPlaybackSpeedControl(Track track, StateSetter setModalState) => [
+  List<Widget> _trackDetailsPlaybackSpeedControl(Track track) => [
         ValueListenableBuilder(
             valueListenable: track.playbackSpeed,
             builder: (context, playbackSpeed, child) =>
                 _uiWrapper.mediaPlayerButton(AppIcon.trackPlaybackSpeed, _trans.trackPlaybackSpeedSet(track.name.value), onPressed: () {
-                  setModalState(() {
-                    track.setPlaybackSpeed(1);
-                    save(track);
-                  });
+                  track.setPlaybackSpeed(1);
+                  save(track);
                 })),
         ValueListenableBuilder(
             valueListenable: track.playbackSpeed,
             builder: (context, playbackSpeed, child) => Expanded(
                     child: Slider(
                   value: playbackSpeed,
-                  min: AppGlobalConfig.trackPlaybackSpeedSliderValues.minValue,
-                  max: AppGlobalConfig.trackPlaybackSpeedSliderValues.maxValue,
-                  divisions: AppGlobalConfig.trackPlaybackSpeedSliderValues.divisions,
-                  label: AppGlobalConfig.trackPlaybackSpeedSliderValues.codec.valueFormatter(playbackSpeed),
+                  min: AppGlobalConfig.trackPlaybackSpeed.sliderValues!.min,
+                  max: AppGlobalConfig.trackPlaybackSpeed.sliderValues!.max,
+                  divisions: AppGlobalConfig.trackPlaybackSpeed.sliderValues!.divisions,
+                  label: AppGlobalConfig.trackPlaybackSpeed.valueFormatter(playbackSpeed),
                   onChanged: (double value) {
-                    setModalState(() {
-                      track.setPlaybackSpeed(value);
-                      save(track);
-                    });
+                    track.setPlaybackSpeed(value);
+                    save(track);
                   },
                 ))),
         ValueListenableBuilder(
             valueListenable: track.playbackSpeed,
-            builder: (context, playbackSpeed, child) =>
-                _uiWrapper.trailingLabel(AppGlobalConfig.trackPlaybackSpeedSliderValues.codec.valueFormatter(playbackSpeed))),
+            builder: (context, playbackSpeed, child) => _uiWrapper.trailingLabel(AppGlobalConfig.trackPlaybackSpeed.valueFormatter(playbackSpeed))),
       ];
 
-  List<Widget> _trackDetailsPlaybackVolumeControl(Track track, StateSetter setModalState) => [
+  List<Widget> _trackDetailsPlaybackVolumeControl(Track track) => [
         ValueListenableBuilder(
             valueListenable: track.playbackVolume,
             builder: (context, playbackVolume, child) =>
                 _uiWrapper.mediaPlayerButton(track.playbackVolumeIcon, _trans.trackPlaybackVolumeSet(track.name.value), onPressed: () {
-                  setModalState(() {
-                    track.setPlaybackVolume((playbackVolume == AppGlobalConfig.trackPlaybackVolumeSliderValues.minValue)
-                        ? AppGlobalConfig.trackPlaybackVolumeSliderValues.maxValue
-                        : AppGlobalConfig.trackPlaybackVolumeSliderValues.minValue);
-                    save(track);
-                  });
+                  track.setPlaybackVolume((playbackVolume == AppGlobalConfig.trackPlaybackVolume.sliderValues!.min)
+                      ? AppGlobalConfig.trackPlaybackVolume.sliderValues!.max
+                      : AppGlobalConfig.trackPlaybackVolume.sliderValues!.min);
+                  save(track);
                 })),
         ValueListenableBuilder(
             valueListenable: track.playbackVolume,
             builder: (context, playbackVolume, child) => Expanded(
                     child: Slider(
                   value: playbackVolume,
-                  min: AppGlobalConfig.trackPlaybackVolumeSliderValues.minValue,
-                  max: AppGlobalConfig.trackPlaybackVolumeSliderValues.maxValue,
-                  divisions: AppGlobalConfig.trackPlaybackVolumeSliderValues.divisions,
-                  label: AppGlobalConfig.trackPlaybackVolumeSliderValues.codec.valueFormatter(playbackVolume),
+                  min: AppGlobalConfig.trackPlaybackVolume.sliderValues!.min,
+                  max: AppGlobalConfig.trackPlaybackVolume.sliderValues!.max,
+                  divisions: AppGlobalConfig.trackPlaybackVolume.sliderValues!.divisions,
+                  label: AppGlobalConfig.trackPlaybackVolume.valueFormatter(playbackVolume),
                   onChanged: (double value) {
-                    setModalState(() {
-                      track.setPlaybackVolume(value);
-                      save(track);
-                    });
+                    track.setPlaybackVolume(value);
+                    save(track);
                   },
                 ))),
         ValueListenableBuilder(
             valueListenable: track.playbackVolume,
             builder: (context, playbackVolume, child) =>
-                _uiWrapper.trailingLabel(AppGlobalConfig.trackPlaybackVolumeSliderValues.codec.valueFormatter(playbackVolume))),
+                _uiWrapper.trailingLabel(AppGlobalConfig.trackPlaybackVolume.valueFormatter(playbackVolume))),
       ];
 
-  List<Widget> _trackDetailsPlaybackBalanceControl(Track track, StateSetter setModalState) => [
+  List<Widget> _trackDetailsPlaybackBalanceControl(Track track) => [
         ValueListenableBuilder(
             valueListenable: track.playbackBalance,
             builder: (context, playbackBalance, child) =>
                 _uiWrapper.mediaPlayerButton(track.playbackBalanceIcon, _trans.trackPlaybackBalanceSet(track.name.value), onPressed: () {
-                  setModalState(() {
-                    track.setPlaybackBalance(0);
-                    save(track);
-                  });
+                  track.setPlaybackBalance(0);
+                  save(track);
                 })),
         ValueListenableBuilder(
             valueListenable: track.playbackBalance,
             builder: (context, playbackBalance, child) => Expanded(
                     child: Slider(
                   value: playbackBalance,
-                  min: AppGlobalConfig.trackPlaybackBalanceSliderValues.minValue,
-                  max: AppGlobalConfig.trackPlaybackBalanceSliderValues.maxValue,
-                  divisions: AppGlobalConfig.trackPlaybackBalanceSliderValues.divisions,
-                  label: AppGlobalConfig.trackPlaybackBalanceSliderValues.codec.valueTranslator(playbackBalance, _trans),
+                  min: AppGlobalConfig.trackPlaybackBalance.sliderValues.min,
+                  max: AppGlobalConfig.trackPlaybackBalance.sliderValues.max,
+                  divisions: AppGlobalConfig.trackPlaybackBalance.sliderValues.divisions,
+                  label: AppGlobalConfig.trackPlaybackBalance.translation(playbackBalance, trans: _trans),
                   onChanged: (double value) {
-                    setModalState(() {
-                      track.setPlaybackBalance(value);
-                      save(track);
-                    });
+                    track.setPlaybackBalance(value);
+                    save(track);
                   },
                 ))),
         ValueListenableBuilder(
             valueListenable: track.playbackBalance,
             builder: (context, playbackBalance, child) =>
-                _uiWrapper.trailingLabel(AppGlobalConfig.trackPlaybackBalanceSliderValues.codec.valueFormatter(playbackBalance))),
+                _uiWrapper.trailingLabel(AppGlobalConfig.trackPlaybackBalance.valueFormatter(playbackBalance))),
       ];
 
   /// *************************************************************************
   /// TRACK MENU ITEMS
-  List<PopupMenuEntry<TrackMenuItem>> _trackMenuItems(Track track) {
-    var items = <PopupMenuEntry<TrackMenuItem>>[];
-    items.add(_uiWrapper.trackMenuItem(TrackMenuItem.changeName, AppIcon.trackTitle, _trans.trackNameChange));
-    items.add(_uiWrapper.trackMenuItem(TrackMenuItem.changeKeyboardKey, AppIcon.trackKeyboardKey, _trans.trackKeyboardKeyChange));
-    if (track.state.value != TrackState.empty) {
-      items.add(_uiWrapper.trackMenuItem(TrackMenuItem.delete, AppIcon.deleteForever, _trans.trackRecordingDelete));
-    }
-    return items.toList();
-  }
+  List<PopupMenuEntry<TrackMenuItem>> _trackMenuItems(Track track) => [
+        _uiWrapper.trackMenuItem(TrackMenuItem.changeName, AppIcon.trackTitle, _trans.trackNameChange),
+        _uiWrapper.trackMenuItem(TrackMenuItem.changeKeyboardKey, AppIcon.trackKeyboardKey, _trans.trackKeyboardKeyChange),
+        if (track.state.value != TrackState.empty) _uiWrapper.trackMenuItem(TrackMenuItem.delete, AppIcon.deleteForever, _trans.trackRecordingDelete),
+      ];
 
   /// *************************************************************************
   /// TRACK MENU SELECTED
-  void _trackMenuItemSelected(Track track, TrackMenuItem selection, StateSetter setModalState) async {
+  void _trackMenuItemSelected(Track track, TrackMenuItem selection) async {
     switch (selection) {
       case TrackMenuItem.changeName:
         String selectedEmoji = track.name.value;
         showDialog(
             context: context,
             builder: (BuildContext context) => StatefulBuilder(
-                builder: (context, setState) => AlertDialog(
+                builder: (context, setDialogState) => AlertDialog(
                       title: _uiWrapper.statusIconTile(AppIcon.trackTitle, _trans.trackNameChangeTitle(track.name.value)),
                       content: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -853,7 +839,7 @@ class TrackWrapper {
                               height: 200,
                               child: EmojiPicker(
                                   onEmojiSelected: (Category? category, Emoji emoji) {
-                                    setState(() {
+                                    setDialogState(() {
                                       selectedEmoji = emoji.emoji;
                                     });
                                   },
@@ -864,7 +850,7 @@ class TrackWrapper {
                                     viewOrderConfig: const ViewOrderConfig(),
                                     emojiViewConfig: EmojiViewConfig(
                                       /// Issue: https://github.com/flutter/flutter/issues/28894
-                                      emojiSizeMax: 20 * (foundation.defaultTargetPlatform == TargetPlatform.iOS ? 1.2 : 1.0),
+                                      emojiSizeMax: 32 * (foundation.defaultTargetPlatform == TargetPlatform.iOS ? 1.2 : 1.0),
                                       backgroundColor: Colors.transparent,
                                       noRecents: Text(
                                         _trans.noRecents,
@@ -893,23 +879,19 @@ class TrackWrapper {
                       actions: <Widget>[
                         if (selectedEmoji != track.id)
                           _uiWrapper.errorButton(_trans.buttonResetTo(track.id), () {
-                            setModalState(() {
-                              track.setName(track.id);
-                              save(track);
-                              Navigator.pop(context, track.id);
-                              _uiWrapper.toast(_trans.trackNameChangeSuccess(track.id), icon: AppIcon.trackTitle);
-                            });
+                            track.setName(track.id);
+                            save(track);
+                            Navigator.pop(context, track.id);
+                            _uiWrapper.toast(_trans.trackNameChangeSuccess(track.id), icon: AppIcon.trackTitle);
                           }),
                         _uiWrapper.simpleButton(_trans.buttonCancel, () {
                           Navigator.pop(context, 'cancel');
                         }),
                         _uiWrapper.primaryButton(_trans.buttonSaveTo(selectedEmoji), () {
-                          setModalState(() {
-                            track.setName(selectedEmoji);
-                            save(track);
-                            Navigator.pop(context, selectedEmoji);
-                            _uiWrapper.toast(_trans.trackNameChangeSuccess(selectedEmoji), icon: AppIcon.trackTitle);
-                          });
+                          track.setName(selectedEmoji);
+                          save(track);
+                          Navigator.pop(context, selectedEmoji);
+                          _uiWrapper.toast(_trans.trackNameChangeSuccess(selectedEmoji), icon: AppIcon.trackTitle);
                         }),
                       ],
                     )));
@@ -930,12 +912,10 @@ class TrackWrapper {
                         backgroundColor: (key == track.keyboardKey.value) ? Theme.of(context).colorScheme.primary : null,
                       ),
                       onPressed: () {
-                        setModalState(() {
-                          track.setKeyboardKey(key);
-                          save(track);
-                          Navigator.pop(context, key);
-                          _uiWrapper.toast(_trans.trackKeyboardKeyChangeSuccess(key), icon: AppIcon.trackKeyboardKey);
-                        });
+                        track.setKeyboardKey(key);
+                        save(track);
+                        Navigator.pop(context, key);
+                        _uiWrapper.toast(_trans.trackKeyboardKeyChangeSuccess(key), icon: AppIcon.trackKeyboardKey);
                       },
                       child: Text(
                         key,
@@ -951,12 +931,10 @@ class TrackWrapper {
                 Navigator.pop(context, _trans.buttonNo);
               }),
               _uiWrapper.errorButton(_trans.buttonYes, () {
-                setModalState(() {
-                  removeTrackRecording(track);
-                  save(track);
-                  Navigator.pop(context, _trans.buttonYes);
-                  _uiWrapper.toast(_trans.trackRecordingDeleteSuccess(track.name.value), icon: AppIcon.deleteForever);
-                });
+                removeTrackRecording(track);
+                save(track);
+                Navigator.pop(context, _trans.buttonYes);
+                _uiWrapper.toast(_trans.trackRecordingDeleteSuccess(track.name.value), icon: AppIcon.deleteForever);
               }),
             ]);
         break;

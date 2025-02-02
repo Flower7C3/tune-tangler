@@ -85,46 +85,11 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
     }
   }
 
-  @override
-  Widget build(BuildContext context) => MaterialApp(
-        localizationsDelegates: [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: AppGlobalConfig.languages.values,
-        locale: _settingsGet(GlobalConfigKey.locale),
-        themeAnimationDuration: Duration(seconds: 0),
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: _settingsGet(GlobalConfigKey.themeSeedColor),
-            brightness: Brightness.light,
-          ),
-          useMaterial3: true,
-        ),
-        darkTheme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: _settingsGet(GlobalConfigKey.themeSeedColor),
-            brightness: Brightness.dark,
-          ),
-          useMaterial3: true,
-        ),
-        themeMode: _settingsGet(GlobalConfigKey.themeMode),
-        initialRoute: '/',
-        routes: {
-          '/': (context) => HomeScreen(settingsGet: _settingsGet, settingsSet: _settingsSet, audioRecorder: _audioRecorder, tracksList: _tracksList),
-          '/settings': (context) =>
-              SettingsScreen(settingsGet: _settingsGet, settingsSet: _settingsSet, audioRecorder: _audioRecorder, tracksList: _tracksList),
-        },
-      );
-
   RecordConfig _recordConfig() {
     InputDevice? inputDevice = _settingsGet(GlobalConfigKey.recordingInputDevice);
-    var decoder = AppGlobalConfig.recordingAudioEncoderValues.codec.valueDecoder;
-    AudioEncoder audioEncoder = decoder(_settingsGet(GlobalConfigKey.recordingAudioEncoder));
-    int sampleRate = AppGlobalConfig.recordingSampleRateValues.codec.valueDecoder(_settingsGet(GlobalConfigKey.recordingSampleRate));
-    int bitRate = AppGlobalConfig.recordingBitRateValues.codec.valueDecoder(_settingsGet(GlobalConfigKey.recordingBitRate));
+    AudioEncoder audioEncoder = AppGlobalConfig.recordingAudioEncoder.valueDecoder(_settingsGet(GlobalConfigKey.recordingAudioEncoder));
+    int sampleRate = AppGlobalConfig.recordingSampleRate.valueDecoder(_settingsGet(GlobalConfigKey.recordingSampleRate));
+    int bitRate = AppGlobalConfig.recordingBitRate.valueDecoder(_settingsGet(GlobalConfigKey.recordingBitRate));
     int channels = (_settingsGet(GlobalConfigKey.recordingAudioModeStereo) == true) ? 2 : 1;
     bool autoGain = _settingsGet(GlobalConfigKey.recordingAutoGain);
     bool echoCancel = _settingsGet(GlobalConfigKey.recordingEchoCancel);
@@ -152,4 +117,47 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
       );
     }
   }
+
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+        localizationsDelegates: [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppGlobalConfig.languages.values<Locale>(),
+        locale: _settingsGet(GlobalConfigKey.locale),
+        themeAnimationDuration: Duration(seconds: 0),
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: _settingsGet(GlobalConfigKey.themeSeedColor),
+            brightness: Brightness.light,
+          ),
+          useMaterial3: true,
+        ),
+        darkTheme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: _settingsGet(GlobalConfigKey.themeSeedColor),
+            brightness: Brightness.dark,
+          ),
+          useMaterial3: true,
+        ),
+        themeMode: _settingsGet(GlobalConfigKey.themeMode),
+        initialRoute: '/',
+        routes: {
+          '/': (context) => HomeScreen(
+                settingsGet: _settingsGet,
+                settingsSet: _settingsSet,
+                audioRecorder: _audioRecorder,
+                tracksList: _tracksList,
+              ),
+          '/settings': (context) => SettingsScreen(
+                settingsGet: _settingsGet,
+                settingsSet: _settingsSet,
+                audioRecorder: _audioRecorder,
+                tracksList: _tracksList,
+              ),
+        },
+      );
 }

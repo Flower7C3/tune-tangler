@@ -104,16 +104,10 @@ class AppKeyboardKeyMap {
 
   static Iterable<String> gridRowNames() => _keyboardKeysRows.keys;
 
-  static Iterable<String> keyboardKeyNames() {
+  static List<String> keyboardKeyNames() {
     var items = <String>[];
     _keyboardKeysRows.forEach((row, keys) => items.addAll(keys.keys));
-    return items;
-  }
-
-  static Iterable<String> keyboardKeyCodes() {
-    var items = <String>[];
-    _keyboardKeysRows.forEach((row, keys) => items.addAll(keys.values));
-    return items;
+    return items.toList();
   }
 
   static String keyboardKeyID(List<LogicalKeyboardKey> keys) {

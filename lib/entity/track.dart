@@ -100,6 +100,20 @@ class Track {
   ///*************************************************************************************************************************************************
   /// DURATION
 
+  final ValueNotifier<double> clock = ValueNotifier(0);
+  Timer? timer;
+
+  void startTimer() {
+    clock.value = 0;
+    timer = Timer.periodic(Duration(milliseconds: 100), (Timer t) {
+      clock.value += 100;
+    });
+  }
+
+  void stopTimer() {
+    timer?.cancel();
+  }
+
   final ValueNotifier<Duration?> duration = ValueNotifier(null);
 
   final ValueNotifier<Duration?> position = ValueNotifier(null);
@@ -244,12 +258,10 @@ class Track {
     updateState();
   }
 
-  RecorderState _recorderState = RecorderState.empty;
-
-  RecorderState get recorderState => _recorderState;
+  final ValueNotifier<RecorderState> recorderState = ValueNotifier(RecorderState.empty);
 
   void setRecordingState(RecorderState state) {
-    _recorderState = state;
+    recorderState.value = state;
     updateState();
   }
 
@@ -258,7 +270,7 @@ class Track {
   final ValueNotifier<IconData> stateIcon = ValueNotifier(Icons.square_rounded);
 
   void updateState() {
-    state.value = switch (_recorderState) {
+    state.value = switch (recorderState.value) {
       RecorderState.empty => TrackState.empty,
       RecorderState.recording => TrackState.recording,
       RecorderState.ready => switch (_playerState) {
@@ -269,17 +281,17 @@ class Track {
           _ => TrackState.empty,
         },
     };
-    stateIcon.value = (AppGlobalConfig.trackStateIcons()[state.value] ?? Icons.square_rounded);
+    stateIcon.value = AppGlobalConfig.trackState.icon(state.value, defaultValue: Icons.error_outline_rounded);
   }
 
   Color stateForegroundColor(BuildContext context) =>
-      AppGlobalConfig.trackStateForegroundColors(context)[state.value] ?? Theme.of(context).colorScheme.primary;
+      AppGlobalConfig.trackStateForegroundColor.color(state.value, context: context, defaultValue: Theme.of(context).colorScheme.primary);
 
   Color stateBackgroundColor(BuildContext context) =>
-      AppGlobalConfig.trackStateBackgroundColors(context)[state.value] ?? Theme.of(context).colorScheme.primaryFixedDim;
+      AppGlobalConfig.trackStateBackgroundColor.color(state.value, context: context, defaultValue: Theme.of(context).colorScheme.primaryFixedDim);
 
   Color stateProgressColor(BuildContext context) =>
-      AppGlobalConfig.trackStateProgressColors(context)[state.value] ?? Theme.of(context).colorScheme.primaryContainer;
+      AppGlobalConfig.trackStateProgressColor.color(state.value, context: context, defaultValue: Theme.of(context).colorScheme.primaryContainer);
 
   ///*************************************************************************************************************************************************
   /// PLAYBACK VOLUME
@@ -295,9 +307,9 @@ class Track {
 
   IconData get playbackVolumeIcon {
     IconData volumeIcon = Symbols.add;
-    AppGlobalConfig.trackPlaybackVolumeSliderValues.codec.valueIcons.entries.any((MapEntry<double, IconData> data) {
-      if (playbackVolume.value <= data.key) {
-        volumeIcon = data.value;
+    AppGlobalConfig.trackPlaybackVolume.values<double>().any((double value) {
+      if (playbackVolume.value <= value) {
+        volumeIcon = AppGlobalConfig.trackPlaybackVolume.icon(value);
         return true;
       }
       return false;
