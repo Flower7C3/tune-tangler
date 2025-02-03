@@ -3,6 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:record/record.dart';
 
+import '../config/fields.dart';
 import '../config/app_icon.dart';
 import '../config/config.dart';
 import '../config/menu_item.dart';
@@ -22,9 +23,9 @@ class HomeScreen extends StatefulWidget implements ScreenInterface {
   });
 
   @override
-  final Function(dynamic key, {ConfigSpace space, dynamic defaultValue}) settingsGet;
+  final Function(dynamic key, {AppConfigSpace space, dynamic defaultValue}) settingsGet;
   @override
-  final void Function(dynamic key, dynamic value, {ConfigSpace space, bool updateState}) settingsSet;
+  final void Function(dynamic key, dynamic value, {AppConfigSpace space, bool updateState}) settingsSet;
   @override
   final AudioRecorder audioRecorder;
   @override
@@ -95,10 +96,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               backgroundColor: Theme.of(context).colorScheme.inversePrimary,
               leading: IconButton(
                   icon:
-                      Icon(widget.settingsGet(GlobalConfigKey.wakelockEnabled) ? AppIcon.logoKeepScreenOnEnabled : AppIcon.logoKeepScreenOnDisabled),
+                      Icon(widget.settingsGet(AppGlobalConfigFieldKey.wakelockEnabled) ? AppIcon.logoKeepScreenOnEnabled : AppIcon.logoKeepScreenOnDisabled),
                   onPressed: () {
                     _uiWrapper.recordConfigDialog(_trans.recordingSettings,
-                        recordConfig: widget.settingsGet(GlobalConfigKey.recording), trans: _trans);
+                        recordConfig: widget.settingsGet(AppGlobalConfigFieldKey.recording), trans: _trans);
                   }),
               title: Text(_trans.appTitle),
               actions: _buildTopMenu(),
@@ -117,18 +118,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       icon: Icon(AppIcon.trackPlayingStart),
       tooltip: _trans.allTracksPlayingStart,
       onPressed: () {
-        setState(() {
-          _trackWrapper.startTracksPlaying(widget.tracksList.all());
-        });
+        _trackWrapper.startTracksPlaying(widget.tracksList.all());
       },
     ));
     items.add(IconButton(
       icon: Icon(AppIcon.trackPlayingStop),
       tooltip: _trans.allTracksPlayingStop,
       onPressed: () {
-        setState(() {
-          _trackWrapper.stopTracksPlaying(widget.tracksList.all());
-        });
+        _trackWrapper.stopTracksPlaying(widget.tracksList.all());
       },
     ));
     items.add(PopupMenuButton<String>(
@@ -144,12 +141,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   List<PopupMenuEntry<String>> _topMenuItems() {
     List<PopupMenuEntry<String>> menuItems = [];
     menuItems.add(_uiWrapper.topPopupMenuItem(TopMenuItem.changeLanguage, AppIcon.language, _trans.changeLanguage));
-    if (widget.settingsGet(GlobalConfigKey.isThemeModeDark)) {
+    if (widget.settingsGet(AppGlobalConfigFieldKey.isThemeModeDark)) {
       menuItems.add(_uiWrapper.topPopupMenuItem(TopMenuItem.themeModeLight, AppIcon.screenLightThemeMode, _trans.menuLightMode));
     } else {
       menuItems.add(_uiWrapper.topPopupMenuItem(TopMenuItem.themeModeDark, AppIcon.screenDarkThemeMode, _trans.menuDarkMode));
     }
-    if (widget.settingsGet(GlobalConfigKey.wakelockEnabled)) {
+    if (widget.settingsGet(AppGlobalConfigFieldKey.wakelockEnabled)) {
       menuItems
           .add(_uiWrapper.topPopupMenuItem(TopMenuItem.keepScreenOnDisable, AppIcon.keepScreenOnEnabled, _trans.menuKeepScreenOn, checked: true));
     } else {
@@ -166,12 +163,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       case TopMenuItem.changeLanguage:
         var options = <Widget>[];
         AppGlobalConfig.languages.values<Locale>().forEach((Locale locale) {
-          var name = AppGlobalConfig.languages.name(locale);
+          var name = AppGlobalConfig.languages.text(locale);
           var code = locale.toLanguageTag();
           options.add(SimpleDialogOption(
             padding: EdgeInsets.all(16),
             onPressed: () {
-              widget.settingsSet(GlobalConfigKey.locale, locale, updateState: true);
+              widget.settingsSet(AppGlobalConfigFieldKey.locale, locale, updateState: true);
               Navigator.pop(context, locale);
             },
             child: Text('$name ($code)'),
@@ -180,16 +177,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         _uiWrapper.listDialog(AppIcon.language, _trans.changeLanguage, actions: options.toList());
         break;
       case TopMenuItem.keepScreenOnEnable:
-        widget.settingsSet(GlobalConfigKey.wakelockEnabled, true, updateState: true);
+        widget.settingsSet(AppGlobalConfigFieldKey.wakelockEnabled, true, updateState: true);
         break;
       case TopMenuItem.keepScreenOnDisable:
-        widget.settingsSet(GlobalConfigKey.wakelockEnabled, false, updateState: true);
+        widget.settingsSet(AppGlobalConfigFieldKey.wakelockEnabled, false, updateState: true);
         break;
       case TopMenuItem.themeModeLight:
-        widget.settingsSet(GlobalConfigKey.themeMode, ThemeMode.light, updateState: true);
+        widget.settingsSet(AppGlobalConfigFieldKey.themeMode, ThemeMode.light, updateState: true);
         break;
       case TopMenuItem.themeModeDark:
-        widget.settingsSet(GlobalConfigKey.themeMode, ThemeMode.dark, updateState: true);
+        widget.settingsSet(AppGlobalConfigFieldKey.themeMode, ThemeMode.dark, updateState: true);
         break;
       case TopMenuItem.settings:
         setState(() {
@@ -227,7 +224,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ]),
           ],
           applicationIcon:
-              Icon(widget.settingsGet(GlobalConfigKey.wakelockEnabled) ? AppIcon.logoKeepScreenOnEnabled : AppIcon.logoKeepScreenOnDisabled),
+              Icon(widget.settingsGet(AppGlobalConfigFieldKey.wakelockEnabled) ? AppIcon.logoKeepScreenOnEnabled : AppIcon.logoKeepScreenOnDisabled),
           applicationLegalese: _trans.legalNote,
         );
         break;
@@ -237,50 +234,50 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   /// *************************************************************************
   /// TRACKS GRID
   dynamic _buildTracksGrid() => ListView.builder(
-        itemCount: widget.settingsGet(GlobalConfigKey.gridRowsAmount),
-        itemBuilder: (context, rowIndex) => Row(children: [
-          _trackWrapper.buildRowButtons(rowIndex, TrackRow.name(rowIndex)),
-          Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: List.generate(
-                  widget.settingsGet(GlobalConfigKey.gridColsAmount),
-                  (columnIndex) {
-                    String trackId = Track.buildId(rowIndex, columnIndex);
-                    Track track = widget.settingsGet(trackId, space: ConfigSpace.track, defaultValue: Track(rowIndex, columnIndex));
-                    widget.tracksList.addAll(track);
-                    widget.tracksList.addRow(rowIndex, track);
-                    _trackWrapper.initStreams(track);
-                    return Container(
-                        margin: EdgeInsets.all(_uiWrapper.trackItemMargin),
-                        width: _uiWrapper.trackItemWidth,
-                        child: ValueListenableBuilder(
-                          valueListenable: track.state,
-                          builder: (context, state, child) => ElevatedButton(
-                            onPressed: () {
-                              _trackWrapper.trackPressed(track);
-                            },
-                            onLongPress: () {
-                              _trackWrapper.trackDetails(track);
-                            },
-                            style: ElevatedButton.styleFrom(
-                                padding: EdgeInsets.all(_uiWrapper.trackPadding),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_uiWrapper.trackBorderRadius)),
-                                backgroundColor: track.stateBackgroundColor(context),
-                                foregroundColor: track.stateForegroundColor(context)),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: _trackWrapper.trackButton(track),
-                            ),
+      itemCount: widget.settingsGet(AppGlobalConfigFieldKey.gridRowsAmount),
+      itemBuilder: (context, rowIndex) => Row(children: [
+        _trackWrapper.buildRowButtons(rowIndex, TrackRow.name(rowIndex)),
+        Expanded(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: List.generate(
+                widget.settingsGet(AppGlobalConfigFieldKey.gridColsAmount),
+                    (columnIndex) {
+                  String trackId = Track.buildId(rowIndex, columnIndex);
+                  Track track = widget.settingsGet(trackId, space: AppConfigSpace.track, defaultValue: Track(rowIndex, columnIndex));
+                  widget.tracksList.addAll(track);
+                  widget.tracksList.addRow(rowIndex, track);
+                  _trackWrapper.initStreams(track);
+                  return Container(
+                      margin: EdgeInsets.all(_uiWrapper.trackItemMargin),
+                      width: _uiWrapper.trackItemWidth,
+                      child: ValueListenableBuilder(
+                        valueListenable: track.state,
+                        builder: (context, state, child) => ElevatedButton(
+                          onPressed: () {
+                            _trackWrapper.trackPressed(track);
+                          },
+                          onLongPress: () {
+                            _trackWrapper.trackDetails(track);
+                          },
+                          style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.all(_uiWrapper.trackPadding),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_uiWrapper.trackBorderRadius)),
+                              backgroundColor: track.stateBackgroundColor(context),
+                              foregroundColor: track.stateForegroundColor(context)),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: _trackWrapper.trackButton(track),
                           ),
-                        ));
-                  },
-                ),
+                        ),
+                      ));
+                },
               ),
             ),
-          )
-        ]),
-      );
+          ),
+        )
+      ]),
+    );
 }

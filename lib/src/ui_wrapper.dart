@@ -277,13 +277,12 @@ class UIWrapper {
             trans.recordingInputDeviceValue(recordConfig.device == null ? trans.defaultDevice : recordConfig.device!.label),
             iconSize: 16, fontSize: 14, separatorSize: iconToTextOffset),
         statusIconRow(AppIcon.recordingAudioEncoder,
-            trans.recordingAudioEncoderValue(AppGlobalConfig.recordingAudioEncoder.translation(recordConfig.encoder.index.toDouble(), trans: trans)),
+            trans.recordingAudioEncoderValue(AppGlobalConfig.recordingAudioEncoder.translate(recordConfig.encoder.index.toDouble(), trans: trans)),
             iconSize: 16, fontSize: 14, separatorSize: iconToTextOffset),
         statusIconRow(AppIcon.recordingSampleRate,
-            trans.recordingSampleRateValue(AppGlobalConfig.recordingSampleRate.valueFormatter(recordConfig.sampleRate.toDouble())),
+            trans.recordingSampleRateValue(AppGlobalConfig.recordingSampleRate.format(recordConfig.sampleRate.toDouble())),
             iconSize: 16, fontSize: 14, separatorSize: iconToTextOffset),
-        statusIconRow(
-            AppIcon.recordingBitRate, trans.recordingBitRateValue(AppGlobalConfig.recordingBitRate.valueFormatter(recordConfig.bitRate.toDouble())),
+        statusIconRow(AppIcon.recordingBitRate, trans.recordingBitRateValue(AppGlobalConfig.recordingBitRate.format(recordConfig.bitRate.toDouble())),
             iconSize: 16, fontSize: 14, separatorSize: iconToTextOffset),
         statusIconRow(AppIcon.recordingAudioGain, trans.recordingAutoGainValue(recordConfig.autoGain ? trans.yes : trans.no),
             iconSize: 16, fontSize: 14, separatorSize: iconToTextOffset),
@@ -440,11 +439,11 @@ class UIWrapper {
 
   Container helpTrackState(TrackState state, String message) => Container(
         padding: EdgeInsets.all(4),
-        color: AppGlobalConfig.trackStateBackgroundColor.colorOrNull(state, context: context),
+        color: AppGlobalConfig.trackState.color(state, context: context, name: ConfigItemPropertyName.backgroundColor),
         child: statusIconTile(
-          AppGlobalConfig.trackState.icon(state, defaultValue: Icons.error_outline_rounded),
+          AppGlobalConfig.trackState.icon(state),
           message,
-          textColor: AppGlobalConfig.trackStateForegroundColor.colorOrNull(state, context: context),
+          textColor: AppGlobalConfig.trackState.color(state, context: context, name: ConfigItemPropertyName.foregroundColor),
         ),
       );
 
@@ -496,7 +495,7 @@ class UIWrapper {
           leading: Icon(icon),
           title: Text(listTitle),
           trailing: (withTrailing == true)
-              ? trailingLabel(configCollection != null ? configCollection.valueFormatter(currentValue) : currentValue.toString())
+              ? trailingLabel(configCollection != null ? configCollection.format(currentValue) : currentValue.toString())
               : null,
           onTap: () {
             showDialog(
@@ -515,14 +514,14 @@ class UIWrapper {
                                     label: ((configCollection == null)
                                         ? currentValue.toString()
                                         : ((trans.toString() != 'null' && trans != null)
-                                            ? configCollection.translation(currentValue, trans: trans)
-                                            : configCollection.valueFormatter(currentValue))),
+                                            ? configCollection.translate(currentValue, trans: trans)
+                                            : configCollection.format(currentValue))),
                                     onChanged: (double newValue) {
                                       setModalState(() {
                                         currentValue = newValue;
                                       });
                                     }),
-                                Text(configCollection != null ? configCollection.valueFormatter(currentValue) : currentValue.toString()),
+                                Text(configCollection != null ? configCollection.format(currentValue) : currentValue.toString()),
                               ]),
                             ]),
                             actions: [
@@ -537,8 +536,8 @@ class UIWrapper {
                                       ((configCollection == null)
                                           ? currentValue.toString()
                                           : ((trans.toString() != 'null' && trans != null)
-                                              ? configCollection.translation(currentValue, trans: trans)
-                                              : configCollection.valueFormatter(currentValue))),
+                                              ? configCollection.translate(currentValue, trans: trans)
+                                              : configCollection.format(currentValue))),
                                     ),
                                     icon: icon);
                               }),
@@ -567,7 +566,7 @@ class UIWrapper {
       subtitle.add(Text(listSubtitle, style: TextStyle(fontSize: settingsSubtitleFontSize)));
     }
     String translatedValue =
-        (trans.toString() != 'null' && configCollection != null && trans != null) ? configCollection.translation(currentValue, trans: trans) : '';
+        (trans.toString() != 'null' && configCollection != null && trans != null) ? configCollection.translate(currentValue, trans: trans) : '';
     if (translatedValue != '') {
       subtitle.add(Text(translatedValue, style: TextStyle(fontSize: settingsSubtitleFontSize)));
     }
@@ -575,7 +574,7 @@ class UIWrapper {
         leading: Icon(icon),
         title: Text(listTitle),
         subtitle: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: subtitle.toList()),
-        trailing: (withTrailing == true && configCollection != null) ? trailingLabel(configCollection.valueFormatter(currentValue)) : null,
+        trailing: (withTrailing == true && configCollection != null) ? trailingLabel(configCollection.format(currentValue)) : null,
         onTap: () {
           showDialog(
             context: context,
@@ -593,15 +592,15 @@ class UIWrapper {
                         label: ((configCollection == null)
                             ? currentValue.toString()
                             : ((trans.toString() != 'null' && trans != null)
-                                ? configCollection.translation(currentValue, trans: trans)
-                                : configCollection.valueFormatter(currentValue))),
+                                ? configCollection.translate(currentValue, trans: trans)
+                                : configCollection.format(currentValue))),
                         onChanged: (double newValue) {
                           setModalState(() {
                             sliderValue = newValue;
                             currentValue = values[sliderValue.toInt()];
                           });
                         }),
-                    Text(configCollection != null ? configCollection.valueFormatter(currentValue) : currentValue.toString()),
+                    Text(configCollection != null ? configCollection.format(currentValue) : currentValue.toString()),
                   ]),
                 ]),
                 actions: [
@@ -616,8 +615,8 @@ class UIWrapper {
                           ((configCollection == null)
                               ? currentValue.toString()
                               : ((trans.toString() != 'null' && trans != null)
-                                  ? configCollection.translation(currentValue, trans: trans)
-                                  : configCollection.valueFormatter(currentValue))),
+                                  ? configCollection.translate(currentValue, trans: trans)
+                                  : configCollection.format(currentValue))),
                         ),
                         icon: icon);
                   }),

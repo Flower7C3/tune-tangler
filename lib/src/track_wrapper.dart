@@ -18,6 +18,7 @@ import 'package:tune_tangler/src/ui_wrapper.dart';
 
 import '../config/app_icon.dart';
 import '../config/config.dart';
+import '../config/fields.dart';
 import '../config/keyboard.dart';
 import '../config/menu_item.dart';
 import '../entity/track.dart';
@@ -40,7 +41,7 @@ class TrackWrapper {
   }
 
   void save(Track track, {bool updateState = false}) {
-    widget.settingsSet(track.id, track, space: ConfigSpace.track, updateState: updateState);
+    widget.settingsSet(track.id, track, space: AppConfigSpace.track, updateState: updateState);
   }
 
   Future<void> _importRecording(Track track) async {
@@ -85,8 +86,8 @@ class TrackWrapper {
         throw Exception(_trans.trackRecordingStartNoNotificationPermission);
       }
 
-      RecordConfig recordConfig = widget.settingsGet(GlobalConfigKey.recording);
-      String fileExtension = AppGlobalConfig.readerEncoderExtension.name(recordConfig.encoder);
+      RecordConfig recordConfig = widget.settingsGet(AppGlobalConfigFieldKey.recording);
+      String fileExtension = AppGlobalConfig.readerEncoderExtension.text(recordConfig.encoder);
       String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
       String filePath = await getApplicationDocumentsDirectory().then((value) => '${value.path}/${track.id}.$timestamp.$fileExtension');
 
@@ -137,7 +138,7 @@ class TrackWrapper {
     track.setPath(null);
     save(track);
     _uiWrapper.toast(_trans.trackRecordingCancelled(track.name.value),
-        icon: AppGlobalConfig.trackState.icon(TrackState.empty, defaultValue: Icons.error_outline_rounded));
+        icon: AppGlobalConfig.trackState.icon(TrackState.empty));
   }
 
   Future<void> _stopAndSaveRecording(Track track) async {
@@ -145,7 +146,7 @@ class TrackWrapper {
       String? path = await widget.audioRecorder.stop();
       track.setPath(path);
       _uiWrapper.toast(_trans.trackRecordingStopSuccess(track.name.value),
-          icon: AppGlobalConfig.trackState.icon(TrackState.ready, defaultValue: Icons.error_outline_rounded));
+          icon: AppGlobalConfig.trackState.icon(TrackState.ready));
     } catch (e) {
       track.setRecordingState(RecorderState.empty);
       _uiWrapper.toast(_trans.trackRecordingStopError(e.toString(), track.name.value), icon: AppIcon.exception, type: ToastType.error, duration: 4);
@@ -163,7 +164,7 @@ class TrackWrapper {
   void removeTracksRecordings(Set<Track> tracksList) async {
     for (Track track in tracksList) {
       removeTrackRecording(track);
-      save(track, updateState: true);
+      save(track);
     }
   }
 
@@ -318,7 +319,7 @@ class TrackWrapper {
       <PopupMenuEntry<dynamic>>[
         _uiWrapper.rowMenuButton(RowMenuItem.playbackMode, AppIcon.trackPlaybackMode, _trans.rowTracksPlaybackModeSet, itemBuilder: () {
           var items = <PopupMenuItem<dynamic>>[];
-          AppGlobalConfig.trackPlaybackMode.values<int>().forEach((int value) {
+          AppGlobalConfig.trackPlaybackMode.values<double>().forEach((double value) {
             items.add(_uiWrapper.rowPopupMenuItem(
               value,
               AppGlobalConfig.trackPlaybackMode.icon(value),
@@ -338,13 +339,13 @@ class TrackWrapper {
             items.add(_uiWrapper.rowPopupMenuItem(
               value,
               AppGlobalConfig.trackPlaybackVolume.icon(value),
-              _trans.rowTracksPlaybackVolumeTitleSet(AppGlobalConfig.trackPlaybackVolume.valueFormatter(value)),
+              _trans.rowTracksPlaybackVolumeTitleSet(AppGlobalConfig.trackPlaybackVolume.format(value)),
             ));
           });
           return items.toList();
         }, onSelected: (selection) {
           setTracksPlaybackVolume(tracksList, selection);
-          _uiWrapper.toast(_trans.rowTracksPlaybackVolumeSuccessSet(rowName, AppGlobalConfig.trackPlaybackVolume.valueFormatter(selection)),
+          _uiWrapper.toast(_trans.rowTracksPlaybackVolumeSuccessSet(rowName, AppGlobalConfig.trackPlaybackVolume.format(selection)),
               icon: AppIcon.trackPlaybackSpeed);
           Navigator.pop(context);
         }),
@@ -354,14 +355,14 @@ class TrackWrapper {
             items.add(_uiWrapper.rowPopupMenuItem(
               value,
               AppGlobalConfig.trackPlaybackBalance.icon(value),
-              _trans.rowTracksPlaybackBalanceTitleSet(AppGlobalConfig.trackPlaybackBalance.translation(value, trans: _trans)),
+              _trans.rowTracksPlaybackBalanceTitleSet(AppGlobalConfig.trackPlaybackBalance.translate(value, trans: _trans)),
             ));
           });
           return items.toList();
         }, onSelected: (selection) {
           setTracksPlaybackBalance(tracksList, selection);
           _uiWrapper.toast(
-              _trans.rowTracksPlaybackBalanceSuccessSet(rowName, AppGlobalConfig.trackPlaybackBalance.translation(selection, trans: _trans)),
+              _trans.rowTracksPlaybackBalanceSuccessSet(rowName, AppGlobalConfig.trackPlaybackBalance.translate(selection, trans: _trans)),
               icon: AppIcon.trackPlaybackBalance);
           Navigator.pop(context);
         }),
@@ -370,14 +371,14 @@ class TrackWrapper {
           AppGlobalConfig.trackPlaybackSpeed.values<double>().forEach((double value) {
             items.add(_uiWrapper.rowPopupMenuItem(
               value,
-              AppGlobalConfig.trackPlaybackSpeed.iconOrNull(value)!,
-              _trans.rowTracksPlaybackSpeedTitleSet(AppGlobalConfig.trackPlaybackSpeed.valueFormatter(value)),
+              AppGlobalConfig.trackPlaybackSpeed.icon(value),
+              _trans.rowTracksPlaybackSpeedTitleSet(AppGlobalConfig.trackPlaybackSpeed.format(value)),
             ));
           });
           return items.toList();
         }, onSelected: (selection) {
           setTracksPlaybackSpeed(tracksList, selection);
-          _uiWrapper.toast(_trans.rowTracksPlaybackSpeedSuccessSet(rowName, AppGlobalConfig.trackPlaybackSpeed.valueFormatter(selection)),
+          _uiWrapper.toast(_trans.rowTracksPlaybackSpeedSuccessSet(rowName, AppGlobalConfig.trackPlaybackSpeed.format(selection)),
               icon: AppIcon.trackPlaybackSpeed);
           Navigator.pop(context);
         }),
@@ -409,97 +410,89 @@ class TrackWrapper {
   /// *************************************************************************
   /// TRACK PRESSED
 
-  List<Widget> trackButton(Track track) {
-    Color foregroundColor = track.stateForegroundColor(context);
-    var items = <Widget>[];
-    items.add(
-      SizedBox(
-          height: _uiWrapper.trackItemWidth - _uiWrapper.trackPadding,
-          child: Stack(fit: StackFit.expand, children: [
-            Align(
-                alignment: Alignment.topLeft,
-                child: ValueListenableBuilder(
-                    valueListenable: track.stateIcon,
-                    builder: (context, stateIcon, child) => Icon(stateIcon, size: _uiWrapper.trackButtonIconSize, color: foregroundColor))),
-            Align(
-                alignment: Alignment.topRight,
-                child: ValueListenableBuilder(
-                    valueListenable: track.keyboardKey,
-                    builder: (context, keyboardKey, child) =>
-                        AppIcon.trackKeyboardKeyBox(track, ui: _uiWrapper, context: context, foregroundColor: foregroundColor))),
-            Align(
-                alignment: Alignment.bottomLeft,
-                child: ValueListenableBuilder(
-                    valueListenable: track.playbackVolume,
-                    builder: (context, playbackVolume, child) =>
-                        Icon(track.playbackVolumeIcon, size: _uiWrapper.trackButtonIconSize, color: foregroundColor))),
-            Align(
-                alignment: Alignment.bottomRight,
-                child: ValueListenableBuilder(
-                    valueListenable: track.playbackBalance,
-                    builder: (context, playbackBalance, child) =>
-                        Icon(track.playbackBalanceIcon, size: _uiWrapper.trackButtonIconSize, color: foregroundColor))),
-            Align(
-                alignment: Alignment.bottomCenter,
-                child: ValueListenableBuilder(
-                    valueListenable: track.playbackBalance,
-                    builder: (context, playbackBalance, child) => Text(AppGlobalConfig.trackPlaybackBalance.name(playbackBalance),
-                        style: TextStyle(fontSize: _uiWrapper.trackInfoBalanceFontSize, color: foregroundColor)))),
-            Align(
-                alignment: Alignment.centerLeft,
-                child: ValueListenableBuilder(
-                    valueListenable: track.playbackSpeed,
-                    builder: (context, playbackSpeed, child) => Text(AppGlobalConfig.trackPlaybackSpeed.valueFormatter(playbackSpeed),
-                        style: TextStyle(fontSize: _uiWrapper.trackInfoSpeedFontSize, color: foregroundColor)))),
-            Align(
-                alignment: Alignment.centerRight,
-                child: ValueListenableBuilder(
-                    valueListenable: track.playbackModeSingle,
-                    builder: (context, playbackModeSingle, child) =>
-                        Icon(track.playbackModeIcon, size: _uiWrapper.trackButtonIconSize, color: foregroundColor))),
-            Align(
-                alignment: Alignment.center,
-                child: ValueListenableBuilder(
-                    valueListenable: track.name,
-                    builder: (context, name, child) =>
-                        Text(_trans.cell(name), style: TextStyle(fontSize: _uiWrapper.trackButtonTitleFontSize, fontWeight: FontWeight.bold)))),
-          ])),
-    );
-    items.add(
-      ValueListenableBuilder<double>(
-        valueListenable: track.progress,
-        builder: (context, progress, child) => (track.state.value == TrackState.recording)
-            ? LinearProgressIndicator(color: foregroundColor, backgroundColor: track.stateProgressColor(context))
-            : LinearProgressIndicator(value: progress, color: foregroundColor, backgroundColor: track.stateProgressColor(context)),
-      ),
-    );
-
-    items.add(
-      ValueListenableBuilder<TrackState>(
-        valueListenable: track.state,
-        builder: (context, state, child) => (state == TrackState.recording)
-            ? ValueListenableBuilder<double>(
-                valueListenable: track.clock,
-                builder: (context, clock, child) => _uiWrapper.statusIconRow(
-                      AppIcon.trackDuration,
-                      _uiWrapper.formatTime(clock.toInt()),
-                      iconColor: foregroundColor,
-                      iconSize: _uiWrapper.trackInfoIconSize,
-                      fontSize: _uiWrapper.trackInfoFontSize,
-                    ))
-            : ValueListenableBuilder<Duration?>(
-                valueListenable: track.duration,
-                builder: (context, duration, child) => _uiWrapper.statusIconRow(
-                      AppIcon.trackDuration,
-                      _uiWrapper.formatTime((duration == null) ? 0 : duration.inMilliseconds),
-                      iconColor: foregroundColor,
-                      iconSize: _uiWrapper.trackInfoIconSize,
-                      fontSize: _uiWrapper.trackInfoFontSize,
-                    )),
-      ),
-    );
-    return items.toList();
-  }
+  List<Widget> trackButton(Track track) => [
+        SizedBox(
+            height: _uiWrapper.trackItemWidth - _uiWrapper.trackPadding,
+            child: Stack(fit: StackFit.expand, children: [
+              Align(
+                  alignment: Alignment.topLeft,
+                  child: ValueListenableBuilder(
+                      valueListenable: track.stateIcon,
+                      builder: (context, stateIcon, child) =>
+                          Icon(stateIcon, size: _uiWrapper.trackButtonIconSize, color: track.stateForegroundColor(context)))),
+              Align(
+                  alignment: Alignment.topRight,
+                  child: ValueListenableBuilder(
+                      valueListenable: track.keyboardKey,
+                      builder: (context, keyboardKey, child) => AppIcon.trackKeyboardKeyBox(track,
+                          ui: _uiWrapper, context: context, foregroundColor: track.stateForegroundColor(context)))),
+              Align(
+                  alignment: Alignment.bottomLeft,
+                  child: ValueListenableBuilder(
+                      valueListenable: track.playbackVolume,
+                      builder: (context, playbackVolume, child) =>
+                          Icon(track.playbackVolumeIcon, size: _uiWrapper.trackButtonIconSize, color: track.stateForegroundColor(context)))),
+              Align(
+                  alignment: Alignment.bottomRight,
+                  child: ValueListenableBuilder(
+                      valueListenable: track.playbackBalance,
+                      builder: (context, playbackBalance, child) =>
+                          Icon(track.playbackBalanceIcon, size: _uiWrapper.trackButtonIconSize, color: track.stateForegroundColor(context)))),
+              Align(
+                  alignment: Alignment.bottomCenter,
+                  child: ValueListenableBuilder(
+                      valueListenable: track.playbackBalance,
+                      builder: (context, playbackBalance, child) => Text(AppGlobalConfig.trackPlaybackBalance.text(playbackBalance),
+                          style: TextStyle(fontSize: _uiWrapper.trackInfoBalanceFontSize, color: track.stateForegroundColor(context))))),
+              Align(
+                  alignment: Alignment.centerLeft,
+                  child: ValueListenableBuilder(
+                      valueListenable: track.playbackSpeed,
+                      builder: (context, playbackSpeed, child) => Text(AppGlobalConfig.trackPlaybackSpeed.format(playbackSpeed),
+                          style: TextStyle(fontSize: _uiWrapper.trackInfoSpeedFontSize, color: track.stateForegroundColor(context))))),
+              Align(
+                  alignment: Alignment.centerRight,
+                  child: ValueListenableBuilder(
+                      valueListenable: track.playbackModeSingle,
+                      builder: (context, playbackModeSingle, child) =>
+                          Icon(track.playbackModeIcon, size: _uiWrapper.trackButtonIconSize, color: track.stateForegroundColor(context)))),
+              Align(
+                  alignment: Alignment.center,
+                  child: ValueListenableBuilder(
+                      valueListenable: track.name,
+                      builder: (context, name, child) =>
+                          Text(_trans.cell(name), style: TextStyle(fontSize: _uiWrapper.trackButtonTitleFontSize, fontWeight: FontWeight.bold)))),
+            ])),
+        ValueListenableBuilder<double>(
+          valueListenable: track.progress,
+          builder: (context, progress, child) => (track.state.value == TrackState.recording)
+              ? LinearProgressIndicator(color: track.stateForegroundColor(context), backgroundColor: track.stateProgressColor(context))
+              : LinearProgressIndicator(
+                  value: progress, color: track.stateForegroundColor(context), backgroundColor: track.stateProgressColor(context)),
+        ),
+        ValueListenableBuilder<TrackState>(
+          valueListenable: track.state,
+          builder: (context, state, child) => (state == TrackState.recording)
+              ? ValueListenableBuilder<double>(
+                  valueListenable: track.clock,
+                  builder: (context, clock, child) => _uiWrapper.statusIconRow(
+                        AppIcon.trackDuration,
+                        _uiWrapper.formatTime(clock.toInt()),
+                        iconColor: track.stateForegroundColor(context),
+                        iconSize: _uiWrapper.trackInfoIconSize,
+                        fontSize: _uiWrapper.trackInfoFontSize,
+                      ))
+              : ValueListenableBuilder<Duration?>(
+                  valueListenable: track.duration,
+                  builder: (context, duration, child) => _uiWrapper.statusIconRow(
+                        AppIcon.trackDuration,
+                        _uiWrapper.formatTime((duration == null) ? 0 : duration.inMilliseconds),
+                        iconColor: track.stateForegroundColor(context),
+                        iconSize: _uiWrapper.trackInfoIconSize,
+                        fontSize: _uiWrapper.trackInfoFontSize,
+                      )),
+        ),
+      ];
 
   /// *************************************************************************
   /// TRACK DETAILS
@@ -559,7 +552,7 @@ class TrackWrapper {
                                           if (track.audioEncoder != null)
                                             _uiWrapper.statusIconRow(
                                               AppIcon.recordingAudioEncoder,
-                                              AppGlobalConfig.recordingAudioEncoder.translation(track.audioEncoder!.index.toDouble(), trans: _trans),
+                                              AppGlobalConfig.recordingAudioEncoder.translate(track.audioEncoder?.index.toDouble(), trans: _trans),
                                               iconSize: 16,
                                               fontSize: 14,
                                               separatorSize: _uiWrapper.iconToTextOffset,
@@ -568,7 +561,7 @@ class TrackWrapper {
                                             _uiWrapper.statusIconRow(
                                               AppIcon.recordingSampleRate,
                                               _trans.recordingSampleRateValue(
-                                                  AppGlobalConfig.recordingSampleRate.valueFormatter(track.sampleRate!.toDouble())),
+                                                  AppGlobalConfig.recordingSampleRate.format(track.sampleRate?.toDouble())),
                                               iconSize: 16,
                                               fontSize: 14,
                                               separatorSize: _uiWrapper.iconToTextOffset,
@@ -577,7 +570,7 @@ class TrackWrapper {
                                             _uiWrapper.statusIconRow(
                                               AppIcon.recordingBitRate,
                                               _trans
-                                                  .recordingBitRateValue(AppGlobalConfig.recordingBitRate.valueFormatter(track.bitRate!.toDouble())),
+                                                  .recordingBitRateValue(AppGlobalConfig.recordingBitRate.format(track.bitRate?.toDouble())),
                                               iconSize: 16,
                                               fontSize: 14,
                                               separatorSize: _uiWrapper.iconToTextOffset,
@@ -737,10 +730,10 @@ class TrackWrapper {
             builder: (context, playbackSpeed, child) => Expanded(
                     child: Slider(
                   value: playbackSpeed,
-                  min: AppGlobalConfig.trackPlaybackSpeed.sliderValues!.min,
-                  max: AppGlobalConfig.trackPlaybackSpeed.sliderValues!.max,
-                  divisions: AppGlobalConfig.trackPlaybackSpeed.sliderValues!.divisions,
-                  label: AppGlobalConfig.trackPlaybackSpeed.valueFormatter(playbackSpeed),
+                  min: AppGlobalConfig.trackPlaybackSpeed.sliderValues.min,
+                  max: AppGlobalConfig.trackPlaybackSpeed.sliderValues.max,
+                  divisions: AppGlobalConfig.trackPlaybackSpeed.sliderValues.divisions,
+                  label: AppGlobalConfig.trackPlaybackSpeed.format(playbackSpeed),
                   onChanged: (double value) {
                     track.setPlaybackSpeed(value);
                     save(track);
@@ -748,7 +741,7 @@ class TrackWrapper {
                 ))),
         ValueListenableBuilder(
             valueListenable: track.playbackSpeed,
-            builder: (context, playbackSpeed, child) => _uiWrapper.trailingLabel(AppGlobalConfig.trackPlaybackSpeed.valueFormatter(playbackSpeed))),
+            builder: (context, playbackSpeed, child) => _uiWrapper.trailingLabel(AppGlobalConfig.trackPlaybackSpeed.format(playbackSpeed))),
       ];
 
   List<Widget> _trackDetailsPlaybackVolumeControl(Track track) => [
@@ -756,9 +749,9 @@ class TrackWrapper {
             valueListenable: track.playbackVolume,
             builder: (context, playbackVolume, child) =>
                 _uiWrapper.mediaPlayerButton(track.playbackVolumeIcon, _trans.trackPlaybackVolumeSet(track.name.value), onPressed: () {
-                  track.setPlaybackVolume((playbackVolume == AppGlobalConfig.trackPlaybackVolume.sliderValues!.min)
-                      ? AppGlobalConfig.trackPlaybackVolume.sliderValues!.max
-                      : AppGlobalConfig.trackPlaybackVolume.sliderValues!.min);
+                  track.setPlaybackVolume((playbackVolume == AppGlobalConfig.trackPlaybackVolume.sliderValues.min)
+                      ? AppGlobalConfig.trackPlaybackVolume.sliderValues.max
+                      : AppGlobalConfig.trackPlaybackVolume.sliderValues.min);
                   save(track);
                 })),
         ValueListenableBuilder(
@@ -766,10 +759,10 @@ class TrackWrapper {
             builder: (context, playbackVolume, child) => Expanded(
                     child: Slider(
                   value: playbackVolume,
-                  min: AppGlobalConfig.trackPlaybackVolume.sliderValues!.min,
-                  max: AppGlobalConfig.trackPlaybackVolume.sliderValues!.max,
-                  divisions: AppGlobalConfig.trackPlaybackVolume.sliderValues!.divisions,
-                  label: AppGlobalConfig.trackPlaybackVolume.valueFormatter(playbackVolume),
+                  min: AppGlobalConfig.trackPlaybackVolume.sliderValues.min,
+                  max: AppGlobalConfig.trackPlaybackVolume.sliderValues.max,
+                  divisions: AppGlobalConfig.trackPlaybackVolume.sliderValues.divisions,
+                  label: AppGlobalConfig.trackPlaybackVolume.format(playbackVolume),
                   onChanged: (double value) {
                     track.setPlaybackVolume(value);
                     save(track);
@@ -778,7 +771,7 @@ class TrackWrapper {
         ValueListenableBuilder(
             valueListenable: track.playbackVolume,
             builder: (context, playbackVolume, child) =>
-                _uiWrapper.trailingLabel(AppGlobalConfig.trackPlaybackVolume.valueFormatter(playbackVolume))),
+                _uiWrapper.trailingLabel(AppGlobalConfig.trackPlaybackVolume.format(playbackVolume))),
       ];
 
   List<Widget> _trackDetailsPlaybackBalanceControl(Track track) => [
@@ -797,7 +790,7 @@ class TrackWrapper {
                   min: AppGlobalConfig.trackPlaybackBalance.sliderValues.min,
                   max: AppGlobalConfig.trackPlaybackBalance.sliderValues.max,
                   divisions: AppGlobalConfig.trackPlaybackBalance.sliderValues.divisions,
-                  label: AppGlobalConfig.trackPlaybackBalance.translation(playbackBalance, trans: _trans),
+                  label: AppGlobalConfig.trackPlaybackBalance.translate(playbackBalance, trans: _trans),
                   onChanged: (double value) {
                     track.setPlaybackBalance(value);
                     save(track);
@@ -806,7 +799,7 @@ class TrackWrapper {
         ValueListenableBuilder(
             valueListenable: track.playbackBalance,
             builder: (context, playbackBalance, child) =>
-                _uiWrapper.trailingLabel(AppGlobalConfig.trackPlaybackBalance.valueFormatter(playbackBalance))),
+                _uiWrapper.trailingLabel(AppGlobalConfig.trackPlaybackBalance.format(playbackBalance))),
       ];
 
   /// *************************************************************************
@@ -858,7 +851,7 @@ class TrackWrapper {
                                         textAlign: TextAlign.center,
                                       ),
                                     ),
-                                    locale: widget.settingsGet(GlobalConfigKey.locale),
+                                    locale: widget.settingsGet(AppGlobalConfigFieldKey.locale),
                                     skinToneConfig: const SkinToneConfig(),
                                     categoryViewConfig: CategoryViewConfig(
                                       extraTab: CategoryExtraTab.SEARCH,

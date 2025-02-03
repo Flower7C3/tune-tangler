@@ -1,73 +1,113 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class ConfigCollection {
+enum ConfigItemPropertyName {
+  defaultProperty,
+  foregroundColor,
+  backgroundColor,
+  progressColor,
+}
+
+final class ConfigCollection {
   final List<ConfigItem> items;
 
   final dynamic defaultValue;
-  final dynamic Function(dynamic value) valueFormatter;
-  final dynamic Function(dynamic value) valueDecoder;
 
   ConfigCollection(
     this.items, {
     this.defaultValue,
-    this.valueFormatter = _defaultValueFormatter,
-    this.valueDecoder = _defaultValueDecoder,
+    this.format = _defaultValueFormatter,
+    this.decode = _defaultValueDecoder,
   });
 
   Iterable<T> values<T>() => items.map((item) => item.value as T);
 
   valueAt<T>(int index) => values().elementAt(index);
 
-  Iterable<String?> get names => items.map((item) => item.name);
+  Iterable<ConfigItem> _getByValue(dynamic value) => items.where((item) => item.value == value);
 
-  Iterable<IconData?> get icons => items.map((item) => item.icon);
+  String text(dynamic value, {ConfigItemPropertyName name = ConfigItemPropertyName.defaultProperty}) =>
+      _getByValue(value).first.properties.whereType<ConfigItemTextProperty>().firstWhere((property) => (property.name == name)).text;
 
-  Iterable<ConfigItem> get(dynamic value) => items.where((item) => item.value == value);
+  IconData icon(dynamic value, {ConfigItemPropertyName name = ConfigItemPropertyName.defaultProperty}) =>
+      _getByValue(value).first.properties.whereType<ConfigItemIconProperty>().firstWhere((property) => (property.name == name)).icon;
 
-  String name(dynamic value) => get(value).first.name.toString();
+  Color color(dynamic value, {required BuildContext context, ConfigItemPropertyName name = ConfigItemPropertyName.defaultProperty}) =>
+      _getByValue(value)
+          .first
+          .properties
+          .whereType<ConfigItemColorProperty>()
+          .firstWhere((property) => (property.name == name))
+          .callback
+          .call(context);
 
-  IconData icon(dynamic value, {IconData defaultValue = Icons.add}) => iconOrNull(value) ?? defaultValue;
+  String translate(dynamic value, {required AppLocalizations trans, ConfigItemPropertyName name = ConfigItemPropertyName.defaultProperty}) =>
+      _getByValue(value)
+          .first
+          .properties
+          .whereType<ConfigItemTranslatableProperty>()
+          .firstWhere((property) => (property.name == name))
+          .callback
+          .call(trans);
 
-  IconData? iconOrNull(dynamic value) => get(value).first.icon;
-
-  String translation(dynamic value, {required AppLocalizations trans, String? defaultValue}) =>
-      translationOrNull(value, trans: trans) ?? (defaultValue ?? '');
-
-  String? translationOrNull(dynamic value, {required AppLocalizations trans}) => get(value).first.translation?.call(trans);
-
-  Color color(dynamic value, {required BuildContext context, required Color defaultValue}) => colorOrNull(value, context: context) ?? defaultValue;
-
-  Color? colorOrNull(dynamic value, {required BuildContext context}) => get(value).first.color?.call(context);
+  final dynamic Function(dynamic value) format;
+  final dynamic Function(dynamic value) decode;
 
   static dynamic _defaultValueFormatter(dynamic value) => value.toString();
 
   static dynamic _defaultValueDecoder(dynamic value) => value;
 }
 
-class SliderConfigCollection extends ConfigCollection {
+final class SliderConfigCollection extends ConfigCollection {
   final ConfigSliderValues sliderValues;
 
   SliderConfigCollection(
     super.items, {
     super.defaultValue,
-    super.valueFormatter,
-    super.valueDecoder,
+    super.format,
+    super.decode,
     required this.sliderValues,
   });
 }
 
-class ConfigItem {
-  final dynamic value;
-  final IconData? icon;
-  final String? name;
-  final String Function(AppLocalizations)? translation;
-  final Color Function(BuildContext)? color;
+final class ConfigItem<T> {
+  final T value;
+  final List<ConfigItemProperty> properties;
 
-  ConfigItem(this.value, {this.icon, this.name, this.translation, this.color});
+  ConfigItem(this.value, {required this.properties});
 }
 
-class ConfigSliderValues {
+abstract final class ConfigItemProperty {
+  ConfigItemPropertyName name = ConfigItemPropertyName.defaultProperty;
+
+  ConfigItemProperty(this.name);
+}
+
+final class ConfigItemColorProperty extends ConfigItemProperty {
+  final Function(BuildContext) callback;
+
+  ConfigItemColorProperty(this.callback, {name = ConfigItemPropertyName.defaultProperty}) : super(name);
+}
+
+final class ConfigItemIconProperty extends ConfigItemProperty {
+  final IconData icon;
+
+  ConfigItemIconProperty(this.icon, {name = ConfigItemPropertyName.defaultProperty}) : super(name);
+}
+
+final class ConfigItemTextProperty extends ConfigItemProperty {
+  final String text;
+
+  ConfigItemTextProperty(this.text, {name = ConfigItemPropertyName.defaultProperty}) : super(name);
+}
+
+final class ConfigItemTranslatableProperty extends ConfigItemProperty {
+  final Function(AppLocalizations) callback;
+
+  ConfigItemTranslatableProperty(this.callback, {name = ConfigItemPropertyName.defaultProperty}) : super(name);
+}
+
+final class ConfigSliderValues {
   final double min;
   final double max;
   final int divisions;

@@ -6,6 +6,7 @@ import 'package:record/record.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../config/config.dart';
+import '../config/fields.dart';
 import '../entity/track_row.dart';
 import 'home_screen.dart';
 import 'settings_screen.dart';
@@ -34,9 +35,6 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {}
-
-  @override
   void dispose() {
     _audioRecorder.dispose();
     WidgetsBinding.instance.removeObserver(this);
@@ -45,21 +43,21 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
     super.dispose();
   }
 
-  dynamic _settingsGet(key, {space = ConfigSpace.global, dynamic defaultValue}) => switch (key) {
-        GlobalConfigKey.isThemeModeDark => _settingsGet(GlobalConfigKey.themeMode) == ThemeMode.dark,
-        GlobalConfigKey.isThemeModeLight => _settingsGet(GlobalConfigKey.themeMode) == ThemeMode.light,
-        GlobalConfigKey.isThemeModeSystem => _settingsGet(GlobalConfigKey.themeMode) == ThemeMode.system,
-        GlobalConfigKey.recording => _recordConfig(),
+  dynamic _settingsGet(key, {space = AppConfigSpace.global, dynamic defaultValue}) => switch (key) {
+        AppGlobalConfigFieldKey.isThemeModeDark => _settingsGet(AppGlobalConfigFieldKey.themeMode) == ThemeMode.dark,
+        AppGlobalConfigFieldKey.isThemeModeLight => _settingsGet(AppGlobalConfigFieldKey.themeMode) == ThemeMode.light,
+        AppGlobalConfigFieldKey.isThemeModeSystem => _settingsGet(AppGlobalConfigFieldKey.themeMode) == ThemeMode.system,
+        AppGlobalConfigFieldKey.recording => _recordConfig(),
         _ => switch (space) {
-            ConfigSpace.global => widget.globalSettingsBox
-                .get(AppGlobalConfig.settingField(key).boxFieldName, defaultValue: AppGlobalConfig.settingField(key).defaultValue),
-            ConfigSpace.track => widget.trackSettingsBox.get(key, defaultValue: defaultValue),
+          AppConfigSpace.global => widget.globalSettingsBox
+                .get(AppGlobalConfigFieldsCollection.field(key).boxFieldName, defaultValue: AppGlobalConfigFieldsCollection.field(key).defaultValue),
+          AppConfigSpace.track => widget.trackSettingsBox.get(key, defaultValue: defaultValue),
             Object() => throw UnimplementedError(),
             null => throw UnimplementedError(),
           },
       };
 
-  void _settingsSet(key, value, {space = ConfigSpace.global, bool updateState = false}) {
+  void _settingsSet(key, value, {space = AppConfigSpace.global, bool updateState = false}) {
     if (updateState == true) {
       setState(() {
         _settingsSetStateLess(key, value, space: space);
@@ -69,31 +67,31 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
     }
   }
 
-  Future<void> _settingsSetStateLess(key, value, {space = ConfigSpace.global}) async {
+  Future<void> _settingsSetStateLess(key, value, {space = AppConfigSpace.global}) async {
     switch (space) {
-      case ConfigSpace.global:
-        await widget.globalSettingsBox.put(AppGlobalConfig.settingField(key).boxFieldName, value);
+      case AppConfigSpace.global:
+        await widget.globalSettingsBox.put(AppGlobalConfigFieldsCollection.field(key).boxFieldName, value);
         switch (key) {
-          case GlobalConfigKey.wakelockEnabled:
+          case AppGlobalConfigFieldKey.wakelockEnabled:
             WakelockPlus.toggle(enable: value);
             break;
         }
         break;
-      case ConfigSpace.track:
+      case AppConfigSpace.track:
         await widget.trackSettingsBox.put(key, value);
         break;
     }
   }
 
   RecordConfig _recordConfig() {
-    InputDevice? inputDevice = _settingsGet(GlobalConfigKey.recordingInputDevice);
-    AudioEncoder audioEncoder = AppGlobalConfig.recordingAudioEncoder.valueDecoder(_settingsGet(GlobalConfigKey.recordingAudioEncoder));
-    int sampleRate = AppGlobalConfig.recordingSampleRate.valueDecoder(_settingsGet(GlobalConfigKey.recordingSampleRate));
-    int bitRate = AppGlobalConfig.recordingBitRate.valueDecoder(_settingsGet(GlobalConfigKey.recordingBitRate));
-    int channels = (_settingsGet(GlobalConfigKey.recordingAudioModeStereo) == true) ? 2 : 1;
-    bool autoGain = _settingsGet(GlobalConfigKey.recordingAutoGain);
-    bool echoCancel = _settingsGet(GlobalConfigKey.recordingEchoCancel);
-    bool noiseSuppress = _settingsGet(GlobalConfigKey.recordingNoiseSuppress);
+    InputDevice? inputDevice = _settingsGet(AppGlobalConfigFieldKey.recordingInputDevice);
+    AudioEncoder audioEncoder = AppGlobalConfig.recordingAudioEncoder.decode(_settingsGet(AppGlobalConfigFieldKey.recordingAudioEncoder));
+    int sampleRate = AppGlobalConfig.recordingSampleRate.decode(_settingsGet(AppGlobalConfigFieldKey.recordingSampleRate));
+    int bitRate = AppGlobalConfig.recordingBitRate.decode(_settingsGet(AppGlobalConfigFieldKey.recordingBitRate));
+    int channels = (_settingsGet(AppGlobalConfigFieldKey.recordingAudioModeStereo) == true) ? 2 : 1;
+    bool autoGain = _settingsGet(AppGlobalConfigFieldKey.recordingAutoGain);
+    bool echoCancel = _settingsGet(AppGlobalConfigFieldKey.recordingEchoCancel);
+    bool noiseSuppress = _settingsGet(AppGlobalConfigFieldKey.recordingNoiseSuppress);
     if (inputDevice == null) {
       return RecordConfig(
         encoder: audioEncoder,
@@ -127,23 +125,23 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
           GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: AppGlobalConfig.languages.values<Locale>(),
-        locale: _settingsGet(GlobalConfigKey.locale),
+        locale: _settingsGet(AppGlobalConfigFieldKey.locale),
         themeAnimationDuration: Duration(seconds: 0),
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
-            seedColor: _settingsGet(GlobalConfigKey.themeSeedColor),
+            seedColor: _settingsGet(AppGlobalConfigFieldKey.themeSeedColor),
             brightness: Brightness.light,
           ),
           useMaterial3: true,
         ),
         darkTheme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
-            seedColor: _settingsGet(GlobalConfigKey.themeSeedColor),
+            seedColor: _settingsGet(AppGlobalConfigFieldKey.themeSeedColor),
             brightness: Brightness.dark,
           ),
           useMaterial3: true,
         ),
-        themeMode: _settingsGet(GlobalConfigKey.themeMode),
+        themeMode: _settingsGet(AppGlobalConfigFieldKey.themeMode),
         initialRoute: '/',
         routes: {
           '/': (context) => HomeScreen(

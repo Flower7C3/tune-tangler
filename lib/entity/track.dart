@@ -7,6 +7,7 @@ import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:record/record.dart';
 import 'package:tune_tangler/config/config.dart';
 
+import '../config/config_collection.dart';
 import '../config/keyboard.dart';
 import 'track_row.dart';
 
@@ -17,6 +18,7 @@ enum RecorderState {
 }
 
 enum TrackState {
+  undefined,
   empty,
   recording,
   ready,
@@ -142,12 +144,8 @@ class Track {
 
   void startPlaying() {
     String? p = path;
-    if (state.value != TrackState.empty && p != null) {
-      // if (_player.source == null) {
-      //   _player.play(DeviceFileSource(p));
-      // } else {
+    if ((state.value == TrackState.stopped || state.value == TrackState.paused) && p != null) {
       _player.resume();
-      // }
       setPlayerState(PlayerState.playing);
     }
   }
@@ -202,14 +200,13 @@ class Track {
       _player.getDuration().then((value) => (duration.value == value) ? null : setDuration(value));
       _player.setVolume(playbackVolume.value);
       _player.setBalance(playbackBalance.value);
-      _player.setReleaseMode(playbackModeSingle.value ? ReleaseMode.stop : ReleaseMode.loop);
+      _player.setReleaseMode(playbackModeSingle.value ? ReleaseMode.release : ReleaseMode.loop);
       _player.setPlaybackRate(playbackSpeed.value);
     });
   }
 
   _clearPath() {
     setRecordingState(RecorderState.empty);
-    setPlayerState(PlayerState.disposed);
     setAudioEncoder(null);
     setSampleRate(null);
     setBitRate(null);
@@ -265,7 +262,7 @@ class Track {
     updateState();
   }
 
-  final ValueNotifier<TrackState> state = ValueNotifier(TrackState.empty);
+  final ValueNotifier<TrackState> state = ValueNotifier(TrackState.undefined);
 
   final ValueNotifier<IconData> stateIcon = ValueNotifier(Icons.square_rounded);
 
@@ -278,20 +275,21 @@ class Track {
           PlayerState.playing => TrackState.playing,
           PlayerState.paused => TrackState.paused,
           PlayerState.disposed => TrackState.stopped,
+          PlayerState.completed => TrackState.stopped,
           _ => TrackState.empty,
         },
     };
-    stateIcon.value = AppGlobalConfig.trackState.icon(state.value, defaultValue: Icons.error_outline_rounded);
+    stateIcon.value = AppGlobalConfig.trackState.icon(state.value);
   }
 
   Color stateForegroundColor(BuildContext context) =>
-      AppGlobalConfig.trackStateForegroundColor.color(state.value, context: context, defaultValue: Theme.of(context).colorScheme.primary);
+      AppGlobalConfig.trackState.color(state.value, context: context, name: ConfigItemPropertyName.foregroundColor);
 
   Color stateBackgroundColor(BuildContext context) =>
-      AppGlobalConfig.trackStateBackgroundColor.color(state.value, context: context, defaultValue: Theme.of(context).colorScheme.primaryFixedDim);
+      AppGlobalConfig.trackState.color(state.value, context: context, name: ConfigItemPropertyName.backgroundColor);
 
   Color stateProgressColor(BuildContext context) =>
-      AppGlobalConfig.trackStateProgressColor.color(state.value, context: context, defaultValue: Theme.of(context).colorScheme.primaryContainer);
+      AppGlobalConfig.trackState.color(state.value, context: context, name: ConfigItemPropertyName.progressColor);
 
   ///*************************************************************************************************************************************************
   /// PLAYBACK VOLUME
@@ -347,7 +345,7 @@ class Track {
   final ValueNotifier<bool> playbackModeSingle = ValueNotifier(defaultPlaybackModeSingle);
 
   Future<void> setPlaybackMode(bool value) async {
-    await _player.setReleaseMode(value ? ReleaseMode.stop : ReleaseMode.loop);
+    await _player.setReleaseMode(value ? ReleaseMode.release : ReleaseMode.loop);
     playbackModeSingle.value = value;
   }
 

@@ -6,6 +6,7 @@ import 'package:tune_tangler/screen/screen.dart';
 
 import '../config/app_icon.dart';
 import '../config/config.dart';
+import '../config/fields.dart';
 import '../entity/track.dart';
 import '../entity/track_row.dart';
 import '../src/track_wrapper.dart';
@@ -21,9 +22,9 @@ class SettingsScreen extends StatefulWidget implements ScreenInterface {
   });
 
   @override
-  final Function(dynamic key, {ConfigSpace space, dynamic defaultValue}) settingsGet;
+  final Function(dynamic key, {AppConfigSpace space, dynamic defaultValue}) settingsGet;
   @override
-  final void Function(dynamic key, dynamic value, {ConfigSpace space, bool updateState}) settingsSet;
+  final void Function(dynamic key, dynamic value, {AppConfigSpace space, bool updateState}) settingsSet;
   @override
   final AudioRecorder audioRecorder;
   @override
@@ -104,9 +105,9 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
                             _trackWrapper.setTracksPlaybackVolume(widget.tracksList.all(), Track.defaultPlaybackVolume);
                             _trackWrapper.setTracksPlaybackBalance(widget.tracksList.all(), Track.defaultPlaybackBalance);
                             _trackWrapper.setTracksPlaybackSpeed(widget.tracksList.all(), Track.defaultPlaybackSpeed);
-                            AppGlobalConfig.settingsFields().forEach((GlobalConfigKeyNameDefaults field) {
+                            for (AppGlobalConfigField field in AppGlobalConfigFieldsCollection.list) {
                               widget.settingsSet(field.key, field.defaultValue, updateState: true);
-                            });
+                            }
                             _uiWrapper.toast(_trans.allSettingsResetSuccess, icon: AppIcon.resetAllSettings);
                             Navigator.pop(context, 'Yes');
                           });
@@ -149,17 +150,17 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
         ListTile(
             leading: Icon(AppIcon.language),
             title: Text(_trans.languageVersion),
-            trailing: _uiWrapper.trailingLabel(widget.settingsGet(GlobalConfigKey.locale).toLanguageTag()),
+            trailing: _uiWrapper.trailingLabel(widget.settingsGet(AppGlobalConfigFieldKey.locale).toLanguageTag()),
             onTap: () {
               var options = <Widget>[];
               AppGlobalConfig.languages.values<Locale>().forEach((Locale locale) {
-                var name = AppGlobalConfig.languages.name(locale);
+                var name = AppGlobalConfig.languages.text(locale);
                 var code = locale.toLanguageTag();
                 options.add(SimpleDialogOption(
                     padding: EdgeInsets.all(16),
                     onPressed: () {
                       Navigator.pop(context, locale);
-                      widget.settingsSet(GlobalConfigKey.locale, locale, updateState: true);
+                      widget.settingsSet(AppGlobalConfigFieldKey.locale, locale, updateState: true);
                     },
                     child: Text('$name ($code)')));
               });
@@ -172,9 +173,9 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
           disabledLabel: _trans.lightMode,
           enabledIcon: AppIcon.screenDarkThemeMode,
           enabledLabel: _trans.darkMode,
-          switchValue: widget.settingsGet(GlobalConfigKey.isThemeModeDark),
+          switchValue: widget.settingsGet(AppGlobalConfigFieldKey.isThemeModeDark),
           successAction: (bool value) {
-            widget.settingsSet(GlobalConfigKey.themeMode, value ? ThemeMode.dark : ThemeMode.light, updateState: true);
+            widget.settingsSet(AppGlobalConfigFieldKey.themeMode, value ? ThemeMode.dark : ThemeMode.light, updateState: true);
             return null;
           },
         ),
@@ -185,7 +186,7 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
                 width: 30,
                 height: 30,
                 decoration: BoxDecoration(
-                  color: widget.settingsGet(GlobalConfigKey.themeSeedColor),
+                  color: widget.settingsGet(AppGlobalConfigFieldKey.themeSeedColor),
                   borderRadius: BorderRadius.circular(24),
                 )),
             onTap: () {
@@ -202,10 +203,10 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
                               padding: EdgeInsets.all(16),
                             ),
                             onPressed: () {
-                              widget.settingsSet(GlobalConfigKey.themeSeedColor, color, updateState: true);
+                              widget.settingsSet(AppGlobalConfigFieldKey.themeSeedColor, color, updateState: true);
                               Navigator.pop(context, color.toString());
                               _uiWrapper.toast(
-                                _trans.screenThemeColorSuccess(AppGlobalConfig.userInterfaceColor.translation(color, trans: _trans)),
+                                _trans.screenThemeColorSuccess(AppGlobalConfig.userInterfaceColor.translate(color, trans: _trans)),
                                 icon: AppIcon.screenThemeColor,
                               );
                             },
@@ -219,9 +220,9 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
           disabledLabel: _trans.disabled,
           enabledIcon: AppIcon.keepScreenOnEnabled,
           enabledLabel: _trans.enabled,
-          switchValue: widget.settingsGet(GlobalConfigKey.wakelockEnabled),
+          switchValue: widget.settingsGet(AppGlobalConfigFieldKey.wakelockEnabled),
           successAction: (bool value) {
-            widget.settingsSet(GlobalConfigKey.wakelockEnabled, value, updateState: true);
+            widget.settingsSet(AppGlobalConfigFieldKey.wakelockEnabled, value, updateState: true);
             return value ? _trans.keepScreenOnIsDisabledSuccess : _trans.keepScreenOnIsEnabledSuccess;
           },
         ),
@@ -230,14 +231,14 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
           _trans.gridRowsAmount,
           _trans.gridRowsAmountTitle,
           _trans.gridRowsAmountInfo,
-          double.parse(widget.settingsGet(GlobalConfigKey.gridRowsAmount).toString()),
+          double.parse(widget.settingsGet(AppGlobalConfigFieldKey.gridRowsAmount).toString()),
           AppGlobalConfig.gridRows.sliderValues.min,
           AppGlobalConfig.gridRows.sliderValues.max,
           AppGlobalConfig.gridRows.sliderValues.divisions,
           _trans.buttonCancel,
           _trans.buttonSave,
           successAction: (double value, String formattedValue) {
-            widget.settingsSet(GlobalConfigKey.gridRowsAmount, value.toInt(), updateState: true);
+            widget.settingsSet(AppGlobalConfigFieldKey.gridRowsAmount, value.toInt(), updateState: true);
             return _trans.gridRowsAmountSuccess(formattedValue);
           },
           configCollection: AppGlobalConfig.gridRows,
@@ -247,14 +248,14 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
           _trans.gridColsAmount,
           _trans.gridColsAmountTitle,
           _trans.gridColsAmountInfo,
-          double.parse(widget.settingsGet(GlobalConfigKey.gridColsAmount).toString()),
+          double.parse(widget.settingsGet(AppGlobalConfigFieldKey.gridColsAmount).toString()),
           AppGlobalConfig.gridCols.sliderValues.min,
           AppGlobalConfig.gridCols.sliderValues.max,
           AppGlobalConfig.gridCols.sliderValues.divisions,
           _trans.buttonCancel,
           _trans.buttonSave,
           successAction: (double value, String formattedValue) {
-            widget.settingsSet(GlobalConfigKey.gridColsAmount, value.toInt(), updateState: true);
+            widget.settingsSet(AppGlobalConfigFieldKey.gridColsAmount, value.toInt(), updateState: true);
             return _trans.gridColsAmountSuccess(formattedValue);
           },
           configCollection: AppGlobalConfig.gridCols,
@@ -336,7 +337,7 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
           _trans.buttonSave,
           successAction: (double value, String formattedValue) {
             _trackWrapper.setTracksPlaybackBalance(widget.tracksList.all(), value);
-            return _trans.allTracksPlaybackBalanceSuccessSet(AppGlobalConfig.trackPlaybackBalance.translation(value, trans: _trans));
+            return _trans.allTracksPlaybackBalanceSuccessSet(AppGlobalConfig.trackPlaybackBalance.translate(value, trans: _trans));
           },
           withTrailing: false,
           // configCollection: AppGlobalConfig.trackPlaybackBalanceSliderValues,
@@ -374,8 +375,8 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
             leading: Icon(AppIcon.recordingInputDevice),
             title: Text(_trans.recordingInputDevice),
             subtitle: Text(
-              widget.settingsGet(GlobalConfigKey.recordingInputDevice) != null
-                  ? widget.settingsGet(GlobalConfigKey.recordingInputDevice).label
+              widget.settingsGet(AppGlobalConfigFieldKey.recordingInputDevice) != null
+                  ? widget.settingsGet(AppGlobalConfigFieldKey.recordingInputDevice).label
                   : _trans.defaultDevice,
             ),
             onTap: () async {
@@ -384,7 +385,7 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
                   padding: EdgeInsets.all(16),
                   onPressed: () {
                     Navigator.pop(context, 'recordingInputDevice');
-                    widget.settingsSet(GlobalConfigKey.recordingInputDevice, null, updateState: true);
+                    widget.settingsSet(AppGlobalConfigFieldKey.recordingInputDevice, null, updateState: true);
                   },
                   child: Text(_trans.defaultDevice)));
               await widget.audioRecorder.listInputDevices().then((List<InputDevice> inputDevices) {
@@ -393,7 +394,7 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
                       padding: EdgeInsets.all(16),
                       onPressed: () {
                         setState(() {
-                          widget.settingsSet(GlobalConfigKey.recordingInputDevice, inputDevice, updateState: true);
+                          widget.settingsSet(AppGlobalConfigFieldKey.recordingInputDevice, inputDevice, updateState: true);
                         });
                         Navigator.pop(context, 'recordingInputDevice');
                       },
@@ -409,13 +410,13 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
           null,
           _trans.recordingAudioEncoderTitle,
           _trans.recordingAudioEncoderInfo,
-          widget.settingsGet(GlobalConfigKey.recordingAudioEncoder),
+          widget.settingsGet(AppGlobalConfigFieldKey.recordingAudioEncoder),
           AppGlobalConfig.recordingAudioEncoder.values().toList(),
           _trans.buttonCancel,
           _trans.buttonSave,
           successAction: (dynamic value, String formattedValue) {
             widget.settingsSet(
-              GlobalConfigKey.recordingAudioEncoder,
+              AppGlobalConfigFieldKey.recordingAudioEncoder,
               value,
               updateState: true,
             );
@@ -430,12 +431,12 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
           _trans.recordingSampleRateInfo,
           _trans.recordingSampleRateTitle,
           _trans.recordingSampleRateInfo,
-          widget.settingsGet(GlobalConfigKey.recordingSampleRate),
+          widget.settingsGet(AppGlobalConfigFieldKey.recordingSampleRate),
           AppGlobalConfig.recordingSampleRate.values().toList(),
           _trans.buttonCancel,
           _trans.buttonSave,
           successAction: (dynamic value, String formattedValue) {
-            widget.settingsSet(GlobalConfigKey.recordingSampleRate, value, updateState: true);
+            widget.settingsSet(AppGlobalConfigFieldKey.recordingSampleRate, value, updateState: true);
             return _trans.recordingAudioEncoderSuccess(formattedValue);
           },
           configCollection: AppGlobalConfig.recordingSampleRate,
@@ -446,12 +447,12 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
           _trans.recordingBitRateInfo,
           _trans.recordingBitRateTitle,
           _trans.recordingBitRateInfo,
-          widget.settingsGet(GlobalConfigKey.recordingBitRate),
+          widget.settingsGet(AppGlobalConfigFieldKey.recordingBitRate),
           AppGlobalConfig.recordingBitRate.values().toList(),
           _trans.buttonCancel,
           _trans.buttonSave,
           successAction: (dynamic value, String formattedValue) {
-            widget.settingsSet(GlobalConfigKey.recordingBitRate, value, updateState: true);
+            widget.settingsSet(AppGlobalConfigFieldKey.recordingBitRate, value, updateState: true);
             return _trans.recordingAudioEncoderSuccess(formattedValue);
           },
           configCollection: AppGlobalConfig.recordingBitRate,
@@ -463,9 +464,9 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
           disabledLabel: _trans.recordingAudioModeOptionMono,
           enabledIcon: AppIcon.recordingAudioModeStereo,
           enabledLabel: _trans.recordingAudioModeOptionStereo,
-          switchValue: widget.settingsGet(GlobalConfigKey.recordingAudioModeStereo),
+          switchValue: widget.settingsGet(AppGlobalConfigFieldKey.recordingAudioModeStereo),
           successAction: (bool value) {
-            widget.settingsSet(GlobalConfigKey.recordingAudioModeStereo, value, updateState: true);
+            widget.settingsSet(AppGlobalConfigFieldKey.recordingAudioModeStereo, value, updateState: true);
             return _trans.recordingAudioModeSuccess(value ? _trans.recordingAudioModeOptionStereo : _trans.recordingAudioModeOptionMono);
           },
         ),
@@ -475,9 +476,9 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
           disabledIcon: AppIcon.no,
           enabledIcon: AppIcon.yes,
           enabledLabel: _trans.recordingAutoGainInfo,
-          switchValue: widget.settingsGet(GlobalConfigKey.recordingAutoGain),
+          switchValue: widget.settingsGet(AppGlobalConfigFieldKey.recordingAutoGain),
           successAction: (bool value) {
-            widget.settingsSet(GlobalConfigKey.recordingAutoGain, value, updateState: true);
+            widget.settingsSet(AppGlobalConfigFieldKey.recordingAutoGain, value, updateState: true);
             return _trans.recordingAutoGainSuccess(value ? _trans.yes : _trans.no);
           },
         ),
@@ -487,9 +488,9 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
           disabledIcon: AppIcon.no,
           enabledIcon: AppIcon.yes,
           enabledLabel: _trans.recordingEchoCancelInfo,
-          switchValue: widget.settingsGet(GlobalConfigKey.recordingEchoCancel),
+          switchValue: widget.settingsGet(AppGlobalConfigFieldKey.recordingEchoCancel),
           successAction: (bool value) {
-            widget.settingsSet(GlobalConfigKey.recordingEchoCancel, value, updateState: true);
+            widget.settingsSet(AppGlobalConfigFieldKey.recordingEchoCancel, value, updateState: true);
             return _trans.recordingEchoCancelSuccess(value ? _trans.yes : _trans.no);
           },
         ),
@@ -499,9 +500,9 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
           disabledIcon: AppIcon.no,
           enabledIcon: AppIcon.yes,
           enabledLabel: _trans.recordingNoiseSuppressInfo,
-          switchValue: widget.settingsGet(GlobalConfigKey.recordingNoiseSuppress),
+          switchValue: widget.settingsGet(AppGlobalConfigFieldKey.recordingNoiseSuppress),
           successAction: (bool value) {
-            widget.settingsSet(GlobalConfigKey.recordingNoiseSuppress, value, updateState: true);
+            widget.settingsSet(AppGlobalConfigFieldKey.recordingNoiseSuppress, value, updateState: true);
             return _trans.recordingNoiseSuppressSuccess(value ? _trans.yes : _trans.no);
           },
         ),
@@ -509,9 +510,9 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
         ...AppGlobalConfig.permissions.values<Permission>().map((Permission permission) {
           final status = _permissionStatuses[permission] ?? PermissionStatus.denied;
           return ListTile(
-            leading: Icon(AppGlobalConfig.permissions.iconOrNull(permission)),
-            title: Text(AppGlobalConfig.permissions.translationOrNull(permission, trans: _trans).toString()),
-            subtitle: Text(AppGlobalConfig.permissionsStatus.translation(status, trans: _trans)),
+            leading: Icon(AppGlobalConfig.permissions.icon(permission)),
+            title: Text(AppGlobalConfig.permissions.translate(permission, trans: _trans)),
+            subtitle: Text(AppGlobalConfig.permissionsStatus.translate(status, trans: _trans)),
             trailing: status.isGranted
                 ? Icon(AppIcon.yes, color: Theme.of(context).colorScheme.primary)
                 : ElevatedButton(
