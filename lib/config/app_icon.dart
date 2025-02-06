@@ -26,15 +26,19 @@ class AppIcon {
   static IconData recordingFile = Icons.audio_file_outlined;
   static IconData trackKeyboardKey = Icons.keyboard_alt_rounded;
 
-  static Container trackKeyboardKeyBox(Track track, {required UIWrapper ui, required BuildContext context, required Color foregroundColor}) =>
+  static Container trackKeyboardKeyBox(
+    Track track, {
+    required UIWrapper ui,
+    required BuildContext context,
+    required Color foregroundColor,
+    required double size,
+  }) =>
       Container(
-          width: ui.trackButtonRoundSize,
-          height: ui.trackButtonRoundSize,
+          width: size,
+          height: size,
           alignment: Alignment.center,
-          decoration: BoxDecoration(
-              color: foregroundColor, borderRadius: BorderRadius.all(Radius.circular(ui.trackButtonRoundRadius)), shape: BoxShape.rectangle),
-          child: Text(track.keyboardKey.value,
-              style: TextStyle(fontSize: ui.trackButtonRoundSize, height: 1.0, color: track.stateBackgroundColor(context))));
+          decoration: BoxDecoration(color: foregroundColor, borderRadius: BorderRadius.all(Radius.circular(ui.gridGap)), shape: BoxShape.rectangle),
+          child: Text(track.keyboardKey.value, style: TextStyle(fontSize: size, height: 1.0, color: track.stateBackgroundColor(context))));
 
   static IconData trackPlaybackMode = Icons.repeat_on_rounded;
   static IconData trackSinglePlaybackMode = Icons.repeat_one_rounded;
@@ -76,5 +80,6 @@ class AppIcon {
 
   static IconData displaySettings = Icons.display_settings;
   static IconData trackSettings = Icons.graphic_eq_rounded;
-  static IconData recordSettings = Icons.settings_voice;
+  static IconData recordingSettings = Icons.settings_voice;
+  static IconData permissions = Icons.shield_outlined;
 }

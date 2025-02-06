@@ -86,7 +86,7 @@ class TrackWrapper {
         throw Exception(_trans.trackRecordingStartNoNotificationPermission);
       }
 
-      RecordConfig recordConfig = widget.settingsGet(AppGlobalConfigFieldKey.recording);
+      RecordConfig recordConfig = widget.settingsGet(AppConfigFieldKey.recording);
       String fileExtension = AppGlobalConfig.readerEncoderExtension.text(recordConfig.encoder);
       String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
       String filePath = await getApplicationDocumentsDirectory().then((value) => '${value.path}/${track.id}.$timestamp.$fileExtension');
@@ -137,16 +137,14 @@ class TrackWrapper {
     track.stopTimer();
     track.setPath(null);
     save(track);
-    _uiWrapper.toast(_trans.trackRecordingCancelled(track.name.value),
-        icon: AppGlobalConfig.trackState.icon(TrackState.empty));
+    _uiWrapper.toast(_trans.trackRecordingCancelled(track.name.value), icon: AppGlobalConfig.trackState.icon(TrackState.empty));
   }
 
   Future<void> _stopAndSaveRecording(Track track) async {
     try {
       String? path = await widget.audioRecorder.stop();
       track.setPath(path);
-      _uiWrapper.toast(_trans.trackRecordingStopSuccess(track.name.value),
-          icon: AppGlobalConfig.trackState.icon(TrackState.ready));
+      _uiWrapper.toast(_trans.trackRecordingStopSuccess(track.name.value), icon: AppGlobalConfig.trackState.icon(TrackState.idle));
     } catch (e) {
       track.setRecordingState(RecorderState.empty);
       _uiWrapper.toast(_trans.trackRecordingStopError(e.toString(), track.name.value), icon: AppIcon.exception, type: ToastType.error, duration: 4);
@@ -264,7 +262,7 @@ class TrackWrapper {
       case TrackState.recording:
         _stopAndSaveRecording(track);
         break;
-      case TrackState.stopped:
+      case TrackState.idle:
         track.startPlaying();
         save(track);
         break;
@@ -276,8 +274,6 @@ class TrackWrapper {
         track.resumePlaying();
         save(track);
         break;
-      default:
-        break;
     }
   }
 
@@ -288,15 +284,23 @@ class TrackWrapper {
     String rowName,
   ) =>
       Container(
-          width: _uiWrapper.gridFirstColumnWidth,
+          width: Theme.of(context).textTheme.displaySmall!.fontSize,
           padding: EdgeInsets.zero,
           child: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
-            _uiWrapper.rowButton(_uiWrapper.mediaPlayerButton(AppIcon.trackPlayingStart, _trans.rowTracksPlayingStart(rowName), onPressed: () {
-              startTracksPlaying(widget.tracksList.row(rowIndex));
-            })),
-            _uiWrapper.rowButton(_uiWrapper.mediaPlayerButton(AppIcon.trackPlayingStop, _trans.rowTracksPlayingStop(rowName), onPressed: () {
-              stopTracksPlaying(widget.tracksList.row(rowIndex));
-            })),
+            _uiWrapper.rowButton(_uiWrapper.mediaPlayerButton(
+              AppIcon.trackPlayingStart,
+              _trans.rowTracksPlayingStart(rowName),
+              onPressed: () {
+                startTracksPlaying(widget.tracksList.row(rowIndex));
+              },
+            )),
+            _uiWrapper.rowButton(_uiWrapper.mediaPlayerButton(
+              AppIcon.trackPlayingStop,
+              _trans.rowTracksPlayingStop(rowName),
+              onPressed: () {
+                stopTracksPlaying(widget.tracksList.row(rowIndex));
+              },
+            )),
             _uiWrapper.rowButton(_rowMenu(rowName, widget.tracksList.row(rowIndex))),
           ]));
 
@@ -306,7 +310,7 @@ class TrackWrapper {
   ) =>
       PopupMenuButton<dynamic>(
           style: _uiWrapper.circledButtonStyle(),
-          icon: Icon(AppIcon.moreMenu, size: _uiWrapper.rowButtonIconSize, color: Theme.of(context).colorScheme.secondary),
+          icon: Icon(AppIcon.moreMenu, color: Theme.of(context).colorScheme.secondary),
           itemBuilder: (BuildContext context) => _rowMenuItems(rowName, tracksList),
           onSelected: (dynamic selection) {
             _rowMenuItemSelected(selection, rowName, tracksList);
@@ -412,56 +416,59 @@ class TrackWrapper {
 
   List<Widget> trackButton(Track track) => [
         SizedBox(
-            height: _uiWrapper.trackItemWidth - _uiWrapper.trackPadding,
+            height: Theme.of(context).textTheme.titleLarge!.fontSize! * 3,
             child: Stack(fit: StackFit.expand, children: [
               Align(
                   alignment: Alignment.topLeft,
                   child: ValueListenableBuilder(
                       valueListenable: track.stateIcon,
                       builder: (context, stateIcon, child) =>
-                          Icon(stateIcon, size: _uiWrapper.trackButtonIconSize, color: track.stateForegroundColor(context)))),
+                          Icon(stateIcon, size: Theme.of(context).textTheme.titleMedium!.fontSize, color: track.stateForegroundColor(context)))),
               Align(
                   alignment: Alignment.topRight,
                   child: ValueListenableBuilder(
                       valueListenable: track.keyboardKey,
                       builder: (context, keyboardKey, child) => AppIcon.trackKeyboardKeyBox(track,
-                          ui: _uiWrapper, context: context, foregroundColor: track.stateForegroundColor(context)))),
+                          ui: _uiWrapper,
+                          context: context,
+                          foregroundColor: track.stateForegroundColor(context),
+                          size: Theme.of(context).textTheme.titleMedium!.fontSize!))),
               Align(
                   alignment: Alignment.bottomLeft,
                   child: ValueListenableBuilder(
                       valueListenable: track.playbackVolume,
-                      builder: (context, playbackVolume, child) =>
-                          Icon(track.playbackVolumeIcon, size: _uiWrapper.trackButtonIconSize, color: track.stateForegroundColor(context)))),
+                      builder: (context, playbackVolume, child) => Icon(track.playbackVolumeIcon,
+                          size: Theme.of(context).textTheme.titleMedium!.fontSize, color: track.stateForegroundColor(context)))),
               Align(
                   alignment: Alignment.bottomRight,
                   child: ValueListenableBuilder(
                       valueListenable: track.playbackBalance,
-                      builder: (context, playbackBalance, child) =>
-                          Icon(track.playbackBalanceIcon, size: _uiWrapper.trackButtonIconSize, color: track.stateForegroundColor(context)))),
+                      builder: (context, playbackBalance, child) => Icon(track.playbackBalanceIcon,
+                          size: Theme.of(context).textTheme.titleMedium!.fontSize, color: track.stateForegroundColor(context)))),
               Align(
                   alignment: Alignment.bottomCenter,
                   child: ValueListenableBuilder(
                       valueListenable: track.playbackBalance,
                       builder: (context, playbackBalance, child) => Text(AppGlobalConfig.trackPlaybackBalance.text(playbackBalance),
-                          style: TextStyle(fontSize: _uiWrapper.trackInfoBalanceFontSize, color: track.stateForegroundColor(context))))),
+                          style: TextStyle(fontSize: Theme.of(context).textTheme.titleSmall!.fontSize, color: track.stateForegroundColor(context))))),
               Align(
                   alignment: Alignment.centerLeft,
                   child: ValueListenableBuilder(
                       valueListenable: track.playbackSpeed,
                       builder: (context, playbackSpeed, child) => Text(AppGlobalConfig.trackPlaybackSpeed.format(playbackSpeed),
-                          style: TextStyle(fontSize: _uiWrapper.trackInfoSpeedFontSize, color: track.stateForegroundColor(context))))),
+                          style: TextStyle(fontSize: Theme.of(context).textTheme.labelSmall!.fontSize, color: track.stateForegroundColor(context))))),
               Align(
                   alignment: Alignment.centerRight,
                   child: ValueListenableBuilder(
                       valueListenable: track.playbackModeSingle,
-                      builder: (context, playbackModeSingle, child) =>
-                          Icon(track.playbackModeIcon, size: _uiWrapper.trackButtonIconSize, color: track.stateForegroundColor(context)))),
+                      builder: (context, playbackModeSingle, child) => Icon(track.playbackModeIcon,
+                          size: Theme.of(context).textTheme.titleMedium!.fontSize, color: track.stateForegroundColor(context)))),
               Align(
                   alignment: Alignment.center,
                   child: ValueListenableBuilder(
                       valueListenable: track.name,
-                      builder: (context, name, child) =>
-                          Text(_trans.cell(name), style: TextStyle(fontSize: _uiWrapper.trackButtonTitleFontSize, fontWeight: FontWeight.bold)))),
+                      builder: (context, name, child) => Text(_trans.cell(name),
+                          style: TextStyle(fontSize: Theme.of(context).textTheme.titleLarge!.fontSize, fontWeight: FontWeight.bold)))),
             ])),
         ValueListenableBuilder<double>(
           valueListenable: track.progress,
@@ -479,8 +486,8 @@ class TrackWrapper {
                         AppIcon.trackDuration,
                         _uiWrapper.formatTime(clock.toInt()),
                         iconColor: track.stateForegroundColor(context),
-                        iconSize: _uiWrapper.trackInfoIconSize,
-                        fontSize: _uiWrapper.trackInfoFontSize,
+                        iconSize: Theme.of(context).textTheme.labelLarge!.fontSize! / 1.4 * _uiWrapper.iconSizeMultiplier,
+                        fontSize: Theme.of(context).textTheme.labelLarge!.fontSize! / 1.4,
                       ))
               : ValueListenableBuilder<Duration?>(
                   valueListenable: track.duration,
@@ -488,8 +495,8 @@ class TrackWrapper {
                         AppIcon.trackDuration,
                         _uiWrapper.formatTime((duration == null) ? 0 : duration.inMilliseconds),
                         iconColor: track.stateForegroundColor(context),
-                        iconSize: _uiWrapper.trackInfoIconSize,
-                        fontSize: _uiWrapper.trackInfoFontSize,
+                        iconSize: Theme.of(context).textTheme.labelLarge!.fontSize! / 1.4 * _uiWrapper.iconSizeMultiplier,
+                        fontSize: Theme.of(context).textTheme.labelLarge!.fontSize! / 1.4,
                       )),
         ),
       ];
@@ -506,101 +513,128 @@ class TrackWrapper {
         context: context,
         builder: (context) => LayoutBuilder(
             builder: (context, constraints) => DraggableScrollableSheet(
-                  expand: false,
-                  initialChildSize: (500 / constraints.maxHeight).clamp(0.3, 0.9),
-                  minChildSize: (500 / constraints.maxHeight).clamp(0.3, 0.9),
-                  maxChildSize: (500 / constraints.maxHeight).clamp(0.3, 0.9),
-                  builder: (context, scrollController) => Padding(
-                      padding: EdgeInsets.all(_uiWrapper.trackDetailsPadding1x),
-                      child: Column(mainAxisSize: MainAxisSize.min, children: [
-                        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.center, children: [
-                          ValueListenableBuilder(
-                            valueListenable: track.stateIcon,
-                            builder: (context, icon, child) => Icon(icon),
-                          ),
-                          ValueListenableBuilder(
-                              valueListenable: track.name,
-                              builder: (context, name, child) => Text(_trans.trackTitle(name),
-                                  style: TextStyle(fontSize: _uiWrapper.trackDetailsTitleFontSize, fontWeight: FontWeight.bold))),
-                          ValueListenableBuilder(
-                              valueListenable: track.keyboardKey,
-                              builder: (context, keyboardKey, child) => AppIcon.trackKeyboardKeyBox(track,
-                                  ui: _uiWrapper, context: context, foregroundColor: Theme.of(context).colorScheme.primary)),
-                        ]),
-                        SizedBox(height: _uiWrapper.trackDetailsPadding1x),
-                        const Divider(height: 1),
-                        ValueListenableBuilder(
-                            valueListenable: track.recorderState,
-                            builder: (context, recorderState, child) => Expanded(
+                expand: false,
+                initialChildSize: (500 / constraints.maxHeight).clamp(0.3, 0.9),
+                minChildSize: (500 / constraints.maxHeight).clamp(0.3, 0.9),
+                maxChildSize: (500 / constraints.maxHeight).clamp(0.3, 0.9),
+                builder: (context, scrollController) => Padding(
+                    padding: EdgeInsets.all(Theme.of(context).textTheme.titleLarge!.fontSize!),
+                    child: ValueListenableBuilder(
+                        valueListenable: track.recorderState,
+                        builder: (context, recorderState, child) => Column(mainAxisSize: MainAxisSize.min, children: [
+                              Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: _trackDetailsTitle(track)),
+                              SizedBox(height: Theme.of(context).textTheme.labelSmall!.fontSize),
+                              const Divider(height: 1),
+                              Expanded(
                                   child: SingleChildScrollView(
-                                    reverse: true,
-                                    controller: scrollController,
-                                    child: Column(
-                                        mainAxisSize: MainAxisSize.max,
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          SizedBox(height: _uiWrapper.trackDetailsPadding1x),
-                                          if (recorderState == RecorderState.ready && track.path != null)
-                                            _uiWrapper.statusIconRow(
-                                              AppIcon.recordingFile,
-                                              path.basename(track.path.toString()),
-                                              iconSize: 16,
-                                              fontSize: 14,
-                                              separatorSize: _uiWrapper.iconToTextOffset,
-                                            ),
-                                          if (track.audioEncoder != null)
-                                            _uiWrapper.statusIconRow(
-                                              AppIcon.recordingAudioEncoder,
-                                              AppGlobalConfig.recordingAudioEncoder.translate(track.audioEncoder?.index.toDouble(), trans: _trans),
-                                              iconSize: 16,
-                                              fontSize: 14,
-                                              separatorSize: _uiWrapper.iconToTextOffset,
-                                            ),
-                                          if (track.sampleRate != null)
-                                            _uiWrapper.statusIconRow(
-                                              AppIcon.recordingSampleRate,
-                                              _trans.recordingSampleRateValue(
-                                                  AppGlobalConfig.recordingSampleRate.format(track.sampleRate?.toDouble())),
-                                              iconSize: 16,
-                                              fontSize: 14,
-                                              separatorSize: _uiWrapper.iconToTextOffset,
-                                            ),
-                                          if (track.bitRate != null)
-                                            _uiWrapper.statusIconRow(
-                                              AppIcon.recordingBitRate,
-                                              _trans
-                                                  .recordingBitRateValue(AppGlobalConfig.recordingBitRate.format(track.bitRate?.toDouble())),
-                                              iconSize: 16,
-                                              fontSize: 14,
-                                              separatorSize: _uiWrapper.iconToTextOffset,
-                                            ),
-                                          if (recorderState == RecorderState.ready) _uiWrapper.trackDetailsLine(_trackDetailsSeek(track)),
-                                          if (recorderState == RecorderState.ready)
-                                            _uiWrapper.trackDetailsLine(_trackDetailsProgress(track),
-                                                mainAxisAlignment: MainAxisAlignment.spaceBetween),
-                                          SizedBox(height: _uiWrapper.trackDetailsPadding1x),
-                                          _uiWrapper.trackDetailsLine(_trackDetailsPlaybackSpeedControl(track),
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween),
-                                          _uiWrapper.trackDetailsLine(_trackDetailsPlaybackVolumeControl(track),
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween),
-                                          _uiWrapper.trackDetailsLine(_trackDetailsPlaybackBalanceControl(track),
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween),
-                                          SizedBox(height: _uiWrapper.trackDetailsPadding1x),
-                                        ]),
-                                  ),
-                                )),
-                        const Divider(height: 1),
-                        SizedBox(height: _uiWrapper.trackDetailsPadding1x),
-                        ValueListenableBuilder(
-                            valueListenable: track.recorderState,
-                            builder: (context, recorderState, child) => _uiWrapper.trackDetailsLine(_trackDetailsPlayerIcons(track))),
-                      ])),
-                )));
+                                      controller: scrollController,
+                                      child: Column(
+                                          mainAxisSize: MainAxisSize.max,
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: _trackDetailsScroll(track, recorderState)))),
+                              const Divider(height: 1),
+                              SizedBox(height: Theme.of(context).textTheme.labelSmall!.fontSize),
+                              ValueListenableBuilder(
+                                  valueListenable: track.recorderState,
+                                  builder: (context, recorderState, child) => _uiWrapper.trackDetailsLine(_trackDetailsPlayerIcons(track))),
+                            ]))))));
   }
 
   /// *************************************************************************
   /// TRACK DETAILS PLAYER ICONS
+  List<Widget> _trackDetailsTitle(Track track) => [
+        ValueListenableBuilder(
+            valueListenable: track.state,
+            builder: (context, state, child) => Tooltip(
+                message: AppGlobalConfig.trackState.translate(state, trans: _trans),
+                child: ValueListenableBuilder(
+                  valueListenable: track.stateIcon,
+                  builder: (context, icon, child) =>
+                      Icon(icon, size: Theme.of(context).textTheme.headlineMedium!.fontSize! * _uiWrapper.iconSizeMultiplier),
+                ))),
+        Expanded(
+            child: Column(
+          children: [
+            ValueListenableBuilder(
+                valueListenable: track.name,
+                builder: (context, name, child) => Text(_trans.trackTitle(name),
+                    style: TextStyle(fontSize: Theme.of(context).textTheme.headlineMedium!.fontSize, fontWeight: FontWeight.bold))),
+            Text(track.path == null ? '' : path.basename(track.path.toString()),
+                style: TextStyle(fontSize: Theme.of(context).textTheme.labelSmall!.fontSize)),
+          ],
+        )),
+        ValueListenableBuilder(
+            valueListenable: track.name,
+            builder: (context, name, child) => Tooltip(
+                message: _trans.trackKeyboardKey(name),
+                child: ValueListenableBuilder(
+                    valueListenable: track.keyboardKey,
+                    builder: (context, keyboardKey, child) => AppIcon.trackKeyboardKeyBox(
+                          track,
+                          ui: _uiWrapper,
+                          context: context,
+                          foregroundColor: Theme.of(context).colorScheme.primary,
+                          size: Theme.of(context).textTheme.headlineSmall!.fontSize!,
+                        )))),
+      ];
+
+  List<Widget> _trackDetailsScroll(Track track, RecorderState recorderState) => [
+        SizedBox(height: Theme.of(context).textTheme.labelSmall!.fontSize),
+        _uiWrapper.trackDetailsLine(_trackDetailsPlaybackSpeedControl(track), mainAxisAlignment: MainAxisAlignment.spaceBetween),
+        _uiWrapper.trackDetailsLine(_trackDetailsPlaybackVolumeControl(track), mainAxisAlignment: MainAxisAlignment.spaceBetween),
+        _uiWrapper.trackDetailsLine(_trackDetailsPlaybackBalanceControl(track), mainAxisAlignment: MainAxisAlignment.spaceBetween),
+        SizedBox(height: Theme.of(context).textTheme.labelSmall!.fontSize),
+        // if (recorderState == RecorderState.ready && track.path != null)
+        //   _uiWrapper.statusIconRow(
+        //     AppIcon.recordingFile,
+        //     path.basename(track.path.toString()),
+        // iconSize: Theme.of(context).textTheme.bodyLarge!.fontSize!*_uiWrapper.iconSizeMultiplier,
+        // fontSize: Theme.of(context).textTheme.bodyLarge!.fontSize!,
+        //     separatorSize: _uiWrapper.gridGap * 2,
+        //     mainAxisAlignment: MainAxisAlignment.center,
+        //   ),
+        if (track.audioEncoder != null)
+          _uiWrapper.statusIconRow(
+            AppIcon.recordingAudioEncoder,
+            AppGlobalConfig.recordingAudioEncoder.translate(track.audioEncoder?.index.toDouble(), trans: _trans),
+            iconSize: Theme.of(context).textTheme.bodyLarge!.fontSize! * _uiWrapper.iconSizeMultiplier,
+            fontSize: Theme.of(context).textTheme.bodyLarge!.fontSize!,
+            separatorSize: _uiWrapper.gridGap * 2,
+          ),
+        if (track.sampleRate != null)
+          _uiWrapper.statusIconRow(
+            AppIcon.recordingSampleRate,
+            _trans.recordingSampleRateValue(AppGlobalConfig.recordingSampleRate.format(track.sampleRate?.toDouble())),
+            iconSize: Theme.of(context).textTheme.bodyLarge!.fontSize! * _uiWrapper.iconSizeMultiplier,
+            fontSize: Theme.of(context).textTheme.bodyLarge!.fontSize!,
+            separatorSize: _uiWrapper.gridGap * 2,
+          ),
+        if (track.bitRate != null)
+          _uiWrapper.statusIconRow(
+            AppIcon.recordingBitRate,
+            _trans.recordingBitRateValue(AppGlobalConfig.recordingBitRate.format(track.bitRate?.toDouble())),
+            iconSize: Theme.of(context).textTheme.bodyLarge!.fontSize! * _uiWrapper.iconSizeMultiplier,
+            fontSize: Theme.of(context).textTheme.bodyLarge!.fontSize!,
+            separatorSize: _uiWrapper.gridGap * 2,
+          ),
+        SizedBox(height: Theme.of(context).textTheme.labelSmall!.fontSize),
+        if (recorderState == RecorderState.recording)
+          LinearProgressIndicator(color: track.stateForegroundColor(context), backgroundColor: track.stateProgressColor(context)),
+        if (recorderState == RecorderState.recording) SizedBox(height: Theme.of(context).textTheme.labelSmall!.fontSize),
+        if (recorderState == RecorderState.recording)
+          ValueListenableBuilder<double>(
+              valueListenable: track.clock, builder: (context, clock, child) => Center(child: Text(_uiWrapper.formatTime(clock.toInt())))),
+        if (recorderState == RecorderState.recording) SizedBox(height: Theme.of(context).textTheme.labelSmall!.fontSize),
+        if (recorderState == RecorderState.ready) _uiWrapper.trackDetailsLine(_trackDetailsSeek(track)),
+        if (recorderState == RecorderState.ready)
+          _uiWrapper.trackDetailsLine(_trackDetailsProgress(track), mainAxisAlignment: MainAxisAlignment.spaceBetween),
+        if (recorderState == RecorderState.ready) SizedBox(height: Theme.of(context).textTheme.labelSmall!.fontSize),
+      ];
+
   List<Widget> _trackDetailsSeek(Track track) => [
         ValueListenableBuilder<Duration?>(
             valueListenable: track.duration,
@@ -649,18 +683,21 @@ class TrackWrapper {
         ValueListenableBuilder(
             valueListenable: track.playbackModeSingle,
             builder: (context, playbackModeSingle, child) =>
-                _uiWrapper.mediaPlayerButton(track.playbackModeIcon, _trans.trackPlaybackModeToggle(track.name.value), onPressed: () {
-                  track.togglePlaybackMode();
-                  save(track);
-                })),
+                _uiWrapper.mediaPlayerButton(track.playbackModeIcon, _trans.trackPlaybackModeToggle(track.name.value),
+                    onPressed: (track.state.value != TrackState.recording)
+                        ? () {
+                            track.togglePlaybackMode();
+                            save(track);
+                          }
+                        : null)),
         if (track.recorderState.value == RecorderState.empty)
           _uiWrapper.mediaPlayerButton(AppIcon.trackRecordingStart, _trans.trackRecordingStart(track.name.value),
-              iconSize: _uiWrapper.mediaPlayerIconSize2x, onPressed: () {
+              iconSize: Theme.of(context).textTheme.displayLarge!.fontSize, onPressed: () {
             _startRecording(track);
           }),
         if (track.recorderState.value == RecorderState.recording)
           _uiWrapper.mediaPlayerButton(AppIcon.trackRecordingStop, _trans.trackRecordingStop(track.name.value),
-              iconSize: _uiWrapper.mediaPlayerIconSize2x, onPressed: () {
+              iconSize: Theme.of(context).textTheme.displayLarge!.fontSize, onPressed: () {
             _stopAndSaveRecording(track);
           }),
         if (track.recorderState.value == RecorderState.recording)
@@ -691,13 +728,13 @@ class TrackWrapper {
                                 track.pausePLaying();
                                 save(track);
                               }
-                            : ((state == TrackState.stopped)
+                            : ((state == TrackState.idle)
                                 ? () {
                                     track.startPlaying();
                                     save(track);
                                   }
                                 : null)),
-                    iconSize: _uiWrapper.mediaPlayerIconSize2x,
+                    iconSize: Theme.of(context).textTheme.displayLarge!.fontSize,
                   )),
         if (track.recorderState.value == RecorderState.ready)
           ValueListenableBuilder(
@@ -713,6 +750,7 @@ class TrackWrapper {
           style: _uiWrapper.circledButtonStyle(),
           icon: Icon(AppIcon.moreMenu),
           itemBuilder: (BuildContext context) => _trackMenuItems(track),
+          enabled: (track.state.value != TrackState.recording),
           onSelected: (TrackMenuItem selection) => _trackMenuItemSelected(track, selection),
         ),
       ];
@@ -721,10 +759,13 @@ class TrackWrapper {
         ValueListenableBuilder(
             valueListenable: track.playbackSpeed,
             builder: (context, playbackSpeed, child) =>
-                _uiWrapper.mediaPlayerButton(AppIcon.trackPlaybackSpeed, _trans.trackPlaybackSpeedSet(track.name.value), onPressed: () {
-                  track.setPlaybackSpeed(1);
-                  save(track);
-                })),
+                _uiWrapper.mediaPlayerButton(AppIcon.trackPlaybackSpeed, _trans.trackPlaybackSpeedSet(track.name.value),
+                    onPressed: (track.state.value == TrackState.recording)
+                        ? null
+                        : () {
+                            track.setPlaybackSpeed(1);
+                            save(track);
+                          })),
         ValueListenableBuilder(
             valueListenable: track.playbackSpeed,
             builder: (context, playbackSpeed, child) => Expanded(
@@ -734,10 +775,12 @@ class TrackWrapper {
                   max: AppGlobalConfig.trackPlaybackSpeed.sliderValues.max,
                   divisions: AppGlobalConfig.trackPlaybackSpeed.sliderValues.divisions,
                   label: AppGlobalConfig.trackPlaybackSpeed.format(playbackSpeed),
-                  onChanged: (double value) {
-                    track.setPlaybackSpeed(value);
-                    save(track);
-                  },
+                  onChanged: (track.state.value == TrackState.recording)
+                      ? null
+                      : (double value) {
+                          track.setPlaybackSpeed(value);
+                          save(track);
+                        },
                 ))),
         ValueListenableBuilder(
             valueListenable: track.playbackSpeed,
@@ -748,12 +791,15 @@ class TrackWrapper {
         ValueListenableBuilder(
             valueListenable: track.playbackVolume,
             builder: (context, playbackVolume, child) =>
-                _uiWrapper.mediaPlayerButton(track.playbackVolumeIcon, _trans.trackPlaybackVolumeSet(track.name.value), onPressed: () {
-                  track.setPlaybackVolume((playbackVolume == AppGlobalConfig.trackPlaybackVolume.sliderValues.min)
-                      ? AppGlobalConfig.trackPlaybackVolume.sliderValues.max
-                      : AppGlobalConfig.trackPlaybackVolume.sliderValues.min);
-                  save(track);
-                })),
+                _uiWrapper.mediaPlayerButton(track.playbackVolumeIcon, _trans.trackPlaybackVolumeSet(track.name.value),
+                    onPressed: (track.state.value == TrackState.recording)
+                        ? null
+                        : () {
+                            track.setPlaybackVolume((playbackVolume == AppGlobalConfig.trackPlaybackVolume.sliderValues.min)
+                                ? AppGlobalConfig.trackPlaybackVolume.sliderValues.max
+                                : AppGlobalConfig.trackPlaybackVolume.sliderValues.min);
+                            save(track);
+                          })),
         ValueListenableBuilder(
             valueListenable: track.playbackVolume,
             builder: (context, playbackVolume, child) => Expanded(
@@ -763,25 +809,29 @@ class TrackWrapper {
                   max: AppGlobalConfig.trackPlaybackVolume.sliderValues.max,
                   divisions: AppGlobalConfig.trackPlaybackVolume.sliderValues.divisions,
                   label: AppGlobalConfig.trackPlaybackVolume.format(playbackVolume),
-                  onChanged: (double value) {
-                    track.setPlaybackVolume(value);
-                    save(track);
-                  },
+                  onChanged: (track.state.value == TrackState.recording)
+                      ? null
+                      : (double value) {
+                          track.setPlaybackVolume(value);
+                          save(track);
+                        },
                 ))),
         ValueListenableBuilder(
             valueListenable: track.playbackVolume,
-            builder: (context, playbackVolume, child) =>
-                _uiWrapper.trailingLabel(AppGlobalConfig.trackPlaybackVolume.format(playbackVolume))),
+            builder: (context, playbackVolume, child) => _uiWrapper.trailingLabel(AppGlobalConfig.trackPlaybackVolume.format(playbackVolume))),
       ];
 
   List<Widget> _trackDetailsPlaybackBalanceControl(Track track) => [
         ValueListenableBuilder(
             valueListenable: track.playbackBalance,
             builder: (context, playbackBalance, child) =>
-                _uiWrapper.mediaPlayerButton(track.playbackBalanceIcon, _trans.trackPlaybackBalanceSet(track.name.value), onPressed: () {
-                  track.setPlaybackBalance(0);
-                  save(track);
-                })),
+                _uiWrapper.mediaPlayerButton(track.playbackBalanceIcon, _trans.trackPlaybackBalanceSet(track.name.value),
+                    onPressed: (track.state.value == TrackState.recording)
+                        ? null
+                        : () {
+                            track.setPlaybackBalance(0);
+                            save(track);
+                          })),
         ValueListenableBuilder(
             valueListenable: track.playbackBalance,
             builder: (context, playbackBalance, child) => Expanded(
@@ -791,23 +841,26 @@ class TrackWrapper {
                   max: AppGlobalConfig.trackPlaybackBalance.sliderValues.max,
                   divisions: AppGlobalConfig.trackPlaybackBalance.sliderValues.divisions,
                   label: AppGlobalConfig.trackPlaybackBalance.translate(playbackBalance, trans: _trans),
-                  onChanged: (double value) {
-                    track.setPlaybackBalance(value);
-                    save(track);
-                  },
+                  onChanged: (track.state.value == TrackState.recording)
+                      ? null
+                      : (double value) {
+                          track.setPlaybackBalance(value);
+                          save(track);
+                        },
                 ))),
         ValueListenableBuilder(
             valueListenable: track.playbackBalance,
-            builder: (context, playbackBalance, child) =>
-                _uiWrapper.trailingLabel(AppGlobalConfig.trackPlaybackBalance.format(playbackBalance))),
+            builder: (context, playbackBalance, child) => _uiWrapper.trailingLabel(AppGlobalConfig.trackPlaybackBalance.format(playbackBalance))),
       ];
 
   /// *************************************************************************
   /// TRACK MENU ITEMS
   List<PopupMenuEntry<TrackMenuItem>> _trackMenuItems(Track track) => [
-        _uiWrapper.trackMenuItem(TrackMenuItem.changeName, AppIcon.trackTitle, _trans.trackNameChange),
-        _uiWrapper.trackMenuItem(TrackMenuItem.changeKeyboardKey, AppIcon.trackKeyboardKey, _trans.trackKeyboardKeyChange),
-        if (track.state.value != TrackState.empty) _uiWrapper.trackMenuItem(TrackMenuItem.delete, AppIcon.deleteForever, _trans.trackRecordingDelete),
+        if (track.state.value != TrackState.recording) _uiWrapper.trackMenuItem(TrackMenuItem.changeName, AppIcon.trackTitle, _trans.trackNameChange),
+        if (track.state.value != TrackState.recording)
+          _uiWrapper.trackMenuItem(TrackMenuItem.changeKeyboardKey, AppIcon.trackKeyboardKey, _trans.trackKeyboardKeyChange),
+        if (track.state.value != TrackState.empty && track.state.value != TrackState.recording)
+          _uiWrapper.trackMenuItem(TrackMenuItem.delete, AppIcon.deleteForever, _trans.trackRecordingDelete),
       ];
 
   /// *************************************************************************
@@ -826,7 +879,7 @@ class TrackWrapper {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(_trans.trackNameChangeInfo(track.name.value)),
-                          SizedBox(height: _uiWrapper.dividerSize),
+                          SizedBox(height: Theme.of(context).textTheme.labelSmall!.fontSize),
                           SizedBox(
                               width: double.maxFinite,
                               height: 200,
@@ -843,15 +896,16 @@ class TrackWrapper {
                                     viewOrderConfig: const ViewOrderConfig(),
                                     emojiViewConfig: EmojiViewConfig(
                                       /// Issue: https://github.com/flutter/flutter/issues/28894
-                                      emojiSizeMax: 32 * (foundation.defaultTargetPlatform == TargetPlatform.iOS ? 1.2 : 1.0),
+                                      emojiSizeMax: Theme.of(context).textTheme.bodyLarge!.fontSize! *
+                                          (foundation.defaultTargetPlatform == TargetPlatform.iOS ? 1.2 : 1.0),
                                       backgroundColor: Colors.transparent,
                                       noRecents: Text(
                                         _trans.noRecents,
-                                        style: TextStyle(fontSize: 20),
+                                        style: TextStyle(fontSize: Theme.of(context).textTheme.bodyLarge!.fontSize),
                                         textAlign: TextAlign.center,
                                       ),
                                     ),
-                                    locale: widget.settingsGet(AppGlobalConfigFieldKey.locale),
+                                    locale: widget.settingsGet(AppConfigFieldKey.locale),
                                     skinToneConfig: const SkinToneConfig(),
                                     categoryViewConfig: CategoryViewConfig(
                                       extraTab: CategoryExtraTab.SEARCH,
@@ -900,7 +954,7 @@ class TrackWrapper {
                       style: OutlinedButton.styleFrom(
                         padding: EdgeInsets.zero,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(_uiWrapper.trackButtonRoundRadius)),
+                          borderRadius: BorderRadius.all(Radius.circular(_uiWrapper.gridGap)),
                         ),
                         backgroundColor: (key == track.keyboardKey.value) ? Theme.of(context).colorScheme.primary : null,
                       ),

@@ -8,7 +8,7 @@ enum AppConfigSpace {
   track,
 }
 
-enum AppGlobalConfigFieldKey {
+enum AppConfigFieldKey {
   locale,
   themeMode,
   isThemeModeDark,
@@ -29,33 +29,42 @@ enum AppGlobalConfigFieldKey {
   gridColsAmount,
 }
 
-final class AppGlobalConfigField {
-  final AppGlobalConfigFieldKey key;
+final class AppConfigField {
+  final AppConfigFieldKey key;
   final String boxFieldName;
   final dynamic defaultValue;
 
-  AppGlobalConfigField(this.key, this.boxFieldName, this.defaultValue);
+  AppConfigField(this.key, this.boxFieldName, this.defaultValue);
+}
+final class AppGlobalConfigField  extends AppConfigField{
+  AppGlobalConfigField(super.key, super.boxFieldName, super.defaultValue);
+}
+
+final class AppRecordingConfigField extends AppConfigField {
+  AppRecordingConfigField(super.key, super.boxFieldName, super.defaultValue);
 }
 
 final class AppGlobalConfigFieldsCollection {
-  static final List<AppGlobalConfigField> _fields = <AppGlobalConfigField>[
-    AppGlobalConfigField(AppGlobalConfigFieldKey.locale, 'locale', AppGlobalConfig.languages.defaultValue),
-    AppGlobalConfigField(AppGlobalConfigFieldKey.themeMode, 'themeMode', ThemeMode.dark),
-    AppGlobalConfigField(AppGlobalConfigFieldKey.themeSeedColor, 'themeSeedColor', AppGlobalConfig.userInterfaceColor.defaultValue),
-    AppGlobalConfigField(AppGlobalConfigFieldKey.wakelockEnabled, 'keepScreenOnEnabled', false),
-    AppGlobalConfigField(AppGlobalConfigFieldKey.recordingInputDevice, 'recordingInputDevice', null),
-    AppGlobalConfigField(AppGlobalConfigFieldKey.recordingAudioEncoder, 'recordingAudioEncoder', AppGlobalConfig.recordingAudioEncoder.defaultValue),
-    AppGlobalConfigField(AppGlobalConfigFieldKey.recordingSampleRate, 'recordingSampleRate', AppGlobalConfig.recordingSampleRate.defaultValue),
-    AppGlobalConfigField(AppGlobalConfigFieldKey.recordingBitRate, 'recordingBitRate', AppGlobalConfig.recordingBitRate.defaultValue),
-    AppGlobalConfigField(AppGlobalConfigFieldKey.recordingAudioModeStereo, 'recordingAudioModeStereo', true),
-    AppGlobalConfigField(AppGlobalConfigFieldKey.recordingAutoGain, 'recordingAudioAutoGain', false),
-    AppGlobalConfigField(AppGlobalConfigFieldKey.recordingEchoCancel, 'recordingAudioEchoCancel', false),
-    AppGlobalConfigField(AppGlobalConfigFieldKey.recordingNoiseSuppress, 'recordingAudioNoiseSuppress', false),
-    AppGlobalConfigField(AppGlobalConfigFieldKey.gridRowsAmount, 'gridRowsAmount', AppGlobalConfig.gridRows.defaultValue.toInt()),
-    AppGlobalConfigField(AppGlobalConfigFieldKey.gridColsAmount, 'gridColsAmount', AppGlobalConfig.gridCols.defaultValue.toInt()),
+  static final List<AppConfigField> _fields = <AppConfigField>[
+    AppGlobalConfigField(AppConfigFieldKey.locale, 'locale', AppGlobalConfig.languages.defaultValue),
+    AppGlobalConfigField(AppConfigFieldKey.themeMode, 'themeMode', ThemeMode.dark),
+    AppGlobalConfigField(AppConfigFieldKey.themeSeedColor, 'themeSeedColor', AppGlobalConfig.userInterfaceColor.defaultValue),
+    AppGlobalConfigField(AppConfigFieldKey.wakelockEnabled, 'keepScreenOnEnabled', false),
+    AppGlobalConfigField(AppConfigFieldKey.gridRowsAmount, 'gridRowsAmount', AppGlobalConfig.gridRows.defaultValue.toInt()),
+    AppGlobalConfigField(AppConfigFieldKey.gridColsAmount, 'gridColsAmount', AppGlobalConfig.gridCols.defaultValue.toInt()),
+    AppRecordingConfigField(AppConfigFieldKey.recordingInputDevice, 'recordingInputDevice', null),
+    AppRecordingConfigField(AppConfigFieldKey.recordingAudioEncoder, 'recordingAudioEncoder', AppGlobalConfig.recordingAudioEncoder.defaultValue),
+    AppRecordingConfigField(AppConfigFieldKey.recordingSampleRate, 'recordingSampleRate', AppGlobalConfig.recordingSampleRate.defaultValue),
+    AppRecordingConfigField(AppConfigFieldKey.recordingBitRate, 'recordingBitRate', AppGlobalConfig.recordingBitRate.defaultValue),
+    AppRecordingConfigField(AppConfigFieldKey.recordingAudioModeStereo, 'recordingAudioModeStereo', true),
+    AppRecordingConfigField(AppConfigFieldKey.recordingAutoGain, 'recordingAudioAutoGain', false),
+    AppRecordingConfigField(AppConfigFieldKey.recordingEchoCancel, 'recordingAudioEchoCancel', false),
+    AppRecordingConfigField(AppConfigFieldKey.recordingNoiseSuppress, 'recordingAudioNoiseSuppress', false),
   ];
 
-  static List<AppGlobalConfigField> get list => _fields;
+  static List<AppConfigField> get list => _fields;
+  static List<AppGlobalConfigField> get listGlobal => list.whereType<AppGlobalConfigField>().toList();
+  static List<AppRecordingConfigField> get listRecording => list.whereType<AppRecordingConfigField>().toList();
 
-  static AppGlobalConfigField field(dynamic key) => list.firstWhere((item) => item.key == key);
+  static AppConfigField field(dynamic key) => list.firstWhere((item) => item.key == key);
 }

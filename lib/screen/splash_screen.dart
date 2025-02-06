@@ -13,8 +13,8 @@ class SplashScreenApp extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.dashboard_customize_rounded, size: 48),
-                Text('Tune Tangler', style: TextStyle(fontSize: 48)),
+                Icon(Icons.dashboard_customize_rounded, size: Theme.of(context).textTheme.displayMedium?.fontSize),
+                Text('Tune Tangler', style: Theme.of(context).textTheme.displayMedium),
               ],
             ),
             CircularProgressIndicator(strokeWidth: 8),

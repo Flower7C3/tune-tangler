@@ -18,40 +18,8 @@ enum DialogType {
 }
 
 class UIWrapper {
-  final double gridFirstColumnWidth = 40;
-
-  final double rowButtonIconSize = 24;
-  final double rowContainerPadding = 3;
-  final double rowMenuIconSize = 20;
-  final double rowMenuFontSize = 16;
-
-  final double trackDetailsPadding1x = 16;
-  final double trackDetailsPadding2x = 32;
-  final double trackDetailsTitleFontSize = 24;
-  final double trackItemMargin = 4;
-  final double trackItemWidth = 70;
-  final double trackPadding = 4;
-  final double trackBorderRadius = 10;
-  final double trackButtonTitleFontSize = 22.0;
-  final double trackButtonRoundRadius = 3;
-  final double trackButtonRoundSize = 18.0;
-  final double trackButtonIconSize = 20.0;
-  final double trackInfoSpeedFontSize = 10.0;
-  final double trackInfoBalanceFontSize = 14.0;
-  final double trackInfoIconSize = 12.0;
-  final double trackInfoFontSize = 10.0;
-  final double trackMenuIconSize = 20;
-  final double trackMenuFontSize = 16;
-  final double mediaPlayerIconSize = 24;
-  final double mediaPlayerIconSize2x = 48;
-  final double iconToTextOffset = 8;
-  final double dividerSize = 16;
-
-  final double settingsTitleFontSize = 20;
-  final double settingsSubtitleIconSize = 12;
-  final double settingsSubtitleFontSize = 12;
-
-  final double footerFontSize = 12;
+  final double gridGap = 4;
+  final double iconSizeMultiplier = 1.2;
 
   BuildContext context;
 
@@ -70,8 +38,27 @@ class UIWrapper {
         title: Text(text, style: TextStyle(color: textColor, fontSize: fontSize)),
       );
 
-  Row statusIconRow(IconData icon, String text, {Color? iconColor, double? iconSize, Color? textColor, double? fontSize, double? separatorSize}) =>
-      Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+  ListTile statusTextTile(
+    String icon,
+    String text, {
+    Color? iconColor,
+    double? iconSize,
+    Color? textColor,
+    double? fontSize,
+  }) =>
+      ListTile(
+        leading: Text(icon, style: TextStyle(color: iconColor, fontSize: iconSize)),
+        title: Text(text, style: TextStyle(color: textColor, fontSize: fontSize)),
+      );
+
+  Widget statusIconRow(IconData icon, String text,
+          {Color? iconColor,
+          double? iconSize,
+          Color? textColor,
+          double? fontSize,
+          double? separatorSize,
+          MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start}) =>
+      Row(mainAxisAlignment: mainAxisAlignment, children: [
         Icon(icon, size: iconSize, color: iconColor),
         SizedBox(width: separatorSize),
         Expanded(child: Text(text, style: TextStyle(color: textColor, fontSize: fontSize))),
@@ -81,9 +68,7 @@ class UIWrapper {
     List<Widget> items, {
     MainAxisAlignment mainAxisAlignment = MainAxisAlignment.center,
   }) =>
-      items.isEmpty
-          ? SizedBox(child: null)
-          : SizedBox(width: double.maxFinite, child: Row(mainAxisSize: MainAxisSize.max, mainAxisAlignment: mainAxisAlignment, children: items));
+      SizedBox(width: double.maxFinite, child: Row(mainAxisSize: MainAxisSize.max, mainAxisAlignment: mainAxisAlignment, children: items));
 
   PopupMenuItem<String> topPopupMenuItem(
     TopMenuItem value,
@@ -99,11 +84,25 @@ class UIWrapper {
             trailing: (checked == null) ? null : Icon((checked == true) ? Symbols.check_box_rounded : Symbols.square_rounded),
           ));
 
+  PopupMenuItem<String> topTrackMenuItem(
+    AllTracksMenuItem value,
+    IconData icon,
+    String text, {
+    bool? checked,
+  }) =>
+      PopupMenuItem(
+          value: value.toString(),
+          child: ListTile(
+            leading: Icon(icon),
+            title: Text(text),
+            trailing: (checked == null) ? null : Icon((checked == true) ? Symbols.check_box_rounded : Symbols.square_rounded),
+          ));
+
   Container rowButton(Widget content) => Container(
         margin: EdgeInsets.all(0),
-        width: rowButtonIconSize + rowContainerPadding * 2,
-        height: rowButtonIconSize + rowContainerPadding * 2,
-        padding: EdgeInsets.all(rowContainerPadding),
+        width: Theme.of(context).textTheme.displaySmall!.fontSize! * 0.9,
+        height: Theme.of(context).textTheme.displaySmall!.fontSize! * 0.9,
+        padding: EdgeInsets.all(gridGap),
         child: content,
       );
 
@@ -114,7 +113,7 @@ class UIWrapper {
   ) =>
       PopupMenuItem<dynamic>(
         value: value,
-        child: statusIconTile(icon, title, iconSize: rowMenuIconSize, fontSize: rowMenuFontSize),
+        child: statusIconTile(icon, title),
       );
 
   PopupMenuItem<dynamic> rowMenuButton(
@@ -128,7 +127,7 @@ class UIWrapper {
         value: value,
         child: PopupMenuButton<dynamic>(
           onSelected: onSelected,
-          child: statusIconTile(icon, title, iconSize: rowMenuIconSize, fontSize: rowMenuFontSize),
+          child: statusIconTile(icon, title),
           itemBuilder: (BuildContext context) => itemBuilder(),
         ),
       );
@@ -140,16 +139,16 @@ class UIWrapper {
   ) =>
       PopupMenuItem<TrackMenuItem>(
         value: value,
-        child: statusIconTile(icon, title, iconSize: trackMenuIconSize, fontSize: trackMenuFontSize),
+        child: statusIconTile(icon, title),
       );
 
   void aboutDialog(
     PackageInfo packageInfo,
     List<Widget> content, {
-    applicationName,
-    applicationVersion,
-    applicationLegalese,
-    applicationIcon,
+    String? applicationName,
+    String? applicationVersion,
+    String? applicationLegalese,
+    Widget? applicationIcon,
   }) {
     showAboutDialog(
         context: context,
@@ -275,21 +274,21 @@ class UIWrapper {
       Column(mainAxisSize: MainAxisSize.min, children: [
         statusIconRow(AppIcon.recordingInputDevice,
             trans.recordingInputDeviceValue(recordConfig.device == null ? trans.defaultDevice : recordConfig.device!.label),
-            iconSize: 16, fontSize: 14, separatorSize: iconToTextOffset),
+            iconSize: 16, fontSize: 14, separatorSize: gridGap * 2),
         statusIconRow(AppIcon.recordingAudioEncoder,
             trans.recordingAudioEncoderValue(AppGlobalConfig.recordingAudioEncoder.translate(recordConfig.encoder.index.toDouble(), trans: trans)),
-            iconSize: 16, fontSize: 14, separatorSize: iconToTextOffset),
+            iconSize: 16, fontSize: 14, separatorSize: gridGap * 2),
         statusIconRow(AppIcon.recordingSampleRate,
             trans.recordingSampleRateValue(AppGlobalConfig.recordingSampleRate.format(recordConfig.sampleRate.toDouble())),
-            iconSize: 16, fontSize: 14, separatorSize: iconToTextOffset),
+            iconSize: 16, fontSize: 14, separatorSize: gridGap * 2),
         statusIconRow(AppIcon.recordingBitRate, trans.recordingBitRateValue(AppGlobalConfig.recordingBitRate.format(recordConfig.bitRate.toDouble())),
-            iconSize: 16, fontSize: 14, separatorSize: iconToTextOffset),
+            iconSize: 16, fontSize: 14, separatorSize: gridGap * 2),
         statusIconRow(AppIcon.recordingAudioGain, trans.recordingAutoGainValue(recordConfig.autoGain ? trans.yes : trans.no),
-            iconSize: 16, fontSize: 14, separatorSize: iconToTextOffset),
+            iconSize: 16, fontSize: 14, separatorSize: gridGap * 2),
         statusIconRow(AppIcon.recordingEchoCancel, trans.recordingEchoCancelValue(recordConfig.echoCancel ? trans.yes : trans.no),
-            iconSize: 16, fontSize: 14, separatorSize: iconToTextOffset),
+            iconSize: 16, fontSize: 14, separatorSize: gridGap * 2),
         statusIconRow(AppIcon.recordingNoiseSuppress, trans.recordingNoiseSuppressValue(recordConfig.noiseSuppress ? trans.yes : trans.no),
-            iconSize: 16, fontSize: 14, separatorSize: iconToTextOffset),
+            iconSize: 16, fontSize: 14, separatorSize: gridGap * 2),
       ]);
 
   void recordConfigDialog(
@@ -331,7 +330,7 @@ class UIWrapper {
     var message = <Widget>[];
     if (icon != null) {
       message.add(Icon(icon, color: foregroundColor, size: 16));
-      message.add(SizedBox(width: iconToTextOffset));
+      message.add(SizedBox(width: gridGap * 2));
     }
     message.add(Flexible(child: Text(text, style: TextStyle(color: foregroundColor))));
     ScaffoldMessenger.of(context).clearSnackBars();
@@ -425,17 +424,8 @@ class UIWrapper {
   IconButton mediaPlayerButton(IconData icon, String tooltip, {VoidCallback? onPressed, double? iconSize}) => IconButton(
       onPressed: onPressed,
       style: circledButtonStyle(),
-      icon: Icon(icon, size: iconSize ?? mediaPlayerIconSize, color: Theme.of(context).colorScheme.primary),
+      icon: Icon(icon, size: iconSize ?? Theme.of(context).textTheme.headlineSmall!.fontSize, color: Theme.of(context).colorScheme.primary),
       tooltip: tooltip);
-
-  Column helpSection(String title, List<Widget> content) {
-    var items = <Widget>[];
-    items.add(Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)));
-    items.add(SizedBox(height: 6));
-    items.addAll(content);
-    items.add(SizedBox(height: 16));
-    return Column(children: items);
-  }
 
   Container helpTrackState(TrackState state, String message) => Container(
         padding: EdgeInsets.all(4),
@@ -447,9 +437,10 @@ class UIWrapper {
         ),
       );
 
-  Divider settingsTileDivider() => Divider(height: 0, thickness: 1, indent: 20, endIndent: 20, color: Colors.black);
+  Divider settingsTileDivider() => Divider(height: 0, thickness: 1, indent: 20, endIndent: 20, color: Theme.of(context).colorScheme.inversePrimary);
 
-  ListTile settingsTileTitle(title) => ListTile(title: Center(child: Text(title, style: TextStyle(fontSize: settingsTitleFontSize))));
+  ListTile settingsTileTitle(title) =>
+      ListTile(title: Center(child: Text(title, style: TextStyle(fontSize: Theme.of(context).textTheme.titleLarge!.fontSize))));
 
   ListTile listTileReset(
     IconData icon,
@@ -464,16 +455,26 @@ class UIWrapper {
           leading: Icon(icon),
           title: Text(listTitle),
           onTap: () {
-            alertDialog(icon, dialogTitle, contentText: dialogInfo, actions: <Widget>[
-              simpleButton(cancelLabel, () {
-                Navigator.pop(context, cancelLabel);
-              }),
-              errorButton(saveLabel, () {
-                Navigator.pop(context, saveLabel);
-                toast(successAction(), icon: icon);
-              }),
-            ]);
+            alertDialogReset(icon, dialogTitle, dialogInfo, cancelLabel, saveLabel, successAction);
           });
+
+  Future<void> alertDialogReset(
+    IconData icon,
+    String dialogTitle,
+    String dialogInfo,
+    String cancelLabel,
+    String saveLabel,
+    Function() successAction,
+  ) =>
+      alertDialog(icon, dialogTitle, contentText: dialogInfo, actions: <Widget>[
+        simpleButton(cancelLabel, () {
+          Navigator.pop(context, cancelLabel);
+        }),
+        errorButton(saveLabel, () {
+          Navigator.pop(context, saveLabel);
+          toast(successAction(), icon: icon);
+        }),
+      ]);
 
   ListTile listTileSlider(
     IconData icon,
@@ -483,7 +484,7 @@ class UIWrapper {
     dynamic currentValue,
     double minValue,
     double maxValue,
-    int divisions,
+    int? divisions,
     String cancelLabel,
     String saveLabel, {
     required String Function(double value, String formattedValue) successAction,
@@ -492,59 +493,93 @@ class UIWrapper {
     AppLocalizations? trans,
   }) =>
       ListTile(
-          leading: Icon(icon),
-          title: Text(listTitle),
-          trailing: (withTrailing == true)
-              ? trailingLabel(configCollection != null ? configCollection.format(currentValue) : currentValue.toString())
-              : null,
-          onTap: () {
-            showDialog(
-                context: context,
-                builder: (context) => StatefulBuilder(
-                    builder: (BuildContext context, StateSetter setModalState) => AlertDialog(
-                            title: statusIconTile(icon, dialogTitle),
-                            content: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
-                              Text(dialogInfo),
-                              Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
-                                Slider(
-                                    value: currentValue,
-                                    min: minValue,
-                                    max: maxValue,
-                                    divisions: divisions.toInt(),
-                                    label: ((configCollection == null)
-                                        ? currentValue.toString()
-                                        : ((trans.toString() != 'null' && trans != null)
-                                            ? configCollection.translate(currentValue, trans: trans)
-                                            : configCollection.format(currentValue))),
-                                    onChanged: (double newValue) {
-                                      setModalState(() {
-                                        currentValue = newValue;
-                                      });
-                                    }),
-                                Text(configCollection != null ? configCollection.format(currentValue) : currentValue.toString()),
-                              ]),
+        leading: Icon(icon),
+        title: Text(listTitle),
+        trailing:
+            (withTrailing == true) ? trailingLabel(configCollection != null ? configCollection.format(currentValue) : currentValue.toString()) : null,
+        onTap: () {
+          showDialog(
+              context: context,
+              builder: (context) => StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setModalState) => AlertDialog(
+                          title: statusIconTile(icon, dialogTitle),
+                          content: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
+                            Text(dialogInfo),
+                            Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
+                              Slider(
+                                  value: currentValue,
+                                  min: minValue,
+                                  max: maxValue,
+                                  divisions: divisions?.toInt(),
+                                  label: _format(currentValue, configCollection),
+                                  onChanged: (double newValue) {
+                                    setModalState(() {
+                                      currentValue = newValue;
+                                    });
+                                  }),
+                              Text(configCollection != null ? configCollection.format(currentValue) : currentValue.toString()),
                             ]),
-                            actions: [
-                              simpleButton(cancelLabel, () {
-                                Navigator.pop(context, cancelLabel);
-                              }),
-                              primaryButton(saveLabel, () {
-                                Navigator.pop(context, saveLabel);
-                                toast(
-                                    successAction(
-                                      currentValue,
-                                      ((configCollection == null)
-                                          ? currentValue.toString()
-                                          : ((trans.toString() != 'null' && trans != null)
-                                              ? configCollection.translate(currentValue, trans: trans)
-                                              : configCollection.format(currentValue))),
-                                    ),
-                                    icon: icon);
-                              }),
-                            ])));
-          });
+                          ]),
+                          actions: [
+                            simpleButton(cancelLabel, () {
+                              Navigator.pop(context, cancelLabel);
+                            }),
+                            primaryButton(saveLabel, () {
+                              Navigator.pop(context, saveLabel);
+                              toast(successAction(currentValue, _translateOrFormat(currentValue, configCollection, trans)), icon: icon);
+                            }),
+                          ])));
+        },
+      );
 
-  ListTile listTileRadio(
+  void alertDialogSlider(
+    IconData icon,
+    String dialogTitle,
+    String dialogInfo,
+    dynamic currentValue,
+    double minValue,
+    double maxValue,
+    int? divisions,
+    String cancelLabel,
+    String saveLabel, {
+    required String Function(double value, String formattedValue) successAction,
+    bool withTrailing = true,
+    ConfigCollection? configCollection,
+    AppLocalizations? trans,
+  }) =>
+      showDialog(
+          context: context,
+          builder: (context) => StatefulBuilder(
+              builder: (BuildContext context, StateSetter setModalState) => AlertDialog(
+                      title: statusIconTile(icon, dialogTitle),
+                      content: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
+                        Text(dialogInfo),
+                        Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
+                          Slider(
+                              value: currentValue,
+                              min: minValue,
+                              max: maxValue,
+                              divisions: divisions?.toInt(),
+                              label: _format(currentValue, configCollection),
+                              onChanged: (double newValue) {
+                                setModalState(() {
+                                  currentValue = newValue;
+                                });
+                              }),
+                          Text(configCollection != null ? configCollection.format(currentValue) : currentValue.toString()),
+                        ]),
+                      ]),
+                      actions: [
+                        simpleButton(cancelLabel, () {
+                          Navigator.pop(context, cancelLabel);
+                        }),
+                        primaryButton(saveLabel, () {
+                          Navigator.pop(context, saveLabel);
+                          toast(successAction(currentValue, _translateOrFormat(currentValue, configCollection, trans)), icon: icon);
+                        }),
+                      ])));
+
+  ListTile listTileRadioDialog(
     IconData icon,
     String listTitle,
     String? listSubtitle,
@@ -563,17 +598,19 @@ class UIWrapper {
 
     List<Widget> subtitle = [];
     if (listSubtitle != null) {
-      subtitle.add(Text(listSubtitle, style: TextStyle(fontSize: settingsSubtitleFontSize)));
+      subtitle.add(Text(listSubtitle, style: TextStyle(fontSize: Theme.of(context).textTheme.labelSmall!.fontSize)));
     }
     String translatedValue =
         (trans.toString() != 'null' && configCollection != null && trans != null) ? configCollection.translate(currentValue, trans: trans) : '';
     if (translatedValue != '') {
-      subtitle.add(Text(translatedValue, style: TextStyle(fontSize: settingsSubtitleFontSize)));
+      subtitle.add(Text(translatedValue, style: TextStyle(fontSize: Theme.of(context).textTheme.labelSmall!.fontSize)));
     }
     return ListTile(
         leading: Icon(icon),
         title: Text(listTitle),
-        subtitle: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: subtitle.toList()),
+        subtitle: (subtitle.isNotEmpty)
+            ? Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: subtitle.toList())
+            : null,
         trailing: (withTrailing == true && configCollection != null) ? trailingLabel(configCollection.format(currentValue)) : null,
         onTap: () {
           showDialog(
@@ -589,18 +626,14 @@ class UIWrapper {
                         min: 0,
                         max: (values.length - 1).toDouble(),
                         divisions: (values.length - 1),
-                        label: ((configCollection == null)
-                            ? currentValue.toString()
-                            : ((trans.toString() != 'null' && trans != null)
-                                ? configCollection.translate(currentValue, trans: trans)
-                                : configCollection.format(currentValue))),
+                        label: _format(currentValue, configCollection),
                         onChanged: (double newValue) {
                           setModalState(() {
                             sliderValue = newValue;
                             currentValue = values[sliderValue.toInt()];
                           });
                         }),
-                    Text(configCollection != null ? configCollection.format(currentValue) : currentValue.toString()),
+                    Text(_translateOrFormat(currentValue, configCollection, trans)),
                   ]),
                 ]),
                 actions: [
@@ -609,16 +642,7 @@ class UIWrapper {
                   }),
                   primaryButton(saveLabel, () {
                     Navigator.pop(context, saveLabel);
-                    toast(
-                        successAction(
-                          currentValue,
-                          ((configCollection == null)
-                              ? currentValue.toString()
-                              : ((trans.toString() != 'null' && trans != null)
-                                  ? configCollection.translate(currentValue, trans: trans)
-                                  : configCollection.format(currentValue))),
-                        ),
-                        icon: icon);
+                    toast(successAction(currentValue, _translateOrFormat(currentValue, configCollection, trans)), icon: icon);
                   }),
                 ],
               ),
@@ -626,6 +650,85 @@ class UIWrapper {
           );
         });
   }
+
+  Widget listTileButtons(
+    IconData icon,
+    String listTitle,
+    dynamic currentValue,
+    List<dynamic> values, {
+    required String Function(dynamic value, String formattedValue) successAction,
+    ConfigCollection? configCollection,
+    AppLocalizations? trans,
+  }) =>
+      ExpansionTile(
+        leading: Icon(icon),
+        title: Text(listTitle),
+        subtitle: Text(_translateOrFormat(currentValue, configCollection, trans)),
+        childrenPadding: EdgeInsets.only(left: gridGap * 3),
+        children: [
+          Wrap(
+            spacing: gridGap,
+            children: List.generate(
+              values.length,
+              (index) => ChoiceChip(
+                label: Text(_format(values[index], configCollection)),
+                selected: values[index] == currentValue,
+                onSelected: (bool selected) {
+                  if (selected) {
+                    dynamic selectedValue = values[index];
+                    toast(successAction(selectedValue, _translateOrFormat(selectedValue, configCollection, trans)), icon: icon);
+                  }
+                },
+              ),
+            ),
+          )
+        ],
+      );
+
+  ListTile listTileColorPicker(
+    IconData icon,
+    String listTitle,
+    String? listSubtitle,
+    String dialogTitle,
+    String dialogInfo,
+    Color currentValue,
+    List<Color> values, {
+    required String Function(dynamic value, String formattedValue) successAction,
+    ConfigCollection? configCollection,
+    AppLocalizations? trans,
+  }) =>
+      ListTile(
+          leading: Icon(icon),
+          title: Text(listTitle),
+          subtitle: listSubtitle == null ? null : Text(listSubtitle),
+          trailing: Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                color: currentValue,
+                borderRadius: BorderRadius.circular(24),
+              )),
+          onTap: () {
+            alertDialog(AppIcon.screenThemeColor, dialogTitle,
+                contentText: dialogInfo,
+                contentWidget: gridBuilder(
+                    itemCount: values.length,
+                    itemBuilder: (context, index) {
+                      Color color = AppGlobalConfig.userInterfaceColor.valueAt<Color>(index);
+                      return ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: color,
+                            shape: CircleBorder(),
+                            padding: EdgeInsets.all(16),
+                          ),
+                          onPressed: () {
+                            dynamic selectedValue = values[index];
+                            Navigator.pop(context, color.toString());
+                            toast(successAction(selectedValue, _translateOrFormat(selectedValue, configCollection, trans)), icon: icon);
+                          },
+                          child: null);
+                    }));
+          });
 
   ListTile listTileSwitch(
     IconData icon,
@@ -640,16 +743,25 @@ class UIWrapper {
   }) {
     List<Widget> subtitle = [];
     if (subtitleText != null) {
-      subtitle.add(Text(subtitleText, style: TextStyle(fontSize: settingsSubtitleFontSize)));
+      subtitle.add(Text(subtitleText, style: TextStyle(fontSize: Theme.of(context).textTheme.labelSmall!.fontSize)));
     }
-    subtitle.add(Column(children: [
-      if (disabledLabel != null) statusIconRow(disabledIcon, disabledLabel, iconSize: settingsSubtitleIconSize, fontSize: settingsSubtitleFontSize),
-      if (enabledLabel != null) statusIconRow(enabledIcon, enabledLabel, iconSize: settingsSubtitleIconSize, fontSize: settingsSubtitleFontSize),
-    ]));
+    if (disabledLabel != null || enabledLabel != null) {
+      subtitle.add(Column(children: [
+        if (disabledLabel != null)
+          statusIconRow(disabledIcon, disabledLabel,
+              iconSize: Theme.of(context).textTheme.labelSmall!.fontSize! * iconSizeMultiplier,
+              fontSize: Theme.of(context).textTheme.labelSmall!.fontSize),
+        if (enabledLabel != null)
+          statusIconRow(enabledIcon, enabledLabel,
+              iconSize: Theme.of(context).textTheme.labelSmall!.fontSize!, fontSize: Theme.of(context).textTheme.labelSmall!.fontSize),
+      ]));
+    }
     return ListTile(
         leading: Icon(icon),
         title: Text(listTitle),
-        subtitle: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: subtitle.toList()),
+        subtitle: (subtitle.isNotEmpty)
+            ? Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: subtitle.toList())
+            : null,
         trailing: Switch(
             thumbIcon: WidgetStateProperty.resolveWith<Icon?>(
                 (Set<WidgetState> states) => Icon(switchValue ? enabledIcon : disabledIcon, color: Colors.white)),
@@ -666,6 +778,28 @@ class UIWrapper {
             }));
   }
 
+  ListTile listTileListDialog(
+    IconData icon,
+    String listTitle, {
+    required String dialogTitle,
+    required String currentValue,
+    required List<SimpleDialogOption> options,
+  }) =>
+      ListTile(
+          leading: Icon(icon),
+          title: Text(listTitle),
+          trailing: trailingLabel(currentValue),
+          onTap: () {
+            listDialog(AppIcon.language, dialogTitle, actions: options.toList());
+          });
+
+  String _translateOrFormat(dynamic value, ConfigCollection? configCollection, AppLocalizations? trans) => ((configCollection == null)
+      ? value.toString()
+      : ((trans.toString() != 'null' && trans != null) ? configCollection.translate(value, trans: trans) : configCollection.format(value)));
+
+  String _format(dynamic value, ConfigCollection? configCollection) =>
+      ((configCollection == null) ? value.toString() : configCollection.format(value));
+
   Flexible gridBuilder({
     required int itemCount,
     required Widget Function(dynamic context, dynamic index) itemBuilder,
@@ -676,13 +810,28 @@ class UIWrapper {
               child: GridView.builder(
                 shrinkWrap: true,
                 gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  maxCrossAxisExtent: 32,
-                  mainAxisExtent: 32,
+                  crossAxisSpacing: gridGap * 4,
+                  mainAxisSpacing: gridGap * 4,
+                  maxCrossAxisExtent: gridGap * 8,
+                  mainAxisExtent: gridGap * 8,
                 ),
                 padding: const EdgeInsets.all(0),
                 itemCount: itemCount,
                 itemBuilder: itemBuilder,
               )));
+
+  Widget drawerTitle(IconData icon, String title) => Container(
+      padding: EdgeInsets.zero,
+      alignment: Alignment.centerLeft,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.secondaryContainer,
+      ),
+      child: statusIconTile(
+        icon,
+        title,
+        iconSize: Theme.of(context).textTheme.titleLarge!.fontSize! * iconSizeMultiplier,
+        fontSize: Theme.of(context).textTheme.titleLarge?.fontSize,
+        iconColor: Theme.of(context).colorScheme.secondary,
+        textColor: Theme.of(context).colorScheme.secondary,
+      ));
 }

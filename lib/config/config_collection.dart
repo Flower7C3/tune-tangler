@@ -110,7 +110,7 @@ final class ConfigItemTranslatableProperty extends ConfigItemProperty {
 final class ConfigSliderValues {
   final double min;
   final double max;
-  final int divisions;
+  final int? divisions;
 
-  ConfigSliderValues(this.min, this.max, this.divisions);
+  ConfigSliderValues({required this.min, required this.max, this.divisions});
 }

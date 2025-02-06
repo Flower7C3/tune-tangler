@@ -13,18 +13,16 @@ enum ToastType {
 }
 
 final class AppGlobalConfig {
-
-
   static final SliderConfigCollection gridRows = SliderConfigCollection(
     [],
-    sliderValues: ConfigSliderValues(2, 8, 6),
+    sliderValues: ConfigSliderValues(min: 2, max: 8, divisions: 6),
     defaultValue: 6,
     format: (dynamic value) => value.toStringAsFixed(0),
   );
 
   static final SliderConfigCollection gridCols = SliderConfigCollection(
     [],
-    sliderValues: ConfigSliderValues(2, 10, 9),
+    sliderValues: ConfigSliderValues(min: 2, max: 10, divisions: 8),
     defaultValue: 4,
     format: (dynamic value) => value.toStringAsFixed(0),
   );
@@ -91,7 +89,7 @@ final class AppGlobalConfig {
     ],
     defaultValue: 1.0,
     format: (dynamic value) => '{value}x'.replaceAll('{value}', value.toStringAsFixed(1)),
-    sliderValues: ConfigSliderValues(0.1, 2.0, 19),
+    sliderValues: ConfigSliderValues(min: 0.1, max: 2.0, divisions: 19),
   );
 
   static final SliderConfigCollection trackPlaybackVolume = SliderConfigCollection(
@@ -114,7 +112,7 @@ final class AppGlobalConfig {
     ],
     defaultValue: 1.00,
     format: (dynamic value) => '{value}%'.replaceAll('{value}', (value * 100).toStringAsFixed(0).padLeft(3, '0')),
-    sliderValues: ConfigSliderValues(0, 1, 100),
+    sliderValues: ConfigSliderValues(min: 0, max: 1, divisions: 100),
   );
 
   static final SliderConfigCollection trackPlaybackBalance = SliderConfigCollection(
@@ -146,7 +144,7 @@ final class AppGlobalConfig {
       ]),
     ],
     defaultValue: 0.0,
-    sliderValues: ConfigSliderValues(-1, 1, 4),
+    sliderValues: ConfigSliderValues(min: -1, max: 1, divisions: 4),
   );
 
   static final ConfigCollection recordingAudioEncoder = ConfigCollection(
@@ -235,7 +233,7 @@ final class AppGlobalConfig {
         ConfigItemTranslatableProperty((trans) => trans.pink),
       ]),
     ],
-    defaultValue: Colors.red,
+    defaultValue: Colors.purple,
   );
 
   static final ConfigCollection trackState = ConfigCollection(
@@ -245,36 +243,35 @@ final class AppGlobalConfig {
         ConfigItemColorProperty((context) => Theme.of(context).colorScheme.inversePrimary, name: ConfigItemPropertyName.foregroundColor),
         ConfigItemColorProperty((context) => Theme.of(context).colorScheme.surfaceContainer, name: ConfigItemPropertyName.backgroundColor),
         ConfigItemColorProperty((context) => Theme.of(context).colorScheme.inversePrimary, name: ConfigItemPropertyName.progressColor),
+        ConfigItemTranslatableProperty((trans) => trans.stateEmpty),
       ]),
       ConfigItem<TrackState>(TrackState.recording, properties: [
         ConfigItemIconProperty(Icons.radio_button_checked_outlined),
         ConfigItemColorProperty((context) => Theme.of(context).colorScheme.error, name: ConfigItemPropertyName.foregroundColor),
         ConfigItemColorProperty((context) => Theme.of(context).colorScheme.errorContainer, name: ConfigItemPropertyName.backgroundColor),
         ConfigItemColorProperty((context) => Theme.of(context).colorScheme.surfaceContainerHighest, name: ConfigItemPropertyName.progressColor),
+        ConfigItemTranslatableProperty((trans) => trans.stateRecording),
       ]),
-      ConfigItem<TrackState>(TrackState.ready, properties: [
+      ConfigItem<TrackState>(TrackState.idle, properties: [
         ConfigItemIconProperty(Icons.task_alt_outlined),
         ConfigItemColorProperty((context) => Theme.of(context).colorScheme.secondary, name: ConfigItemPropertyName.foregroundColor),
         ConfigItemColorProperty((context) => Theme.of(context).colorScheme.secondaryContainer, name: ConfigItemPropertyName.backgroundColor),
         ConfigItemColorProperty((context) => Theme.of(context).colorScheme.surfaceContainer, name: ConfigItemPropertyName.progressColor),
-      ]),
-      ConfigItem<TrackState>(TrackState.stopped, properties: [
-        ConfigItemIconProperty(Icons.task_alt_outlined),
-        ConfigItemColorProperty((context) => Theme.of(context).colorScheme.secondary, name: ConfigItemPropertyName.foregroundColor),
-        ConfigItemColorProperty((context) => Theme.of(context).colorScheme.secondaryContainer, name: ConfigItemPropertyName.backgroundColor),
-        ConfigItemColorProperty((context) => Theme.of(context).colorScheme.surfaceContainer, name: ConfigItemPropertyName.progressColor),
+        ConfigItemTranslatableProperty((trans) => trans.stateIdle),
       ]),
       ConfigItem<TrackState>(TrackState.playing, properties: [
         ConfigItemIconProperty(Icons.play_circle_outline),
         ConfigItemColorProperty((context) => Theme.of(context).colorScheme.primary, name: ConfigItemPropertyName.foregroundColor),
         ConfigItemColorProperty((context) => Theme.of(context).colorScheme.primaryContainer, name: ConfigItemPropertyName.backgroundColor),
         ConfigItemColorProperty((context) => Theme.of(context).colorScheme.inversePrimary, name: ConfigItemPropertyName.progressColor),
+        ConfigItemTranslatableProperty((trans) => trans.statePlaying),
       ]),
       ConfigItem<TrackState>(TrackState.paused, properties: [
         ConfigItemIconProperty(Icons.pause_circle_outline),
         ConfigItemColorProperty((context) => Theme.of(context).colorScheme.tertiary, name: ConfigItemPropertyName.foregroundColor),
         ConfigItemColorProperty((context) => Theme.of(context).colorScheme.tertiaryContainer, name: ConfigItemPropertyName.backgroundColor),
         ConfigItemColorProperty((context) => Theme.of(context).colorScheme.surfaceContainer, name: ConfigItemPropertyName.progressColor),
+        ConfigItemTranslatableProperty((trans) => trans.statePaused),
       ]),
     ],
   );

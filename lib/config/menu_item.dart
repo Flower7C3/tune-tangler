@@ -21,3 +21,13 @@ enum RowMenuItem {
   playbackBalance,
   delete,
 }
+
+enum AllTracksMenuItem {
+  playbackModeSet,
+  playbackSpeedSet,
+  playbackVolumeSet,
+  playbackBalanceSet,
+  titleReset,
+  shortcutKeyReset,
+  recordingsDelete,
+}

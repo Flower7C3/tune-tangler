@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:tune_tangler/entity/track.dart';
 
 import '../config/keyboard.dart';
@@ -21,11 +20,8 @@ class TracksCollection {
     _collections[name]!.add(track);
   }
 
-  void addAll(Track track) {
+  void add(int rowIndex, Track track) {
     _add(_allKeyName(), track);
-  }
-
-  void addRow(int rowIndex, Track track) {
     _add(_rowKeyName(rowIndex), track);
   }
 

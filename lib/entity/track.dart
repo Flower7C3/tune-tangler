@@ -18,11 +18,9 @@ enum RecorderState {
 }
 
 enum TrackState {
-  undefined,
   empty,
   recording,
-  ready,
-  stopped,
+  idle,
   playing,
   paused,
 }
@@ -144,7 +142,7 @@ class Track {
 
   void startPlaying() {
     String? p = path;
-    if ((state.value == TrackState.stopped || state.value == TrackState.paused) && p != null) {
+    if ((state.value == TrackState.idle || state.value == TrackState.paused) && p != null) {
       _player.resume();
       setPlayerState(PlayerState.playing);
     }
@@ -200,7 +198,7 @@ class Track {
       _player.getDuration().then((value) => (duration.value == value) ? null : setDuration(value));
       _player.setVolume(playbackVolume.value);
       _player.setBalance(playbackBalance.value);
-      _player.setReleaseMode(playbackModeSingle.value ? ReleaseMode.release : ReleaseMode.loop);
+      _player.setReleaseMode(playbackModeSingle.value ? ReleaseMode.stop : ReleaseMode.loop);
       _player.setPlaybackRate(playbackSpeed.value);
     });
   }
@@ -262,7 +260,7 @@ class Track {
     updateState();
   }
 
-  final ValueNotifier<TrackState> state = ValueNotifier(TrackState.undefined);
+  final ValueNotifier<TrackState> state = ValueNotifier(TrackState.empty);
 
   final ValueNotifier<IconData> stateIcon = ValueNotifier(Icons.square_rounded);
 
@@ -271,11 +269,11 @@ class Track {
       RecorderState.empty => TrackState.empty,
       RecorderState.recording => TrackState.recording,
       RecorderState.ready => switch (_playerState) {
-          PlayerState.stopped => TrackState.stopped,
+          PlayerState.stopped => TrackState.idle,
           PlayerState.playing => TrackState.playing,
           PlayerState.paused => TrackState.paused,
-          PlayerState.disposed => TrackState.stopped,
-          PlayerState.completed => TrackState.stopped,
+          PlayerState.disposed => TrackState.idle,
+          PlayerState.completed => TrackState.idle,
           _ => TrackState.empty,
         },
     };
@@ -345,7 +343,7 @@ class Track {
   final ValueNotifier<bool> playbackModeSingle = ValueNotifier(defaultPlaybackModeSingle);
 
   Future<void> setPlaybackMode(bool value) async {
-    await _player.setReleaseMode(value ? ReleaseMode.release : ReleaseMode.loop);
+    await _player.setReleaseMode(value ? ReleaseMode.stop : ReleaseMode.loop);
     playbackModeSingle.value = value;
   }
 

@@ -1,5 +1,4 @@
 import 'package:hive/hive.dart';
-import 'package:record/record.dart';
 
 import '../entity/track.dart';
 
@@ -28,10 +27,6 @@ class TrackAdapter extends TypeAdapter<Track> {
     final Map<dynamic, dynamic> data = reader.readMap();
     var track = Track(data[TrackAdapterKey.rowIndex.toString()], data[TrackAdapterKey.colIndex.toString()]);
     track.setName(data[TrackAdapterKey.name.toString()]);
-    int? audioEncoderIndex = data[TrackAdapterKey.audioEncoder.toString()];
-    track.setAudioEncoder(audioEncoderIndex == null ? null : AudioEncoder.values[audioEncoderIndex]);
-    track.setSampleRate(data[TrackAdapterKey.sampleRate.toString()]);
-    track.setBitRate(data[TrackAdapterKey.bitRate.toString()]);
     if (data[TrackAdapterKey.recorderState] == null) {
       track.setRecordingState(RecorderState.empty);
     } else {
@@ -53,10 +48,6 @@ class TrackAdapter extends TypeAdapter<Track> {
       TrackAdapterKey.rowIndex.toString(): obj.rowIndex,
       TrackAdapterKey.colIndex.toString(): obj.colIndex,
       TrackAdapterKey.name.toString(): obj.name.value,
-      TrackAdapterKey.path.toString(): obj.path,
-      TrackAdapterKey.audioEncoder.toString(): (obj.audioEncoder == null) ? 0 : obj.audioEncoder?.index,
-      TrackAdapterKey.sampleRate.toString(): obj.sampleRate,
-      TrackAdapterKey.bitRate.toString(): obj.bitRate,
       TrackAdapterKey.recorderState.toString(): obj.recorderState.value.index,
       TrackAdapterKey.playbackMode.toString(): obj.playbackModeSingle.value,
       TrackAdapterKey.playbackVolume.toString(): obj.playbackVolume.value,
