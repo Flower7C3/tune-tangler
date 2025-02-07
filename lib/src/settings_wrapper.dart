@@ -112,6 +112,7 @@ class SettingsWrapper {
           _trans.recordingAudioEncoder,
           _widget.settingsGet(AppConfigFieldKey.recordingAudioEncoder),
           AppGlobalConfig.recordingAudioEncoder.values().toList(),
+          helpMessage: _trans.recordingAudioEncoderInfo,
           configCollection: AppGlobalConfig.recordingAudioEncoder,
           trans: _trans,
           successAction: (dynamic value, String formattedValue) {
@@ -128,6 +129,7 @@ class SettingsWrapper {
           _trans.recordingSampleRate,
           _widget.settingsGet(AppConfigFieldKey.recordingSampleRate),
           AppGlobalConfig.recordingSampleRate.values().toList(),
+          helpMessage: _trans.recordingSampleRateInfo,
           configCollection: AppGlobalConfig.recordingSampleRate,
           successAction: (dynamic value, String formattedValue) {
             _widget.settingsSet(AppConfigFieldKey.recordingSampleRate, value, updateState: true);
@@ -139,6 +141,7 @@ class SettingsWrapper {
           _trans.recordingBitRate,
           _widget.settingsGet(AppConfigFieldKey.recordingBitRate),
           AppGlobalConfig.recordingBitRate.values().toList(),
+          helpMessage: _trans.recordingBitRateInfo,
           configCollection: AppGlobalConfig.recordingBitRate,
           successAction: (dynamic value, String formattedValue) {
             _widget.settingsSet(AppConfigFieldKey.recordingBitRate, value, updateState: true);
@@ -359,7 +362,7 @@ class SettingsWrapper {
           ],
         ),
         ExpansionTile(
-          title: Text(_trans.recordingAudioEncoder),
+          title: Text(_trans.recordingAudioEncoders),
           childrenPadding: EdgeInsets.all(_uiWrapper.gridGap),
           children: [
             Text(_trans.helpScreenRecordingCodecsInfoContent),
@@ -369,7 +372,7 @@ class SettingsWrapper {
           title: Text(_trans.helpScreenRecordingCodecsChooseTitle),
           childrenPadding: EdgeInsets.all(_uiWrapper.gridGap),
           children: [
-            Text(_trans.helpScreenRecordingCodecsChooseContent),
+            Text(_trans.recordingAudioEncoderInfo),
           ],
         ),
       ],

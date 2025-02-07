@@ -637,6 +637,7 @@ class UIWrapper {
     String listTitle,
     dynamic currentValue,
     List<dynamic> values, {
+    String? helpMessage,
     required String Function(dynamic value, String formattedValue) successAction,
     ConfigCollection? configCollection,
     AppLocalizations? trans,
@@ -662,7 +663,8 @@ class UIWrapper {
                 },
               ),
             ),
-          )
+          ),
+          if (helpMessage != null) Text(helpMessage),
         ],
       );
 

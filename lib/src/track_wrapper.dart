@@ -88,7 +88,7 @@ class TrackWrapper {
       }
 
       RecordConfig recordConfig = _widget.settingsGet(AppConfigFieldKey.recording);
-      String fileExtension = AppGlobalConfig.readerEncoderExtension.text(recordConfig.encoder);
+      String fileExtension = AppGlobalConfig.recordingAudioEncoder.text(recordConfig.encoder);
       String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
       String filePath = await getApplicationDocumentsDirectory().then((value) => '${value.path}/${track.id}.$timestamp.$fileExtension');
 
@@ -317,10 +317,10 @@ class TrackWrapper {
                           style: TextStyle(fontSize: Theme.of(context).textTheme.titleLarge!.fontSize, fontWeight: FontWeight.bold)))),
               Align(
                   alignment: Alignment.topLeft,
-                  child: ValueListenableBuilder<IconData>(
-                      valueListenable: track.stateIcon,
-                      builder: (context, stateIcon, child) =>
-                          Icon(stateIcon, size: Theme.of(context).textTheme.titleMedium!.fontSize, color: track.stateForegroundColor(context)))),
+                  child: ValueListenableBuilder<TrackState>(
+                      valueListenable: track.state,
+                      builder: (context, state, child) =>
+                          Icon(track.stateIcon, size: Theme.of(context).textTheme.titleMedium!.fontSize, color: track.stateForegroundColor(context)))),
               Align(
                   alignment: Alignment.topRight,
                   child: ValueListenableBuilder<String>(
@@ -362,18 +362,18 @@ class TrackWrapper {
                           size: Theme.of(context).textTheme.titleMedium!.fontSize, color: track.stateForegroundColor(context)))),
               Align(
                   alignment: AlignmentDirectional(0.3, 1),
-                  child: ValueListenableBuilder<IconData?>(
-                      valueListenable: track.playbackStartAtPositionIcon,
-                      builder: (context, icon, child) => (icon == null)
+                  child: ValueListenableBuilder<Duration?>(
+                      valueListenable: track.playbackStartAtPosition,
+                      builder: (context, time, child) => (time == null)
                           ? Text('')
-                          : Icon(icon, size: Theme.of(context).textTheme.titleMedium!.fontSize, color: track.stateForegroundColor(context)))),
+                          : Icon(track.playbackStartAtPositionIcon, size: Theme.of(context).textTheme.titleMedium!.fontSize, color: track.stateForegroundColor(context)))),
               Align(
                   alignment: AlignmentDirectional(1, 1),
-                  child: ValueListenableBuilder<IconData?>(
-                      valueListenable: track.playbackEndAtPositionIcon,
-                      builder: (context, icon, child) => (icon == null)
+                  child: ValueListenableBuilder<Duration?>(
+                      valueListenable: track.playbackEndAtPosition,
+                      builder: (context, time, child) => (time == null)
                           ? Text('')
-                          : Icon(icon, size: Theme.of(context).textTheme.titleMedium!.fontSize, color: track.stateForegroundColor(context)))),
+                          : Icon(track.playbackEndAtPositionIcon, size: Theme.of(context).textTheme.titleMedium!.fontSize, color: track.stateForegroundColor(context)))),
             ])),
         (state == TrackState.recording)
             ? LinearProgressIndicator(
@@ -466,10 +466,10 @@ class TrackWrapper {
             valueListenable: track.state,
             builder: (context, state, child) => Tooltip(
                 message: AppGlobalConfig.trackState.translate(state, trans: _trans),
-                child: ValueListenableBuilder<IconData>(
-                  valueListenable: track.stateIcon,
-                  builder: (context, icon, child) =>
-                      Icon(icon, size: Theme.of(context).textTheme.headlineMedium!.fontSize! * _uiWrapper.iconSizeMultiplier),
+                child: ValueListenableBuilder<TrackState>(
+                  valueListenable: track.state,
+                  builder: (context, state, child) =>
+                      Icon(track.stateIcon, size: Theme.of(context).textTheme.headlineMedium!.fontSize! * _uiWrapper.iconSizeMultiplier),
                 ))),
         Expanded(
             child: Column(
@@ -523,7 +523,7 @@ class TrackWrapper {
         if (track.audioEncoder != null)
           _uiWrapper.statusIconRow(
             AppIcon.recordingAudioEncoder,
-            AppGlobalConfig.recordingAudioEncoder.translate(track.audioEncoder?.index.toDouble(), trans: _trans),
+            AppGlobalConfig.recordingAudioEncoder.translate(track.audioEncoder, trans: _trans),
             iconSize: Theme.of(_context).textTheme.bodyLarge!.fontSize! * _uiWrapper.iconSizeMultiplier,
             fontSize: Theme.of(_context).textTheme.bodyLarge!.fontSize!,
             separatorSize: _uiWrapper.gridGap * 2,

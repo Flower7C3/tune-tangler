@@ -163,12 +163,12 @@ class Track {
   /// POSITION START AT
 
   final ValueNotifier<Duration?> playbackStartAtPosition = ValueNotifier(Duration());
-  final ValueNotifier<IconData?> playbackStartAtPositionIcon = ValueNotifier(null);
+
+  IconData? get playbackStartAtPositionIcon =>
+      (playbackStartAtPosition.value != null && playbackStartAtPosition.value!.inMilliseconds > 0) ? AppIcon.trackPlaybackStartAtPosition : null;
 
   void setPlaybackStartAtPosition(Duration? value) {
     playbackStartAtPosition.value = (playbackEndAtPosition.value != null && value == null) ? Duration() : value;
-    playbackStartAtPositionIcon.value =
-        (playbackStartAtPosition.value != null && playbackStartAtPosition.value!.inMilliseconds > 0) ? AppIcon.trackPlaybackStartAtPosition : null;
     _updatePositionCut();
     _updateDurationCut();
     if (value != null) {
@@ -196,15 +196,14 @@ class Track {
   /// POSITION END AT
 
   final ValueNotifier<Duration?> playbackEndAtPosition = ValueNotifier(Duration());
-  final ValueNotifier<IconData?> playbackEndAtPositionIcon = ValueNotifier(null);
+
+  IconData? get playbackEndAtPositionIcon =>
+      (playbackEndAtPosition.value != null && duration.value != null && playbackEndAtPosition.value!.inMilliseconds != duration.value!.inMilliseconds)
+          ? AppIcon.trackPlaybackEndAtPosition
+          : null;
 
   void setPlaybackEndAtPosition(Duration? value) {
     playbackEndAtPosition.value = (value == null) ? duration.value : value;
-    playbackEndAtPositionIcon.value = (playbackEndAtPosition.value != null &&
-            duration.value != null &&
-            playbackEndAtPosition.value!.inMilliseconds != duration.value!.inMilliseconds)
-        ? AppIcon.trackPlaybackEndAtPosition
-        : null;
     _updateDurationCut();
     if (value != null) {
       if (position.value != null && position.value! > playbackEndAtPosition.value!) {
@@ -306,7 +305,6 @@ class Track {
     setAudioEncoder(null);
     setSampleRate(null);
     setBitRate(null);
-    setRecorderState(RecorderState.empty);
     setPlayerState(null);
     setPosition(Duration());
     setDuration(Duration());
@@ -359,9 +357,9 @@ class Track {
     updateState();
   }
 
-  final ValueNotifier<TrackState> state = ValueNotifier(TrackState.empty);
+  final ValueNotifier<TrackState> state = ValueNotifier(AppGlobalConfig.trackState.defaultValue);
 
-  final ValueNotifier<IconData> stateIcon = ValueNotifier(Icons.square_rounded);
+  IconData get stateIcon => AppGlobalConfig.trackState.icon(state.value);
 
   void updateState() {
     state.value = switch (recorderState.value) {
@@ -376,7 +374,6 @@ class Track {
           _ => TrackState.empty,
         },
     };
-    stateIcon.value = AppGlobalConfig.trackState.icon(state.value);
   }
 
   Color stateForegroundColor(BuildContext context) =>
@@ -442,7 +439,7 @@ class Track {
     playbackReleaseMode.value = value;
   }
 
-  IconData get playbackModeIcon => (isPlaybackReleaseModeSingle(playbackReleaseMode.value)) ? Symbols.repeat_one_rounded : Symbols.repeat_rounded;
+  IconData get playbackModeIcon => AppGlobalConfig.trackPlaybackReleaseMode.icon(playbackReleaseMode.value);
 
   void togglePlaybackMode() {
     setPlaybackReleaseMode(isPlaybackReleaseModeSingle(playbackReleaseMode.value) ? ReleaseMode.loop : ReleaseMode.stop);

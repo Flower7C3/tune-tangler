@@ -6,6 +6,7 @@ enum ConfigItemPropertyName {
   foregroundColor,
   backgroundColor,
   progressColor,
+  extension,
 }
 
 final class ConfigCollection {

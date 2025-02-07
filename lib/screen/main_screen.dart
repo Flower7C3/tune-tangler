@@ -84,10 +84,10 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
 
   RecordConfig _recordConfig() {
     InputDevice? inputDevice = _settingsGet(AppConfigFieldKey.recordingInputDevice);
-    AudioEncoder audioEncoder = AppGlobalConfig.recordingAudioEncoder.decode(_settingsGet(AppConfigFieldKey.recordingAudioEncoder));
-    int sampleRate = AppGlobalConfig.recordingSampleRate.decode(_settingsGet(AppConfigFieldKey.recordingSampleRate));
-    int bitRate = AppGlobalConfig.recordingBitRate.decode(_settingsGet(AppConfigFieldKey.recordingBitRate));
-    int channels = (_settingsGet(AppConfigFieldKey.recordingAudioModeStereo) == true) ? 2 : 1;
+    AudioEncoder audioEncoder = _settingsGet(AppConfigFieldKey.recordingAudioEncoder);
+    int sampleRate = _settingsGet(AppConfigFieldKey.recordingSampleRate);
+    int bitRate = _settingsGet(AppConfigFieldKey.recordingBitRate);
+    int channels = AppGlobalConfig.recordingAudioMode.decode(_settingsGet(AppConfigFieldKey.recordingAudioModeStereo));
     bool autoGain = _settingsGet(AppConfigFieldKey.recordingAutoGain);
     bool echoCancel = _settingsGet(AppConfigFieldKey.recordingEchoCancel);
     bool noiseSuppress = _settingsGet(AppConfigFieldKey.recordingNoiseSuppress);

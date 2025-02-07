@@ -154,25 +154,47 @@ final class AppGlobalConfig {
 
   static final ConfigCollection recordingAudioEncoder = ConfigCollection(
     [
-      ConfigItem<double>(AudioEncoder.aacHe.index.toDouble(), properties: [
+      ConfigItem<AudioEncoder>(AudioEncoder.aacHe, properties: [
         ConfigItemTranslatableProperty((trans) => trans.audioRecorderAacLc),
+        ConfigItemTextProperty('m4a', name: ConfigItemPropertyName.extension),
       ]),
-      ConfigItem<double>(AudioEncoder.aacEld.index.toDouble(), properties: [
+      ConfigItem<AudioEncoder>(AudioEncoder.aacEld, properties: [
         ConfigItemTranslatableProperty((trans) => trans.audioRecorderAacEld),
+        ConfigItemTextProperty('m4a', name: ConfigItemPropertyName.extension),
       ]),
-      ConfigItem<double>(AudioEncoder.aacLc.index.toDouble(), properties: [
+      ConfigItem<AudioEncoder>(AudioEncoder.aacLc, properties: [
         ConfigItemTranslatableProperty((trans) => trans.audioRecorderAacHe),
+        ConfigItemTextProperty('m4a', name: ConfigItemPropertyName.extension),
       ]),
-      ConfigItem<double>(AudioEncoder.wav.index.toDouble(), properties: [
+      ConfigItem<AudioEncoder>(AudioEncoder.wav, properties: [
         ConfigItemTranslatableProperty((trans) => trans.audioRecorderWav),
+        ConfigItemTextProperty('wav', name: ConfigItemPropertyName.extension),
       ]),
-      ConfigItem<double>(AudioEncoder.flac.index.toDouble(), properties: [
+      ConfigItem<AudioEncoder>(AudioEncoder.flac, properties: [
         ConfigItemTranslatableProperty((trans) => trans.audioRecorderFlac),
+        ConfigItemTextProperty('flac', name: ConfigItemPropertyName.extension),
       ]),
+      // ConfigItem<AudioEncoder>(AudioEncoder.amrNb, properties: [
+      //   ConfigItemTextProperty('3gp', name: ConfigItemPropertyName.extension),
+      // ]),
+      // ConfigItem<AudioEncoder>(AudioEncoder.amrWb, properties: [
+      //   ConfigItemTextProperty('3gp', name: ConfigItemPropertyName.extension),
+      // ]),
+      // ConfigItem<AudioEncoder>(AudioEncoder.opus, properties: [
+      //   ConfigItemTextProperty('opus', name: ConfigItemPropertyName.extension),
+      // ]),
+      // ConfigItem<AudioEncoder>(AudioEncoder.pcm16bits, properties: [
+      //   ConfigItemTextProperty('pcm', name: ConfigItemPropertyName.extension),
+      // ]),
     ],
-    defaultValue: AudioEncoder.wav.index.toDouble(),
-    format: (dynamic value) => AudioEncoder.values[value.toInt()].toString().replaceAll('AudioEncoder.', ''),
-    decode: (dynamic value) => AudioEncoder.values[value.toInt()],
+    defaultValue: AudioEncoder.wav,
+    format: (dynamic value) => value.toString().replaceAll('AudioEncoder.', ''),
+    decode: (dynamic value) => value,
+  );
+
+  static final ConfigCollection recordingAudioMode = ConfigCollection(
+    [],
+    decode: (value) => (value == true) ? 2 : 1,
   );
 
   static final ConfigCollection recordingSampleRate = ConfigCollection(
@@ -183,7 +205,6 @@ final class AppGlobalConfig {
     ],
     defaultValue: 48000,
     format: (dynamic value) => '{value} kHz'.replaceAll('{value}', (value / 1000).toStringAsFixed(0)),
-    decode: (dynamic value) => value.toInt(),
   );
 
   static final ConfigCollection recordingBitRate = ConfigCollection(
@@ -196,7 +217,6 @@ final class AppGlobalConfig {
     ],
     defaultValue: 192000,
     format: (dynamic value) => '{value} kbps'.replaceAll('{value}', (value / 1000).toStringAsFixed(0)),
-    decode: (dynamic value) => value.toInt(),
   );
 
   static final ConfigCollection languages = ConfigCollection(
@@ -279,37 +299,6 @@ final class AppGlobalConfig {
         ConfigItemTranslatableProperty((trans) => trans.statePaused),
       ]),
     ],
-  );
-
-  static ConfigCollection readerEncoderExtension = ConfigCollection(
-    [
-      ConfigItem<AudioEncoder>(AudioEncoder.aacLc, properties: [
-        ConfigItemTextProperty('m4a'),
-      ]),
-      ConfigItem<AudioEncoder>(AudioEncoder.aacEld, properties: [
-        ConfigItemTextProperty('m4a'),
-      ]),
-      ConfigItem<AudioEncoder>(AudioEncoder.aacHe, properties: [
-        ConfigItemTextProperty('m4a'),
-      ]),
-      ConfigItem<AudioEncoder>(AudioEncoder.amrNb, properties: [
-        ConfigItemTextProperty('3gp'),
-      ]),
-      ConfigItem<AudioEncoder>(AudioEncoder.amrWb, properties: [
-        ConfigItemTextProperty('3gp'),
-      ]),
-      ConfigItem<AudioEncoder>(AudioEncoder.opus, properties: [
-        ConfigItemTextProperty('opus'),
-      ]),
-      ConfigItem<AudioEncoder>(AudioEncoder.flac, properties: [
-        ConfigItemTextProperty('flac'),
-      ]),
-      ConfigItem<AudioEncoder>(AudioEncoder.wav, properties: [
-        ConfigItemTextProperty('wav'),
-      ]),
-      ConfigItem<AudioEncoder>(AudioEncoder.pcm16bits, properties: [
-        ConfigItemTextProperty('pcm'),
-      ]),
-    ],
+    defaultValue: TrackState.empty,
   );
 }
