@@ -5,6 +5,7 @@ import 'package:tune_tangler/adapter/audio_input_device_adapter.dart';
 
 import 'adapter/audio_encoder_adapter.dart';
 import 'adapter/locale_adapter.dart';
+import 'adapter/release_mode_adapter.dart';
 import 'adapter/theme_mode_adapter.dart';
 import 'adapter/track_adapter.dart';
 import 'screen/main_screen.dart';
@@ -28,6 +29,7 @@ Future<void> main() async {
   Hive.registerAdapter(AudioEncoderAdapter());
   Hive.registerAdapter(ColorAdapter());
   Hive.registerAdapter(AudioInputDeviceAdapter());
+  Hive.registerAdapter(ReleaseModeAdapter());
   Box globalSettingsBox = await Hive.openBox('settings');
   Box trackSettingsBox = await Hive.openBox('tracks');
 

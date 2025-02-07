@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:record/record.dart';
 import 'package:tune_tangler/entity/track.dart';
 
 import '../config/app_icon.dart';
@@ -24,6 +23,20 @@ class UIWrapper {
   BuildContext context;
 
   UIWrapper(this.context);
+
+  Container get dragHandle => Container(
+        padding: EdgeInsets.only(top: Theme.of(context).textTheme.titleSmall!.fontSize!),
+        child: Center(
+          child: Container(
+            width: Theme.of(context).textTheme.displayLarge!.fontSize!,
+            height: Theme.of(context).textTheme.displayLarge!.fontSize! / 10,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.inversePrimary,
+              borderRadius: BorderRadius.circular(Theme.of(context).textTheme.displayLarge!.fontSize! / 10),
+            ),
+          ),
+        ),
+      );
 
   ListTile statusIconTile(
     IconData icon,
@@ -51,17 +64,26 @@ class UIWrapper {
         title: Text(text, style: TextStyle(color: textColor, fontSize: fontSize)),
       );
 
-  Widget statusIconRow(IconData icon, String text,
-          {Color? iconColor,
-          double? iconSize,
-          Color? textColor,
-          double? fontSize,
-          double? separatorSize,
-          MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start}) =>
+  Widget statusIconRow(
+    IconData icon,
+    String text, {
+    Color? iconColor,
+    double? iconSize,
+    Color? textColor,
+    double? fontSize,
+    double? separatorSize,
+    MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
+    IconAlignment iconAlignment = IconAlignment.start,
+    bool wrapExpanded = true,
+  }) =>
       Row(mainAxisAlignment: mainAxisAlignment, children: [
-        Icon(icon, size: iconSize, color: iconColor),
-        SizedBox(width: separatorSize),
-        Expanded(child: Text(text, style: TextStyle(color: textColor, fontSize: fontSize))),
+        if (iconAlignment == IconAlignment.start) Icon(icon, size: iconSize, color: iconColor),
+        if (iconAlignment == IconAlignment.start) SizedBox(width: separatorSize),
+        (wrapExpanded == true)
+            ? Expanded(child: Text(text, style: TextStyle(color: textColor, fontSize: fontSize)))
+            : Text(text, style: TextStyle(color: textColor, fontSize: fontSize)),
+        if (iconAlignment == IconAlignment.end) SizedBox(width: separatorSize),
+        if (iconAlignment == IconAlignment.end) Icon(icon, size: iconSize, color: iconColor),
       ]);
 
   SizedBox trackDetailsLine(
@@ -69,20 +91,6 @@ class UIWrapper {
     MainAxisAlignment mainAxisAlignment = MainAxisAlignment.center,
   }) =>
       SizedBox(width: double.maxFinite, child: Row(mainAxisSize: MainAxisSize.max, mainAxisAlignment: mainAxisAlignment, children: items));
-
-  PopupMenuItem<String> topPopupMenuItem(
-    TopMenuItem value,
-    IconData icon,
-    String text, {
-    bool? checked,
-  }) =>
-      PopupMenuItem(
-          value: value.toString(),
-          child: ListTile(
-            leading: Icon(icon),
-            title: Text(text),
-            trailing: (checked == null) ? null : Icon((checked == true) ? Symbols.check_box_rounded : Symbols.square_rounded),
-          ));
 
   PopupMenuItem<String> topTrackMenuItem(
     AllTracksMenuItem value,
@@ -248,7 +256,7 @@ class UIWrapper {
 
   String formatTime(
     int milliseconds, {
-    String format = '{h}:{m}:{s}.{ds}',
+    String format = '{h}:{m}:{s}.{cs}',
   }) {
     final duration = Duration(milliseconds: milliseconds);
     final hours = duration.inHours.toString().padLeft(2, '0');
@@ -265,48 +273,6 @@ class UIWrapper {
         .replaceAll('{cs}', centiSecond)
         .replaceAll('{ms}', milliSecond)
         .replaceAll('{MS}', duration.inMilliseconds.toString());
-  }
-
-  Widget _recordConfig(
-    RecordConfig recordConfig,
-    AppLocalizations trans,
-  ) =>
-      Column(mainAxisSize: MainAxisSize.min, children: [
-        statusIconRow(AppIcon.recordingInputDevice,
-            trans.recordingInputDeviceValue(recordConfig.device == null ? trans.defaultDevice : recordConfig.device!.label),
-            iconSize: 16, fontSize: 14, separatorSize: gridGap * 2),
-        statusIconRow(AppIcon.recordingAudioEncoder,
-            trans.recordingAudioEncoderValue(AppGlobalConfig.recordingAudioEncoder.translate(recordConfig.encoder.index.toDouble(), trans: trans)),
-            iconSize: 16, fontSize: 14, separatorSize: gridGap * 2),
-        statusIconRow(AppIcon.recordingSampleRate,
-            trans.recordingSampleRateValue(AppGlobalConfig.recordingSampleRate.format(recordConfig.sampleRate.toDouble())),
-            iconSize: 16, fontSize: 14, separatorSize: gridGap * 2),
-        statusIconRow(AppIcon.recordingBitRate, trans.recordingBitRateValue(AppGlobalConfig.recordingBitRate.format(recordConfig.bitRate.toDouble())),
-            iconSize: 16, fontSize: 14, separatorSize: gridGap * 2),
-        statusIconRow(AppIcon.recordingAudioGain, trans.recordingAutoGainValue(recordConfig.autoGain ? trans.yes : trans.no),
-            iconSize: 16, fontSize: 14, separatorSize: gridGap * 2),
-        statusIconRow(AppIcon.recordingEchoCancel, trans.recordingEchoCancelValue(recordConfig.echoCancel ? trans.yes : trans.no),
-            iconSize: 16, fontSize: 14, separatorSize: gridGap * 2),
-        statusIconRow(AppIcon.recordingNoiseSuppress, trans.recordingNoiseSuppressValue(recordConfig.noiseSuppress ? trans.yes : trans.no),
-            iconSize: 16, fontSize: 14, separatorSize: gridGap * 2),
-      ]);
-
-  void recordConfigDialog(
-    String title, {
-    required RecordConfig recordConfig,
-    required AppLocalizations trans,
-  }) {
-    alertDialog(
-      AppIcon.trackRecordingStart,
-      title,
-      contentWidget: _recordConfig(recordConfig, trans),
-      actions: [
-        primaryButton(trans.settingsChange, () async {
-          Navigator.pop(context, 'trackRecordingStop');
-          await Navigator.pushNamed(context, '/settings', arguments: 2);
-        }),
-      ],
-    );
   }
 
   void toast(
@@ -421,11 +387,26 @@ class UIWrapper {
   ButtonStyle circledButtonStyle() =>
       IconButton.styleFrom(shape: CircleBorder(), padding: EdgeInsets.zero, backgroundColor: Theme.of(context).colorScheme.primaryContainer);
 
-  IconButton mediaPlayerButton(IconData icon, String tooltip, {VoidCallback? onPressed, double? iconSize}) => IconButton(
-      onPressed: onPressed,
-      style: circledButtonStyle(),
-      icon: Icon(icon, size: iconSize ?? Theme.of(context).textTheme.headlineSmall!.fontSize, color: Theme.of(context).colorScheme.primary),
-      tooltip: tooltip);
+  Container mediaPlayerButton(
+    IconData icon,
+    String tooltip, {
+    VoidCallback? onPressed,
+    double? iconSize,
+    double? boxSize,
+  }) =>
+      Container(
+          margin: EdgeInsets.zero,
+          width: boxSize,
+          height: boxSize,
+          padding: EdgeInsets.all(gridGap),
+          child: IconButton(
+            style: circledButtonStyle(),
+            icon: Icon(icon, color: Theme.of(context).colorScheme.primary),
+            iconSize: iconSize ?? Theme.of(context).textTheme.headlineSmall!.fontSize,
+            padding: EdgeInsets.zero,
+            tooltip: tooltip,
+            onPressed: onPressed,
+          ));
 
   Container helpTrackState(TrackState state, String message) => Container(
         padding: EdgeInsets.all(4),
@@ -511,13 +492,13 @@ class UIWrapper {
                                   min: minValue,
                                   max: maxValue,
                                   divisions: divisions?.toInt(),
-                                  label: _format(currentValue, configCollection),
+                                  label: _translateOrFormat(currentValue, configCollection, trans),
                                   onChanged: (double newValue) {
                                     setModalState(() {
                                       currentValue = newValue;
                                     });
                                   }),
-                              Text(configCollection != null ? configCollection.format(currentValue) : currentValue.toString()),
+                              Text(_format(currentValue, configCollection)),
                             ]),
                           ]),
                           actions: [
@@ -560,13 +541,13 @@ class UIWrapper {
                               min: minValue,
                               max: maxValue,
                               divisions: divisions?.toInt(),
-                              label: _format(currentValue, configCollection),
+                              label: _translateOrFormat(currentValue, configCollection, trans),
                               onChanged: (double newValue) {
                                 setModalState(() {
                                   currentValue = newValue;
                                 });
                               }),
-                          Text(configCollection != null ? configCollection.format(currentValue) : currentValue.toString()),
+                          Text(_format(currentValue, configCollection)),
                         ]),
                       ]),
                       actions: [
@@ -626,14 +607,14 @@ class UIWrapper {
                         min: 0,
                         max: (values.length - 1).toDouble(),
                         divisions: (values.length - 1),
-                        label: _format(currentValue, configCollection),
+                        label: _translateOrFormat(currentValue, configCollection, trans),
                         onChanged: (double newValue) {
                           setModalState(() {
                             sliderValue = newValue;
                             currentValue = values[sliderValue.toInt()];
                           });
                         }),
-                    Text(_translateOrFormat(currentValue, configCollection, trans)),
+                    Text(_format(currentValue, configCollection)),
                   ]),
                 ]),
                 actions: [

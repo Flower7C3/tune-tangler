@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -61,15 +62,16 @@ final class AppGlobalConfig {
     ],
   );
 
-  static final ConfigCollection trackPlaybackMode = ConfigCollection(
+  static final ConfigCollection trackPlaybackReleaseMode = ConfigCollection(
     [
-      ConfigItem<double>(1, properties: [
+      ConfigItem<ReleaseMode>(ReleaseMode.stop, properties: [
         ConfigItemIconProperty(AppIcon.trackSinglePlaybackMode),
       ]),
-      ConfigItem<double>(0, properties: [
+      ConfigItem<ReleaseMode>(ReleaseMode.loop, properties: [
         ConfigItemIconProperty(AppIcon.trackRepeatPlaybackMode),
       ]),
     ],
+    defaultValue: ReleaseMode.stop,
   );
 
   static final SliderConfigCollection trackPlaybackSpeed = SliderConfigCollection(
@@ -144,6 +146,7 @@ final class AppGlobalConfig {
       ]),
     ],
     defaultValue: 0.0,
+    format: (dynamic value) => trackPlaybackBalance.text(value),
     sliderValues: ConfigSliderValues(min: -1, max: 1, divisions: 4),
   );
 

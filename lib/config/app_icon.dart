@@ -46,7 +46,18 @@ class AppIcon {
   static IconData trackPlaybackVolume = Icons.volume_up_rounded;
   static IconData trackPlaybackBalance = Icons.headphones_rounded;
   static IconData trackPlaybackSpeed = Icons.slow_motion_video_rounded;
-  static IconData trackDuration = Icons.timelapse_rounded;
+
+  static IconData trackTimer = Icons.timer_rounded;
+  static IconData trackPosition = Icons.timelapse_rounded;
+  static IconData trackDuration = Icons.schedule_rounded;
+
+  static IconData trackPlaybackStartAtPosition = Symbols.logout_rounded;
+  static IconData trackPlaybackEndAtPosition = Symbols.login_rounded;
+  static IconData trackPlaybackPositionSub1000 = Symbols.fast_rewind;
+  static IconData trackPlaybackPositionReset = Symbols.cancel_presentation_rounded;
+  static IconData trackPlaybackPositionSub100 = Symbols.arrow_back_2_rounded;
+  static IconData trackPlaybackPositionAdd100 = Symbols.play_arrow;
+  static IconData trackPlaybackPositionAdd1000 = Symbols.fast_forward;
 
   static IconData recordingInputDevice = Symbols.settings_input_component;
   static IconData recordingAudioEncoder = Icons.integration_instructions_outlined;
@@ -82,4 +93,5 @@ class AppIcon {
   static IconData trackSettings = Icons.graphic_eq_rounded;
   static IconData recordingSettings = Icons.settings_voice;
   static IconData permissions = Icons.shield_outlined;
+
 }

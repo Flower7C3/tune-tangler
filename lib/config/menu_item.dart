@@ -1,13 +1,3 @@
-enum TopMenuItem {
-  changeLanguage,
-  themeModeLight,
-  themeModeDark,
-  keepScreenOnDisable,
-  keepScreenOnEnable,
-  settings,
-  help,
-}
-
 enum TrackMenuItem {
   changeKeyboardKey,
   changeName,
@@ -19,7 +9,9 @@ enum RowMenuItem {
   playbackSpeed,
   playbackVolume,
   playbackBalance,
-  delete,
+  playbackStartAtPositionReset,
+  playbackEndAtPositionReset,
+  recordingsDelete,
 }
 
 enum AllTracksMenuItem {
@@ -27,7 +19,10 @@ enum AllTracksMenuItem {
   playbackSpeedSet,
   playbackVolumeSet,
   playbackBalanceSet,
+  playbackStartAtPositionReset,
+  playbackEndAtPositionReset,
   titleReset,
   shortcutKeyReset,
+  settingsReset,
   recordingsDelete,
 }

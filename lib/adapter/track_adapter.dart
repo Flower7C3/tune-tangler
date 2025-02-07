@@ -1,4 +1,5 @@
 import 'package:hive/hive.dart';
+import 'package:tune_tangler/config/config.dart';
 
 import '../entity/track.dart';
 
@@ -11,7 +12,7 @@ enum TrackAdapterKey {
   bitRate,
   sampleRate,
   recorderState,
-  playbackMode,
+  playbackReleaseMode,
   playbackVolume,
   playbackBalance,
   playbackSpeed,
@@ -33,10 +34,10 @@ class TrackAdapter extends TypeAdapter<Track> {
       RecorderState state = RecorderState.values[data[TrackAdapterKey.recorderState.toString()]];
       track.setRecordingState((state == RecorderState.ready) ? RecorderState.ready : RecorderState.empty);
     }
-    track.setPlaybackVolume(data[TrackAdapterKey.playbackVolume.toString()] ?? Track.defaultPlaybackVolume);
-    track.setPlaybackBalance(data[TrackAdapterKey.playbackBalance.toString()] ?? Track.defaultPlaybackBalance);
-    track.setPlaybackSpeed(data[TrackAdapterKey.playbackSpeed.toString()] ?? Track.defaultPlaybackSpeed);
-    track.setPlaybackMode(data[TrackAdapterKey.playbackMode.toString()] ?? Track.defaultPlaybackModeSingle);
+    track.setPlaybackVolume(data[TrackAdapterKey.playbackVolume.toString()] ?? AppGlobalConfig.trackPlaybackVolume.defaultValue);
+    track.setPlaybackBalance(data[TrackAdapterKey.playbackBalance.toString()] ?? AppGlobalConfig.trackPlaybackBalance.defaultValue);
+    track.setPlaybackSpeed(data[TrackAdapterKey.playbackSpeed.toString()] ?? AppGlobalConfig.trackPlaybackSpeed.defaultValue);
+    track.setPlaybackReleaseMode(data[TrackAdapterKey.playbackReleaseMode.toString()] ?? AppGlobalConfig.trackPlaybackReleaseMode.defaultValue);
     track.setKeyboardKey(data[TrackAdapterKey.keyboardKey.toString()] ?? '');
     track.setPath(data[TrackAdapterKey.path.toString()]);
     return track;
@@ -49,7 +50,7 @@ class TrackAdapter extends TypeAdapter<Track> {
       TrackAdapterKey.colIndex.toString(): obj.colIndex,
       TrackAdapterKey.name.toString(): obj.name.value,
       TrackAdapterKey.recorderState.toString(): obj.recorderState.value.index,
-      TrackAdapterKey.playbackMode.toString(): obj.playbackModeSingle.value,
+      TrackAdapterKey.playbackReleaseMode.toString(): obj.playbackReleaseMode.value.index,
       TrackAdapterKey.playbackVolume.toString(): obj.playbackVolume.value,
       TrackAdapterKey.playbackBalance.toString(): obj.playbackBalance.value,
       TrackAdapterKey.playbackSpeed.toString(): obj.playbackSpeed.value,

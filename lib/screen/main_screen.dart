@@ -9,7 +9,6 @@ import '../config/config.dart';
 import '../config/fields.dart';
 import '../entity/track_row.dart';
 import 'home_screen.dart';
-import 'settings_screen.dart';
 
 class MainScreenApp extends StatefulWidget {
   final Box globalSettingsBox;
@@ -150,12 +149,6 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
                 audioRecorder: _audioRecorder,
                 tracksList: _tracksList,
               ),
-          // '/settings': (context) => SettingsScreen(
-          //       settingsGet: _settingsGet,
-          //       settingsSet: _settingsSet,
-          //       audioRecorder: _audioRecorder,
-          //       tracksList: _tracksList,
-          //     ),
         },
       );
 }
