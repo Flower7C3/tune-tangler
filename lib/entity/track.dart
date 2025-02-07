@@ -288,7 +288,7 @@ class Track {
     _path = newPath;
     await player.setSourceDeviceFile(newPath).then((value) async {
       await player.getDuration().then((value) => (duration.value == value) ? null : setDuration(value ?? Duration()));
-      setRecordingState(RecorderState.ready);
+      setRecorderState(RecorderState.ready);
       setPlayerState(PlayerState.completed);
       setPosition(Duration());
       setPlaybackStartAtPosition(Duration());
@@ -302,11 +302,11 @@ class Track {
 
   _clearPath() {
     player.setSourceUrl('');
-    setRecordingState(RecorderState.empty);
+    setRecorderState(RecorderState.empty);
     setAudioEncoder(null);
     setSampleRate(null);
     setBitRate(null);
-    setRecordingState(RecorderState.empty);
+    setRecorderState(RecorderState.empty);
     setPlayerState(null);
     setPosition(Duration());
     setDuration(Duration());
@@ -354,7 +354,7 @@ class Track {
 
   final ValueNotifier<RecorderState> recorderState = ValueNotifier(RecorderState.empty);
 
-  void setRecordingState(RecorderState state) {
+  void setRecorderState(RecorderState state) {
     recorderState.value = state;
     updateState();
   }

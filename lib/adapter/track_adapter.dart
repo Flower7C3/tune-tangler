@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:hive/hive.dart';
 import 'package:tune_tangler/config/config.dart';
 
@@ -21,40 +22,59 @@ enum TrackAdapterKey {
 
 class TrackAdapter extends TypeAdapter<Track> {
   @override
-  final typeId = 3;
+  final typeId = 30;
 
   @override
   Track read(BinaryReader reader) {
     final Map<dynamic, dynamic> data = reader.readMap();
-    var track = Track(data[TrackAdapterKey.rowIndex.toString()], data[TrackAdapterKey.colIndex.toString()]);
-    track.setName(data[TrackAdapterKey.name.toString()]);
+    var track = Track(data[TrackAdapterKey.rowIndex], data[TrackAdapterKey.colIndex]);
+    track.setName(data[TrackAdapterKey.name]);
     if (data[TrackAdapterKey.recorderState] == null) {
-      track.setRecordingState(RecorderState.empty);
+      track.setRecorderState(RecorderState.empty);
     } else {
-      RecorderState state = RecorderState.values[data[TrackAdapterKey.recorderState.toString()]];
-      track.setRecordingState((state == RecorderState.ready) ? RecorderState.ready : RecorderState.empty);
+      RecorderState state = RecorderState.values[data[TrackAdapterKey.recorderState]];
+      track.setRecorderState((state == RecorderState.ready) ? RecorderState.ready : RecorderState.empty);
     }
-    track.setPlaybackVolume(data[TrackAdapterKey.playbackVolume.toString()] ?? AppGlobalConfig.trackPlaybackVolume.defaultValue);
-    track.setPlaybackBalance(data[TrackAdapterKey.playbackBalance.toString()] ?? AppGlobalConfig.trackPlaybackBalance.defaultValue);
-    track.setPlaybackSpeed(data[TrackAdapterKey.playbackSpeed.toString()] ?? AppGlobalConfig.trackPlaybackSpeed.defaultValue);
-    track.setPlaybackReleaseMode(data[TrackAdapterKey.playbackReleaseMode.toString()] ?? AppGlobalConfig.trackPlaybackReleaseMode.defaultValue);
-    track.setKeyboardKey(data[TrackAdapterKey.keyboardKey.toString()] ?? '');
-    track.setPath(data[TrackAdapterKey.path.toString()]);
+    track.setPlaybackReleaseMode(ReleaseMode.values[data[TrackAdapterKey.playbackReleaseMode]]);
+    track.setPlaybackVolume(data[TrackAdapterKey.playbackVolume] ?? AppGlobalConfig.trackPlaybackVolume.defaultValue);
+    track.setPlaybackBalance(data[TrackAdapterKey.playbackBalance] ?? AppGlobalConfig.trackPlaybackBalance.defaultValue);
+    track.setPlaybackSpeed(data[TrackAdapterKey.playbackSpeed] ?? AppGlobalConfig.trackPlaybackSpeed.defaultValue);
+    track.setKeyboardKey(data[TrackAdapterKey.keyboardKey] ?? '');
+    track.setPath(data[TrackAdapterKey.path]);
     return track;
   }
 
   @override
   void write(BinaryWriter writer, Track obj) {
     writer.writeMap({
-      TrackAdapterKey.rowIndex.toString(): obj.rowIndex,
-      TrackAdapterKey.colIndex.toString(): obj.colIndex,
-      TrackAdapterKey.name.toString(): obj.name.value,
-      TrackAdapterKey.recorderState.toString(): obj.recorderState.value.index,
-      TrackAdapterKey.playbackReleaseMode.toString(): obj.playbackReleaseMode.value.index,
-      TrackAdapterKey.playbackVolume.toString(): obj.playbackVolume.value,
-      TrackAdapterKey.playbackBalance.toString(): obj.playbackBalance.value,
-      TrackAdapterKey.playbackSpeed.toString(): obj.playbackSpeed.value,
-      TrackAdapterKey.keyboardKey.toString(): obj.keyboardKey.value,
+      TrackAdapterKey.rowIndex: obj.rowIndex,
+      TrackAdapterKey.colIndex: obj.colIndex,
+      TrackAdapterKey.name: obj.name.value,
+      TrackAdapterKey.path: obj.path,
+      TrackAdapterKey.recorderState: obj.recorderState.value.index,
+      TrackAdapterKey.playbackReleaseMode: obj.playbackReleaseMode.value.index,
+      TrackAdapterKey.playbackVolume: obj.playbackVolume.value,
+      TrackAdapterKey.playbackBalance: obj.playbackBalance.value,
+      TrackAdapterKey.playbackSpeed: obj.playbackSpeed.value,
+      TrackAdapterKey.keyboardKey: obj.keyboardKey.value,
     });
+  }
+}
+
+
+
+class TrackAdapterKeyAdapter extends TypeAdapter<TrackAdapterKey> {
+  @override
+  final typeId = 33;
+
+  @override
+  TrackAdapterKey read(BinaryReader reader) {
+    final int index = reader.readInt();
+    return TrackAdapterKey.values[index];
+  }
+
+  @override
+  void write(BinaryWriter writer, TrackAdapterKey obj) {
+    writer.writeInt(obj.index);
   }
 }

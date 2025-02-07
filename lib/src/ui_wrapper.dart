@@ -163,7 +163,7 @@ class UIWrapper {
         applicationName: applicationName ?? packageInfo.appName,
         applicationVersion: applicationVersion ?? packageInfo.version,
         applicationLegalese: applicationLegalese,
-        applicationIcon: applicationIcon ?? Icon(Icons.dashboard_customize_rounded),
+        applicationIcon: applicationIcon ?? Icon(AppIcon.logoKeepScreenOnEnabled),
         children: content.toList());
   }
 

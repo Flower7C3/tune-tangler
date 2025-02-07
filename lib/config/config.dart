@@ -66,9 +66,11 @@ final class AppGlobalConfig {
     [
       ConfigItem<ReleaseMode>(ReleaseMode.stop, properties: [
         ConfigItemIconProperty(AppIcon.trackSinglePlaybackMode),
+        ConfigItemTranslatableProperty((trans) => trans.singlePlaybackMode),
       ]),
       ConfigItem<ReleaseMode>(ReleaseMode.loop, properties: [
         ConfigItemIconProperty(AppIcon.trackRepeatPlaybackMode),
+        ConfigItemTranslatableProperty((trans) => trans.repeatPlaybackMode),
       ]),
     ],
     defaultValue: ReleaseMode.stop,

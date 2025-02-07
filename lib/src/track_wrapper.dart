@@ -102,7 +102,7 @@ class TrackWrapper {
       track.setAudioEncoder(recordConfig.encoder);
       track.setSampleRate(recordConfig.sampleRate);
       track.setBitRate(recordConfig.bitRate);
-      track.setRecordingState(RecorderState.recording);
+      track.setRecorderState(RecorderState.recording);
       save(track);
 
       await showRecordingNotification(track);
@@ -147,7 +147,7 @@ class TrackWrapper {
       track.setPath(path);
       _uiWrapper.toast(_trans.trackRecordingStopSuccess(track.name.value), icon: AppGlobalConfig.trackState.icon(TrackState.idle));
     } catch (e) {
-      track.setRecordingState(RecorderState.empty);
+      track.setRecorderState(RecorderState.empty);
       _uiWrapper.toast(_trans.trackRecordingStopError(e.toString(), track.name.value), icon: AppIcon.exception, type: ToastType.error, duration: 4);
     }
     await flutterLocalNotificationsPlugin.cancel(0);
@@ -237,6 +237,17 @@ class TrackWrapper {
     }
   }
 
+  void resetTracksSettings(Set<Track> tracksList) {
+    setTracksPlaybackMode(tracksList, AppGlobalConfig.trackPlaybackReleaseMode.defaultValue);
+    setTracksPlaybackBalance(tracksList, AppGlobalConfig.trackPlaybackBalance.defaultValue);
+    setTracksPlaybackVolume(tracksList, AppGlobalConfig.trackPlaybackVolume.defaultValue);
+    setTracksPlaybackSpeed(tracksList, AppGlobalConfig.trackPlaybackSpeed.defaultValue);
+    resetTracksPlaybackStartAtPosition(tracksList);
+    resetTracksPlaybackEndAtPosition(tracksList);
+    resetTracksName(tracksList);
+    resetTracksKeyboardKey(tracksList);
+  }
+
   void dispose(Set<Track> tracksList) async {
     for (Track track in tracksList) {
       track.dispose();
@@ -292,7 +303,6 @@ class TrackWrapper {
     }
   }
 
-  /// *************************************************************************
   /// TRACK PRESSED
 
   List<Widget> trackButton(Track track, TrackState state) => [

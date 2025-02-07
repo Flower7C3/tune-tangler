@@ -7,9 +7,8 @@ import '../entity/track.dart';
 class AppIcon {
   static IconData logoKeepScreenOnEnabled = Icons.dashboard_customize;
   static IconData logoKeepScreenOnDisabled = Icons.dashboard_customize_outlined;
-  static IconData settings = Icons.settings_rounded;
   static IconData language = Icons.translate_rounded;
-  static IconData help = Icons.help_rounded;
+  static IconData help = Icons.help_outline_rounded;
 
   static IconData screenThemeMode = Icons.brightness_4;
   static IconData screenLightThemeMode = Icons.light_mode_rounded;
@@ -40,7 +39,7 @@ class AppIcon {
           decoration: BoxDecoration(color: foregroundColor, borderRadius: BorderRadius.all(Radius.circular(ui.gridGap)), shape: BoxShape.rectangle),
           child: Text(track.keyboardKey.value, style: TextStyle(fontSize: size, height: 1.0, color: track.stateBackgroundColor(context))));
 
-  static IconData trackPlaybackMode = Icons.repeat_on_rounded;
+  static IconData trackPlaybackMode = Icons.replay_rounded;
   static IconData trackSinglePlaybackMode = Icons.repeat_one_rounded;
   static IconData trackRepeatPlaybackMode = Icons.repeat_rounded;
   static IconData trackPlaybackVolume = Icons.volume_up_rounded;
@@ -89,9 +88,10 @@ class AppIcon {
 
   static IconData moreMenu = Icons.more_vert;
 
-  static IconData displaySettings = Icons.display_settings;
+  static IconData screenSettings = Icons.display_settings;
   static IconData trackSettings = Icons.graphic_eq_rounded;
   static IconData recordingSettings = Icons.settings_voice;
   static IconData permissions = Icons.shield_outlined;
 
+  static IconData dangerZone = Icons.dangerous_outlined;
 }

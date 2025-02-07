@@ -25,6 +25,7 @@ Future<void> main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(LocaleAdapter());
   Hive.registerAdapter(ThemeModeAdapter());
+  Hive.registerAdapter(TrackAdapterKeyAdapter());
   Hive.registerAdapter(TrackAdapter());
   Hive.registerAdapter(AudioEncoderAdapter());
   Hive.registerAdapter(ColorAdapter());

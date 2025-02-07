@@ -50,10 +50,22 @@ class SettingsWrapper {
               children: _recordingSettings(setDrawerState),
             ),
             ExpansionTile(
-              leading: Icon(AppIcon.displaySettings),
+              leading: Icon(AppIcon.screenSettings),
               title: Text(_trans.screen),
               childrenPadding: EdgeInsets.only(left: _uiWrapper.gridGap * 3),
-              children: displaySettings(setDrawerState),
+              children: screenSettings(setDrawerState),
+            ),
+            ExpansionTile(
+              leading: Icon(AppIcon.permissions),
+              title: Text(_trans.permissions),
+              childrenPadding: EdgeInsets.only(left: _uiWrapper.gridGap * 3),
+              children: permissions(setDrawerState),
+            ),
+            ExpansionTile(
+              leading: Icon(AppIcon.dangerZone),
+              title: Text(_trans.dangerZone),
+              childrenPadding: EdgeInsets.only(left: _uiWrapper.gridGap * 3),
+              children: _dangerZone,
             ),
             ListTile(
               leading: Icon(AppIcon.help),
@@ -137,9 +149,7 @@ class SettingsWrapper {
           AppIcon.recordingAudioMode,
           _trans.recordingAudioMode,
           disabledIcon: AppIcon.recordingAudioModeMono,
-          // disabledLabel: _trans.recordingAudioModeOptionMono,
           enabledIcon: AppIcon.recordingAudioModeStereo,
-          // enabledLabel: _trans.recordingAudioModeOptionStereo,
           switchValue: _widget.settingsGet(AppConfigFieldKey.recordingAudioModeStereo),
           successAction: (bool value) {
             _widget.settingsSet(AppConfigFieldKey.recordingAudioModeStereo, value, updateState: true);
@@ -151,7 +161,6 @@ class SettingsWrapper {
           _trans.recordingAutoGain,
           disabledIcon: AppIcon.no,
           enabledIcon: AppIcon.yes,
-          // enabledLabel: _trans.recordingAutoGainInfo,
           switchValue: _widget.settingsGet(AppConfigFieldKey.recordingAutoGain),
           successAction: (bool value) {
             _widget.settingsSet(AppConfigFieldKey.recordingAutoGain, value, updateState: true);
@@ -163,7 +172,6 @@ class SettingsWrapper {
           _trans.recordingEchoCancel,
           disabledIcon: AppIcon.no,
           enabledIcon: AppIcon.yes,
-          // enabledLabel: _trans.recordingEchoCancelInfo,
           switchValue: _widget.settingsGet(AppConfigFieldKey.recordingEchoCancel),
           successAction: (bool value) {
             _widget.settingsSet(AppConfigFieldKey.recordingEchoCancel, value, updateState: true);
@@ -175,37 +183,15 @@ class SettingsWrapper {
           _trans.recordingNoiseSuppress,
           disabledIcon: AppIcon.no,
           enabledIcon: AppIcon.yes,
-          // enabledLabel: _trans.recordingNoiseSuppressInfo,
           switchValue: _widget.settingsGet(AppConfigFieldKey.recordingNoiseSuppress),
           successAction: (bool value) {
             _widget.settingsSet(AppConfigFieldKey.recordingNoiseSuppress, value, updateState: true);
             return _trans.recordingNoiseSuppressSuccess(value ? _trans.yes : _trans.no);
           },
         ),
-        _uiWrapper.settingsTileDivider(),
-        _uiWrapper.listTileReset(
-          AppIcon.resetAllSettings,
-          _trans.recordingSettingsReset,
-          _trans.recordingSettingsResetTitle,
-          _trans.recordingSettingsResetInfo,
-          _trans.buttonNo,
-          _trans.buttonYes,
-          () {
-            for (AppRecordingConfigField field in AppGlobalConfigFieldsCollection.listRecording) {
-              _widget.settingsSet(field.key, field.defaultValue, updateState: true);
-            }
-            return _trans.recordingSettingsResetSuccess;
-          },
-        ),
-        ExpansionTile(
-          leading: Icon(AppIcon.permissions),
-          title: Text(_trans.permissions),
-          childrenPadding: EdgeInsets.only(left: _uiWrapper.gridGap * 3),
-          children: permissions(setDrawerState),
-        ),
       ];
 
-  List<Widget> displaySettings(StateSetter setDrawerState) => [
+  List<Widget> screenSettings(StateSetter setDrawerState) => [
         _uiWrapper.listTileListDialog(
           AppIcon.language,
           _trans.languageVersion,
@@ -232,9 +218,7 @@ class SettingsWrapper {
           AppIcon.screenThemeMode,
           _trans.screenThemeMode,
           disabledIcon: AppIcon.screenLightThemeMode,
-          // disabledLabel: _trans.lightMode,
           enabledIcon: AppIcon.screenDarkThemeMode,
-          // enabledLabel: _trans.darkMode,
           switchValue: _widget.settingsGet(AppConfigFieldKey.isThemeModeDark),
           successAction: (bool value) {
             _widget.settingsSet(AppConfigFieldKey.themeMode, value ? ThemeMode.dark : ThemeMode.light, updateState: true);
@@ -245,7 +229,6 @@ class SettingsWrapper {
           AppIcon.screenThemeColor,
           _trans.screenThemeColor,
           null,
-          //_trans.screenThemeColorInfo,
           _trans.screenThemeColorTitle,
           _trans.screenThemeColorInfo,
           _widget.settingsGet(AppConfigFieldKey.themeSeedColor),
@@ -261,9 +244,7 @@ class SettingsWrapper {
           AppIcon.keepScreenOn,
           _trans.keepScreenOn,
           disabledIcon: AppIcon.keepScreenOnDisabled,
-          // disabledLabel: _trans.disabled,
           enabledIcon: AppIcon.keepScreenOnEnabled,
-          // enabledLabel: _trans.enabled,
           switchValue: _widget.settingsGet(AppConfigFieldKey.wakelockEnabled),
           successAction: (bool value) {
             _widget.settingsSet(AppConfigFieldKey.wakelockEnabled, value, updateState: true);
@@ -304,14 +285,6 @@ class SettingsWrapper {
           },
           configCollection: AppGlobalConfig.gridCols,
         ),
-        _uiWrapper.settingsTileDivider(),
-        _uiWrapper.listTileReset(AppIcon.resetAllSettings, _trans.screenSettingsReset, _trans.screenSettingsResetTitle,
-            _trans.screenSettingsResetInfo, _trans.buttonNo, _trans.buttonYes, () {
-          for (AppGlobalConfigField field in AppGlobalConfigFieldsCollection.listGlobal) {
-            _widget.settingsSet(field.key, field.defaultValue, updateState: true);
-          }
-          return _trans.screenSettingsResetSuccess;
-        }),
       ];
 
   List<Widget> permissions(StateSetter setDrawerState) => [
@@ -445,33 +418,36 @@ class SettingsWrapper {
         const PopupMenuDivider(),
         _uiWrapper.topTrackMenuItem(AllTracksMenuItem.titleReset, AppIcon.trackTitle, _trans.allTracksTitleReset),
         _uiWrapper.topTrackMenuItem(AllTracksMenuItem.shortcutKeyReset, AppIcon.trackKeyboardKey, _trans.allTracksShortcutKeyReset),
-        const PopupMenuDivider(),
-        _uiWrapper.topTrackMenuItem(AllTracksMenuItem.settingsReset, AppIcon.resetAllSettings, _trans.allTracksSettingsReset),
-        _uiWrapper.topTrackMenuItem(AllTracksMenuItem.recordingsDelete, AppIcon.deleteForever, _trans.allTracksRecordingsDelete),
       ];
 
   void _trackSettingsMenuItemSelected(AllTracksMenuItem selection) async {
     switch (selection) {
       case AllTracksMenuItem.playbackModeSet:
-        _uiWrapper
-            .listDialog(AppIcon.trackPlaybackMode, _trans.allTracksPlaybackModeTitleSet, contentText: _trans.allTracksPlaybackModeInfoSet, actions: [
-          SimpleDialogOption(
-              padding: EdgeInsets.zero,
-              child: _uiWrapper.statusIconTile(AppIcon.trackSinglePlaybackMode, _trans.singlePlaybackMode),
-              onPressed: () {
-                _trackWrapper.setTracksPlaybackMode(_widget.tracksList.all(), ReleaseMode.stop);
-                _uiWrapper.toast(_trans.allTracksPlaybackModeSuccessSet(_trans.singlePlaybackMode), icon: AppIcon.trackSinglePlaybackMode);
-                Navigator.pop(_context, _trans.singlePlaybackMode);
-              }),
-          SimpleDialogOption(
-              padding: EdgeInsets.zero,
-              child: _uiWrapper.statusIconTile(AppIcon.trackRepeatPlaybackMode, _trans.repeatPlaybackMode),
-              onPressed: () {
-                _trackWrapper.setTracksPlaybackMode(_widget.tracksList.all(), ReleaseMode.loop);
-                _uiWrapper.toast(_trans.allTracksPlaybackModeSuccessSet(_trans.repeatPlaybackMode), icon: AppIcon.trackRepeatPlaybackMode);
-                Navigator.pop(_context, _trans.repeatPlaybackMode);
-              }),
-        ]);
+        _uiWrapper.listDialog(
+          AppIcon.trackPlaybackMode,
+          _trans.allTracksPlaybackModeTitleSet,
+          contentText: _trans.allTracksPlaybackModeInfoSet,
+          actions: [
+            ...AppGlobalConfig.trackPlaybackReleaseMode.values<ReleaseMode>().map(
+                  (ReleaseMode value) => SimpleDialogOption(
+                      padding: EdgeInsets.zero,
+                      child: _uiWrapper.statusIconTile(
+                        AppGlobalConfig.trackPlaybackReleaseMode.icon(value),
+                        AppGlobalConfig.trackPlaybackReleaseMode.translate(value, trans: _trans),
+                      ),
+                      onPressed: () {
+                        _trackWrapper.setTracksPlaybackMode(_widget.tracksList.all(), value);
+                        _uiWrapper.toast(
+                            _trans.allTracksPlaybackModeSuccessSet(
+                              AppGlobalConfig.trackPlaybackReleaseMode
+                                  .translate(AppGlobalConfig.trackPlaybackReleaseMode.values().toList().indexOf(0), trans: _trans),
+                            ),
+                            icon: AppIcon.trackSinglePlaybackMode);
+                        Navigator.pop(_context);
+                      }),
+                )
+          ],
+        );
         break;
       case AllTracksMenuItem.playbackBalanceSet:
         _uiWrapper.alertDialogSlider(
@@ -583,29 +559,53 @@ class SettingsWrapper {
           },
         );
         break;
-      case AllTracksMenuItem.settingsReset:
-        _uiWrapper.alertDialogReset(
-          AppIcon.deleteForever,
+    }
+  }
+
+  List<Widget> get _dangerZone => [
+        _uiWrapper.listTileReset(
+          AppIcon.recordingSettings,
+          _trans.recordingSettingsReset,
+          _trans.recordingSettingsResetTitle,
+          _trans.recordingSettingsResetInfo,
+          _trans.buttonNo,
+          _trans.buttonYes,
+          () {
+            for (AppRecordingConfigField field in AppGlobalConfigFieldsCollection.listRecording) {
+              _widget.settingsSet(field.key, field.defaultValue, updateState: true);
+            }
+            return _trans.recordingSettingsResetSuccess;
+          },
+        ),
+        _uiWrapper.listTileReset(
+          AppIcon.screenSettings,
+          _trans.screenSettingsReset,
+          _trans.screenSettingsResetTitle,
+          _trans.screenSettingsResetInfo,
+          _trans.buttonNo,
+          _trans.buttonYes,
+          () {
+            for (AppGlobalConfigField field in AppGlobalConfigFieldsCollection.listGlobal) {
+              _widget.settingsSet(field.key, field.defaultValue, updateState: true);
+            }
+            return _trans.screenSettingsResetSuccess;
+          },
+        ),
+        _uiWrapper.listTileReset(
+          AppIcon.trackSettings,
+          _trans.allTracksSettingsReset,
           _trans.allTracksSettingsResetTitle,
           _trans.allTracksSettingsResetInfo,
           _trans.buttonNo,
           _trans.buttonYes,
           () {
-            _trackWrapper.setTracksPlaybackMode(_widget.tracksList.all(), AppGlobalConfig.trackPlaybackReleaseMode.defaultValue);
-            _trackWrapper.setTracksPlaybackBalance(_widget.tracksList.all(), AppGlobalConfig.trackPlaybackBalance.defaultValue);
-            _trackWrapper.setTracksPlaybackVolume(_widget.tracksList.all(), AppGlobalConfig.trackPlaybackVolume.defaultValue);
-            _trackWrapper.setTracksPlaybackSpeed(_widget.tracksList.all(), AppGlobalConfig.trackPlaybackSpeed.defaultValue);
-            _trackWrapper.resetTracksPlaybackStartAtPosition(_widget.tracksList.all());
-            _trackWrapper.resetTracksPlaybackEndAtPosition(_widget.tracksList.all());
-            _trackWrapper.resetTracksName(_widget.tracksList.all());
-            _trackWrapper.resetTracksKeyboardKey(_widget.tracksList.all());
+            _trackWrapper.resetTracksSettings(_widget.tracksList.all());
             return _trans.allTracksSettingsResetSuccess;
           },
-        );
-        break;
-      case AllTracksMenuItem.recordingsDelete:
-        _uiWrapper.alertDialogReset(
+        ),
+        _uiWrapper.listTileReset(
           AppIcon.deleteForever,
+          _trans.allTracksRecordingsDelete,
           _trans.allTracksRecordingsDeleteTitle,
           _trans.allTracksRecordingsDeleteInfo,
           _trans.buttonNo,
@@ -614,10 +614,8 @@ class SettingsWrapper {
             _trackWrapper.removeTracksRecordings(_widget.tracksList.all());
             return _trans.allTracksRecordingsDeleteSuccess;
           },
-        );
-        break;
-    }
-  }
+        ),
+      ];
 
   /// *************************************************************************
   /// ROW
@@ -656,82 +654,72 @@ class SettingsWrapper {
           style: _uiWrapper.circledButtonStyle(),
           icon: Icon(AppIcon.moreMenu, color: Theme.of(_context).colorScheme.secondary),
           itemBuilder: (BuildContext context) => _rowMenuItems(rowName, tracksList),
-          onSelected: (dynamic selection) {
-            _rowMenuItemSelected(selection, rowName, tracksList);
-          });
+          onSelected: (dynamic selection) => _rowMenuItemSelected(selection, rowName, tracksList));
 
   List<PopupMenuEntry<dynamic>> _rowMenuItems(
     String rowName,
     Set<Track> tracksList,
   ) =>
       <PopupMenuEntry<dynamic>>[
-        _uiWrapper.rowMenuButton(RowMenuItem.playbackMode, AppIcon.trackPlaybackMode, _trans.rowTracksPlaybackModeSet, itemBuilder: () {
-          var items = <PopupMenuItem<dynamic>>[];
-          AppGlobalConfig.trackPlaybackReleaseMode.values<ReleaseMode>().forEach((ReleaseMode value) {
-            items.add(_uiWrapper.rowPopupMenuItem(
-              value,
-              AppGlobalConfig.trackPlaybackReleaseMode.icon(value),
-              _trans.rowTracksPlaybackModeSetTitle(Track.isPlaybackReleaseModeSingle(value) ? _trans.singlePlaybackMode : _trans.repeatPlaybackMode),
-            ));
-          });
-          return items.toList();
-        }, onSelected: (selection) {
-          _trackWrapper.setTracksPlaybackMode(tracksList, selection);
-          _uiWrapper.toast(
-              _trans.rowTracksPlaybackModeSetSuccess(
-                  rowName, Track.isPlaybackReleaseModeSingle(selection) ? _trans.singlePlaybackMode : _trans.repeatPlaybackMode),
-              icon: AppIcon.trackPlaybackMode);
-          Navigator.pop(_context);
-        }),
-        _uiWrapper.rowMenuButton(RowMenuItem.playbackVolume, AppIcon.trackPlaybackVolume, _trans.rowTracksPlaybackVolumeSet, itemBuilder: () {
-          var items = <PopupMenuItem<dynamic>>[];
-          AppGlobalConfig.trackPlaybackVolume.values<double>().forEach((double value) {
-            items.add(_uiWrapper.rowPopupMenuItem(
-              value,
-              AppGlobalConfig.trackPlaybackVolume.icon(value),
-              _trans.rowTracksPlaybackVolumeTitleSet(AppGlobalConfig.trackPlaybackVolume.format(value)),
-            ));
-          });
-          return items.toList();
-        }, onSelected: (selection) {
-          _trackWrapper.setTracksPlaybackVolume(tracksList, selection);
-          _uiWrapper.toast(_trans.rowTracksPlaybackVolumeSuccessSet(rowName, AppGlobalConfig.trackPlaybackVolume.format(selection)),
-              icon: AppIcon.trackPlaybackSpeed);
-          Navigator.pop(_context);
-        }),
-        _uiWrapper.rowMenuButton(RowMenuItem.playbackBalance, AppIcon.trackPlaybackBalance, _trans.rowTracksPlaybackBalanceSet, itemBuilder: () {
-          var items = <PopupMenuItem<dynamic>>[];
-          AppGlobalConfig.trackPlaybackBalance.values<double>().forEach((double value) {
-            items.add(_uiWrapper.rowPopupMenuItem(
-              value,
-              AppGlobalConfig.trackPlaybackBalance.icon(value),
-              _trans.rowTracksPlaybackBalanceTitleSet(AppGlobalConfig.trackPlaybackBalance.translate(value, trans: _trans)),
-            ));
-          });
-          return items.toList();
-        }, onSelected: (selection) {
-          _trackWrapper.setTracksPlaybackBalance(tracksList, selection);
-          _uiWrapper.toast(
-              _trans.rowTracksPlaybackBalanceSuccessSet(rowName, AppGlobalConfig.trackPlaybackBalance.translate(selection, trans: _trans)),
-              icon: AppIcon.trackPlaybackBalance);
-          Navigator.pop(_context);
-        }),
-        _uiWrapper.rowMenuButton(RowMenuItem.playbackSpeed, AppIcon.trackPlaybackSpeed, _trans.rowTracksPlaybackSpeedSet, itemBuilder: () {
-          var items = <PopupMenuItem<dynamic>>[];
-          AppGlobalConfig.trackPlaybackSpeed.values<double>().forEach((double value) {
-            items.add(_uiWrapper.rowPopupMenuItem(
-              value,
-              AppGlobalConfig.trackPlaybackSpeed.icon(value),
-              _trans.rowTracksPlaybackSpeedTitleSet(AppGlobalConfig.trackPlaybackSpeed.format(value)),
-            ));
-          });
-          return items.toList();
-        }, onSelected: (selection) {
-          _trackWrapper.setTracksPlaybackSpeed(tracksList, selection);
-          _uiWrapper.toast(_trans.rowTracksPlaybackSpeedSuccessSet(rowName, AppGlobalConfig.trackPlaybackSpeed.format(selection)),
-              icon: AppIcon.trackPlaybackSpeed);
-          Navigator.pop(_context);
-        }),
+        _uiWrapper.rowMenuButton(RowMenuItem.playbackMode, AppIcon.trackPlaybackMode, _trans.rowTracksPlaybackModeSet,
+            itemBuilder: () => [
+                  ...AppGlobalConfig.trackPlaybackReleaseMode.values<ReleaseMode>().map((ReleaseMode value) => _uiWrapper.rowPopupMenuItem(
+                        value,
+                        AppGlobalConfig.trackPlaybackReleaseMode.icon(value),
+                        AppGlobalConfig.trackPlaybackReleaseMode.translate(value, trans: _trans),
+                      ))
+                ],
+            onSelected: (selection) {
+              _trackWrapper.setTracksPlaybackMode(tracksList, selection);
+              _uiWrapper.toast(
+                  _trans.rowTracksPlaybackModeSetSuccess(
+                      rowName, Track.isPlaybackReleaseModeSingle(selection) ? _trans.singlePlaybackMode : _trans.repeatPlaybackMode),
+                  icon: AppIcon.trackPlaybackMode);
+              Navigator.pop(_context);
+            }),
+        _uiWrapper.rowMenuButton(RowMenuItem.playbackVolume, AppIcon.trackPlaybackVolume, _trans.rowTracksPlaybackVolumeSet,
+            itemBuilder: () => [
+                  ...AppGlobalConfig.trackPlaybackVolume.values<double>().map((double value) => _uiWrapper.rowPopupMenuItem(
+                        value,
+                        AppGlobalConfig.trackPlaybackVolume.icon(value),
+                        _trans.rowTracksPlaybackVolumeTitleSet(AppGlobalConfig.trackPlaybackVolume.format(value)),
+                      ))
+                ],
+            onSelected: (selection) {
+              _trackWrapper.setTracksPlaybackVolume(tracksList, selection);
+              _uiWrapper.toast(_trans.rowTracksPlaybackVolumeSuccessSet(rowName, AppGlobalConfig.trackPlaybackVolume.format(selection)),
+                  icon: AppIcon.trackPlaybackSpeed);
+              Navigator.pop(_context);
+            }),
+        _uiWrapper.rowMenuButton(RowMenuItem.playbackBalance, AppIcon.trackPlaybackBalance, _trans.rowTracksPlaybackBalanceSet,
+            itemBuilder: () => [
+                  ...AppGlobalConfig.trackPlaybackBalance.values<double>().map((double value) => _uiWrapper.rowPopupMenuItem(
+                        value,
+                        AppGlobalConfig.trackPlaybackBalance.icon(value),
+                        _trans.rowTracksPlaybackBalanceTitleSet(AppGlobalConfig.trackPlaybackBalance.translate(value, trans: _trans)),
+                      ))
+                ],
+            onSelected: (selection) {
+              _trackWrapper.setTracksPlaybackBalance(tracksList, selection);
+              _uiWrapper.toast(
+                  _trans.rowTracksPlaybackBalanceSuccessSet(rowName, AppGlobalConfig.trackPlaybackBalance.translate(selection, trans: _trans)),
+                  icon: AppIcon.trackPlaybackBalance);
+              Navigator.pop(_context);
+            }),
+        _uiWrapper.rowMenuButton(RowMenuItem.playbackSpeed, AppIcon.trackPlaybackSpeed, _trans.rowTracksPlaybackSpeedSet,
+            itemBuilder: () => [
+                  ...AppGlobalConfig.trackPlaybackSpeed.values<double>().map((double value) => _uiWrapper.rowPopupMenuItem(
+                        value,
+                        AppGlobalConfig.trackPlaybackSpeed.icon(value),
+                        _trans.rowTracksPlaybackSpeedTitleSet(AppGlobalConfig.trackPlaybackSpeed.format(value)),
+                      ))
+                ],
+            onSelected: (selection) {
+              _trackWrapper.setTracksPlaybackSpeed(tracksList, selection);
+              _uiWrapper.toast(_trans.rowTracksPlaybackSpeedSuccessSet(rowName, AppGlobalConfig.trackPlaybackSpeed.format(selection)),
+                  icon: AppIcon.trackPlaybackSpeed);
+              Navigator.pop(_context);
+            }),
         const PopupMenuDivider(),
         _uiWrapper.rowPopupMenuItem(
             RowMenuItem.playbackStartAtPositionReset, AppIcon.trackPlaybackStartAtPosition, _trans.rowTracksPlaybackStartAtPositionReset),

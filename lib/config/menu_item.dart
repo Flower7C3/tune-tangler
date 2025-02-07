@@ -23,6 +23,6 @@ enum AllTracksMenuItem {
   playbackEndAtPositionReset,
   titleReset,
   shortcutKeyReset,
-  settingsReset,
-  recordingsDelete,
+  // settingsReset,
+  // recordingsDelete,
 }
