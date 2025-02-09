@@ -410,18 +410,15 @@ class UIWrapper {
 
   Container helpTrackState(TrackState state, String message) => Container(
         padding: EdgeInsets.all(4),
-        color: AppGlobalConfig.trackState.color(state, context: context, name: ConfigItemPropertyName.backgroundColor),
+        color: AppGlobalConfig.trackState.color(state, context: context, domain: ConfigItemPropertyDomain.backgroundColor),
         child: statusIconTile(
           AppGlobalConfig.trackState.icon(state),
           message,
-          textColor: AppGlobalConfig.trackState.color(state, context: context, name: ConfigItemPropertyName.foregroundColor),
+          textColor: AppGlobalConfig.trackState.color(state, context: context, domain: ConfigItemPropertyDomain.foregroundColor),
         ),
       );
 
   Divider settingsTileDivider() => Divider(height: 0, thickness: 1, indent: 20, endIndent: 20, color: Theme.of(context).colorScheme.inversePrimary);
-
-  ListTile settingsTileTitle(title) =>
-      ListTile(title: Center(child: Text(title, style: TextStyle(fontSize: Theme.of(context).textTheme.titleLarge!.fontSize))));
 
   ListTile listTileReset(
     IconData icon,
@@ -638,6 +635,7 @@ class UIWrapper {
     dynamic currentValue,
     List<dynamic> values, {
     String? helpMessage,
+    List<Widget>? helpWidgets,
     required String Function(dynamic value, String formattedValue) successAction,
     ConfigCollection? configCollection,
     AppLocalizations? trans,
@@ -664,18 +662,27 @@ class UIWrapper {
               ),
             ),
           ),
-          if (helpMessage != null) Text(helpMessage),
+          if (helpMessage != null)
+            Padding(padding: EdgeInsets.symmetric(vertical: gridGap), child: Text(helpMessage, style: Theme.of(context).textTheme.labelMedium)),
+          if (helpWidgets != null)
+            Padding(
+                padding: EdgeInsets.symmetric(vertical: gridGap),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: gridGap,
+                  children: helpWidgets,
+                ))
         ],
       );
 
   ListTile listTileColorPicker(
     IconData icon,
-    String listTitle,
+    String listTitle, {
     String? listSubtitle,
-    String dialogTitle,
-    String dialogInfo,
-    Color currentValue,
-    List<Color> values, {
+    required String dialogTitle,
+    required String dialogInfo,
+    required Color currentValue,
+    required List<Color> values,
     required String Function(dynamic value, String formattedValue) successAction,
     ConfigCollection? configCollection,
     AppLocalizations? trans,
@@ -764,6 +771,7 @@ class UIWrapper {
   ListTile listTileListDialog(
     IconData icon,
     String listTitle, {
+    String? listSubtitle,
     required String dialogTitle,
     required String currentValue,
     required List<SimpleDialogOption> options,
@@ -772,6 +780,7 @@ class UIWrapper {
           leading: Icon(icon),
           title: Text(listTitle),
           trailing: trailingLabel(currentValue),
+          subtitle: (listSubtitle == null) ? null : Text(listSubtitle),
           onTap: () {
             listDialog(AppIcon.language, dialogTitle, actions: options.toList());
           });

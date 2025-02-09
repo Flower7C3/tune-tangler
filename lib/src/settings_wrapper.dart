@@ -4,6 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
+import 'package:tune_tangler/config/config_collection.dart';
 import 'package:tune_tangler/screen/home_screen.dart';
 import 'package:tune_tangler/src/track_wrapper.dart';
 import 'package:tune_tangler/src/ui_wrapper.dart';
@@ -112,7 +113,13 @@ class SettingsWrapper {
           _trans.recordingAudioEncoder,
           _widget.settingsGet(AppConfigFieldKey.recordingAudioEncoder),
           AppGlobalConfig.recordingAudioEncoder.values().toList(),
-          helpMessage: _trans.recordingAudioEncoderInfo,
+          helpWidgets: AppGlobalConfig.recordingAudioEncoder
+              .values()
+              .map((value) => Text(
+                    '${AppGlobalConfig.recordingAudioEncoder.format(value)}: ${AppGlobalConfig.recordingAudioEncoder.translate(value, trans: _trans, domain: ConfigItemPropertyDomain.info)}',
+                    style: Theme.of(_context).textTheme.labelMedium,
+                  ))
+              .toList(),
           configCollection: AppGlobalConfig.recordingAudioEncoder,
           trans: _trans,
           successAction: (dynamic value, String formattedValue) {
@@ -198,6 +205,7 @@ class SettingsWrapper {
         _uiWrapper.listTileListDialog(
           AppIcon.language,
           _trans.languageVersion,
+          listSubtitle: AppGlobalConfig.languages.text(_widget.settingsGet(AppConfigFieldKey.locale)),
           dialogTitle: _trans.changeLanguage,
           currentValue: _widget.settingsGet(AppConfigFieldKey.locale).toLanguageTag(),
           options: AppGlobalConfig.languages
@@ -231,11 +239,11 @@ class SettingsWrapper {
         _uiWrapper.listTileColorPicker(
           AppIcon.screenThemeColor,
           _trans.screenThemeColor,
-          null,
-          _trans.screenThemeColorTitle,
-          _trans.screenThemeColorInfo,
-          _widget.settingsGet(AppConfigFieldKey.themeSeedColor),
-          AppGlobalConfig.userInterfaceColor.values<Color>().toList(),
+          listSubtitle: AppGlobalConfig.userInterfaceColor.translate(_widget.settingsGet(AppConfigFieldKey.themeSeedColor), trans: _trans),
+          dialogTitle: _trans.screenThemeColorTitle,
+          dialogInfo: _trans.screenThemeColorInfo,
+          currentValue: _widget.settingsGet(AppConfigFieldKey.themeSeedColor),
+          values: AppGlobalConfig.userInterfaceColor.values<Color>().toList(),
           configCollection: AppGlobalConfig.userInterfaceColor,
           trans: _trans,
           successAction: (dynamic value, String formattedValue) {
@@ -319,28 +327,24 @@ class SettingsWrapper {
       ];
 
   Future<void> helpDialog() async {
-    double fontSize = Theme.of(_context).textTheme.titleMedium!.fontSize!;
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     _uiWrapper.aboutDialog(
       packageInfo,
       [
         ExpansionTile(
           title: Text(_trans.helpScreenMessageAboutTitle),
-          childrenPadding: EdgeInsets.all(_uiWrapper.gridGap),
           children: [
             Text(_trans.helpScreenMessageAboutContent),
           ],
         ),
         ExpansionTile(
           title: Text(_trans.helpScreenMessageUsageTitle),
-          childrenPadding: EdgeInsets.all(_uiWrapper.gridGap),
           children: [
             Text(_trans.helpScreenMessageUsageContent),
           ],
         ),
         ExpansionTile(
           title: Text(_trans.helpScreenMessageTrackActions),
-          childrenPadding: EdgeInsets.all(_uiWrapper.gridGap),
           children: [
             _uiWrapper.helpTrackState(TrackState.empty, _trans.stateEmpty),
             _uiWrapper.helpTrackState(TrackState.recording, _trans.stateRecording),
@@ -351,29 +355,42 @@ class SettingsWrapper {
         ),
         ExpansionTile(
           title: Text(_trans.recordingSettings),
-          childrenPadding: EdgeInsets.all(_uiWrapper.gridGap),
           children: [
-            _uiWrapper.statusIconRow(AppIcon.recordingAudioGain, _trans.recordingAutoGain, fontSize: fontSize),
-            Text(_trans.recordingAutoGainInfo),
-            _uiWrapper.statusIconRow(AppIcon.recordingEchoCancel, _trans.recordingEchoCancel, fontSize: fontSize),
-            Text(_trans.recordingEchoCancelInfo),
-            _uiWrapper.statusIconRow(AppIcon.recordingNoiseSuppress, _trans.recordingNoiseSuppress, fontSize: fontSize),
-            Text(_trans.recordingNoiseSuppressInfo),
+            ListTile(
+              leading: Icon(AppIcon.recordingAudioGain),
+              title: Text(_trans.recordingAutoGain),
+              subtitle: Text(_trans.recordingAutoGainInfo),
+            ),
+            ListTile(
+              leading: Icon(AppIcon.recordingEchoCancel),
+              title: Text(_trans.recordingEchoCancel),
+              subtitle: Text(_trans.recordingEchoCancelInfo),
+            ),
+            ListTile(
+              leading: Icon(AppIcon.recordingNoiseSuppress),
+              title: Text(_trans.recordingNoiseSuppress),
+              subtitle: Text(_trans.recordingNoiseSuppressInfo),
+            ),
           ],
         ),
         ExpansionTile(
           title: Text(_trans.recordingAudioEncoders),
-          childrenPadding: EdgeInsets.all(_uiWrapper.gridGap),
-          children: [
-            Text(_trans.helpScreenRecordingCodecsInfoContent),
-          ],
-        ),
-        ExpansionTile(
-          title: Text(_trans.helpScreenRecordingCodecsChooseTitle),
-          childrenPadding: EdgeInsets.all(_uiWrapper.gridGap),
-          children: [
-            Text(_trans.recordingAudioEncoderInfo),
-          ],
+          children: AppGlobalConfig.recordingAudioEncoder
+              .values()
+              .map((value) => ExpansionTile(
+                    leading: Text(AppGlobalConfig.recordingAudioEncoder.text(value, domain: ConfigItemPropertyDomain.icon)),
+                    title: Text(AppGlobalConfig.recordingAudioEncoder.format(value)),
+                    subtitle: Text(AppGlobalConfig.recordingAudioEncoder.translate(value, trans: _trans, domain: ConfigItemPropertyDomain.info)),
+                    children: [
+                      ListTile(
+                        title: Text(
+                            AppGlobalConfig.recordingAudioEncoder.translate(value, trans: _trans, domain: ConfigItemPropertyDomain.defaultProperty)),
+                        subtitle:
+                            Text(AppGlobalConfig.recordingAudioEncoder.translate(value, trans: _trans, domain: ConfigItemPropertyDomain.details)),
+                      ),
+                    ],
+                  ))
+              .toList(),
         ),
       ],
       applicationIcon:

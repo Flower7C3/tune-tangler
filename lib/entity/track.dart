@@ -377,13 +377,13 @@ class Track {
   }
 
   Color stateForegroundColor(BuildContext context) =>
-      AppGlobalConfig.trackState.color(state.value, context: context, name: ConfigItemPropertyName.foregroundColor);
+      AppGlobalConfig.trackState.color(state.value, context: context, domain: ConfigItemPropertyDomain.foregroundColor);
 
   Color stateBackgroundColor(BuildContext context) =>
-      AppGlobalConfig.trackState.color(state.value, context: context, name: ConfigItemPropertyName.backgroundColor);
+      AppGlobalConfig.trackState.color(state.value, context: context, domain: ConfigItemPropertyDomain.backgroundColor);
 
   Color stateProgressColor(BuildContext context) =>
-      AppGlobalConfig.trackState.color(state.value, context: context, name: ConfigItemPropertyName.progressColor);
+      AppGlobalConfig.trackState.color(state.value, context: context, domain: ConfigItemPropertyDomain.progressColor);
 
   ///*************************************************************************************************************************************************
   /// PLAYBACK VOLUME

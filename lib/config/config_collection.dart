@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-enum ConfigItemPropertyName {
+enum ConfigItemPropertyDomain {
   defaultProperty,
   foregroundColor,
   backgroundColor,
   progressColor,
+  shortName,
   extension,
+  info,
+  details,
+  icon,
 }
 
 final class ConfigCollection {
@@ -27,29 +31,31 @@ final class ConfigCollection {
 
   Iterable<ConfigItem> _getByValue(dynamic value) => items.where((item) => item.value == value);
 
-  String text(dynamic value, {ConfigItemPropertyName name = ConfigItemPropertyName.defaultProperty}) =>
-      _getByValue(value).first.properties.whereType<ConfigItemTextProperty>().firstWhere((property) => (property.name == name)).text;
+  String text(dynamic value, {ConfigItemPropertyDomain domain = ConfigItemPropertyDomain.defaultProperty}) =>
+      _getByValue(value).first.properties.whereType<ConfigItemTextProperty>().firstWhere((property) => (property.domain == domain)).text;
 
-  IconData icon(dynamic value, {ConfigItemPropertyName name = ConfigItemPropertyName.defaultProperty}) =>
-      _getByValue(value).first.properties.whereType<ConfigItemIconProperty>().firstWhere((property) => (property.name == name)).icon;
+  IconData icon(dynamic value, {ConfigItemPropertyDomain domain = ConfigItemPropertyDomain.defaultProperty}) =>
+      _getByValue(value).first.properties.whereType<ConfigItemIconProperty>().firstWhere((property) => (property.domain == domain)).icon;
 
-  Color color(dynamic value, {required BuildContext context, ConfigItemPropertyName name = ConfigItemPropertyName.defaultProperty}) =>
+  Color color(dynamic value, {required BuildContext context, ConfigItemPropertyDomain domain = ConfigItemPropertyDomain.defaultProperty}) =>
       _getByValue(value)
           .first
           .properties
           .whereType<ConfigItemColorProperty>()
-          .firstWhere((property) => (property.name == name))
+          .firstWhere((property) => (property.domain == domain))
           .callback
           .call(context);
 
-  String translate(dynamic value, {required AppLocalizations trans, ConfigItemPropertyName name = ConfigItemPropertyName.defaultProperty}) =>
-      _getByValue(value)
-          .first
-          .properties
-          .whereType<ConfigItemTranslatableProperty>()
-          .firstWhere((property) => (property.name == name))
-          .callback
-          .call(trans);
+  String translate(dynamic value, {required AppLocalizations trans, ConfigItemPropertyDomain domain = ConfigItemPropertyDomain.defaultProperty}) =>
+      _getByValue(value).firstOrNull == null
+          ? ''
+          : _getByValue(value)
+              .first
+              .properties
+              .whereType<ConfigItemTranslatableProperty>()
+              .firstWhere((property) => (property.domain == domain))
+              .callback
+              .call(trans);
 
   final dynamic Function(dynamic value) format;
   final dynamic Function(dynamic value) decode;
@@ -79,33 +85,33 @@ final class ConfigItem<T> {
 }
 
 abstract final class ConfigItemProperty {
-  ConfigItemPropertyName name = ConfigItemPropertyName.defaultProperty;
+  ConfigItemPropertyDomain domain = ConfigItemPropertyDomain.defaultProperty;
 
-  ConfigItemProperty(this.name);
+  ConfigItemProperty(this.domain);
 }
 
 final class ConfigItemColorProperty extends ConfigItemProperty {
   final Function(BuildContext) callback;
 
-  ConfigItemColorProperty(this.callback, {name = ConfigItemPropertyName.defaultProperty}) : super(name);
+  ConfigItemColorProperty(this.callback, {domain = ConfigItemPropertyDomain.defaultProperty}) : super(domain);
 }
 
 final class ConfigItemIconProperty extends ConfigItemProperty {
   final IconData icon;
 
-  ConfigItemIconProperty(this.icon, {name = ConfigItemPropertyName.defaultProperty}) : super(name);
+  ConfigItemIconProperty(this.icon, {domain = ConfigItemPropertyDomain.defaultProperty}) : super(domain);
 }
 
 final class ConfigItemTextProperty extends ConfigItemProperty {
   final String text;
 
-  ConfigItemTextProperty(this.text, {name = ConfigItemPropertyName.defaultProperty}) : super(name);
+  ConfigItemTextProperty(this.text, {domain = ConfigItemPropertyDomain.defaultProperty}) : super(domain);
 }
 
 final class ConfigItemTranslatableProperty extends ConfigItemProperty {
   final Function(AppLocalizations) callback;
 
-  ConfigItemTranslatableProperty(this.callback, {name = ConfigItemPropertyName.defaultProperty}) : super(name);
+  ConfigItemTranslatableProperty(this.callback, {domain = ConfigItemPropertyDomain.defaultProperty}) : super(domain);
 }
 
 final class ConfigSliderValues {

@@ -14,6 +14,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:tune_tangler/config/config_collection.dart';
 import 'package:tune_tangler/screen/screen.dart';
 import 'package:tune_tangler/src/ui_wrapper.dart';
 
@@ -88,7 +89,7 @@ class TrackWrapper {
       }
 
       RecordConfig recordConfig = _widget.settingsGet(AppConfigFieldKey.recording);
-      String fileExtension = AppGlobalConfig.recordingAudioEncoder.text(recordConfig.encoder);
+      String fileExtension = AppGlobalConfig.recordingAudioEncoder.text(recordConfig.encoder, domain: ConfigItemPropertyDomain.extension);
       String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
       String filePath = await getApplicationDocumentsDirectory().then((value) => '${value.path}/${track.id}.$timestamp.$fileExtension');
 
