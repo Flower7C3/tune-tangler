@@ -115,7 +115,7 @@ final class AppGlobalConfig {
       ]),
     ],
     defaultValue: 1.00,
-    format: (dynamic value) => '{value}%'.replaceAll('{value}', (value * 100).toStringAsFixed(0).padLeft(3, '0')),
+    format: (dynamic value) => '{value}%'.replaceAll('{value}', (value * 100).toStringAsFixed(0)),
     sliderValues: ConfigSliderValues(min: 0, max: 1, divisions: 100),
   );
 
@@ -126,20 +126,40 @@ final class AppGlobalConfig {
         ConfigItemTextProperty('LL'),
         ConfigItemTranslatableProperty((trans) => trans.balanceLeft100),
       ]),
+      ConfigItem<double>(-0.75, properties: [
+        ConfigItemIconProperty(Icons.join_left_rounded),
+        ConfigItemTextProperty('L'),
+        ConfigItemTranslatableProperty((trans) => trans.balanceLeft75),
+      ]),
       ConfigItem<double>(-0.5, properties: [
         ConfigItemIconProperty(Icons.join_left_rounded),
         ConfigItemTextProperty('CL'),
         ConfigItemTranslatableProperty((trans) => trans.balanceLeft50),
+      ]),
+      ConfigItem<double>(-0.25, properties: [
+        ConfigItemIconProperty(Icons.join_left_rounded),
+        ConfigItemTextProperty('CCL'),
+        ConfigItemTranslatableProperty((trans) => trans.balanceLeft25),
       ]),
       ConfigItem<double>(0.0, properties: [
         ConfigItemIconProperty(Icons.join_full_rounded),
         ConfigItemTextProperty('CC'),
         ConfigItemTranslatableProperty((trans) => trans.balanceCenter),
       ]),
+      ConfigItem<double>(0.25, properties: [
+        ConfigItemIconProperty(Icons.join_right_outlined),
+        ConfigItemTextProperty('CCR'),
+        ConfigItemTranslatableProperty((trans) => trans.balanceRight25),
+      ]),
       ConfigItem<double>(0.5, properties: [
         ConfigItemIconProperty(Icons.join_right_outlined),
         ConfigItemTextProperty('CR'),
         ConfigItemTranslatableProperty((trans) => trans.balanceRight50),
+      ]),
+      ConfigItem<double>(0.75, properties: [
+        ConfigItemIconProperty(Icons.join_right_outlined),
+        ConfigItemTextProperty('CRR'),
+        ConfigItemTranslatableProperty((trans) => trans.balanceRight75),
       ]),
       ConfigItem<double>(1.0, properties: [
         ConfigItemIconProperty(Icons.join_right_outlined),
@@ -149,7 +169,7 @@ final class AppGlobalConfig {
     ],
     defaultValue: 0.0,
     format: (dynamic value) => trackPlaybackBalance.text(value),
-    sliderValues: ConfigSliderValues(min: -1, max: 1, divisions: 4),
+    sliderValues: ConfigSliderValues(min: -1, max: 1, divisions: 8),
   );
 
   static final ConfigCollection recordingAudioEncoder = ConfigCollection(
@@ -308,6 +328,13 @@ final class AppGlobalConfig {
         ConfigItemColorProperty((context) => Theme.of(context).colorScheme.errorContainer, domain: ConfigItemPropertyDomain.backgroundColor),
         ConfigItemColorProperty((context) => Theme.of(context).colorScheme.surfaceContainerHighest, domain: ConfigItemPropertyDomain.progressColor),
         ConfigItemTranslatableProperty((trans) => trans.stateRecording),
+      ]),
+      ConfigItem<TrackState>(TrackState.loading, properties: [
+        ConfigItemIconProperty(Icons.hourglass_empty),
+        ConfigItemColorProperty((context) => Theme.of(context).colorScheme.inversePrimary, domain: ConfigItemPropertyDomain.foregroundColor),
+        ConfigItemColorProperty((context) => Theme.of(context).colorScheme.surfaceContainer, domain: ConfigItemPropertyDomain.backgroundColor),
+        ConfigItemColorProperty((context) => Theme.of(context).colorScheme.inversePrimary, domain: ConfigItemPropertyDomain.progressColor),
+        ConfigItemTranslatableProperty((trans) => trans.stateEmpty),
       ]),
       ConfigItem<TrackState>(TrackState.idle, properties: [
         ConfigItemIconProperty(Icons.task_alt_outlined),

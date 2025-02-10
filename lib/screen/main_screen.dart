@@ -116,39 +116,42 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
   }
 
   @override
-  Widget build(BuildContext context) => MaterialApp(
-        localizationsDelegates: [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: AppGlobalConfig.languages.values<Locale>(),
-        locale: _settingsGet(AppConfigFieldKey.locale),
-        themeAnimationDuration: Duration(seconds: 0),
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: _settingsGet(AppConfigFieldKey.themeSeedColor),
-            brightness: Brightness.light,
-          ),
-          useMaterial3: true,
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      localizationsDelegates: [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppGlobalConfig.languages.values<Locale>(),
+      locale: _settingsGet(AppConfigFieldKey.locale),
+      themeAnimationDuration: Duration(seconds: 0),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: _settingsGet(AppConfigFieldKey.themeSeedColor),
+          brightness: Brightness.light,
         ),
-        darkTheme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: _settingsGet(AppConfigFieldKey.themeSeedColor),
-            brightness: Brightness.dark,
-          ),
-          useMaterial3: true,
+        useMaterial3: true,
+      ),
+      darkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: _settingsGet(AppConfigFieldKey.themeSeedColor),
+          brightness: Brightness.dark,
         ),
-        themeMode: _settingsGet(AppConfigFieldKey.themeMode),
-        initialRoute: '/',
-        routes: {
-          '/': (context) => HomeScreen(
-                settingsGet: _settingsGet,
-                settingsSet: _settingsSet,
-                audioRecorder: _audioRecorder,
-                tracksList: _tracksList,
-              ),
-        },
-      );
+        useMaterial3: true,
+      ),
+      themeMode: _settingsGet(AppConfigFieldKey.themeMode),
+      initialRoute: '/',
+      routes: {
+        '/': (context) =>
+            HomeScreen(
+              settingsGet: _settingsGet,
+              settingsSet: _settingsSet,
+              audioRecorder: _audioRecorder,
+              tracksList: _tracksList,
+            ),
+      },
+    );
+  }
 }

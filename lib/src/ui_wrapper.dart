@@ -86,6 +86,18 @@ class UIWrapper {
         if (iconAlignment == IconAlignment.end) Icon(icon, size: iconSize, color: iconColor),
       ]);
 
+  SingleChildScrollView trackDetailsTabElement(List<Widget> items) =>
+      SingleChildScrollView(padding: EdgeInsets.all(gridGap * 4), child: Column(children: items));
+
+  Container trackDetailsBox(List<Widget> items, {Color? backgroundColor}) => Container(
+      margin: EdgeInsets.only(bottom: gridGap * 4),
+      padding: EdgeInsets.all(gridGap * 2),
+      decoration: BoxDecoration(
+        color: backgroundColor ?? Theme.of(context).colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(Theme.of(context).textTheme.displayLarge!.fontSize! / 10),
+      ),
+      child: Column(children: items));
+
   SizedBox trackDetailsLine(
     List<Widget> items, {
     MainAxisAlignment mainAxisAlignment = MainAxisAlignment.center,
@@ -384,8 +396,11 @@ class UIWrapper {
             })),
       ));
 
-  ButtonStyle circledButtonStyle() =>
-      IconButton.styleFrom(shape: CircleBorder(), padding: EdgeInsets.zero, backgroundColor: Theme.of(context).colorScheme.primaryContainer);
+  ButtonStyle circledButtonStyle() => IconButton.styleFrom(
+        shape: CircleBorder(),
+        padding: EdgeInsets.zero,
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+      );
 
   Container mediaPlayerButton(
     IconData icon,

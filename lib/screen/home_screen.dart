@@ -7,7 +7,6 @@ import 'package:tune_tangler/src/settings_wrapper.dart';
 import '../config/app_icon.dart';
 import '../config/config.dart';
 import '../config/fields.dart';
-import '../entity/track.dart';
 import '../entity/track_row.dart';
 import '../src/track_wrapper.dart';
 import '../src/ui_wrapper.dart';
@@ -36,8 +35,6 @@ class HomeScreen extends StatefulWidget implements ScreenInterface {
 }
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
-  bool loading = false;
-
   late AppLocalizations _trans;
   late UIWrapper _uiWrapper;
   late TrackWrapper _trackWrapper;
@@ -47,20 +44,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   Map<Permission, PermissionStatus> _permissionStatuses = {};
 
-  void _checkPermissions() async {
-    Map<Permission, PermissionStatus> statuses = {};
-    for (var permission in AppGlobalConfig.permissions.values<Permission>()) {
-      statuses[permission] = await permission.status;
-    }
-    _permissionStatuses = statuses;
-  }
-
   @override
   void initState() {
     super.initState();
     _checkPermissions();
     _focusNode.requestFocus(); // Utrzymuje fokus po starcie aplikacji
     WidgetsBinding.instance.addObserver(this);
+  }
+
+  void _checkPermissions() {
+    Map<Permission, PermissionStatus> statuses = {};
+    for (var permission in AppGlobalConfig.permissions.values<Permission>()) {
+      permission.status.then((status) => statuses[permission] = status);
+    }
+    _permissionStatuses = statuses;
   }
 
   @override
@@ -84,25 +81,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         _trackWrapper = TrackWrapper(context, widget, _trans, _uiWrapper);
         _settingsWrapper = SettingsWrapper(context, widget, _trans, _uiWrapper, _trackWrapper, _permissionStatuses);
 
-        Widget body;
-        if (loading == true) {
-          body = Center(
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [CircularProgressIndicator(strokeWidth: 8)]));
-        } else {
-          body = Focus(
-              focusNode: _focusNode,
-              autofocus: true,
-              onKeyEvent: (node, KeyEvent event) {
-                _trackWrapper.onKeyEvent(event);
-                return KeyEventResult.handled;
-              },
-              child: Column(children: [
-                Expanded(child: _buildTracksGrid()),
-              ]));
-        }
+        _trackWrapper.initTracks();
 
         return Scaffold(
             appBar: AppBar(
@@ -120,63 +99,22 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               actions: _settingsWrapper.appBarActions,
             ),
             drawer: _settingsWrapper.drawer,
-            body: body,
+            body: Focus(
+                focusNode: _focusNode,
+                autofocus: true,
+                onKeyEvent: (node, KeyEvent event) {
+                  _trackWrapper.onKeyEvent(event);
+                  return KeyEventResult.handled;
+                },
+                child: ListView.builder(
+                    controller: PageController(viewportFraction: 0.85),
+                    itemCount: widget.settingsGet(AppConfigFieldKey.gridRowsAmount),
+                    itemBuilder: (context, rowIndex) => Row(children: [
+                          _settingsWrapper.buildRowButtons(rowIndex, TrackRow.name(rowIndex)),
+                          _trackWrapper.buildRowTracks(rowIndex),
+                        ]))),
             bottomNavigationBar: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
               Center(child: Text(_trans.legalNote, style: Theme.of(context).textTheme.labelSmall)),
             ]));
       });
-
-  final PageController _controller = PageController(viewportFraction: 0.85);
-
-  /// *************************************************************************
-  /// TRACKS GRID
-  dynamic _buildTracksGrid() => ListView.builder(
-        controller: _controller,
-        itemCount: widget.settingsGet(AppConfigFieldKey.gridRowsAmount),
-        itemBuilder: (context, rowIndex) => Row(children: [
-          _settingsWrapper.buildRowButtons(rowIndex, TrackRow.name(rowIndex)),
-          Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              // physics: PageScrollPhysics(),
-              child: Row(
-                children: List.generate(
-                  widget.settingsGet(AppConfigFieldKey.gridColsAmount),
-                  (columnIndex) {
-                    String trackId = Track.buildId(rowIndex, columnIndex);
-                    Track track = widget.settingsGet(trackId, space: AppConfigSpace.track, defaultValue: Track(rowIndex, columnIndex));
-                    widget.tracksList.add(rowIndex, track);
-                    _trackWrapper.initStreams(track);
-                    return Container(
-                      margin: EdgeInsets.all(_uiWrapper.gridGap),
-                      width: Theme.of(context).textTheme.displaySmall!.fontSize! * 2.1,
-                      child: ValueListenableBuilder(
-                        valueListenable: track.state,
-                        builder: (context, state, child) => ElevatedButton(
-                          onPressed: () {
-                            _trackWrapper.trackPressed(track);
-                          },
-                          onLongPress: () {
-                            _trackWrapper.trackDetails(track);
-                          },
-                          style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.all(_uiWrapper.gridGap),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_uiWrapper.gridGap * 2)),
-                              backgroundColor: track.stateBackgroundColor(context),
-                              foregroundColor: track.stateForegroundColor(context)),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: _trackWrapper.trackButton(track, state),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-          )
-        ]),
-      );
 }

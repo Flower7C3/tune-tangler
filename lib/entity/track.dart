@@ -15,12 +15,14 @@ import 'track_row.dart';
 enum RecorderState {
   empty,
   recording,
+  saving,
   ready,
 }
 
 enum TrackState {
   empty,
   recording,
+  loading,
   idle,
   playing,
   paused,
@@ -68,11 +70,11 @@ class Track {
     });
 
     positionSubscription = player.onPositionChanged.listen((Duration position) {
-      if (playbackStartAtPosition.value != null && playbackEndAtPosition.value != null && position >= playbackEndAtPosition.value!) {
+      if (position >= playbackEndAtPosition.value) {
         if (isPlaybackReleaseModeSingle(playbackReleaseMode.value)) {
           stopPlaying();
         }
-        position = playbackStartAtPosition.value!;
+        position = playbackStartAtPosition.value;
         player.seek(position);
       }
       setPosition(position);
@@ -84,7 +86,7 @@ class Track {
 
     playerCompleteSubscription = player.onPlayerComplete.listen((event) {
       stopPlaying();
-      player.seek(playbackStartAtPosition.value ?? Duration());
+      player.seek(playbackStartAtPosition.value);
     });
 
     _streamsInitialized = true;
@@ -127,9 +129,9 @@ class Track {
   ///*************************************************************************************************************************************************
   /// POSITION
   final ValueNotifier<double> progress = ValueNotifier(0);
-  final ValueNotifier<Duration?> position = ValueNotifier(null);
+  final ValueNotifier<Duration> position = ValueNotifier(Duration());
   final ValueNotifier<Duration> positionAfterCut = ValueNotifier(Duration());
-  final ValueNotifier<Duration?> duration = ValueNotifier(null);
+  final ValueNotifier<Duration> duration = ValueNotifier(Duration());
   final ValueNotifier<Duration> durationAfterCut = ValueNotifier(Duration());
 
   void setPosition(Duration value) {
@@ -146,42 +148,37 @@ class Track {
   }
 
   void _updatePositionCut() {
-    positionAfterCut.value = Duration(
-        milliseconds: (position.value == null ? 0 : position.value!.inMilliseconds) -
-            (playbackStartAtPosition.value == null ? 0 : playbackStartAtPosition.value!.inMilliseconds));
+    positionAfterCut.value = Duration(milliseconds: position.value.inMilliseconds - playbackStartAtPosition.value.inMilliseconds);
     _updateProgress();
   }
 
   void _updateDurationCut() {
-    durationAfterCut.value = Duration(
-        milliseconds: (playbackEndAtPosition.value == null ? 0 : playbackEndAtPosition.value!.inMilliseconds) -
-            (playbackStartAtPosition.value == null ? 0 : playbackStartAtPosition.value!.inMilliseconds));
+    durationAfterCut.value = Duration(milliseconds: playbackEndAtPosition.value.inMilliseconds - playbackStartAtPosition.value.inMilliseconds);
     _updateProgress();
   }
 
   ///*************************************************************************************************************************************************
   /// POSITION START AT
 
-  final ValueNotifier<Duration?> playbackStartAtPosition = ValueNotifier(Duration());
+  IconData? get playbackStartAtPositionIcon => (playbackStartAtPosition.value.inMilliseconds > 0) ? AppIcon.trackPlaybackStartAtPosition : null;
 
-  IconData? get playbackStartAtPositionIcon =>
-      (playbackStartAtPosition.value != null && playbackStartAtPosition.value!.inMilliseconds > 0) ? AppIcon.trackPlaybackStartAtPosition : null;
+  final ValueNotifier<Duration> playbackStartAtPosition = ValueNotifier(Duration());
 
-  void setPlaybackStartAtPosition(Duration? value) {
-    playbackStartAtPosition.value = (playbackEndAtPosition.value != null && value == null) ? Duration() : value;
+  void resetPlaybackStartAtPosition() => setPlaybackStartAtPosition(Duration());
+
+  void setPlaybackStartAtPosition(Duration value) {
+    playbackStartAtPosition.value = value;
     _updatePositionCut();
     _updateDurationCut();
-    if (value != null) {
-      if (position.value != null && position.value! < playbackStartAtPosition.value!) {
-        player.seek(playbackStartAtPosition.value!);
-      }
+    if (position.value < playbackStartAtPosition.value) {
+      player.seek(playbackStartAtPosition.value);
     }
   }
 
   void changePlaybackStartAtPosition(int value) {
     Duration zero = Duration();
-    Duration startAt = playbackStartAtPosition.value ??= zero;
-    Duration endAt = playbackEndAtPosition.value ??= zero;
+    Duration startAt = playbackStartAtPosition.value;
+    Duration endAt = playbackEndAtPosition.value;
     Duration newValue = Duration(milliseconds: startAt.inMilliseconds + value);
     if (newValue < zero) {
       newValue = zero;
@@ -195,28 +192,25 @@ class Track {
   ///*************************************************************************************************************************************************
   /// POSITION END AT
 
-  final ValueNotifier<Duration?> playbackEndAtPosition = ValueNotifier(Duration());
-
   IconData? get playbackEndAtPositionIcon =>
-      (playbackEndAtPosition.value != null && duration.value != null && playbackEndAtPosition.value!.inMilliseconds != duration.value!.inMilliseconds)
-          ? AppIcon.trackPlaybackEndAtPosition
-          : null;
+      (playbackEndAtPosition.value.inMilliseconds != duration.value.inMilliseconds) ? AppIcon.trackPlaybackEndAtPosition : null;
 
-  void setPlaybackEndAtPosition(Duration? value) {
-    playbackEndAtPosition.value = (value == null) ? duration.value : value;
+  final ValueNotifier<Duration> playbackEndAtPosition = ValueNotifier(Duration());
+
+  void resetPlaybackEndAtPosition() => setPlaybackEndAtPosition(duration.value);
+
+  void setPlaybackEndAtPosition(Duration value) {
+    playbackEndAtPosition.value = value;
     _updateDurationCut();
-    if (value != null) {
-      if (position.value != null && position.value! > playbackEndAtPosition.value!) {
-        player.seek(playbackEndAtPosition.value!);
-      }
+    if (position.value > playbackEndAtPosition.value) {
+      player.seek(playbackEndAtPosition.value);
     }
   }
 
   void changePlaybackEndAtPosition(int value) {
-    Duration zero = Duration();
-    Duration startAt = playbackStartAtPosition.value ??= zero;
-    Duration endAt = playbackEndAtPosition.value ??= zero;
-    Duration trackDuration = duration.value ??= zero;
+    Duration startAt = playbackStartAtPosition.value;
+    Duration endAt = playbackEndAtPosition.value;
+    Duration trackDuration = duration.value;
     Duration newValue = Duration(milliseconds: endAt.inMilliseconds + value);
     if (newValue < startAt) {
       newValue = startAt;
@@ -237,9 +231,7 @@ class Track {
   void startPlaying() {
     String? p = path;
     if (p != null && (state.value == TrackState.idle || state.value == TrackState.paused)) {
-      if (playbackStartAtPosition.value != null) {
-        player.seek(playbackStartAtPosition.value!);
-      }
+      player.seek(playbackStartAtPosition.value);
       player.resume();
     }
   }
@@ -259,7 +251,7 @@ class Track {
   Future<void> stopPlaying() async {
     if (path != null) {
       await player.stop();
-      player.seek(playbackStartAtPosition.value ?? Duration());
+      player.seek(playbackStartAtPosition.value);
     }
   }
 
@@ -270,7 +262,7 @@ class Track {
 
   String? get path => _path;
 
-  Future<void> setPath(String? newPath) async {
+  Future<void> setPath(String? newPath, {Duration? playbackStartAtPosition, Duration? playbackEndAtPosition}) async {
     if (newPath == null) {
       if (path != null && File(path!).existsSync()) {
         File(path!).delete();
@@ -285,21 +277,24 @@ class Track {
     }
 
     _path = newPath;
+    setRecorderState(RecorderState.saving);
     await player.setSourceDeviceFile(newPath).then((value) async {
-      await player.getDuration().then((value) => (duration.value == value) ? null : setDuration(value ?? Duration()));
-      setRecorderState(RecorderState.ready);
-      setPlayerState(PlayerState.completed);
-      setPosition(Duration());
-      setPlaybackStartAtPosition(Duration());
-      setPlaybackEndAtPosition(duration.value);
-      player.setVolume(playbackVolume.value);
-      player.setBalance(playbackBalance.value);
-      player.setReleaseMode(playbackReleaseMode.value);
-      player.setPlaybackRate(playbackSpeed.value);
+      await player.getDuration().then((value) {
+        setDuration(value ?? Duration());
+        setPosition(Duration());
+        setPlaybackStartAtPosition(playbackStartAtPosition ?? Duration());
+        setPlaybackEndAtPosition(playbackEndAtPosition ?? duration.value);
+        player.setVolume(playbackVolume.value);
+        player.setBalance(playbackBalance.value);
+        player.setReleaseMode(playbackReleaseMode.value);
+        player.setPlaybackRate(playbackSpeed.value);
+        setRecorderState(RecorderState.ready);
+      });
     });
   }
 
   _clearPath() {
+    setRecorderState(RecorderState.saving);
     player.setSourceUrl('');
     setRecorderState(RecorderState.empty);
     setAudioEncoder(null);
@@ -308,8 +303,9 @@ class Track {
     setPlayerState(null);
     setPosition(Duration());
     setDuration(Duration());
-    setPlaybackStartAtPosition(null);
-    setPlaybackEndAtPosition(null);
+    setPlaybackStartAtPosition(Duration());
+    setPlaybackEndAtPosition(Duration());
+    setRecorderState(RecorderState.empty);
     _path = null;
   }
 
@@ -343,8 +339,6 @@ class Track {
 
   PlayerState? _playerState;
 
-  PlayerState? get playerState => _playerState;
-
   void setPlayerState(PlayerState? state) {
     _playerState = state;
     updateState();
@@ -359,22 +353,20 @@ class Track {
 
   final ValueNotifier<TrackState> state = ValueNotifier(AppGlobalConfig.trackState.defaultValue);
 
-  IconData get stateIcon => AppGlobalConfig.trackState.icon(state.value);
-
   void updateState() {
     state.value = switch (recorderState.value) {
       RecorderState.empty => TrackState.empty,
       RecorderState.recording => TrackState.recording,
+      RecorderState.saving => TrackState.loading,
       RecorderState.ready => switch (_playerState) {
-          PlayerState.stopped => TrackState.idle,
           PlayerState.playing => TrackState.playing,
           PlayerState.paused => TrackState.paused,
-          PlayerState.disposed => TrackState.idle,
-          PlayerState.completed => TrackState.idle,
-          _ => TrackState.empty,
+          _ => TrackState.idle,
         },
     };
   }
+
+  IconData get stateIcon => AppGlobalConfig.trackState.icon(state.value);
 
   Color stateForegroundColor(BuildContext context) =>
       AppGlobalConfig.trackState.color(state.value, context: context, domain: ConfigItemPropertyDomain.foregroundColor);

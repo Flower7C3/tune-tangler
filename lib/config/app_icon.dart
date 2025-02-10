@@ -46,9 +46,9 @@ class AppIcon {
   static IconData trackPlaybackBalance = Icons.headphones_rounded;
   static IconData trackPlaybackSpeed = Icons.slow_motion_video_rounded;
 
-  static IconData trackTimer = Icons.timer_rounded;
-  static IconData trackPosition = Icons.timelapse_rounded;
-  static IconData trackDuration = Icons.schedule_rounded;
+  static IconData trackTimer = Symbols.acute_rounded;
+  static IconData trackPosition = Symbols.timer_play_rounded;
+  static IconData trackDuration = Symbols.timer_rounded;
 
   static IconData trackPlaybackStartAtPosition = Symbols.logout_rounded;
   static IconData trackPlaybackEndAtPosition = Symbols.login_rounded;
@@ -94,4 +94,12 @@ class AppIcon {
   static IconData permissions = Icons.shield_outlined;
 
   static IconData dangerZone = Icons.dangerous_outlined;
+
+  static IconData recordingInProgress = Symbols.voicemail_rounded;
+  static IconData recordingProgress = Symbols.edit_audio_rounded;
+  static IconData recordingControls = Symbols.instant_mix_rounded;
+  static IconData recordingInfo = Symbols.info_rounded;
+
+  static IconData recordingProgressSlider = Symbols.start_rounded;
+  static IconData recordingClipSlider = Symbols.expand_rounded;
 }

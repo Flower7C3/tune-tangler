@@ -275,6 +275,7 @@ class SettingsWrapper {
           _trans.buttonSave,
           successAction: (double value, String formattedValue) {
             _widget.settingsSet(AppConfigFieldKey.gridRowsAmount, value.toInt(), updateState: true);
+            _trackWrapper.initTracks(forceRebuild: true);
             return _trans.gridRowsAmountSuccess(formattedValue);
           },
           configCollection: AppGlobalConfig.gridRows,
@@ -292,6 +293,7 @@ class SettingsWrapper {
           _trans.buttonSave,
           successAction: (double value, String formattedValue) {
             _widget.settingsSet(AppConfigFieldKey.gridColsAmount, value.toInt(), updateState: true);
+            _trackWrapper.initTracks(forceRebuild: true);
             return _trans.gridColsAmountSuccess(formattedValue);
           },
           configCollection: AppGlobalConfig.gridCols,
