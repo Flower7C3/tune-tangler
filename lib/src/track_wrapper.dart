@@ -312,8 +312,8 @@ class TrackWrapper {
           child: Row(
               children: List.generate(
                   _widget.settingsGet(AppConfigFieldKey.gridColsAmount),
-                  (columnIndex) => _buildRowTrackContainer(_widget.settingsGet(Track.buildId(rowIndex, columnIndex),
-                      space: AppConfigSpace.track))))));
+                  (columnIndex) =>
+                      _buildRowTrackContainer(_widget.settingsGet(Track.buildId(rowIndex, columnIndex), space: AppConfigSpace.track))))));
 
   Container _buildRowTrackContainer(Track track) => Container(
       margin: EdgeInsets.all(_uiWrapper.gridGap),
