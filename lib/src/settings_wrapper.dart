@@ -54,13 +54,13 @@ class SettingsWrapper {
               leading: Icon(AppIcon.screenSettings),
               title: Text(_trans.screen),
               childrenPadding: EdgeInsets.only(left: _uiWrapper.gridGap * 3),
-              children: screenSettings(setDrawerState),
+              children: _screenSettings(setDrawerState),
             ),
             ExpansionTile(
               leading: Icon(AppIcon.permissions),
               title: Text(_trans.permissions),
               childrenPadding: EdgeInsets.only(left: _uiWrapper.gridGap * 3),
-              children: permissions(setDrawerState),
+              children: _permissions(setDrawerState),
             ),
             ExpansionTile(
               leading: Icon(AppIcon.dangerZone),
@@ -201,7 +201,7 @@ class SettingsWrapper {
         ),
       ];
 
-  List<Widget> screenSettings(StateSetter setDrawerState) => [
+  List<Widget> _screenSettings(StateSetter setDrawerState) => [
         _uiWrapper.listTileListDialog(
           AppIcon.language,
           _trans.languageVersion,
@@ -298,7 +298,7 @@ class SettingsWrapper {
         ),
       ];
 
-  List<Widget> permissions(StateSetter setDrawerState) => [
+  List<Widget> _permissions(StateSetter setDrawerState) => [
         ...AppGlobalConfig.permissions.values<Permission>().map(
           (Permission permission) {
             final status = permissionStatuses[permission] ?? PermissionStatus.denied;

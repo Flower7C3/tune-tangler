@@ -48,9 +48,9 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
         AppConfigFieldKey.isThemeModeSystem => _settingsGet(AppConfigFieldKey.themeMode) == ThemeMode.system,
         AppConfigFieldKey.recording => _recordConfig(),
         _ => switch (space) {
-          AppConfigSpace.global => widget.globalSettingsBox
+            AppConfigSpace.global => widget.globalSettingsBox
                 .get(AppGlobalConfigFieldsCollection.field(key).boxFieldName, defaultValue: AppGlobalConfigFieldsCollection.field(key).defaultValue),
-          AppConfigSpace.track => widget.trackSettingsBox.get(key, defaultValue: defaultValue),
+            AppConfigSpace.track => widget.trackSettingsBox.get(key, defaultValue: defaultValue),
             Object() => throw UnimplementedError(),
             null => throw UnimplementedError(),
           },
