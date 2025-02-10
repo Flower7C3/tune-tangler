@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:tune_tangler/adapter/audio_input_device_adapter.dart';
+import 'package:tune_tangler/adapter/duration_adapter.dart';
 
 import 'adapter/audio_encoder_adapter.dart';
 import 'adapter/locale_adapter.dart';
@@ -27,6 +28,7 @@ Future<void> main() async {
   Hive.registerAdapter(ThemeModeAdapter());
   Hive.registerAdapter(TrackAdapterKeyAdapter());
   Hive.registerAdapter(TrackAdapter());
+  Hive.registerAdapter(DurationAdapter());
   Hive.registerAdapter(AudioEncoderAdapter());
   Hive.registerAdapter(ColorAdapter());
   Hive.registerAdapter(AudioInputDeviceAdapter());

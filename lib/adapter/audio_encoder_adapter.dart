@@ -3,7 +3,7 @@ import 'package:record/record.dart';
 
 class AudioEncoderAdapter extends TypeAdapter<AudioEncoder> {
   @override
-  final typeId = 4;
+  final typeId = 116;
 
   @override
   AudioEncoder read(BinaryReader reader) {

@@ -1,5 +1,5 @@
 import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:tune_tangler/config/config.dart';
 
@@ -18,12 +18,15 @@ enum TrackAdapterKey {
   playbackVolume,
   playbackBalance,
   playbackSpeed,
+  playbackDuration,
+  playbackStartAtPosition,
+  playbackEndAtPosition,
   keyboardKey,
 }
 
 class TrackAdapter extends TypeAdapter<Track> {
   @override
-  final typeId = 30;
+  final typeId = 111;
 
   @override
   Track read(BinaryReader reader) {
@@ -40,8 +43,12 @@ class TrackAdapter extends TypeAdapter<Track> {
     track.setPlaybackVolume(data[TrackAdapterKey.playbackVolume] ?? AppGlobalConfig.trackPlaybackVolume.defaultValue);
     track.setPlaybackBalance(data[TrackAdapterKey.playbackBalance] ?? AppGlobalConfig.trackPlaybackBalance.defaultValue);
     track.setPlaybackSpeed(data[TrackAdapterKey.playbackSpeed] ?? AppGlobalConfig.trackPlaybackSpeed.defaultValue);
-    track.setKeyboardKey(data[TrackAdapterKey.keyboardKey] ?? '');
     track.setPath(data[TrackAdapterKey.path]);
+    track.setDuration(data[TrackAdapterKey.playbackDuration] ?? Duration());
+    track.setPlaybackStartAtPosition(data[TrackAdapterKey.playbackStartAtPosition] ?? Duration());
+    track.setPlaybackEndAtPosition(data[TrackAdapterKey.playbackEndAtPosition] ?? (data[TrackAdapterKey.playbackDuration] ?? Duration()));
+    track.setKeyboardKey(data[TrackAdapterKey.keyboardKey] ?? '');
+    debugPrint('read db ${track.id}');
     return track;
   }
 
@@ -57,6 +64,9 @@ class TrackAdapter extends TypeAdapter<Track> {
       TrackAdapterKey.playbackVolume: obj.playbackVolume.value,
       TrackAdapterKey.playbackBalance: obj.playbackBalance.value,
       TrackAdapterKey.playbackSpeed: obj.playbackSpeed.value,
+      TrackAdapterKey.playbackDuration: obj.duration.value,
+      TrackAdapterKey.playbackStartAtPosition: obj.playbackStartAtPosition.value,
+      TrackAdapterKey.playbackEndAtPosition: obj.playbackEndAtPosition.value,
       TrackAdapterKey.keyboardKey: obj.keyboardKey.value,
     });
   }
@@ -64,7 +74,7 @@ class TrackAdapter extends TypeAdapter<Track> {
 
 class TrackAdapterKeyAdapter extends TypeAdapter<TrackAdapterKey> {
   @override
-  final typeId = 33;
+  final typeId = 112;
 
   @override
   TrackAdapterKey read(BinaryReader reader) {

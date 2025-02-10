@@ -3,7 +3,7 @@ import 'package:hive/hive.dart';
 
 class ThemeModeAdapter extends TypeAdapter<ThemeMode> {
   @override
-  final typeId = 2;
+  final typeId = 101;
 
   @override
   ThemeMode read(BinaryReader reader) {
