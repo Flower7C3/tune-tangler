@@ -4,23 +4,23 @@ import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:tune_tangler/entity/track.dart';
 
+import '../config/app_global_config.dart';
 import '../config/app_icon.dart';
-import '../config/config.dart';
 import '../config/config_collection.dart';
-import '../config/menu_item.dart';
+import '../config/menu_item_enums.dart';
 
 enum DialogType {
   alert,
   list,
 }
 
-class UIWrapper {
+class UIHelper {
   final double gridGap = 4;
   final double iconSizeMultiplier = 1.2;
 
   BuildContext context;
 
-  UIWrapper(this.context);
+  UIHelper(this.context);
 
   Container get dragHandle => Container(
         padding: EdgeInsets.only(top: Theme.of(context).textTheme.titleSmall!.fontSize!),
@@ -436,11 +436,10 @@ class UIWrapper {
     Function() successAction,
   ) =>
       ListTile(
-          leading: Icon(icon),
-          title: Text(listTitle),
-          onTap: () {
-            alertDialogReset(icon, dialogTitle, dialogInfo, cancelLabel, saveLabel, successAction);
-          });
+        leading: Icon(icon),
+        title: Text(listTitle),
+        onTap: () => alertDialogReset(icon, dialogTitle, dialogInfo, cancelLabel, saveLabel, successAction),
+      );
 
   void alertDialogReset(
     IconData icon,
@@ -451,9 +450,7 @@ class UIWrapper {
     Function() successAction,
   ) =>
       alertDialog(icon, dialogTitle, contentText: dialogInfo, actions: <Widget>[
-        simpleButton(cancelLabel, () {
-          Navigator.pop(context, cancelLabel);
-        }),
+        simpleButton(cancelLabel, () => Navigator.pop(context, cancelLabel)),
         errorButton(saveLabel, () {
           Navigator.pop(context, saveLabel);
           toast(successAction(), icon: icon);
@@ -477,12 +474,12 @@ class UIWrapper {
     AppLocalizations? trans,
   }) =>
       ListTile(
-        leading: Icon(icon),
-        title: Text(listTitle),
-        trailing:
-            (withTrailing == true) ? trailingLabel(configCollection != null ? configCollection.format(currentValue) : currentValue.toString()) : null,
-        onTap: () {
-          showDialog(
+          leading: Icon(icon),
+          title: Text(listTitle),
+          trailing: (withTrailing == true)
+              ? trailingLabel(configCollection != null ? configCollection.format(currentValue) : currentValue.toString())
+              : null,
+          onTap: () => showDialog(
               context: context,
               builder: (context) => StatefulBuilder(
                   builder: (BuildContext context, StateSetter setModalState) => AlertDialog(
@@ -505,16 +502,12 @@ class UIWrapper {
                             ]),
                           ]),
                           actions: [
-                            simpleButton(cancelLabel, () {
-                              Navigator.pop(context, cancelLabel);
-                            }),
+                            simpleButton(cancelLabel, () => Navigator.pop(context, cancelLabel)),
                             primaryButton(saveLabel, () {
                               Navigator.pop(context, saveLabel);
                               toast(successAction(currentValue, _translateOrFormat(currentValue, configCollection, trans)), icon: icon);
                             }),
-                          ])));
-        },
-      );
+                          ]))));
 
   void alertDialogSlider(
     IconData icon,
@@ -596,43 +589,39 @@ class UIWrapper {
             ? Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: subtitle.toList())
             : null,
         trailing: (withTrailing == true && configCollection != null) ? trailingLabel(configCollection.format(currentValue)) : null,
-        onTap: () {
-          showDialog(
+        onTap: () => showDialog(
             context: context,
             builder: (context) => StatefulBuilder(
-              builder: (BuildContext context, StateSetter setModalState) => AlertDialog(
-                title: statusIconTile(icon, dialogTitle),
-                content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [
-                  Text(dialogInfo),
-                  Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Slider(
-                        value: sliderValue,
-                        min: 0,
-                        max: (values.length - 1).toDouble(),
-                        divisions: (values.length - 1),
-                        label: _translateOrFormat(currentValue, configCollection, trans),
-                        onChanged: (double newValue) {
-                          setModalState(() {
-                            sliderValue = newValue;
-                            currentValue = values[sliderValue.toInt()];
-                          });
+                builder: (BuildContext context, StateSetter setModalState) => AlertDialog(
+                      title: statusIconTile(icon, dialogTitle),
+                      content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [
+                        Text(dialogInfo),
+                        Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
+                          Slider(
+                              value: sliderValue,
+                              min: 0,
+                              max: (values.length - 1).toDouble(),
+                              divisions: (values.length - 1),
+                              label: _translateOrFormat(currentValue, configCollection, trans),
+                              onChanged: (double newValue) {
+                                setModalState(() {
+                                  sliderValue = newValue;
+                                  currentValue = values[sliderValue.toInt()];
+                                });
+                              }),
+                          Text(_format(currentValue, configCollection)),
+                        ]),
+                      ]),
+                      actions: [
+                        simpleButton(cancelLabel, () {
+                          Navigator.pop(context, cancelLabel);
                         }),
-                    Text(_format(currentValue, configCollection)),
-                  ]),
-                ]),
-                actions: [
-                  simpleButton(cancelLabel, () {
-                    Navigator.pop(context, cancelLabel);
-                  }),
-                  primaryButton(saveLabel, () {
-                    Navigator.pop(context, saveLabel);
-                    toast(successAction(currentValue, _translateOrFormat(currentValue, configCollection, trans)), icon: icon);
-                  }),
-                ],
-              ),
-            ),
-          );
-        });
+                        primaryButton(saveLabel, () {
+                          Navigator.pop(context, saveLabel);
+                          toast(successAction(currentValue, _translateOrFormat(currentValue, configCollection, trans)), icon: icon);
+                        }),
+                      ],
+                    ))));
   }
 
   Widget listTileButtons(
@@ -704,25 +693,23 @@ class UIWrapper {
                 color: currentValue,
                 borderRadius: BorderRadius.circular(24),
               )),
-          onTap: () {
-            alertDialog(AppIcon.screenThemeColor, dialogTitle,
-                contentText: dialogInfo,
-                contentWidget: gridBuilder(
-                    itemCount: values.length,
-                    itemBuilder: (context, index) => ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: values[index],
-                            shape: CircleBorder(),
-                            padding: EdgeInsets.all(16),
-                          ),
-                          onPressed: () {
-                            dynamic selectedValue = values[index];
-                            Navigator.pop(context);
-                            toast(successAction(selectedValue, _translateOrFormat(selectedValue, configCollection, trans)), icon: icon);
-                          },
-                          child: null,
-                        )));
-          });
+          onTap: () => alertDialog(AppIcon.screenThemeColor, dialogTitle,
+              contentText: dialogInfo,
+              contentWidget: gridBuilder(
+                  itemCount: values.length,
+                  itemBuilder: (context, index) => ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: values[index],
+                          shape: CircleBorder(),
+                          padding: EdgeInsets.all(16),
+                        ),
+                        onPressed: () {
+                          dynamic selectedValue = values[index];
+                          Navigator.pop(context);
+                          toast(successAction(selectedValue, _translateOrFormat(selectedValue, configCollection, trans)), icon: icon);
+                        },
+                        child: null,
+                      ))));
 
   ListTile listTileSwitch(
     IconData icon,
@@ -781,13 +768,12 @@ class UIWrapper {
     required List<SimpleDialogOption> options,
   }) =>
       ListTile(
-          leading: Icon(icon),
-          title: Text(listTitle),
-          trailing: trailingLabel(currentValue),
-          subtitle: (listSubtitle == null) ? null : Text(listSubtitle),
-          onTap: () {
-            listDialog(AppIcon.language, dialogTitle, actions: options.toList());
-          });
+        leading: Icon(icon),
+        title: Text(listTitle),
+        trailing: trailingLabel(currentValue),
+        subtitle: (listSubtitle == null) ? null : Text(listSubtitle),
+        onTap: () => listDialog(AppIcon.language, dialogTitle, actions: options.toList()),
+      );
 
   String _translateOrFormat(dynamic value, ConfigCollection? configCollection, AppLocalizations? trans) => ((configCollection == null)
       ? value.toString()

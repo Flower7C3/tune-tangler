@@ -5,7 +5,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:record/record.dart';
-import 'package:tune_tangler/config/config.dart';
+import 'package:tune_tangler/config/app_global_config.dart';
 
 import '../config/app_icon.dart';
 import '../config/config_collection.dart';

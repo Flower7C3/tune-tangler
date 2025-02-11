@@ -10,7 +10,6 @@ import 'adapter/release_mode_adapter.dart';
 import 'adapter/theme_mode_adapter.dart';
 import 'adapter/track_adapter.dart';
 import 'screen/main_screen.dart';
-import 'screen/splash_screen.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
@@ -19,7 +18,7 @@ Future<void> main() async {
 
   //************************************
   // Set loading screen
-  runApp(const SplashScreenApp());
+  // runApp(const SplashScreenApp());
 
   //************************************
   // Initialize

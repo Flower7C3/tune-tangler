@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 
-import 'config.dart';
+import 'app_global_config.dart';
 
 enum AppConfigSpace {
   global,

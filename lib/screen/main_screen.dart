@@ -3,13 +3,17 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:record/record.dart';
-import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:tune_tangler/repository/track_repository.dart';
 
-import '../config/config.dart';
-import '../config/fields.dart';
-import '../entity/track.dart';
-import '../entity/track_row.dart';
-import 'home_screen.dart';
+import '../config/app_config_fields.dart';
+import '../config/app_global_config.dart';
+import '../helper/ui_helper.dart';
+import '../manager/drawer_manager.dart';
+import '../manager/navigation_bar_manager.dart';
+import '../manager/recording_manager.dart';
+import '../manager/row_menu_manager.dart';
+import '../wrapper/settings_wrapper.dart';
+import '../wrapper/track_wrapper.dart';
 
 class MainScreenApp extends StatefulWidget {
   final Box globalSettingsBox;
@@ -22,143 +26,109 @@ class MainScreenApp extends StatefulWidget {
 }
 
 class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserver {
-  _MainScreenAppState();
-
   late final AudioRecorder _audioRecorder;
-  late final TracksCollection _tracksList = TracksCollection(_settingsGet);
+  final FocusNode _focusNode = FocusNode();
+  late SettingsWrapper _settings;
+  late TrackRepository _trackRepository;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _audioRecorder = AudioRecorder();
+    _focusNode.requestFocus(); // Utrzymuje fokus po starcie aplikacji
     WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
-    _audioRecorder.dispose();
     WidgetsBinding.instance.removeObserver(this);
+    _audioRecorder.dispose();
     widget.globalSettingsBox.close();
     widget.trackSettingsBox.close();
+    _trackRepository.stopTracksPlaying(_trackRepository.allTracks());
+    _trackRepository.dispose(_trackRepository.allTracks());
     super.dispose();
   }
 
-  dynamic _settingsGet(dynamic key, {AppConfigSpace space = AppConfigSpace.global, dynamic defaultValue}) => switch (key) {
-        AppConfigFieldKey.isThemeModeDark => _settingsGet(AppConfigFieldKey.themeMode) == ThemeMode.dark,
-        AppConfigFieldKey.isThemeModeLight => _settingsGet(AppConfigFieldKey.themeMode) == ThemeMode.light,
-        AppConfigFieldKey.isThemeModeSystem => _settingsGet(AppConfigFieldKey.themeMode) == ThemeMode.system,
-        AppConfigFieldKey.recording => _recordConfig(),
-        _ => switch (space) {
-            AppConfigSpace.global => widget.globalSettingsBox
-                .get(AppGlobalConfigFieldsCollection.field(key).boxFieldName, defaultValue: AppGlobalConfigFieldsCollection.field(key).defaultValue),
-            AppConfigSpace.track => _loadTrack(key, defaultValue),
-          },
-      };
-
-  Track _loadTrack(dynamic key, dynamic defaultValue) {
-    Track track = widget.trackSettingsBox.get(key, defaultValue: defaultValue);
-    if (!track.streamsInitialized) {
-      track.setStreamsInitialized();
-      _settingsSet(key, track, space: AppConfigSpace.track);
-    }
-    return track;
-  }
-
-  void _settingsSet(dynamic key, dynamic value, {AppConfigSpace space = AppConfigSpace.global, bool updateState = false}) {
-    if (updateState == true) {
-      setState(() {
-        _settingsSetStateLess(key, value, space: space);
-      });
-    } else {
-      _settingsSetStateLess(key, value, space: space);
-    }
-  }
-
-  void _settingsSetStateLess(dynamic key, dynamic value, {AppConfigSpace space = AppConfigSpace.global}) {
-    switch (space) {
-      case AppConfigSpace.global:
-        widget.globalSettingsBox.put(AppGlobalConfigFieldsCollection.field(key).boxFieldName, value);
-        switch (key) {
-          case AppConfigFieldKey.wakelockEnabled:
-            WakelockPlus.toggle(enable: value);
-            break;
-        }
-        break;
-      case AppConfigSpace.track:
-        widget.trackSettingsBox.put(key, value);
-        break;
-    }
-  }
-
-  RecordConfig _recordConfig() {
-    InputDevice? inputDevice = _settingsGet(AppConfigFieldKey.recordingInputDevice);
-    AudioEncoder audioEncoder = _settingsGet(AppConfigFieldKey.recordingAudioEncoder);
-    int sampleRate = _settingsGet(AppConfigFieldKey.recordingSampleRate);
-    int bitRate = _settingsGet(AppConfigFieldKey.recordingBitRate);
-    int channels = AppGlobalConfig.recordingAudioMode.decode(_settingsGet(AppConfigFieldKey.recordingAudioModeStereo));
-    bool autoGain = _settingsGet(AppConfigFieldKey.recordingAutoGain);
-    bool echoCancel = _settingsGet(AppConfigFieldKey.recordingEchoCancel);
-    bool noiseSuppress = _settingsGet(AppConfigFieldKey.recordingNoiseSuppress);
-    if (inputDevice == null) {
-      return RecordConfig(
-        encoder: audioEncoder,
-        sampleRate: sampleRate,
-        bitRate: bitRate,
-        numChannels: channels,
-        autoGain: autoGain,
-        echoCancel: echoCancel,
-        noiseSuppress: noiseSuppress,
-      );
-    } else {
-      return RecordConfig(
-        device: inputDevice,
-        encoder: audioEncoder,
-        sampleRate: sampleRate,
-        bitRate: bitRate,
-        numChannels: channels,
-        autoGain: autoGain,
-        echoCancel: echoCancel,
-        noiseSuppress: noiseSuppress,
-      );
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.detached || state == AppLifecycleState.inactive) {
+      _trackRepository.stopTracksPlaying(_trackRepository.allTracks());
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      localizationsDelegates: [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: AppGlobalConfig.languages.values<Locale>(),
-      locale: _settingsGet(AppConfigFieldKey.locale),
-      themeAnimationDuration: Duration(seconds: 0),
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: _settingsGet(AppConfigFieldKey.themeSeedColor),
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: _settingsGet(AppConfigFieldKey.themeSeedColor),
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
-      themeMode: _settingsGet(AppConfigFieldKey.themeMode),
-      initialRoute: '/',
-      routes: {
-        '/': (context) => HomeScreen(
-              settingsGet: _settingsGet,
-              settingsSet: _settingsSet,
-              audioRecorder: _audioRecorder,
-              tracksList: _tracksList,
-            ),
-      },
-    );
+    _settings = SettingsWrapper(setState, widget.globalSettingsBox, widget.trackSettingsBox);
+    _settings.checkPermissions();
+    return _buildApp();
   }
+
+  MaterialApp _buildApp() => MaterialApp(
+        localizationsDelegates: [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppGlobalConfig.languages.values<Locale>(),
+        locale: _settings.get(AppConfigFieldKey.locale),
+        themeAnimationDuration: Duration(seconds: 0),
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: _settings.get(AppConfigFieldKey.themeSeedColor),
+            brightness: Brightness.light,
+          ),
+          useMaterial3: true,
+        ),
+        darkTheme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: _settings.get(AppConfigFieldKey.themeSeedColor),
+            brightness: Brightness.dark,
+          ),
+          useMaterial3: true,
+        ),
+        themeMode: _settings.get(AppConfigFieldKey.themeMode),
+        home: _buildContent(),
+        // initialRoute: '/',
+        // routes: {
+        //   '/': (context) =>
+        //       HomeScreen(
+        //         settingsGet: _settings.get,
+        //         settingsSet: _settingsSet,
+        //         audioRecorder: _audioRecorder,
+        // },
+      );
+
+  Builder _buildContent() => Builder(builder: (context) {
+        AppLocalizations trans = AppLocalizations.of(context)!;
+        UIHelper uiWrapper = UIHelper(context);
+        _trackRepository = TrackRepository(_settings);
+        RecordingManager recordingManager = RecordingManager(_settings, trans, uiWrapper, _trackRepository, _audioRecorder);
+        TrackWrapper trackWrapper = TrackWrapper(context, _settings, trans, uiWrapper, _trackRepository, recordingManager);
+        NavigationBarManager navigationBarManager = NavigationBarManager(context, _settings, trans, uiWrapper, _trackRepository);
+        RowMenuManager rowMenuManager = RowMenuManager(context, trans, uiWrapper, _trackRepository);
+        DrawerManager drawerManager = DrawerManager(context, _settings, trans, uiWrapper, _trackRepository, _audioRecorder);
+
+        return Scaffold(
+          appBar: navigationBarManager.buildAppBar,
+          drawer: drawerManager.build,
+          body: Focus(
+              focusNode: _focusNode,
+              autofocus: true,
+              onKeyEvent: (node, KeyEvent event) {
+                trackWrapper.onKeyEvent(event);
+                return KeyEventResult.handled;
+              },
+              child: ListView.builder(
+                  controller: PageController(viewportFraction: 0.85),
+                  itemCount: _settings.get(AppConfigFieldKey.gridRowsAmount),
+                  itemBuilder: (context, rowIndex) => Row(children: [
+                        rowMenuManager.buildRowButtons(rowIndex),
+                        trackWrapper.buildRowTracks(rowIndex),
+                      ]))),
+          bottomNavigationBar: navigationBarManager.buildFooter,
+        );
+      });
 }

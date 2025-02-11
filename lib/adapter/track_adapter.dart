@@ -1,6 +1,6 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:hive/hive.dart';
-import 'package:tune_tangler/config/config.dart';
+import 'package:tune_tangler/config/app_global_config.dart';
 
 import '../entity/track.dart';
 
@@ -33,22 +33,16 @@ class TrackAdapter extends TypeAdapter<Track> {
     final Map<dynamic, dynamic> data = reader.readMap();
     var track = Track(data[TrackAdapterKey.rowIndex], data[TrackAdapterKey.colIndex]);
     track.setName(data[TrackAdapterKey.name]);
-    // if (data[TrackAdapterKey.recorderState] == null) {
-    //   track.setRecorderState(RecorderState.empty);
-    // } else {
-    //   RecorderState state = RecorderState.values[data[TrackAdapterKey.recorderState]];
-    //   track.setRecorderState((state == RecorderState.ready) ? RecorderState.ready : RecorderState.empty);
-    // }
     track.setPlaybackReleaseMode(ReleaseMode.values[data[TrackAdapterKey.playbackReleaseMode]]);
     track.setPlaybackVolume(data[TrackAdapterKey.playbackVolume] ?? AppGlobalConfig.trackPlaybackVolume.defaultValue);
     track.setPlaybackBalance(data[TrackAdapterKey.playbackBalance] ?? AppGlobalConfig.trackPlaybackBalance.defaultValue);
     track.setPlaybackSpeed(data[TrackAdapterKey.playbackSpeed] ?? AppGlobalConfig.trackPlaybackSpeed.defaultValue);
-    track.setPath(data[TrackAdapterKey.path], playbackStartAtPosition: data[TrackAdapterKey.playbackStartAtPosition], playbackEndAtPosition: data[TrackAdapterKey.playbackEndAtPosition]);
     track.setKeyboardKey(data[TrackAdapterKey.keyboardKey] ?? '');
     track.setAudioSource(data[TrackAdapterKey.audioSource]);
     track.setAudioEncoder(data[TrackAdapterKey.audioEncoder]);
     track.setSampleRate(data[TrackAdapterKey.sampleRate]);
     track.setBitRate(data[TrackAdapterKey.bitRate]);
+    track.setPath(data[TrackAdapterKey.path], playbackStartAtPosition: data[TrackAdapterKey.playbackStartAtPosition], playbackEndAtPosition: data[TrackAdapterKey.playbackEndAtPosition]);
     return track;
   }
 
@@ -59,7 +53,6 @@ class TrackAdapter extends TypeAdapter<Track> {
       TrackAdapterKey.colIndex: obj.colIndex,
       TrackAdapterKey.name: obj.name.value,
       TrackAdapterKey.path: obj.path,
-      TrackAdapterKey.recorderState: obj.recorderState.value.index,
       TrackAdapterKey.playbackReleaseMode: obj.playbackReleaseMode.value.index,
       TrackAdapterKey.playbackVolume: obj.playbackVolume.value,
       TrackAdapterKey.playbackBalance: obj.playbackBalance.value,

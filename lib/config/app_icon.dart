@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
-import 'package:tune_tangler/src/ui_wrapper.dart';
+import 'package:tune_tangler/helper/ui_helper.dart';
 
 import '../entity/track.dart';
 
@@ -26,7 +26,7 @@ class AppIcon {
 
   static Container trackKeyboardKeyBox(
     Track track, {
-    required UIWrapper ui,
+    required UIHelper ui,
     required BuildContext context,
     required Color foregroundColor,
     required double size,

@@ -234,6 +234,7 @@
   "audioRecorderFlacName": "FLAC (Free Lossless Audio Codec)",
   "audioRecorderFlacInfo": "Audiofilska kolekcja muzyczna",
   "audioRecorderFlacDetails": "Bezstratny, ale z kompresją (ok. 50-70% mniejszy niż WAV). Obsługuje metadane, czego WAV nie potrafi. Świetny do archiwizacji muzyki w wysokiej jakości.",
+  "recordingDurationValue": "Długość nagrania: {value}",
   "recordingSampleRate": "Częstotliwość próbkowania",
   "recordingSampleRateValue": "Częstotliwość próbkowania: {value}",
   "recordingSampleRateTitle": "Częstotliwość próbkowania",
