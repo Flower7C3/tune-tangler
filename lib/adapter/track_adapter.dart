@@ -33,12 +33,12 @@ class TrackAdapter extends TypeAdapter<Track> {
     final Map<dynamic, dynamic> data = reader.readMap();
     var track = Track(data[TrackAdapterKey.rowIndex], data[TrackAdapterKey.colIndex]);
     track.setName(data[TrackAdapterKey.name]);
-    if (data[TrackAdapterKey.recorderState] == null) {
-      track.setRecorderState(RecorderState.empty);
-    } else {
-      RecorderState state = RecorderState.values[data[TrackAdapterKey.recorderState]];
-      track.setRecorderState((state == RecorderState.ready) ? RecorderState.ready : RecorderState.empty);
-    }
+    // if (data[TrackAdapterKey.recorderState] == null) {
+    //   track.setRecorderState(RecorderState.empty);
+    // } else {
+    //   RecorderState state = RecorderState.values[data[TrackAdapterKey.recorderState]];
+    //   track.setRecorderState((state == RecorderState.ready) ? RecorderState.ready : RecorderState.empty);
+    // }
     track.setPlaybackReleaseMode(ReleaseMode.values[data[TrackAdapterKey.playbackReleaseMode]]);
     track.setPlaybackVolume(data[TrackAdapterKey.playbackVolume] ?? AppGlobalConfig.trackPlaybackVolume.defaultValue);
     track.setPlaybackBalance(data[TrackAdapterKey.playbackBalance] ?? AppGlobalConfig.trackPlaybackBalance.defaultValue);

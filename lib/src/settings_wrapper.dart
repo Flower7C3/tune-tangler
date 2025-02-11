@@ -14,6 +14,7 @@ import '../config/config.dart';
 import '../config/fields.dart';
 import '../config/menu_item.dart';
 import '../entity/track.dart';
+import '../entity/track_row.dart';
 
 class SettingsWrapper {
   final BuildContext _context;
@@ -275,7 +276,7 @@ class SettingsWrapper {
           _trans.buttonSave,
           successAction: (double value, String formattedValue) {
             _widget.settingsSet(AppConfigFieldKey.gridRowsAmount, value.toInt(), updateState: true);
-            _trackWrapper.initTracks(forceRebuild: true);
+            _widget.tracksList.reset();
             return _trans.gridRowsAmountSuccess(formattedValue);
           },
           configCollection: AppGlobalConfig.gridRows,
@@ -293,7 +294,7 @@ class SettingsWrapper {
           _trans.buttonSave,
           successAction: (double value, String formattedValue) {
             _widget.settingsSet(AppConfigFieldKey.gridColsAmount, value.toInt(), updateState: true);
-            _trackWrapper.initTracks(forceRebuild: true);
+            _widget.tracksList.reset();
             return _trans.gridColsAmountSuccess(formattedValue);
           },
           configCollection: AppGlobalConfig.gridCols,
@@ -649,48 +650,36 @@ class SettingsWrapper {
 
   /// *************************************************************************
   /// ROW
-  Container buildRowButtons(
-    int rowIndex,
-    String rowName,
-  ) =>
-      Container(
-          width: Theme.of(_context).textTheme.displaySmall!.fontSize,
-          padding: EdgeInsets.zero,
-          child: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
-            _uiWrapper.mediaPlayerButton(
-              AppIcon.trackPlayingStart,
-              _trans.rowTracksPlayingStart(rowName),
-              boxSize: Theme.of(_context).textTheme.displaySmall!.fontSize! * 0.9,
-              onPressed: () {
-                _trackWrapper.startTracksPlaying(_widget.tracksList.row(rowIndex));
-              },
-            ),
-            _uiWrapper.mediaPlayerButton(
-              AppIcon.trackPlayingStop,
-              _trans.rowTracksPlayingStop(rowName),
-              boxSize: Theme.of(_context).textTheme.displaySmall!.fontSize! * 0.9,
-              onPressed: () {
-                _trackWrapper.stopTracksPlaying(_widget.tracksList.row(rowIndex));
-              },
-            ),
-            _uiWrapper.rowButton(_rowMenuActions(rowName, _widget.tracksList.row(rowIndex))),
-          ]));
+  Container buildRowButtons(int rowIndex) => Container(
+      width: Theme.of(_context).textTheme.displaySmall!.fontSize,
+      padding: EdgeInsets.zero,
+      child: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
+        _uiWrapper.mediaPlayerButton(
+          AppIcon.trackPlayingStart,
+          _trans.rowTracksPlayingStart(rowIndex),
+          boxSize: Theme.of(_context).textTheme.displaySmall!.fontSize! * 0.9,
+          onPressed: () {
+            _trackWrapper.startTracksPlaying(_widget.tracksList.row(rowIndex));
+          },
+        ),
+        _uiWrapper.mediaPlayerButton(
+          AppIcon.trackPlayingStop,
+          _trans.rowTracksPlayingStop(rowIndex),
+          boxSize: Theme.of(_context).textTheme.displaySmall!.fontSize! * 0.9,
+          onPressed: () {
+            _trackWrapper.stopTracksPlaying(_widget.tracksList.row(rowIndex));
+          },
+        ),
+        _uiWrapper.rowButton(_rowMenuActions(rowIndex)),
+      ]));
 
-  PopupMenuButton _rowMenuActions(
-    String rowName,
-    Set<Track> tracksList,
-  ) =>
-      PopupMenuButton<dynamic>(
-          style: _uiWrapper.circledButtonStyle(),
-          icon: Icon(AppIcon.moreMenu, color: Theme.of(_context).colorScheme.secondary),
-          itemBuilder: (BuildContext context) => _rowMenuItems(rowName, tracksList),
-          onSelected: (dynamic selection) => _rowMenuItemSelected(selection, rowName, tracksList));
+  PopupMenuButton _rowMenuActions(int rowIndex) => PopupMenuButton<dynamic>(
+      style: _uiWrapper.circledButtonStyle(),
+      icon: Icon(AppIcon.moreMenu, color: Theme.of(_context).colorScheme.secondary),
+      itemBuilder: (BuildContext context) => _rowMenuItems(rowIndex),
+      onSelected: (dynamic selection) => _rowMenuItemSelected(selection, rowIndex));
 
-  List<PopupMenuEntry<dynamic>> _rowMenuItems(
-    String rowName,
-    Set<Track> tracksList,
-  ) =>
-      <PopupMenuEntry<dynamic>>[
+  List<PopupMenuEntry<dynamic>> _rowMenuItems(int rowIndex) => <PopupMenuEntry<dynamic>>[
         _uiWrapper.rowMenuButton(RowMenuItem.playbackMode, AppIcon.trackPlaybackMode, _trans.rowTracksPlaybackModeSet,
             itemBuilder: () => [
                   ...AppGlobalConfig.trackPlaybackReleaseMode.values<ReleaseMode>().map((ReleaseMode value) => _uiWrapper.rowPopupMenuItem(
@@ -700,10 +689,10 @@ class SettingsWrapper {
                       ))
                 ],
             onSelected: (selection) {
-              _trackWrapper.setTracksPlaybackMode(tracksList, selection);
+              _trackWrapper.setTracksPlaybackMode(_widget.tracksList.row(rowIndex), selection);
               _uiWrapper.toast(
                   _trans.rowTracksPlaybackModeSetSuccess(
-                      rowName, Track.isPlaybackReleaseModeSingle(selection) ? _trans.singlePlaybackMode : _trans.repeatPlaybackMode),
+                      TrackRow.name(rowIndex), AppGlobalConfig.trackPlaybackReleaseMode.translate(selection, trans: _trans)),
                   icon: AppIcon.trackPlaybackMode);
               Navigator.pop(_context);
             }),
@@ -716,8 +705,9 @@ class SettingsWrapper {
                       ))
                 ],
             onSelected: (selection) {
-              _trackWrapper.setTracksPlaybackVolume(tracksList, selection);
-              _uiWrapper.toast(_trans.rowTracksPlaybackVolumeSuccessSet(rowName, AppGlobalConfig.trackPlaybackVolume.format(selection)),
+              _trackWrapper.setTracksPlaybackVolume(_widget.tracksList.row(rowIndex), selection);
+              _uiWrapper.toast(
+                  _trans.rowTracksPlaybackVolumeSuccessSet(TrackRow.name(rowIndex), AppGlobalConfig.trackPlaybackVolume.format(selection)),
                   icon: AppIcon.trackPlaybackSpeed);
               Navigator.pop(_context);
             }),
@@ -730,9 +720,10 @@ class SettingsWrapper {
                       ))
                 ],
             onSelected: (selection) {
-              _trackWrapper.setTracksPlaybackBalance(tracksList, selection);
+              _trackWrapper.setTracksPlaybackBalance(_widget.tracksList.row(rowIndex), selection);
               _uiWrapper.toast(
-                  _trans.rowTracksPlaybackBalanceSuccessSet(rowName, AppGlobalConfig.trackPlaybackBalance.translate(selection, trans: _trans)),
+                  _trans.rowTracksPlaybackBalanceSuccessSet(
+                      TrackRow.name(rowIndex), AppGlobalConfig.trackPlaybackBalance.translate(selection, trans: _trans)),
                   icon: AppIcon.trackPlaybackBalance);
               Navigator.pop(_context);
             }),
@@ -745,8 +736,8 @@ class SettingsWrapper {
                       ))
                 ],
             onSelected: (selection) {
-              _trackWrapper.setTracksPlaybackSpeed(tracksList, selection);
-              _uiWrapper.toast(_trans.rowTracksPlaybackSpeedSuccessSet(rowName, AppGlobalConfig.trackPlaybackSpeed.format(selection)),
+              _trackWrapper.setTracksPlaybackSpeed(_widget.tracksList.row(rowIndex), selection);
+              _uiWrapper.toast(_trans.rowTracksPlaybackSpeedSuccessSet(TrackRow.name(rowIndex), AppGlobalConfig.trackPlaybackSpeed.format(selection)),
                   icon: AppIcon.trackPlaybackSpeed);
               Navigator.pop(_context);
             }),
@@ -759,22 +750,18 @@ class SettingsWrapper {
         _uiWrapper.rowPopupMenuItem(RowMenuItem.recordingsDelete, AppIcon.deleteForever, _trans.rowTracksRecordingsDelete),
       ];
 
-  void _rowMenuItemSelected(
-    RowMenuItem selection,
-    String rowName,
-    Set<Track> tracksList,
-  ) {
+  void _rowMenuItemSelected(RowMenuItem selection, int rowIndex) {
     switch (selection) {
       case RowMenuItem.playbackStartAtPositionReset:
         _uiWrapper.alertDialogReset(
           AppIcon.trackPlaybackStartAtPosition,
           _trans.rowTracksPlaybackStartAtPositionResetTitle,
-          _trans.rowTracksPlaybackStartAtPositionResetInfo(rowName),
+          _trans.rowTracksPlaybackStartAtPositionResetInfo(TrackRow.name(rowIndex)),
           _trans.buttonNo,
           _trans.buttonYes,
           () {
-            _trackWrapper.resetTracksPlaybackStartAtPosition(tracksList);
-            return _trans.rowTracksPlaybackStartAtPositionResetSuccess(rowName);
+            _trackWrapper.resetTracksPlaybackStartAtPosition(_widget.tracksList.row(rowIndex));
+            return _trans.rowTracksPlaybackStartAtPositionResetSuccess(TrackRow.name(rowIndex));
           },
         );
         break;
@@ -782,26 +769,26 @@ class SettingsWrapper {
         _uiWrapper.alertDialogReset(
           AppIcon.trackPlaybackEndAtPosition,
           _trans.rowTracksPlaybackEndAtPositionResetTitle,
-          _trans.rowTracksPlaybackEndAtPositionResetInfo(rowName),
+          _trans.rowTracksPlaybackEndAtPositionResetInfo(TrackRow.name(rowIndex)),
           _trans.buttonNo,
           _trans.buttonYes,
           () {
-            _trackWrapper.resetTracksPlaybackEndAtPosition(tracksList);
-            return _trans.rowTracksPlaybackEndAtPositionResetSuccess(rowName);
+            _trackWrapper.resetTracksPlaybackEndAtPosition(_widget.tracksList.row(rowIndex));
+            return _trans.rowTracksPlaybackEndAtPositionResetSuccess(TrackRow.name(rowIndex));
           },
         );
         break;
       case RowMenuItem.recordingsDelete:
         _uiWrapper.alertDialog(AppIcon.deleteForever, _trans.rowTracksRecordingsDeleteTitle,
-            contentText: _trans.rowTracksRecordingsDeleteInfo(rowName),
+            contentText: _trans.rowTracksRecordingsDeleteInfo(TrackRow.name(rowIndex)),
             actions: <Widget>[
               _uiWrapper.simpleButton(_trans.buttonNo, () {
                 Navigator.pop(_context, 'No');
               }),
               _uiWrapper.errorButton(_trans.buttonYes, () {
-                _trackWrapper.removeTracksRecordings(tracksList);
+                _trackWrapper.removeTracksRecordings(_widget.tracksList.row(rowIndex));
                 Navigator.pop(_context, 'Yes');
-                _uiWrapper.toast(_trans.rowTracksRecordingsDeleteSuccess(rowName), icon: AppIcon.deleteForever);
+                _uiWrapper.toast(_trans.rowTracksRecordingsDeleteSuccess(TrackRow.name(rowIndex)), icon: AppIcon.deleteForever);
               }),
             ]);
         break;

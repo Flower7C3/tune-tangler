@@ -7,6 +7,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../config/config.dart';
 import '../config/fields.dart';
+import '../entity/track.dart';
 import '../entity/track_row.dart';
 import 'home_screen.dart';
 
@@ -24,7 +25,7 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
   _MainScreenAppState();
 
   late final AudioRecorder _audioRecorder;
-  late final TracksCollection _tracksList = TracksCollection();
+  late final TracksCollection _tracksList = TracksCollection(_settingsGet);
 
   @override
   void initState() {
@@ -50,9 +51,18 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
         _ => switch (space) {
             AppConfigSpace.global => widget.globalSettingsBox
                 .get(AppGlobalConfigFieldsCollection.field(key).boxFieldName, defaultValue: AppGlobalConfigFieldsCollection.field(key).defaultValue),
-            AppConfigSpace.track => widget.trackSettingsBox.get(key, defaultValue: defaultValue),
+            AppConfigSpace.track => _loadTrack(key, defaultValue),
           },
       };
+
+  Track _loadTrack(dynamic key, dynamic defaultValue) {
+    Track track = widget.trackSettingsBox.get(key, defaultValue: defaultValue);
+    if (!track.streamsInitialized) {
+      track.setStreamsInitialized();
+      _settingsSet(key, track, space: AppConfigSpace.track);
+    }
+    return track;
+  }
 
   void _settingsSet(dynamic key, dynamic value, {AppConfigSpace space = AppConfigSpace.global, bool updateState = false}) {
     if (updateState == true) {

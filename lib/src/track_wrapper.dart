@@ -1092,18 +1092,4 @@ class TrackWrapper {
         break;
     }
   }
-
-  void initTracks({bool forceRebuild = false}) {
-    if (forceRebuild == true) {
-      _widget.tracksList.reset();
-    }
-    for (int rowIndex = 0; rowIndex < _widget.settingsGet(AppConfigFieldKey.gridRowsAmount); rowIndex++) {
-      for (int columnIndex = 0; columnIndex < _widget.settingsGet(AppConfigFieldKey.gridColsAmount); columnIndex++) {
-        String trackId = Track.buildId(rowIndex, columnIndex);
-        Track track = _widget.settingsGet(trackId, space: AppConfigSpace.track, defaultValue: Track(rowIndex, columnIndex));
-        _widget.tracksList.add(rowIndex, track);
-        initStreams(track);
-      }
-    }
-  }
 }

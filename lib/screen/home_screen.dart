@@ -81,8 +81,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         _trackWrapper = TrackWrapper(context, widget, _trans, _uiWrapper);
         _settingsWrapper = SettingsWrapper(context, widget, _trans, _uiWrapper, _trackWrapper, _permissionStatuses);
 
-        _trackWrapper.initTracks();
-
         return Scaffold(
             appBar: AppBar(
               backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -110,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     controller: PageController(viewportFraction: 0.85),
                     itemCount: widget.settingsGet(AppConfigFieldKey.gridRowsAmount),
                     itemBuilder: (context, rowIndex) => Row(children: [
-                          _settingsWrapper.buildRowButtons(rowIndex, TrackRow.name(rowIndex)),
+                          _settingsWrapper.buildRowButtons(rowIndex),
                           _trackWrapper.buildRowTracks(rowIndex),
                         ]))),
             bottomNavigationBar: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
