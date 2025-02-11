@@ -27,6 +27,7 @@ Future<void> main() async {
   Hive.registerAdapter(LocaleAdapter());
   Hive.registerAdapter(ThemeModeAdapter());
   Hive.registerAdapter(TrackAdapterKeyAdapter());
+  Hive.registerAdapter(TrackAudioSourceAdapter());
   Hive.registerAdapter(TrackAdapter());
   Hive.registerAdapter(DurationAdapter());
   Hive.registerAdapter(AudioEncoderAdapter());

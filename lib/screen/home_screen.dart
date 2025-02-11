@@ -22,7 +22,7 @@ class HomeScreen extends StatefulWidget implements ScreenInterface {
   });
 
   @override
-  final Function(dynamic key, {AppConfigSpace space, dynamic defaultValue}) settingsGet;
+  final dynamic Function(dynamic key, {AppConfigSpace space, dynamic defaultValue}) settingsGet;
   @override
   final void Function(dynamic key, dynamic value, {AppConfigSpace space, bool updateState}) settingsSet;
   @override

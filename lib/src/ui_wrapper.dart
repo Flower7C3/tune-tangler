@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
@@ -169,45 +167,40 @@ class UIWrapper {
     String? applicationVersion,
     String? applicationLegalese,
     Widget? applicationIcon,
-  }) {
-    showAboutDialog(
-        context: context,
-        applicationName: applicationName ?? packageInfo.appName,
-        applicationVersion: applicationVersion ?? packageInfo.version,
-        applicationLegalese: applicationLegalese,
-        applicationIcon: applicationIcon ?? Icon(AppIcon.logoKeepScreenOnEnabled),
-        children: content.toList());
-  }
+  }) =>
+      showAboutDialog(
+          context: context,
+          applicationName: applicationName ?? packageInfo.appName,
+          applicationVersion: applicationVersion ?? packageInfo.version,
+          applicationLegalese: applicationLegalese,
+          applicationIcon: applicationIcon ?? Icon(AppIcon.logoKeepScreenOnEnabled),
+          children: content.toList());
 
-  Future<void> alertDialog(
+  void alertDialog(
     IconData icon,
     String titleText, {
     bool barrierDismissible = true,
     Widget? contentWidget,
     String? contentText,
     List<Widget>? actions,
-    Function(dynamic result)? thenCallback,
-  }) async {
-    _dialogBuilder(
-      DialogType.alert,
-      icon,
-      titleText,
-      barrierDismissible: barrierDismissible,
-      contentWidget: contentWidget,
-      contentText: contentText,
-      actions: actions,
-      thenCallback: thenCallback,
-    );
-  }
+  }) =>
+      _dialogBuilder(
+        DialogType.alert,
+        icon,
+        titleText,
+        barrierDismissible: barrierDismissible,
+        contentWidget: contentWidget,
+        contentText: contentText,
+        actions: actions,
+      );
 
-  Future<void> listDialog(
+  void listDialog(
     IconData icon,
     String titleText, {
     barrierDismissible = true,
     String? contentText,
     List<Widget>? actions,
-    Function(dynamic result)? thenCallback,
-  }) async =>
+  }) =>
       _dialogBuilder(
         DialogType.list,
         icon,
@@ -215,7 +208,6 @@ class UIWrapper {
         barrierDismissible: barrierDismissible,
         contentText: contentText,
         actions: actions,
-        thenCallback: thenCallback,
       );
 
   void _dialogBuilder(
@@ -226,9 +218,8 @@ class UIWrapper {
     Widget? contentWidget,
     String? contentText,
     List<Widget>? actions,
-    Function(dynamic result)? thenCallback,
-  }) async =>
-      await showDialog(
+  }) =>
+      showDialog(
           context: context,
           barrierDismissible: barrierDismissible,
           builder: (context) {
@@ -264,7 +255,7 @@ class UIWrapper {
               default:
                 throw Exception('Dialog type not implemented.');
             }
-          }).then(thenCallback ?? (result) {});
+          });
 
   String formatTime(
     int milliseconds, {
@@ -424,7 +415,7 @@ class UIWrapper {
           ));
 
   Container helpTrackState(TrackState state, String message) => Container(
-        padding: EdgeInsets.all(4),
+        padding: EdgeInsets.zero,
         color: AppGlobalConfig.trackState.color(state, context: context, domain: ConfigItemPropertyDomain.backgroundColor),
         child: statusIconTile(
           AppGlobalConfig.trackState.icon(state),
@@ -451,7 +442,7 @@ class UIWrapper {
             alertDialogReset(icon, dialogTitle, dialogInfo, cancelLabel, saveLabel, successAction);
           });
 
-  Future<void> alertDialogReset(
+  void alertDialogReset(
     IconData icon,
     String dialogTitle,
     String dialogInfo,
@@ -718,21 +709,19 @@ class UIWrapper {
                 contentText: dialogInfo,
                 contentWidget: gridBuilder(
                     itemCount: values.length,
-                    itemBuilder: (context, index) {
-                      Color color = AppGlobalConfig.userInterfaceColor.valueAt<Color>(index);
-                      return ElevatedButton(
+                    itemBuilder: (context, index) => ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: color,
+                            backgroundColor: values[index],
                             shape: CircleBorder(),
                             padding: EdgeInsets.all(16),
                           ),
                           onPressed: () {
                             dynamic selectedValue = values[index];
-                            Navigator.pop(context, color.toString());
+                            Navigator.pop(context);
                             toast(successAction(selectedValue, _translateOrFormat(selectedValue, configCollection, trans)), icon: icon);
                           },
-                          child: null);
-                    }));
+                          child: null,
+                        )));
           });
 
   ListTile listTileSwitch(
@@ -830,9 +819,7 @@ class UIWrapper {
   Widget drawerTitle(IconData icon, String title) => Container(
       padding: EdgeInsets.zero,
       alignment: Alignment.centerLeft,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.secondaryContainer,
-      ),
+      decoration: BoxDecoration(color: Theme.of(context).colorScheme.secondaryContainer),
       child: statusIconTile(
         icon,
         title,

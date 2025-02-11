@@ -22,7 +22,6 @@ class AppIcon {
 
   static IconData trackTitleEmojis = Icons.emoji_emotions_rounded;
   static IconData trackTitle = Icons.text_fields;
-  static IconData recordingFile = Icons.audio_file_outlined;
   static IconData trackKeyboardKey = Icons.keyboard_alt_rounded;
 
   static Container trackKeyboardKeyBox(
@@ -44,7 +43,12 @@ class AppIcon {
   static IconData trackRepeatPlaybackMode = Icons.repeat_rounded;
   static IconData trackPlaybackVolume = Icons.volume_up_rounded;
   static IconData trackPlaybackBalance = Icons.headphones_rounded;
+  static IconData trackPlaybackBalanceLeft = Icons.join_left_rounded;
+  static IconData trackPlaybackBalanceRight = Icons.join_right_rounded;
+  static IconData trackPlaybackBalanceCenter= Icons.join_full_rounded;
   static IconData trackPlaybackSpeed = Icons.slow_motion_video_rounded;
+  static IconData trackAudioSourceRecorded = Icons.audio_file_outlined;
+  static IconData trackAudioSourceImported = Icons.upload_file_outlined;
 
   static IconData trackTimer = Symbols.acute_rounded;
   static IconData trackPosition = Symbols.timer_play_rounded;
@@ -102,4 +106,5 @@ class AppIcon {
 
   static IconData recordingProgressSlider = Symbols.start_rounded;
   static IconData recordingClipSlider = Symbols.expand_rounded;
+
 }

@@ -350,9 +350,20 @@ class SettingsWrapper {
           children: [
             _uiWrapper.helpTrackState(TrackState.empty, _trans.stateEmpty),
             _uiWrapper.helpTrackState(TrackState.recording, _trans.stateRecording),
+            _uiWrapper.helpTrackState(TrackState.processing, _trans.stateProcessing),
             _uiWrapper.helpTrackState(TrackState.idle, _trans.stateIdle),
             _uiWrapper.helpTrackState(TrackState.playing, _trans.statePlaying),
             _uiWrapper.helpTrackState(TrackState.paused, _trans.statePaused),
+            _uiWrapper.statusIconTile(AppIcon.trackPlaybackVolume, _trans.thePlaybackVolume.toLowerCase()),
+            _uiWrapper.statusIconTile(AppIcon.trackSinglePlaybackMode, _trans.singlePlaybackMode.toLowerCase()),
+            _uiWrapper.statusIconTile(AppIcon.trackRepeatPlaybackMode, _trans.repeatPlaybackMode.toLowerCase()),
+            _uiWrapper.statusIconTile(AppIcon.trackPlaybackBalanceLeft, _trans.thePlaybackBalanceAt(_trans.balanceLeft).toLowerCase()),
+            _uiWrapper.statusIconTile(AppIcon.trackPlaybackBalanceCenter, _trans.thePlaybackBalanceAt(_trans.balanceCenter).toLowerCase()),
+            _uiWrapper.statusIconTile(AppIcon.trackPlaybackBalanceRight, _trans.thePlaybackBalanceAt(_trans.balanceRight).toLowerCase()),
+            _uiWrapper.statusIconTile(AppIcon.trackAudioSourceRecorded, _trans.theAudioSourceRecorded.toLowerCase()),
+            _uiWrapper.statusIconTile(AppIcon.trackAudioSourceImported, _trans.theAudioSourceImported.toLowerCase()),
+            _uiWrapper.statusIconTile(AppIcon.trackPlaybackStartAtPosition, _trans.thePlaybackStartAtPosition.toLowerCase()),
+            _uiWrapper.statusIconTile(AppIcon.trackPlaybackEndAtPosition, _trans.thePlaybackEndAtPosition.toLowerCase()),
           ],
         ),
         ExpansionTile(
@@ -460,10 +471,7 @@ class SettingsWrapper {
                       onPressed: () {
                         _trackWrapper.setTracksPlaybackMode(_widget.tracksList.all(), value);
                         _uiWrapper.toast(
-                            _trans.allTracksPlaybackModeSuccessSet(
-                              AppGlobalConfig.trackPlaybackReleaseMode
-                                  .translate(AppGlobalConfig.trackPlaybackReleaseMode.values().toList().indexOf(0), trans: _trans),
-                            ),
+                            _trans.allTracksPlaybackModeSuccessSet(AppGlobalConfig.trackPlaybackReleaseMode.translate(value, trans: _trans)),
                             icon: AppIcon.trackSinglePlaybackMode);
                         Navigator.pop(_context);
                       }),

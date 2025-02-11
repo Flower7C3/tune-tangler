@@ -15,17 +15,22 @@ import 'track_row.dart';
 enum RecorderState {
   empty,
   recording,
-  saving,
+  processing,
   ready,
 }
 
 enum TrackState {
   empty,
   recording,
-  loading,
+  processing,
   idle,
   playing,
   paused,
+}
+
+enum TrackAudioSource {
+  recording,
+  file,
 }
 
 class Track {
@@ -86,18 +91,18 @@ class Track {
 
     playerCompleteSubscription = player.onPlayerComplete.listen((event) {
       stopPlaying();
-      player.seek(playbackStartAtPosition.value);
     });
 
     _streamsInitialized = true;
   }
 
   void dispose() {
-    player.dispose();
-    durationSubscription?.cancel();
-    positionSubscription?.cancel();
-    playerCompleteSubscription?.cancel();
-    playerStateChangeSubscription?.cancel();
+    player.dispose().then((status) {
+      durationSubscription?.cancel();
+      positionSubscription?.cancel();
+      playerCompleteSubscription?.cancel();
+      playerStateChangeSubscription?.cancel();
+    });
   }
 
   ///*************************************************************************************************************************************************
@@ -231,8 +236,7 @@ class Track {
   void startPlaying() {
     String? p = path;
     if (p != null && (state.value == TrackState.idle || state.value == TrackState.paused)) {
-      player.seek(playbackStartAtPosition.value);
-      player.resume();
+      player.seek(playbackStartAtPosition.value).then((status) => player.resume());
     }
   }
 
@@ -248,10 +252,9 @@ class Track {
     }
   }
 
-  Future<void> stopPlaying() async {
+  void stopPlaying() {
     if (path != null) {
-      await player.stop();
-      player.seek(playbackStartAtPosition.value);
+      player.stop().then((status) => player.seek(playbackStartAtPosition.value));
     }
   }
 
@@ -262,7 +265,7 @@ class Track {
 
   String? get path => _path;
 
-  Future<void> setPath(String? newPath, {Duration? playbackStartAtPosition, Duration? playbackEndAtPosition}) async {
+  void setPath(String? newPath, {Duration? playbackStartAtPosition, Duration? playbackEndAtPosition}) async {
     if (newPath == null) {
       if (path != null && File(path!).existsSync()) {
         File(path!).delete();
@@ -276,31 +279,27 @@ class Track {
       return;
     }
 
-    _path = newPath;
-    setRecorderState(RecorderState.saving);
-    await player.setSourceDeviceFile(newPath).then((value) async {
-      await player.getDuration().then((value) {
-        setDuration(value ?? Duration());
-        setPosition(Duration());
-        setPlaybackStartAtPosition(playbackStartAtPosition ?? Duration());
-        setPlaybackEndAtPosition(playbackEndAtPosition ?? duration.value);
-        player.setVolume(playbackVolume.value);
-        player.setBalance(playbackBalance.value);
-        player.setReleaseMode(playbackReleaseMode.value);
-        player.setPlaybackRate(playbackSpeed.value);
-        setRecorderState(RecorderState.ready);
-      });
-    });
+    setRecorderState(RecorderState.processing);
+    player.setSourceDeviceFile(newPath).then((value) async {
+      setDuration(await player.getDuration() ?? Duration());
+      setPosition(Duration());
+      setPlaybackStartAtPosition(playbackStartAtPosition ?? Duration());
+      setPlaybackEndAtPosition(playbackEndAtPosition ?? duration.value);
+      player.setVolume(playbackVolume.value);
+      player.setBalance(playbackBalance.value);
+      player.setReleaseMode(playbackReleaseMode.value);
+      player.setPlaybackRate(playbackSpeed.value);
+      setRecorderState(RecorderState.ready);
+      _path = newPath;
+    }).onError((error, stack) {});
   }
 
   _clearPath() {
-    setRecorderState(RecorderState.saving);
-    player.setSourceUrl('');
-    setRecorderState(RecorderState.empty);
+    setRecorderState(RecorderState.processing);
+    setAudioSource(null);
     setAudioEncoder(null);
     setSampleRate(null);
     setBitRate(null);
-    setPlayerState(null);
     setPosition(Duration());
     setDuration(Duration());
     setPlaybackStartAtPosition(Duration());
@@ -310,6 +309,21 @@ class Track {
   }
 
   ///*************************************************************************************************************************************************
+
+  TrackAudioSource? _audioSource;
+
+  TrackAudioSource? get audioSource => _audioSource;
+
+  void setAudioSource(TrackAudioSource? value) {
+    _audioSource = value;
+  }
+
+  IconData? get audioSourceIcon => switch (audioSource) {
+        TrackAudioSource.recording => AppIcon.trackAudioSourceRecorded,
+        TrackAudioSource.file => AppIcon.trackAudioSourceImported,
+        _ => null
+      };
+
   AudioEncoder? _audioEncoder;
 
   AudioEncoder? get audioEncoder => _audioEncoder;
@@ -339,7 +353,7 @@ class Track {
 
   PlayerState? _playerState;
 
-  void setPlayerState(PlayerState? state) {
+  void setPlayerState(PlayerState state) {
     _playerState = state;
     updateState();
   }
@@ -357,7 +371,7 @@ class Track {
     state.value = switch (recorderState.value) {
       RecorderState.empty => TrackState.empty,
       RecorderState.recording => TrackState.recording,
-      RecorderState.saving => TrackState.loading,
+      RecorderState.processing => TrackState.processing,
       RecorderState.ready => switch (_playerState) {
           PlayerState.playing => TrackState.playing,
           PlayerState.paused => TrackState.paused,
@@ -382,8 +396,8 @@ class Track {
 
   final ValueNotifier<double> playbackVolume = ValueNotifier(AppGlobalConfig.trackPlaybackVolume.defaultValue);
 
-  Future<void> setPlaybackVolume(double value) async {
-    await player.setVolume(value);
+  void setPlaybackVolume(double value) {
+    player.setVolume(value);
     playbackVolume.value = value;
   }
 
@@ -404,8 +418,8 @@ class Track {
 
   final ValueNotifier<double> playbackBalance = ValueNotifier(AppGlobalConfig.trackPlaybackBalance.defaultValue);
 
-  Future<void> setPlaybackBalance(double value) async {
-    await player.setBalance(value);
+  void setPlaybackBalance(double value) {
+    player.setBalance(value);
     playbackBalance.value = value;
   }
 
@@ -426,8 +440,8 @@ class Track {
 
   static isPlaybackReleaseModeSingle(ReleaseMode mode) => mode == ReleaseMode.stop;
 
-  Future<void> setPlaybackReleaseMode(ReleaseMode value) async {
-    await player.setReleaseMode(value);
+  void setPlaybackReleaseMode(ReleaseMode value) {
+    player.setReleaseMode(value);
     playbackReleaseMode.value = value;
   }
 
@@ -442,8 +456,8 @@ class Track {
 
   final ValueNotifier<double> playbackSpeed = ValueNotifier(AppGlobalConfig.trackPlaybackSpeed.defaultValue);
 
-  Future<void> setPlaybackSpeed(double value) async {
-    await player.setPlaybackRate(value);
+  void setPlaybackSpeed(double value) {
+    player.setPlaybackRate(value);
     playbackSpeed.value = value;
   }
 

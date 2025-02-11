@@ -42,7 +42,7 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
     super.dispose();
   }
 
-  dynamic _settingsGet(key, {space = AppConfigSpace.global, dynamic defaultValue}) => switch (key) {
+  dynamic _settingsGet(dynamic key, {AppConfigSpace space = AppConfigSpace.global, dynamic defaultValue}) => switch (key) {
         AppConfigFieldKey.isThemeModeDark => _settingsGet(AppConfigFieldKey.themeMode) == ThemeMode.dark,
         AppConfigFieldKey.isThemeModeLight => _settingsGet(AppConfigFieldKey.themeMode) == ThemeMode.light,
         AppConfigFieldKey.isThemeModeSystem => _settingsGet(AppConfigFieldKey.themeMode) == ThemeMode.system,
@@ -51,12 +51,10 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
             AppConfigSpace.global => widget.globalSettingsBox
                 .get(AppGlobalConfigFieldsCollection.field(key).boxFieldName, defaultValue: AppGlobalConfigFieldsCollection.field(key).defaultValue),
             AppConfigSpace.track => widget.trackSettingsBox.get(key, defaultValue: defaultValue),
-            Object() => throw UnimplementedError(),
-            null => throw UnimplementedError(),
           },
       };
 
-  void _settingsSet(key, value, {space = AppConfigSpace.global, bool updateState = false}) {
+  void _settingsSet(dynamic key, dynamic value, {AppConfigSpace space = AppConfigSpace.global, bool updateState = false}) {
     if (updateState == true) {
       setState(() {
         _settingsSetStateLess(key, value, space: space);
@@ -66,10 +64,10 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
     }
   }
 
-  Future<void> _settingsSetStateLess(key, value, {space = AppConfigSpace.global}) async {
+  void _settingsSetStateLess(dynamic key, dynamic value, {AppConfigSpace space = AppConfigSpace.global}) {
     switch (space) {
       case AppConfigSpace.global:
-        await widget.globalSettingsBox.put(AppGlobalConfigFieldsCollection.field(key).boxFieldName, value);
+        widget.globalSettingsBox.put(AppGlobalConfigFieldsCollection.field(key).boxFieldName, value);
         switch (key) {
           case AppConfigFieldKey.wakelockEnabled:
             WakelockPlus.toggle(enable: value);
@@ -77,7 +75,7 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
         }
         break;
       case AppConfigSpace.track:
-        await widget.trackSettingsBox.put(key, value);
+        widget.trackSettingsBox.put(key, value);
         break;
     }
   }
@@ -144,8 +142,7 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
       themeMode: _settingsGet(AppConfigFieldKey.themeMode),
       initialRoute: '/',
       routes: {
-        '/': (context) =>
-            HomeScreen(
+        '/': (context) => HomeScreen(
               settingsGet: _settingsGet,
               settingsSet: _settingsSet,
               audioRecorder: _audioRecorder,
