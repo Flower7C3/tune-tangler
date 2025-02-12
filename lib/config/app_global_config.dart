@@ -123,47 +123,47 @@ final class AppGlobalConfig {
     [
       ConfigItem<double>(-1.0, properties: [
         ConfigItemIconProperty(AppIcon.trackPlaybackBalanceLeft),
-        ConfigItemTextProperty('LL'),
+        ConfigItemTextProperty('L'),
         ConfigItemTranslatableProperty((trans) => trans.balanceLeft100),
       ]),
       ConfigItem<double>(-0.75, properties: [
         ConfigItemIconProperty(AppIcon.trackPlaybackBalanceLeft),
-        ConfigItemTextProperty('L'),
+        ConfigItemTextProperty('L³'),
         ConfigItemTranslatableProperty((trans) => trans.balanceLeft75),
       ]),
       ConfigItem<double>(-0.5, properties: [
         ConfigItemIconProperty(AppIcon.trackPlaybackBalanceLeft),
-        ConfigItemTextProperty('CL'),
+        ConfigItemTextProperty('L²'),
         ConfigItemTranslatableProperty((trans) => trans.balanceLeft50),
       ]),
       ConfigItem<double>(-0.25, properties: [
         ConfigItemIconProperty(AppIcon.trackPlaybackBalanceLeft),
-        ConfigItemTextProperty('CCL'),
+        ConfigItemTextProperty('L¹'),
         ConfigItemTranslatableProperty((trans) => trans.balanceLeft25),
       ]),
       ConfigItem<double>(0.0, properties: [
         ConfigItemIconProperty(AppIcon.trackPlaybackBalanceCenter),
-        ConfigItemTextProperty('CC'),
+        ConfigItemTextProperty('C'),
         ConfigItemTranslatableProperty((trans) => trans.balanceCenter),
       ]),
       ConfigItem<double>(0.25, properties: [
         ConfigItemIconProperty(AppIcon.trackPlaybackBalanceRight),
-        ConfigItemTextProperty('CCR'),
+        ConfigItemTextProperty('R¹'),
         ConfigItemTranslatableProperty((trans) => trans.balanceRight25),
       ]),
       ConfigItem<double>(0.5, properties: [
         ConfigItemIconProperty(AppIcon.trackPlaybackBalanceRight),
-        ConfigItemTextProperty('CR'),
+        ConfigItemTextProperty('R²'),
         ConfigItemTranslatableProperty((trans) => trans.balanceRight50),
       ]),
       ConfigItem<double>(0.75, properties: [
         ConfigItemIconProperty(AppIcon.trackPlaybackBalanceRight),
-        ConfigItemTextProperty('CRR'),
+        ConfigItemTextProperty('R³'),
         ConfigItemTranslatableProperty((trans) => trans.balanceRight75),
       ]),
       ConfigItem<double>(1.0, properties: [
         ConfigItemIconProperty(AppIcon.trackPlaybackBalanceRight),
-        ConfigItemTextProperty('RR'),
+        ConfigItemTextProperty('R'),
         ConfigItemTranslatableProperty((trans) => trans.balanceRight100),
       ]),
     ],
@@ -268,6 +268,7 @@ final class AppGlobalConfig {
         ConfigItemTextProperty('Polski'),
       ]),
     ],
+    format: (dynamic value) => languages.text(value),
     defaultValue: Locale('en', 'US'),
   );
 
@@ -319,28 +320,28 @@ final class AppGlobalConfig {
         ConfigItemIconProperty(Icons.hourglass_empty),
         ConfigItemColorProperty((context) => Theme.of(context).colorScheme.inversePrimary, domain: ConfigItemPropertyDomain.foregroundColor),
         ConfigItemColorProperty((context) => Theme.of(context).colorScheme.surfaceContainer, domain: ConfigItemPropertyDomain.backgroundColor),
-        ConfigItemColorProperty((context) => Theme.of(context).colorScheme.inversePrimary, domain: ConfigItemPropertyDomain.progressColor),
+        ConfigItemColorProperty((context) => Theme.of(context).colorScheme.surfaceContainerHighest, domain: ConfigItemPropertyDomain.progressColor),
         ConfigItemTranslatableProperty((trans) => trans.stateProcessing),
       ]),
       ConfigItem<TrackState>(TrackState.empty, properties: [
         ConfigItemIconProperty(Icons.cancel_outlined),
         ConfigItemColorProperty((context) => Theme.of(context).colorScheme.inversePrimary, domain: ConfigItemPropertyDomain.foregroundColor),
         ConfigItemColorProperty((context) => Theme.of(context).colorScheme.surfaceContainer, domain: ConfigItemPropertyDomain.backgroundColor),
-        ConfigItemColorProperty((context) => Theme.of(context).colorScheme.inversePrimary, domain: ConfigItemPropertyDomain.progressColor),
+        ConfigItemColorProperty((context) => Theme.of(context).colorScheme.surfaceContainerHighest, domain: ConfigItemPropertyDomain.progressColor),
         ConfigItemTranslatableProperty((trans) => trans.stateEmpty),
       ]),
       ConfigItem<TrackState>(TrackState.recording, properties: [
         ConfigItemIconProperty(Icons.radio_button_checked_outlined),
         ConfigItemColorProperty((context) => Theme.of(context).colorScheme.error, domain: ConfigItemPropertyDomain.foregroundColor),
         ConfigItemColorProperty((context) => Theme.of(context).colorScheme.errorContainer, domain: ConfigItemPropertyDomain.backgroundColor),
-        ConfigItemColorProperty((context) => Theme.of(context).colorScheme.surfaceContainerHighest, domain: ConfigItemPropertyDomain.progressColor),
+        ConfigItemColorProperty((context) => Theme.of(context).colorScheme.surfaceContainerHigh, domain: ConfigItemPropertyDomain.progressColor),
         ConfigItemTranslatableProperty((trans) => trans.stateRecording),
       ]),
       ConfigItem<TrackState>(TrackState.idle, properties: [
         ConfigItemIconProperty(Icons.task_alt_outlined),
         ConfigItemColorProperty((context) => Theme.of(context).colorScheme.secondary, domain: ConfigItemPropertyDomain.foregroundColor),
         ConfigItemColorProperty((context) => Theme.of(context).colorScheme.secondaryContainer, domain: ConfigItemPropertyDomain.backgroundColor),
-        ConfigItemColorProperty((context) => Theme.of(context).colorScheme.surfaceContainer, domain: ConfigItemPropertyDomain.progressColor),
+        ConfigItemColorProperty((context) => Theme.of(context).colorScheme.surfaceContainerHighest, domain: ConfigItemPropertyDomain.progressColor),
         ConfigItemTranslatableProperty((trans) => trans.stateIdle),
       ]),
       ConfigItem<TrackState>(TrackState.playing, properties: [

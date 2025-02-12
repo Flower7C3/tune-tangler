@@ -423,16 +423,6 @@ class Track {
     playbackBalance.value = value;
   }
 
-  IconData get playbackBalanceIcon {
-    if (playbackBalance.value < 0) {
-      return Icons.join_left_rounded;
-    }
-    if (playbackBalance.value > 0) {
-      return Icons.join_right_rounded;
-    }
-    return Icons.join_full_rounded;
-  }
-
   ///*************************************************************************************************************************************************
   /// PLAYBACK MODE
 
@@ -444,8 +434,6 @@ class Track {
     player.setReleaseMode(value);
     playbackReleaseMode.value = value;
   }
-
-  IconData get playbackModeIcon => AppGlobalConfig.trackPlaybackReleaseMode.icon(playbackReleaseMode.value);
 
   void togglePlaybackMode() {
     setPlaybackReleaseMode(isPlaybackReleaseModeSingle(playbackReleaseMode.value) ? ReleaseMode.loop : ReleaseMode.stop);

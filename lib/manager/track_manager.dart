@@ -133,17 +133,24 @@ class TrackManager {
                             child: Icon(track.audioSourceIcon,
                                 size: Theme.of(_context).textTheme.titleMedium!.fontSize, color: track.stateForegroundColor(_context))),
                         Align(
-                            alignment: AlignmentDirectional(1, -0.25),
+                            alignment: AlignmentDirectional(1, -0.3),
                             child: ValueListenableBuilder<double>(
                                 valueListenable: track.playbackBalance,
-                                builder: (context, playbackBalance, child) => Text(AppGlobalConfig.trackPlaybackBalance.text(playbackBalance),
-                                    style: TextStyle(
-                                        fontSize: Theme.of(context).textTheme.titleSmall!.fontSize, color: track.stateForegroundColor(context))))),
+                                builder: (context, playbackBalance, child) => SizedBox(
+                                      width: Theme.of(context).textTheme.titleMedium!.fontSize,
+                                      height: Theme.of(context).textTheme.titleMedium!.fontSize,
+                                      child: Text(
+                                        AppGlobalConfig.trackPlaybackBalance.format(playbackBalance),
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            fontSize: Theme.of(context).textTheme.titleSmall!.fontSize, color: track.stateForegroundColor(context)),
+                                      ),
+                                    ))),
                         Align(
                             alignment: AlignmentDirectional(1, 0.25),
                             child: ValueListenableBuilder<double>(
                                 valueListenable: track.playbackBalance,
-                                builder: (context, playbackBalance, child) => Icon(track.playbackBalanceIcon,
+                                builder: (context, playbackBalance, child) => Icon(AppGlobalConfig.trackPlaybackBalance.icon(playbackBalance),
                                     size: Theme.of(context).textTheme.titleMedium!.fontSize, color: track.stateForegroundColor(context)))),
                         Align(
                             alignment: AlignmentDirectional(-1, 1),
@@ -156,10 +163,10 @@ class TrackManager {
                             alignment: AlignmentDirectional(1, 1),
                             child: ValueListenableBuilder<ReleaseMode>(
                                 valueListenable: track.playbackReleaseMode,
-                                builder: (context, playbackModeSingle, child) => Icon(track.playbackModeIcon,
+                                builder: (context, playbackReleaseMode, child) => Icon(AppGlobalConfig.trackPlaybackReleaseMode.icon(playbackReleaseMode),
                                     size: Theme.of(context).textTheme.titleMedium!.fontSize, color: track.stateForegroundColor(context)))),
                         Align(
-                            alignment: AlignmentDirectional(-0.1, 0.95),
+                            alignment: AlignmentDirectional(0, 0.95),
                             child: ValueListenableBuilder<Duration>(
                                 valueListenable: track.playbackStartAtPosition,
                                 builder: (context, time, child) => Icon(track.playbackStartAtPositionIcon,
@@ -194,6 +201,7 @@ class TrackManager {
                         _uiHelper.formatTime(clock.toInt()),
                         iconColor: track.stateForegroundColor(context),
                         iconSize: Theme.of(context).textTheme.labelLarge!.fontSize! / 1.4 * _uiHelper.iconSizeMultiplier,
+                        textColor: track.stateForegroundColor(context),
                         fontSize: Theme.of(context).textTheme.labelLarge!.fontSize! / 1.4,
                       ))
               : ValueListenableBuilder(
@@ -203,6 +211,7 @@ class TrackManager {
                         _uiHelper.formatTime((track.durationAfterCut.value.inMilliseconds * 1 / track.playbackSpeed.value).toInt()),
                         iconColor: track.stateForegroundColor(context),
                         iconSize: Theme.of(context).textTheme.labelLarge!.fontSize! / 1.4 * _uiHelper.iconSizeMultiplier,
+                        textColor: track.stateForegroundColor(context),
                         fontSize: Theme.of(context).textTheme.labelLarge!.fontSize! / 1.4,
                       )),
       ];

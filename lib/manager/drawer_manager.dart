@@ -210,18 +210,14 @@ class DrawerManager {
         _uiHelper.listTileListDialog(
           AppIcon.language,
           _trans.languageVersion,
-          listSubtitle: AppGlobalConfig.languages.text(_settings.get(AppConfigFieldKey.locale)),
+          listSubtitle: AppGlobalConfig.languages.format(_settings.get(AppConfigFieldKey.locale)),
           dialogTitle: _trans.changeLanguage,
           currentValue: _settings.get(AppConfigFieldKey.locale).toLanguageTag(),
           options: AppGlobalConfig.languages
               .values<Locale>()
               .map((Locale locale) => SimpleDialogOption(
                     padding: EdgeInsets.zero,
-                    child: _uiHelper.statusTextTile(
-                        locale.toLanguageTag(),
-                        AppGlobalConfig.languages.text(
-                          locale,
-                        ),
+                    child: _uiHelper.statusTextTile(locale.toLanguageTag(), AppGlobalConfig.languages.format(locale),
                         iconColor: Theme.of(_context).colorScheme.inversePrimary),
                     onPressed: () {
                       Navigator.pop(_context, locale);

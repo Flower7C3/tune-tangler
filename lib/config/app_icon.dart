@@ -47,6 +47,7 @@ class AppIcon {
   static IconData trackPlaybackBalanceRight = Icons.join_right_rounded;
   static IconData trackPlaybackBalanceCenter= Icons.join_full_rounded;
   static IconData trackPlaybackSpeed = Icons.slow_motion_video_rounded;
+
   static IconData trackAudioSourceRecorded = Icons.audio_file_outlined;
   static IconData trackAudioSourceImported = Icons.upload_file_outlined;
 
@@ -54,13 +55,12 @@ class AppIcon {
   static IconData trackPosition = Symbols.timer_play_rounded;
   static IconData trackDuration = Symbols.timer_rounded;
 
-  static IconData trackPlaybackStartAtPosition = Symbols.logout_rounded;
-  static IconData trackPlaybackEndAtPosition = Symbols.login_rounded;
-  static IconData trackPlaybackPositionSub1000 = Symbols.fast_rewind;
-  static IconData trackPlaybackPositionReset = Symbols.cancel_presentation_rounded;
-  static IconData trackPlaybackPositionSub100 = Symbols.arrow_back_2_rounded;
-  static IconData trackPlaybackPositionAdd100 = Symbols.play_arrow;
-  static IconData trackPlaybackPositionAdd1000 = Symbols.fast_forward;
+  static IconData trackPlaybackStartAtPosition = Symbols.align_justify_flex_start_rounded;
+  static IconData trackPlaybackStartAtPositionReset = Symbols.first_page_rounded;
+  static IconData trackPlaybackEndAtPosition = Symbols.align_justify_flex_end_rounded;
+  static IconData trackPlaybackEndAtPositionReset = Symbols.last_page_rounded;
+  static IconData trackPlaybackPositionSub = Symbols.fast_rewind_rounded;
+  static IconData trackPlaybackPositionAdd = Symbols.fast_forward_rounded;
 
   static IconData recordingInputDevice = Symbols.settings_input_component;
   static IconData recordingAudioEncoder = Icons.integration_instructions_outlined;
@@ -105,6 +105,6 @@ class AppIcon {
   static IconData recordingInfo = Symbols.info_rounded;
 
   static IconData recordingProgressSlider = Symbols.start_rounded;
-  static IconData recordingClipSlider = Symbols.expand_rounded;
+  static IconData recordingClipSlider = Symbols.align_justify_space_even_rounded;
 
 }

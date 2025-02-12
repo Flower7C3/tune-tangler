@@ -53,7 +53,7 @@ class RowMenuManager {
                   ...AppGlobalConfig.trackPlaybackReleaseMode.values<ReleaseMode>().map((ReleaseMode value) => _uiHelper.rowPopupMenuItem(
                         value,
                         AppGlobalConfig.trackPlaybackReleaseMode.icon(value),
-                        AppGlobalConfig.trackPlaybackReleaseMode.translate(value, trans: _trans),
+                        _trans.rowTracksPlaybackModeSetTitle(AppGlobalConfig.trackPlaybackReleaseMode.translate(value, trans: _trans)),
                       ))
                 ],
             onSelected: (selection) {

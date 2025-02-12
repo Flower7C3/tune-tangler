@@ -175,11 +175,12 @@ class TrackDetailsManager {
               fontSize: Theme.of(_context).textTheme.bodyLarge!.fontSize!),
         ValueListenableBuilder<Duration>(
             valueListenable: track.duration,
-            builder: (context, time, child) => _uiHelper.statusIconTile(
-                AppIcon.trackDuration, _trans.recordingDurationValue(_uiHelper.formatTime(time.inMilliseconds)),
-                iconColor: track.stateForegroundColor(context),
-                iconSize: Theme.of(_context).textTheme.bodyLarge!.fontSize! * _uiHelper.iconSizeMultiplier,
-                fontSize: Theme.of(_context).textTheme.bodyLarge!.fontSize!)),
+            builder: (context, time, child) => track.duration.value.inMilliseconds > 0
+                ? _uiHelper.statusIconTile(AppIcon.trackDuration, _trans.recordingDurationValue(_uiHelper.formatTime(time.inMilliseconds)),
+                    iconColor: track.stateForegroundColor(context),
+                    iconSize: Theme.of(_context).textTheme.bodyLarge!.fontSize! * _uiHelper.iconSizeMultiplier,
+                    fontSize: Theme.of(_context).textTheme.bodyLarge!.fontSize!)
+                : SizedBox(height: 0)),
         if (track.audioEncoder != null)
           _uiHelper.statusIconTile(AppIcon.recordingAudioEncoder, AppGlobalConfig.recordingAudioEncoder.translate(track.audioEncoder, trans: _trans),
               iconSize: Theme.of(_context).textTheme.bodyLarge!.fontSize! * _uiHelper.iconSizeMultiplier,
@@ -197,6 +198,7 @@ class TrackDetailsManager {
       ]);
 
   Widget _trackDetailsRecordingBox(Track track) => _uiHelper.trackDetailsBox([
+        SizedBox(height: Theme.of(_context).textTheme.titleLarge!.fontSize),
         LinearProgressIndicator(color: track.stateForegroundColor(_context), backgroundColor: track.stateProgressColor(_context)),
         SizedBox(height: Theme.of(_context).textTheme.titleLarge!.fontSize),
         Row(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -245,7 +247,7 @@ class TrackDetailsManager {
               visualDensity: VisualDensity.compact,
               style: ListTileStyle.drawer,
               leading: _uiHelper.mediaPlayerButton(
-                track.playbackBalanceIcon,
+                AppGlobalConfig.trackPlaybackBalance.icon(track.playbackBalance.value),
                 _trans.trackPlaybackBalanceSet(track.name.value),
                 onPressed: () {
                   track.setPlaybackBalance(0);
@@ -343,11 +345,7 @@ class TrackDetailsManager {
   Widget _trackDetailsClip(Track track) => _uiHelper.trackDetailsBox([
         _uiHelper.trackDetailsLine([
           Expanded(
-              child: ListTile(
-            visualDensity: VisualDensity.compact,
-            leading: Transform.rotate(angle: 90 * (3.1415927 / 180), child: Icon(AppIcon.recordingClipSlider)),
-            title: Text(_trans.thePlaybackTrim),
-          ))
+              child: ListTile(visualDensity: VisualDensity.compact, leading: Icon(AppIcon.recordingClipSlider), title: Text(_trans.thePlaybackTrim)))
         ]),
         _uiHelper.trackDetailsLine([_trackDetailsClipSlider(track)]),
         _uiHelper.trackDetailsLine(_trackDetailsClipText(track), mainAxisAlignment: MainAxisAlignment.spaceAround),
@@ -387,57 +385,91 @@ class TrackDetailsManager {
       ];
 
   List<Widget> _trackDetailsClipButtons(Track track) => [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            _uiHelper.mediaPlayerButton(
-              AppIcon.trackPlaybackPositionSub100,
-              _trans.trackPlaybackStartAtPositionSub100,
-              onPressed: () => track.changePlaybackStartAtPosition(-100),
-              iconSize: Theme.of(_context).textTheme.bodyLarge!.fontSize!,
-              boxSize: Theme.of(_context).textTheme.bodyLarge!.fontSize! * 2,
-            ),
-            _uiHelper.mediaPlayerButton(
-              AppIcon.trackPlaybackPositionReset,
-              _trans.trackPlaybackStartAtPositionReset,
-              onPressed: () => track.resetPlaybackStartAtPosition(),
-              iconSize: Theme.of(_context).textTheme.bodyLarge!.fontSize!,
-              boxSize: Theme.of(_context).textTheme.bodyLarge!.fontSize! * 2,
-            ),
-            _uiHelper.mediaPlayerButton(
-              AppIcon.trackPlaybackPositionAdd100,
-              _trans.trackPlaybackStartAtPositionAdd100,
-              onPressed: () => track.changePlaybackStartAtPosition(100),
-              iconSize: Theme.of(_context).textTheme.bodyLarge!.fontSize!,
-              boxSize: Theme.of(_context).textTheme.bodyLarge!.fontSize! * 2,
-            ),
-          ],
-        ),
-        Row(
-          children: [
-            _uiHelper.mediaPlayerButton(
-              AppIcon.trackPlaybackPositionSub100,
-              _trans.trackPlaybackEndAtPositionSub100,
-              onPressed: () => track.changePlaybackEndAtPosition(-100),
-              iconSize: Theme.of(_context).textTheme.bodyLarge!.fontSize!,
-              boxSize: Theme.of(_context).textTheme.bodyLarge!.fontSize! * 2,
-            ),
-            _uiHelper.mediaPlayerButton(
-              AppIcon.trackPlaybackPositionReset,
-              _trans.trackPlaybackEndAtPositionReset,
-              onPressed: () => track.resetPlaybackEndAtPosition(),
-              iconSize: Theme.of(_context).textTheme.bodyLarge!.fontSize!,
-              boxSize: Theme.of(_context).textTheme.bodyLarge!.fontSize! * 2,
-            ),
-            _uiHelper.mediaPlayerButton(
-              AppIcon.trackPlaybackPositionAdd100,
-              _trans.trackPlaybackEndAtPositionAdd100,
-              onPressed: () => track.changePlaybackEndAtPosition(100),
-              iconSize: Theme.of(_context).textTheme.bodyLarge!.fontSize!,
-              boxSize: Theme.of(_context).textTheme.bodyLarge!.fontSize! * 2,
-            ),
-          ],
-        ),
+        ValueListenableBuilder(
+            valueListenable: CombinedNotifier([track.playbackStartAtPosition, track.playbackEndAtPosition]),
+            builder: (context, _, __) => Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    _uiHelper.mediaPlayerButton(
+                      AppIcon.trackPlaybackStartAtPositionReset,
+                      _trans.trackPlaybackStartAtPositionReset,
+                      onPressed: (track.playbackStartAtPosition.value.inMilliseconds == 0) ? null : () => track.resetPlaybackStartAtPosition(),
+                      iconSize: Theme.of(_context).textTheme.bodyLarge!.fontSize!,
+                      boxSize: Theme.of(_context).textTheme.bodyLarge!.fontSize! * 2,
+                    ),
+                    _uiHelper.mediaPlayerButton(
+                      AppIcon.trackPlaybackPositionSub,
+                      (track.playbackStartAtPosition.value.inMilliseconds + 100 > track.playbackEndAtPosition.value.inMilliseconds)
+                          ? _trans.trackPlaybackStartAtPositionSub10
+                          : _trans.trackPlaybackStartAtPositionSub100,
+                      onPressed: (track.playbackStartAtPosition.value.inMilliseconds == 0)
+                          ? null
+                          : () => track.changePlaybackStartAtPosition(
+                              (track.playbackStartAtPosition.value.inMilliseconds + 100 > track.playbackEndAtPosition.value.inMilliseconds)
+                                  ? -10
+                                  : -100),
+                      iconSize: Theme.of(_context).textTheme.bodyLarge!.fontSize!,
+                      boxSize: Theme.of(_context).textTheme.bodyLarge!.fontSize! * 2,
+                    ),
+                    _uiHelper.mediaPlayerButton(
+                      AppIcon.trackPlaybackPositionAdd,
+                      (track.playbackStartAtPosition.value.inMilliseconds + 100 >= track.playbackEndAtPosition.value.inMilliseconds)
+                          ? _trans.trackPlaybackStartAtPositionAdd10
+                          : _trans.trackPlaybackStartAtPositionAdd100,
+                      onPressed: (track.playbackStartAtPosition.value.inMilliseconds > track.playbackEndAtPosition.value.inMilliseconds)
+                          ? null
+                          : () => track.changePlaybackStartAtPosition(
+                              (track.playbackStartAtPosition.value.inMilliseconds + 100 >= track.playbackEndAtPosition.value.inMilliseconds)
+                                  ? 10
+                                  : 100),
+                      iconSize: Theme.of(_context).textTheme.bodyLarge!.fontSize!,
+                      boxSize: Theme.of(_context).textTheme.bodyLarge!.fontSize! * 2,
+                    ),
+                  ],
+                )),
+        ValueListenableBuilder(
+            valueListenable: CombinedNotifier([track.playbackStartAtPosition, track.playbackEndAtPosition, track.duration]),
+            builder: (context, _, __) => Row(
+                  children: [
+                    _uiHelper.mediaPlayerButton(
+                      AppIcon.trackPlaybackPositionSub,
+                      (track.playbackEndAtPosition.value.inMilliseconds - 100 <= track.playbackStartAtPosition.value.inMilliseconds)?
+                      _trans.trackPlaybackEndAtPositionSub10:
+                      _trans.trackPlaybackEndAtPositionSub100,
+                      onPressed: (track.playbackEndAtPosition.value.inMilliseconds < track.playbackStartAtPosition.value.inMilliseconds)
+                          ? null
+                          : () => track.changePlaybackEndAtPosition(
+                              (track.playbackEndAtPosition.value.inMilliseconds - 100 <= track.playbackStartAtPosition.value.inMilliseconds)
+                                  ? -10
+                                  : -100),
+                      iconSize: Theme.of(_context).textTheme.bodyLarge!.fontSize!,
+                      boxSize: Theme.of(_context).textTheme.bodyLarge!.fontSize! * 2,
+                    ),
+                    _uiHelper.mediaPlayerButton(
+                      AppIcon.trackPlaybackPositionAdd,
+                      (track.playbackEndAtPosition.value.inMilliseconds - 100 < track.playbackStartAtPosition.value.inMilliseconds)?
+                      _trans.trackPlaybackEndAtPositionAdd10:
+                      _trans.trackPlaybackEndAtPositionAdd100,
+                      onPressed: (track.playbackEndAtPosition.value.inMilliseconds == track.duration.value.inMilliseconds)
+                          ? null
+                          : () => track.changePlaybackEndAtPosition(
+                              (track.playbackEndAtPosition.value.inMilliseconds - 100 < track.playbackStartAtPosition.value.inMilliseconds)
+                                  ? 10
+                                  : 100),
+                      iconSize: Theme.of(_context).textTheme.bodyLarge!.fontSize!,
+                      boxSize: Theme.of(_context).textTheme.bodyLarge!.fontSize! * 2,
+                    ),
+                    _uiHelper.mediaPlayerButton(
+                      AppIcon.trackPlaybackEndAtPositionReset,
+                      _trans.trackPlaybackEndAtPositionReset,
+                      onPressed: (track.playbackEndAtPosition.value.inMilliseconds == track.duration.value.inMilliseconds)
+                          ? null
+                          : () => track.resetPlaybackEndAtPosition(),
+                      iconSize: Theme.of(_context).textTheme.bodyLarge!.fontSize!,
+                      boxSize: Theme.of(_context).textTheme.bodyLarge!.fontSize! * 2,
+                    ),
+                  ],
+                )),
       ];
 
   List<Widget> _trackDetailsPlayerIcons(Track track) => [
@@ -473,8 +505,8 @@ class TrackDetailsManager {
                 if (track.recorderState.value != RecorderState.processing)
                   ValueListenableBuilder<ReleaseMode>(
                       valueListenable: track.playbackReleaseMode,
-                      builder: (context, playbackModeSingle, child) => _uiHelper.mediaPlayerButton(
-                            track.playbackModeIcon,
+                      builder: (context, playbackReleaseMode, child) => _uiHelper.mediaPlayerButton(
+                        AppGlobalConfig.trackPlaybackReleaseMode.icon(playbackReleaseMode),
                             _trans.trackPlaybackModeToggle(track.name.value),
                             onPressed: (track.state.value != TrackState.recording)
                                 ? () {
