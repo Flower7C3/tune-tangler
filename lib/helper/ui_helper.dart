@@ -15,8 +15,8 @@ enum DialogType {
 }
 
 class UIHelper {
-  final double gridGap = 4;
-  final double iconSizeMultiplier = 1.2;
+  static final double gridGap = 4;
+  static final double iconSizeMultiplier = 1.2;
 
   BuildContext context;
 
@@ -36,6 +36,14 @@ class UIHelper {
         ),
       );
 
+  ListTile statusWidgetTile(
+    Widget widget,
+    String text, {
+    Color? textColor,
+    double? fontSize,
+  }) =>
+      ListTile(leading: widget, title: Text(text, style: TextStyle(color: textColor, fontSize: fontSize)));
+
   ListTile statusIconTile(
     IconData icon,
     String text, {
@@ -44,10 +52,7 @@ class UIHelper {
     Color? textColor,
     double? fontSize,
   }) =>
-      ListTile(
-        leading: Icon(icon, size: fontSize, color: iconColor),
-        title: Text(text, style: TextStyle(color: textColor, fontSize: fontSize)),
-      );
+      statusWidgetTile(Icon(icon, size: fontSize, color: iconColor), text, textColor: textColor, fontSize: fontSize);
 
   ListTile statusTextTile(
     String icon,
@@ -57,10 +62,7 @@ class UIHelper {
     Color? textColor,
     double? fontSize,
   }) =>
-      ListTile(
-        leading: Text(icon, style: TextStyle(color: iconColor, fontSize: iconSize)),
-        title: Text(text, style: TextStyle(color: textColor, fontSize: fontSize)),
-      );
+      statusWidgetTile(Text(icon, style: TextStyle(color: iconColor, fontSize: iconSize)), text, textColor: textColor, fontSize: fontSize);
 
   Widget statusIconRow(
     IconData icon,

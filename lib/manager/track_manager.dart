@@ -70,7 +70,7 @@ class TrackManager {
                       )))));
 
   Container _buildRowTrackContainer(Track track) => Container(
-      margin: EdgeInsets.all(_uiHelper.gridGap),
+      margin: EdgeInsets.all(UIHelper.gridGap),
       width: Theme.of(_context).textTheme.displaySmall!.fontSize! * 2.1,
       child: ValueListenableBuilder<TrackState>(
           valueListenable: track.state,
@@ -78,8 +78,8 @@ class TrackManager {
                 onPressed: () => _trackDetailsManager.runClickAction(track),
                 onLongPress: () => _trackDetailsManager.openModal(track),
                 style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.all(_uiHelper.gridGap),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_uiHelper.gridGap * 2)),
+                  padding: EdgeInsets.all(UIHelper.gridGap),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(UIHelper.gridGap * 2)),
                   backgroundColor: track.stateBackgroundColor(context),
                   foregroundColor: track.stateForegroundColor(context),
                 ),
@@ -94,7 +94,7 @@ class TrackManager {
                 children: (track.state.value == TrackState.processing)
                     ? [
                         CircularProgressIndicator(
-                            strokeWidth: _uiHelper.gridGap, color: track.stateProgressColor(_context), strokeCap: StrokeCap.round),
+                            strokeWidth: UIHelper.gridGap, color: track.stateProgressColor(_context), strokeCap: StrokeCap.round),
                         Align(
                             alignment: Alignment.center,
                             child: ValueListenableBuilder<String>(
@@ -117,10 +117,9 @@ class TrackManager {
                             alignment: Alignment.topRight,
                             child: ValueListenableBuilder<String>(
                                 valueListenable: track.keyboardKey,
-                                builder: (context, keyboardKey, child) => AppIcon.trackKeyboardKeyBox(track,
-                                    ui: _uiHelper,
-                                    context: context,
-                                    foregroundColor: track.stateForegroundColor(context),
+                                builder: (context, keyboardKey, child) => AppIcon.trackKeyboardKeyBox(keyboardKey,
+                                    foregroundColor: track.stateBackgroundColor(context),
+                                    backgroundColor: track.stateForegroundColor(context),
                                     size: Theme.of(context).textTheme.titleMedium!.fontSize!))),
                         Align(
                             alignment: Alignment.topCenter,
@@ -200,7 +199,7 @@ class TrackManager {
                         AppIcon.trackTimer,
                         _uiHelper.formatTime(clock.toInt()),
                         iconColor: track.stateForegroundColor(context),
-                        iconSize: Theme.of(context).textTheme.labelLarge!.fontSize! / 1.4 * _uiHelper.iconSizeMultiplier,
+                        iconSize: Theme.of(context).textTheme.labelLarge!.fontSize! / 1.4 * UIHelper.iconSizeMultiplier,
                         textColor: track.stateForegroundColor(context),
                         fontSize: Theme.of(context).textTheme.labelLarge!.fontSize! / 1.4,
                       ))
@@ -210,7 +209,7 @@ class TrackManager {
                         AppIcon.trackPosition,
                         _uiHelper.formatTime((track.durationAfterCut.value.inMilliseconds * 1 / track.playbackSpeed.value).toInt()),
                         iconColor: track.stateForegroundColor(context),
-                        iconSize: Theme.of(context).textTheme.labelLarge!.fontSize! / 1.4 * _uiHelper.iconSizeMultiplier,
+                        iconSize: Theme.of(context).textTheme.labelLarge!.fontSize! / 1.4 * UIHelper.iconSizeMultiplier,
                         textColor: track.stateForegroundColor(context),
                         fontSize: Theme.of(context).textTheme.labelLarge!.fontSize! / 1.4,
                       )),

@@ -24,6 +24,7 @@
   "trackRecording": "On air",
   "theAudioSourceRecorded": "Audio recorded",
   "theAudioSourceImported": "Audio imported",
+  "theKeyboardKey": "Keyboard shortcut key",
   "trackRecordingImport": "Import file to {trackName} track",
   "trackRecordingImported": "Imported file to {trackName} track.",
   "trackRecordingImportCancelled": "Cancelled import file to {trackName} track.",

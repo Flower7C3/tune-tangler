@@ -45,32 +45,32 @@ class DrawerManager {
               ),
               currentAccountPicture: Icon(
                   _settings.get(AppConfigFieldKey.wakelockEnabled) ? AppIcon.logoKeepScreenOnEnabled : AppIcon.logoKeepScreenOnDisabled,
-                  size: Theme.of(context).textTheme.displayLarge!.fontSize! * _uiHelper.iconSizeMultiplier,
+                  size: Theme.of(context).textTheme.displayLarge!.fontSize! * UIHelper.iconSizeMultiplier,
                   color: Theme.of(context).colorScheme.inversePrimary),
             ),
             ExpansionTile(
               leading: Icon(AppIcon.recordingSettings),
               title: Text(_trans.recording),
               initiallyExpanded: true,
-              childrenPadding: EdgeInsets.only(left: _uiHelper.gridGap * 3),
+              childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
               children: _recordingSettings(setDrawerState),
             ),
             ExpansionTile(
               leading: Icon(AppIcon.screenSettings),
               title: Text(_trans.screen),
-              childrenPadding: EdgeInsets.only(left: _uiHelper.gridGap * 3),
+              childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
               children: _screenSettings(setDrawerState),
             ),
             ExpansionTile(
               leading: Icon(AppIcon.permissions),
               title: Text(_trans.permissions),
-              childrenPadding: EdgeInsets.only(left: _uiHelper.gridGap * 3),
+              childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
               children: _permissionsList(setDrawerState),
             ),
             ExpansionTile(
               leading: Icon(AppIcon.dangerZone),
               title: Text(_trans.dangerZone),
-              childrenPadding: EdgeInsets.only(left: _uiHelper.gridGap * 3),
+              childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
               children: _dangerZone,
             ),
             ListTile(
@@ -260,7 +260,7 @@ class DrawerManager {
           switchValue: _settings.get(AppConfigFieldKey.wakelockEnabled),
           successAction: (bool value) {
             _settings.set(AppConfigFieldKey.wakelockEnabled, value, updateState: true);
-            return value ? _trans.keepScreenOnIsDisabledSuccess : _trans.keepScreenOnIsEnabledSuccess;
+            return value ? _trans.keepScreenOnIsEnabledSuccess : _trans.keepScreenOnIsDisabledSuccess;
           },
         ),
         _uiHelper.listTileSlider(
@@ -330,83 +330,89 @@ class DrawerManager {
       ];
 
   Future<void> _helpDialog() async {
+    List<Widget> details = [
+      ExpansionTile(
+        title: Text(_trans.helpScreenMessageAboutTitle),
+        children: [
+          Text(_trans.helpScreenMessageAboutContent),
+        ],
+      ),
+      ExpansionTile(
+        title: Text(_trans.helpScreenMessageUsageTitle),
+        children: [
+          Text(_trans.helpScreenMessageUsageContent),
+        ],
+      ),
+      ExpansionTile(
+        title: Text(_trans.helpScreenMessageTrackActions),
+        children: [
+          _uiHelper.helpTrackState(TrackState.empty, _trans.stateEmpty),
+          _uiHelper.helpTrackState(TrackState.recording, _trans.stateRecording),
+          _uiHelper.helpTrackState(TrackState.processing, _trans.stateProcessing),
+          _uiHelper.helpTrackState(TrackState.idle, _trans.stateIdle),
+          _uiHelper.helpTrackState(TrackState.playing, _trans.statePlaying),
+          _uiHelper.helpTrackState(TrackState.paused, _trans.statePaused),
+          _uiHelper.statusWidgetTile(
+              AppIcon.trackKeyboardKeyBox('x',
+                  size: Theme.of(_context).textTheme.titleMedium!.fontSize!,
+                  backgroundColor: Theme.of(_context).colorScheme.primaryContainer,
+                  foregroundColor: Theme.of(_context).colorScheme.primary),
+              _trans.theKeyboardKey.toLowerCase()),
+          _uiHelper.statusIconTile(AppIcon.trackAudioSourceRecorded, _trans.theAudioSourceRecorded.toLowerCase()),
+          _uiHelper.statusIconTile(AppIcon.trackAudioSourceImported, _trans.theAudioSourceImported.toLowerCase()),
+          _uiHelper.statusIconTile(AppIcon.trackPlaybackVolume, _trans.thePlaybackVolume.toLowerCase()),
+          _uiHelper.statusIconTile(AppIcon.trackPlaybackBalanceLeft, _trans.thePlaybackBalanceAt(_trans.balanceLeft).toLowerCase()),
+          _uiHelper.statusIconTile(AppIcon.trackPlaybackBalanceCenter, _trans.thePlaybackBalanceAt(_trans.balanceCenter).toLowerCase()),
+          _uiHelper.statusIconTile(AppIcon.trackPlaybackBalanceRight, _trans.thePlaybackBalanceAt(_trans.balanceRight).toLowerCase()),
+          _uiHelper.statusIconTile(AppIcon.trackPlaybackStartAtPosition, _trans.thePlaybackStartAtPosition.toLowerCase()),
+          _uiHelper.statusIconTile(AppIcon.trackPlaybackEndAtPosition, _trans.thePlaybackEndAtPosition.toLowerCase()),
+          _uiHelper.statusIconTile(AppIcon.trackSinglePlaybackMode, _trans.singlePlaybackMode.toLowerCase()),
+          _uiHelper.statusIconTile(AppIcon.trackRepeatPlaybackMode, _trans.repeatPlaybackMode.toLowerCase()),
+        ],
+      ),
+      ExpansionTile(
+        title: Text(_trans.recordingSettings),
+        children: [
+          ListTile(
+            leading: Icon(AppIcon.recordingAudioGain),
+            title: Text(_trans.recordingAutoGain),
+            subtitle: Text(_trans.recordingAutoGainInfo),
+          ),
+          ListTile(
+            leading: Icon(AppIcon.recordingEchoCancel),
+            title: Text(_trans.recordingEchoCancel),
+            subtitle: Text(_trans.recordingEchoCancelInfo),
+          ),
+          ListTile(
+            leading: Icon(AppIcon.recordingNoiseSuppress),
+            title: Text(_trans.recordingNoiseSuppress),
+            subtitle: Text(_trans.recordingNoiseSuppressInfo),
+          ),
+        ],
+      ),
+      ExpansionTile(
+        title: Text(_trans.recordingAudioEncoders),
+        children: AppGlobalConfig.recordingAudioEncoder
+            .values()
+            .map((value) => ExpansionTile(
+                  leading: Text(AppGlobalConfig.recordingAudioEncoder.text(value, domain: ConfigItemPropertyDomain.icon)),
+                  title: Text(AppGlobalConfig.recordingAudioEncoder.format(value)),
+                  subtitle: Text(AppGlobalConfig.recordingAudioEncoder.translate(value, trans: _trans, domain: ConfigItemPropertyDomain.info)),
+                  children: [
+                    ListTile(
+                      title: Text(
+                          AppGlobalConfig.recordingAudioEncoder.translate(value, trans: _trans, domain: ConfigItemPropertyDomain.defaultProperty)),
+                      subtitle: Text(AppGlobalConfig.recordingAudioEncoder.translate(value, trans: _trans, domain: ConfigItemPropertyDomain.details)),
+                    ),
+                  ],
+                ))
+            .toList(),
+      ),
+    ];
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     _uiHelper.aboutDialog(
       packageInfo,
-      [
-        ExpansionTile(
-          title: Text(_trans.helpScreenMessageAboutTitle),
-          children: [
-            Text(_trans.helpScreenMessageAboutContent),
-          ],
-        ),
-        ExpansionTile(
-          title: Text(_trans.helpScreenMessageUsageTitle),
-          children: [
-            Text(_trans.helpScreenMessageUsageContent),
-          ],
-        ),
-        ExpansionTile(
-          title: Text(_trans.helpScreenMessageTrackActions),
-          children: [
-            _uiHelper.helpTrackState(TrackState.empty, _trans.stateEmpty),
-            _uiHelper.helpTrackState(TrackState.recording, _trans.stateRecording),
-            _uiHelper.helpTrackState(TrackState.processing, _trans.stateProcessing),
-            _uiHelper.helpTrackState(TrackState.idle, _trans.stateIdle),
-            _uiHelper.helpTrackState(TrackState.playing, _trans.statePlaying),
-            _uiHelper.helpTrackState(TrackState.paused, _trans.statePaused),
-            _uiHelper.statusIconTile(AppIcon.trackPlaybackVolume, _trans.thePlaybackVolume.toLowerCase()),
-            _uiHelper.statusIconTile(AppIcon.trackSinglePlaybackMode, _trans.singlePlaybackMode.toLowerCase()),
-            _uiHelper.statusIconTile(AppIcon.trackRepeatPlaybackMode, _trans.repeatPlaybackMode.toLowerCase()),
-            _uiHelper.statusIconTile(AppIcon.trackPlaybackBalanceLeft, _trans.thePlaybackBalanceAt(_trans.balanceLeft).toLowerCase()),
-            _uiHelper.statusIconTile(AppIcon.trackPlaybackBalanceCenter, _trans.thePlaybackBalanceAt(_trans.balanceCenter).toLowerCase()),
-            _uiHelper.statusIconTile(AppIcon.trackPlaybackBalanceRight, _trans.thePlaybackBalanceAt(_trans.balanceRight).toLowerCase()),
-            _uiHelper.statusIconTile(AppIcon.trackAudioSourceRecorded, _trans.theAudioSourceRecorded.toLowerCase()),
-            _uiHelper.statusIconTile(AppIcon.trackAudioSourceImported, _trans.theAudioSourceImported.toLowerCase()),
-            _uiHelper.statusIconTile(AppIcon.trackPlaybackStartAtPosition, _trans.thePlaybackStartAtPosition.toLowerCase()),
-            _uiHelper.statusIconTile(AppIcon.trackPlaybackEndAtPosition, _trans.thePlaybackEndAtPosition.toLowerCase()),
-          ],
-        ),
-        ExpansionTile(
-          title: Text(_trans.recordingSettings),
-          children: [
-            ListTile(
-              leading: Icon(AppIcon.recordingAudioGain),
-              title: Text(_trans.recordingAutoGain),
-              subtitle: Text(_trans.recordingAutoGainInfo),
-            ),
-            ListTile(
-              leading: Icon(AppIcon.recordingEchoCancel),
-              title: Text(_trans.recordingEchoCancel),
-              subtitle: Text(_trans.recordingEchoCancelInfo),
-            ),
-            ListTile(
-              leading: Icon(AppIcon.recordingNoiseSuppress),
-              title: Text(_trans.recordingNoiseSuppress),
-              subtitle: Text(_trans.recordingNoiseSuppressInfo),
-            ),
-          ],
-        ),
-        ExpansionTile(
-          title: Text(_trans.recordingAudioEncoders),
-          children: AppGlobalConfig.recordingAudioEncoder
-              .values()
-              .map((value) => ExpansionTile(
-                    leading: Text(AppGlobalConfig.recordingAudioEncoder.text(value, domain: ConfigItemPropertyDomain.icon)),
-                    title: Text(AppGlobalConfig.recordingAudioEncoder.format(value)),
-                    subtitle: Text(AppGlobalConfig.recordingAudioEncoder.translate(value, trans: _trans, domain: ConfigItemPropertyDomain.info)),
-                    children: [
-                      ListTile(
-                        title: Text(
-                            AppGlobalConfig.recordingAudioEncoder.translate(value, trans: _trans, domain: ConfigItemPropertyDomain.defaultProperty)),
-                        subtitle:
-                            Text(AppGlobalConfig.recordingAudioEncoder.translate(value, trans: _trans, domain: ConfigItemPropertyDomain.details)),
-                      ),
-                    ],
-                  ))
-              .toList(),
-        ),
-      ],
+      details,
       applicationIcon: Icon(_settings.get(AppConfigFieldKey.wakelockEnabled) ? AppIcon.logoKeepScreenOnEnabled : AppIcon.logoKeepScreenOnDisabled),
       applicationLegalese: _trans.legalNote,
     );

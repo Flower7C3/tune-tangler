@@ -24,6 +24,7 @@
   "trackRecording": "Trwa nagrywanie",
   "theAudioSourceRecorded": "Audio nagrane",
   "theAudioSourceImported": "Audio zaimportowane",
+  "theKeyboardKey": "Klawisz skrótu",
   "trackRecordingImport": "Importuj plik do ścieżki {trackName}",
   "trackRecordingImported": "Importowano plik do ścieżki {trackName}.",
   "trackRecordingImportCancelled": "Anulowano import pliku do ścieżki {trackName}.",

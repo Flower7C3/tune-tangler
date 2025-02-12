@@ -95,17 +95,16 @@ class TrackDetailsManager {
               valueListenable: track.state,
               builder: (context, state, child) => Tooltip(
                     message: AppGlobalConfig.trackState.translate(state, trans: _trans),
-                    child: Icon(track.stateIcon, size: Theme.of(context).textTheme.headlineMedium!.fontSize! * _uiHelper.iconSizeMultiplier),
+                    child: Icon(track.stateIcon, size: Theme.of(context).textTheme.headlineMedium!.fontSize! * UIHelper.iconSizeMultiplier),
                   )),
           trailing: ValueListenableBuilder(
               valueListenable: CombinedNotifier([track.name, track.keyboardKey]),
               builder: (context, _, __) => Tooltip(
                   message: _trans.trackKeyboardKey(track.name.value),
                   child: AppIcon.trackKeyboardKeyBox(
-                    track,
-                    ui: _uiHelper,
-                    context: context,
-                    foregroundColor: Theme.of(context).colorScheme.primary,
+                    track.keyboardKey.value,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: track.stateBackgroundColor(context),
                     size: Theme.of(context).textTheme.headlineSmall!.fontSize!,
                   ))),
           title: ValueListenableBuilder<String>(
@@ -171,29 +170,29 @@ class TrackDetailsManager {
   _trackDetailsInfoBox(Track track) => _uiHelper.trackDetailsBox([
         if (track.audioSourceIcon != null && track.path != null)
           _uiHelper.statusIconTile(track.audioSourceIcon!, path.basename(track.path.toString()),
-              iconSize: Theme.of(_context).textTheme.bodyLarge!.fontSize! * _uiHelper.iconSizeMultiplier,
+              iconSize: Theme.of(_context).textTheme.bodyLarge!.fontSize! * UIHelper.iconSizeMultiplier,
               fontSize: Theme.of(_context).textTheme.bodyLarge!.fontSize!),
         ValueListenableBuilder<Duration>(
             valueListenable: track.duration,
             builder: (context, time, child) => track.duration.value.inMilliseconds > 0
                 ? _uiHelper.statusIconTile(AppIcon.trackDuration, _trans.recordingDurationValue(_uiHelper.formatTime(time.inMilliseconds)),
                     iconColor: track.stateForegroundColor(context),
-                    iconSize: Theme.of(_context).textTheme.bodyLarge!.fontSize! * _uiHelper.iconSizeMultiplier,
+                    iconSize: Theme.of(_context).textTheme.bodyLarge!.fontSize! * UIHelper.iconSizeMultiplier,
                     fontSize: Theme.of(_context).textTheme.bodyLarge!.fontSize!)
                 : SizedBox(height: 0)),
         if (track.audioEncoder != null)
           _uiHelper.statusIconTile(AppIcon.recordingAudioEncoder, AppGlobalConfig.recordingAudioEncoder.translate(track.audioEncoder, trans: _trans),
-              iconSize: Theme.of(_context).textTheme.bodyLarge!.fontSize! * _uiHelper.iconSizeMultiplier,
+              iconSize: Theme.of(_context).textTheme.bodyLarge!.fontSize! * UIHelper.iconSizeMultiplier,
               fontSize: Theme.of(_context).textTheme.bodyLarge!.fontSize!),
         if (track.sampleRate != null)
           _uiHelper.statusIconTile(
               AppIcon.recordingSampleRate, _trans.recordingSampleRateValue(AppGlobalConfig.recordingSampleRate.format(track.sampleRate?.toDouble())),
-              iconSize: Theme.of(_context).textTheme.bodyLarge!.fontSize! * _uiHelper.iconSizeMultiplier,
+              iconSize: Theme.of(_context).textTheme.bodyLarge!.fontSize! * UIHelper.iconSizeMultiplier,
               fontSize: Theme.of(_context).textTheme.bodyLarge!.fontSize!),
         if (track.bitRate != null)
           _uiHelper.statusIconTile(
               AppIcon.recordingBitRate, _trans.recordingBitRateValue(AppGlobalConfig.recordingBitRate.format(track.bitRate?.toDouble())),
-              iconSize: Theme.of(_context).textTheme.bodyLarge!.fontSize! * _uiHelper.iconSizeMultiplier,
+              iconSize: Theme.of(_context).textTheme.bodyLarge!.fontSize! * UIHelper.iconSizeMultiplier,
               fontSize: Theme.of(_context).textTheme.bodyLarge!.fontSize!),
       ]);
 
@@ -433,9 +432,9 @@ class TrackDetailsManager {
                   children: [
                     _uiHelper.mediaPlayerButton(
                       AppIcon.trackPlaybackPositionSub,
-                      (track.playbackEndAtPosition.value.inMilliseconds - 100 <= track.playbackStartAtPosition.value.inMilliseconds)?
-                      _trans.trackPlaybackEndAtPositionSub10:
-                      _trans.trackPlaybackEndAtPositionSub100,
+                      (track.playbackEndAtPosition.value.inMilliseconds - 100 <= track.playbackStartAtPosition.value.inMilliseconds)
+                          ? _trans.trackPlaybackEndAtPositionSub10
+                          : _trans.trackPlaybackEndAtPositionSub100,
                       onPressed: (track.playbackEndAtPosition.value.inMilliseconds < track.playbackStartAtPosition.value.inMilliseconds)
                           ? null
                           : () => track.changePlaybackEndAtPosition(
@@ -447,9 +446,9 @@ class TrackDetailsManager {
                     ),
                     _uiHelper.mediaPlayerButton(
                       AppIcon.trackPlaybackPositionAdd,
-                      (track.playbackEndAtPosition.value.inMilliseconds - 100 < track.playbackStartAtPosition.value.inMilliseconds)?
-                      _trans.trackPlaybackEndAtPositionAdd10:
-                      _trans.trackPlaybackEndAtPositionAdd100,
+                      (track.playbackEndAtPosition.value.inMilliseconds - 100 < track.playbackStartAtPosition.value.inMilliseconds)
+                          ? _trans.trackPlaybackEndAtPositionAdd10
+                          : _trans.trackPlaybackEndAtPositionAdd100,
                       onPressed: (track.playbackEndAtPosition.value.inMilliseconds == track.duration.value.inMilliseconds)
                           ? null
                           : () => track.changePlaybackEndAtPosition(
@@ -506,7 +505,7 @@ class TrackDetailsManager {
                   ValueListenableBuilder<ReleaseMode>(
                       valueListenable: track.playbackReleaseMode,
                       builder: (context, playbackReleaseMode, child) => _uiHelper.mediaPlayerButton(
-                        AppGlobalConfig.trackPlaybackReleaseMode.icon(playbackReleaseMode),
+                            AppGlobalConfig.trackPlaybackReleaseMode.icon(playbackReleaseMode),
                             _trans.trackPlaybackModeToggle(track.name.value),
                             onPressed: (track.state.value != TrackState.recording)
                                 ? () {
@@ -696,7 +695,7 @@ class TrackDetailsManager {
                       style: OutlinedButton.styleFrom(
                         padding: EdgeInsets.zero,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(_uiHelper.gridGap)),
+                          borderRadius: BorderRadius.all(Radius.circular(UIHelper.gridGap)),
                         ),
                         backgroundColor: (key == track.keyboardKey.value) ? Theme.of(context).colorScheme.primary : null,
                       ),

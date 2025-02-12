@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:tune_tangler/helper/ui_helper.dart';
 
-import '../entity/track.dart';
-
 class AppIcon {
   static IconData logoKeepScreenOnEnabled = Icons.dashboard_customize;
   static IconData logoKeepScreenOnDisabled = Icons.dashboard_customize_outlined;
@@ -25,18 +23,18 @@ class AppIcon {
   static IconData trackKeyboardKey = Icons.keyboard_alt_rounded;
 
   static Container trackKeyboardKeyBox(
-    Track track, {
-    required UIHelper ui,
-    required BuildContext context,
-    required Color foregroundColor,
+    String keyName, {
+    Color? backgroundColor,
+    Color? foregroundColor,
     required double size,
   }) =>
       Container(
           width: size,
           height: size,
           alignment: Alignment.center,
-          decoration: BoxDecoration(color: foregroundColor, borderRadius: BorderRadius.all(Radius.circular(ui.gridGap)), shape: BoxShape.rectangle),
-          child: Text(track.keyboardKey.value, style: TextStyle(fontSize: size, height: 1.0, color: track.stateBackgroundColor(context))));
+          decoration:
+              BoxDecoration(color: backgroundColor, borderRadius: BorderRadius.all(Radius.circular(UIHelper.gridGap)), shape: BoxShape.rectangle),
+          child: Text(keyName, style: TextStyle(fontSize: size, height: 1.0, color: foregroundColor)));
 
   static IconData trackPlaybackMode = Icons.replay_rounded;
   static IconData trackSinglePlaybackMode = Icons.repeat_one_rounded;
@@ -45,7 +43,7 @@ class AppIcon {
   static IconData trackPlaybackBalance = Icons.headphones_rounded;
   static IconData trackPlaybackBalanceLeft = Icons.join_left_rounded;
   static IconData trackPlaybackBalanceRight = Icons.join_right_rounded;
-  static IconData trackPlaybackBalanceCenter= Icons.join_full_rounded;
+  static IconData trackPlaybackBalanceCenter = Icons.join_full_rounded;
   static IconData trackPlaybackSpeed = Icons.slow_motion_video_rounded;
 
   static IconData trackAudioSourceRecorded = Icons.audio_file_outlined;
@@ -106,5 +104,4 @@ class AppIcon {
 
   static IconData recordingProgressSlider = Symbols.start_rounded;
   static IconData recordingClipSlider = Symbols.align_justify_space_even_rounded;
-
 }
