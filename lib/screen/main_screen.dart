@@ -10,10 +10,9 @@ import '../config/app_global_config.dart';
 import '../helper/ui_helper.dart';
 import '../manager/drawer_manager.dart';
 import '../manager/navigation_bar_manager.dart';
-import '../manager/recording_manager.dart';
 import '../manager/row_menu_manager.dart';
+import '../manager/track_manager.dart';
 import '../wrapper/settings_wrapper.dart';
-import '../wrapper/track_wrapper.dart';
 
 class MainScreenApp extends StatefulWidget {
   final Box globalSettingsBox;
@@ -103,13 +102,12 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
 
   Builder _buildContent() => Builder(builder: (context) {
         AppLocalizations trans = AppLocalizations.of(context)!;
-        UIHelper uiWrapper = UIHelper(context);
+        UIHelper uiHelper = UIHelper(context);
         _trackRepository = TrackRepository(_settings);
-        RecordingManager recordingManager = RecordingManager(_settings, trans, uiWrapper, _trackRepository, _audioRecorder);
-        TrackWrapper trackWrapper = TrackWrapper(context, _settings, trans, uiWrapper, _trackRepository, recordingManager);
-        NavigationBarManager navigationBarManager = NavigationBarManager(context, _settings, trans, uiWrapper, _trackRepository);
-        RowMenuManager rowMenuManager = RowMenuManager(context, trans, uiWrapper, _trackRepository);
-        DrawerManager drawerManager = DrawerManager(context, _settings, trans, uiWrapper, _trackRepository, _audioRecorder);
+        NavigationBarManager navigationBarManager = NavigationBarManager(context, _settings, trans, uiHelper, _trackRepository);
+        RowMenuManager rowMenuManager = RowMenuManager(context, trans, uiHelper, _trackRepository);
+        DrawerManager drawerManager = DrawerManager(context, _settings, trans, uiHelper, _trackRepository, _audioRecorder);
+        TrackManager trackManager = TrackManager(context, _settings, trans, uiHelper, _trackRepository, _audioRecorder);
 
         return Scaffold(
           appBar: navigationBarManager.buildAppBar,
@@ -118,7 +116,7 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
               focusNode: _focusNode,
               autofocus: true,
               onKeyEvent: (node, KeyEvent event) {
-                trackWrapper.onKeyEvent(event);
+                trackManager.onKeyEvent(event);
                 return KeyEventResult.handled;
               },
               child: ListView.builder(
@@ -126,7 +124,7 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
                   itemCount: _settings.get(AppConfigFieldKey.gridRowsAmount),
                   itemBuilder: (context, rowIndex) => Row(children: [
                         rowMenuManager.buildRowButtons(rowIndex),
-                        trackWrapper.buildRowTracks(rowIndex),
+                        trackManager.buildRowTracks(rowIndex),
                       ]))),
           bottomNavigationBar: navigationBarManager.buildFooter,
         );

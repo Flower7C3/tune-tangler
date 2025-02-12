@@ -17,10 +17,6 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   //************************************
-  // Set loading screen
-  // runApp(const SplashScreenApp());
-
-  //************************************
   // Initialize
   await Hive.initFlutter();
   Hive.registerAdapter(LocaleAdapter());
