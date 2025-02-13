@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:tune_tangler/adapter/audio_input_device_adapter.dart';
 import 'package:tune_tangler/adapter/duration_adapter.dart';
@@ -14,10 +15,10 @@ import 'screen/main_screen.dart';
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
   //************************************
   // Initialize
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   await Hive.initFlutter();
   Hive.registerAdapter(LocaleAdapter());
   Hive.registerAdapter(ThemeModeAdapter());
@@ -43,4 +44,8 @@ Future<void> main() async {
   //************************************
   // Set main screen
   runApp(MainScreenApp(globalSettingsBox: globalSettingsBox, trackSettingsBox: trackSettingsBox));
+
+  //************************************
+  // Remove splash screen
+  FlutterNativeSplash.remove();
 }

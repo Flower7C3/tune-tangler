@@ -18,6 +18,10 @@ samples, guidance on mobile development, and a full API reference.
 
 ## How to
 
-Regenerate icons:
+- Regenerate icons:
 
-`dart run flutter_launcher_icons`
+      dart run flutter_launcher_icons
+
+- Regenerate splash screen:
+
+      flutter pub run flutter_native_splash:create
