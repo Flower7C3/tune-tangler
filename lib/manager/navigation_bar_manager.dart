@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:tune_tangler/helper/ui_helper.dart';
 import 'package:tune_tangler/repository/track_repository.dart';
-import 'package:tune_tangler/wrapper/settings_wrapper.dart';
+import 'package:tune_tangler/wrapper/hive_settings_provider.dart';
 
 import '../config/app_config_fields.dart';
 import '../config/app_global_config.dart';
@@ -12,7 +12,7 @@ import '../config/menu_item_enums.dart';
 
 class NavigationBarManager {
   final BuildContext _context;
-  final SettingsWrapper _settings;
+  final HiveSettingsProvider _settings;
   final AppLocalizations _trans;
   final UIHelper _uiHelper;
   final TrackRepository _trackRepository;
@@ -29,7 +29,7 @@ class NavigationBarManager {
           backgroundColor: Theme.of(_context).colorScheme.inversePrimary,
           leading: Builder(
             builder: (context) => IconButton(
-              icon: Icon(_settings.get(AppConfigFieldKey.wakelockEnabled) ? AppIcon.logoKeepScreenOnEnabled : AppIcon.logoKeepScreenOnDisabled),
+              icon: Icon(_settings.getConfig(AppConfigFieldKey.wakelockEnabled) ? AppIcon.logoKeepScreenOnEnabled : AppIcon.logoKeepScreenOnDisabled),
               onPressed: () => Scaffold.of(context).openDrawer(),
             ),
           ),

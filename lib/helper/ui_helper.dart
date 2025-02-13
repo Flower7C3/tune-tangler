@@ -631,6 +631,9 @@ class UIHelper {
     String listTitle,
     dynamic currentValue,
     List<dynamic> values, {
+    bool trailingValueIcon = false,
+    bool translateChoiceChip = false,
+    bool useAvatar = false,
     String? helpMessage,
     List<Widget>? helpWidgets,
     required String Function(dynamic value, String formattedValue) successAction,
@@ -642,13 +645,17 @@ class UIHelper {
         title: Text(listTitle),
         subtitle: Text(_translateOrFormat(currentValue, configCollection, trans)),
         childrenPadding: EdgeInsets.only(left: gridGap * 3),
+        trailing: trailingValueIcon ? Icon(configCollection?.icon(currentValue)) : null,
         children: [
           Wrap(
             spacing: gridGap,
             children: List.generate(
               values.length,
               (index) => ChoiceChip(
-                label: Text(_format(values[index], configCollection)),
+                label:
+                    Text(translateChoiceChip ? _translateOrFormat(values[index], configCollection, trans) : _format(values[index], configCollection)),
+                showCheckmark: false,
+                avatar: useAvatar ? Icon(configCollection?.icon(values[index])) : null,
                 selected: values[index] == currentValue,
                 onSelected: (bool selected) {
                   if (selected) {

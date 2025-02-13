@@ -8,7 +8,8 @@ class AppIcon {
   static IconData language = Icons.translate_rounded;
   static IconData help = Icons.help_outline_rounded;
 
-  static IconData screenThemeMode = Icons.brightness_4;
+  static IconData screenThemeMode = Icons.contrast_rounded;
+  static IconData screenSystemThemeMode = Icons.brightness_5_outlined;
   static IconData screenLightThemeMode = Icons.light_mode_rounded;
   static IconData screenDarkThemeMode = Icons.dark_mode_rounded;
   static IconData screenThemeColor = Icons.palette_rounded;
@@ -93,7 +94,7 @@ class AppIcon {
   static IconData screenSettings = Icons.display_settings;
   static IconData trackSettings = Icons.graphic_eq_rounded;
   static IconData recordingSettings = Icons.settings_voice;
-  static IconData permissions = Icons.shield_outlined;
+  static IconData permissions = Icons.perm_device_info_rounded;
 
   static IconData dangerZone = Icons.dangerous_outlined;
 

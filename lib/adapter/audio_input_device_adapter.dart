@@ -8,7 +8,7 @@ enum AudioInputDeviceAdapterKey {
 
 class AudioInputDeviceAdapter extends TypeAdapter<InputDevice> {
   @override
-  final typeId = 115;
+  get typeId => 115;
 
   @override
   InputDevice read(BinaryReader reader) {

@@ -10,16 +10,17 @@ import 'package:record/record.dart';
 import 'package:tune_tangler/config/config_collection.dart';
 import 'package:tune_tangler/helper/ui_helper.dart';
 
+import '../adapter/track_audio_source.dart';
 import '../config/app_config_fields.dart';
 import '../config/app_global_config.dart';
 import '../config/app_icon.dart';
 import '../entity/track.dart';
 import '../main.dart';
 import '../repository/track_repository.dart';
-import '../wrapper/settings_wrapper.dart';
+import '../wrapper/hive_settings_provider.dart';
 
 class RecordingManager {
-  final SettingsWrapper _settings;
+  final HiveSettingsProvider _settings;
   final UIHelper _uiHelper;
   final AppLocalizations _trans;
   final TrackRepository _trackRepository;
@@ -63,6 +64,39 @@ class RecordingManager {
     _uiHelper.toast(_trans.trackRecordingImported(track.name.value), icon: AppIcon.trackRecordingImport);
   }
 
+  RecordConfig _recordConfig() {
+    InputDevice? inputDevice = _settings.getConfig(AppConfigFieldKey.recordingInputDevice);
+    AudioEncoder audioEncoder = _settings.getConfig(AppConfigFieldKey.recordingAudioEncoder);
+    int sampleRate = _settings.getConfig(AppConfigFieldKey.recordingSampleRate);
+    int bitRate = _settings.getConfig(AppConfigFieldKey.recordingBitRate);
+    int channels = AppGlobalConfig.recordingAudioMode.decode(_settings.getConfig(AppConfigFieldKey.recordingAudioModeStereo));
+    bool autoGain = _settings.getConfig(AppConfigFieldKey.recordingAutoGain);
+    bool echoCancel = _settings.getConfig(AppConfigFieldKey.recordingEchoCancel);
+    bool noiseSuppress = _settings.getConfig(AppConfigFieldKey.recordingNoiseSuppress);
+    if (inputDevice == null) {
+      return RecordConfig(
+        encoder: audioEncoder,
+        sampleRate: sampleRate,
+        bitRate: bitRate,
+        numChannels: channels,
+        autoGain: autoGain,
+        echoCancel: echoCancel,
+        noiseSuppress: noiseSuppress,
+      );
+    } else {
+      return RecordConfig(
+        device: inputDevice,
+        encoder: audioEncoder,
+        sampleRate: sampleRate,
+        bitRate: bitRate,
+        numChannels: channels,
+        autoGain: autoGain,
+        echoCancel: echoCancel,
+        noiseSuppress: noiseSuppress,
+      );
+    }
+  }
+
   Future<void> startRecording(Track track) async {
     try {
       if (await _audioRecorder.isRecording()) {
@@ -75,7 +109,7 @@ class RecordingManager {
         throw Exception(_trans.trackRecordingStartNoNotificationPermission);
       }
 
-      RecordConfig recordConfig = _settings.get(AppConfigFieldKey.recording);
+      RecordConfig recordConfig = _recordConfig();
       String fileExtension = AppGlobalConfig.recordingAudioEncoder.text(recordConfig.encoder, domain: ConfigItemPropertyDomain.extension);
       String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
       String filePath = await getApplicationDocumentsDirectory().then((value) => '${value.path}/${track.id}.$timestamp.$fileExtension');

@@ -1,24 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:record/record.dart';
 import 'package:tune_tangler/repository/track_repository.dart';
+import 'package:tune_tangler/screen/home_screen.dart';
+import 'package:tune_tangler/wrapper/hive_service.dart';
 
 import '../config/app_config_fields.dart';
 import '../config/app_global_config.dart';
-import '../helper/ui_helper.dart';
-import '../manager/drawer_manager.dart';
-import '../manager/navigation_bar_manager.dart';
-import '../manager/row_menu_manager.dart';
-import '../manager/track_manager.dart';
-import '../wrapper/settings_wrapper.dart';
+import '../provider/permission_provider.dart';
+import '../wrapper/hive_settings_provider.dart';
 
 class MainScreenApp extends StatefulWidget {
-  final Box globalSettingsBox;
-  final Box trackSettingsBox;
-
-  const MainScreenApp({super.key, required this.globalSettingsBox, required this.trackSettingsBox});
+  const MainScreenApp({super.key});
 
   @override
   State<MainScreenApp> createState() => _MainScreenAppState();
@@ -27,24 +22,24 @@ class MainScreenApp extends StatefulWidget {
 class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserver {
   late final AudioRecorder _audioRecorder;
   final FocusNode _focusNode = FocusNode();
-  late SettingsWrapper _settings;
+  late HiveSettingsProvider _settings;
   late TrackRepository _trackRepository;
+  final PermissionProvider _permissionProvider = PermissionProvider();
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _audioRecorder = AudioRecorder();
-    _focusNode.requestFocus(); // Utrzymuje fokus po starcie aplikacji
-    WidgetsBinding.instance.addObserver(this);
+    _focusNode.requestFocus();
+    _permissionProvider.init();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _audioRecorder.dispose();
-    widget.globalSettingsBox.close();
-    widget.trackSettingsBox.close();
+    HiveService.dispose();
     _trackRepository.stopTracksPlaying(_trackRepository.allTracks());
     _trackRepository.dispose(_trackRepository.allTracks());
     super.dispose();
@@ -59,74 +54,49 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
 
   @override
   Widget build(BuildContext context) {
-    _settings = SettingsWrapper(setState, widget.globalSettingsBox, widget.trackSettingsBox);
-    _settings.checkPermissions();
-    return _buildApp();
+    _settings = Provider.of<HiveSettingsProvider>(context);
+    _trackRepository = TrackRepository(_settings);
+
+    return MaterialApp(
+      localizationsDelegates: [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppGlobalConfig.languages.values<Locale>(),
+      locale: _settings.getConfig(AppConfigFieldKey.locale),
+      themeAnimationDuration: Duration(seconds: 0),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: _settings.getConfig(AppConfigFieldKey.themeSeedColor),
+          brightness: Brightness.light,
+        ),
+        useMaterial3: true,
+      ),
+      darkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: _settings.getConfig(AppConfigFieldKey.themeSeedColor),
+          brightness: Brightness.dark,
+        ),
+        useMaterial3: true,
+      ),
+      themeMode: _settings.getConfig(AppConfigFieldKey.themeMode),
+      home: HomeScreen(
+        settings: _settings,
+        permissionProvider: _permissionProvider,
+        focusNode: _focusNode,
+        audioRecorder: _audioRecorder,
+        trackRepository: _trackRepository,
+      ),
+      // initialRoute: '/',
+      // routes: {
+      //   '/': (context) =>
+      //       HomeScreen(
+      //         settingsGet: _settings.get,
+      //         settingsSet: _settingsSet,
+      //         audioRecorder: _audioRecorder,
+      // },
+    );
   }
-
-  MaterialApp _buildApp() => MaterialApp(
-        localizationsDelegates: [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: AppGlobalConfig.languages.values<Locale>(),
-        locale: _settings.get(AppConfigFieldKey.locale),
-        themeAnimationDuration: Duration(seconds: 0),
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: _settings.get(AppConfigFieldKey.themeSeedColor),
-            brightness: Brightness.light,
-          ),
-          useMaterial3: true,
-        ),
-        darkTheme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: _settings.get(AppConfigFieldKey.themeSeedColor),
-            brightness: Brightness.dark,
-          ),
-          useMaterial3: true,
-        ),
-        themeMode: _settings.get(AppConfigFieldKey.themeMode),
-        home: _buildContent(),
-        // initialRoute: '/',
-        // routes: {
-        //   '/': (context) =>
-        //       HomeScreen(
-        //         settingsGet: _settings.get,
-        //         settingsSet: _settingsSet,
-        //         audioRecorder: _audioRecorder,
-        // },
-      );
-
-  Builder _buildContent() => Builder(builder: (context) {
-        AppLocalizations trans = AppLocalizations.of(context)!;
-        UIHelper uiHelper = UIHelper(context);
-        _trackRepository = TrackRepository(_settings);
-        NavigationBarManager navigationBarManager = NavigationBarManager(context, _settings, trans, uiHelper, _trackRepository);
-        RowMenuManager rowMenuManager = RowMenuManager(context, trans, uiHelper, _trackRepository);
-        DrawerManager drawerManager = DrawerManager(context, _settings, trans, uiHelper, _trackRepository, _audioRecorder);
-        TrackManager trackManager = TrackManager(context, _settings, trans, uiHelper, _trackRepository, _audioRecorder);
-
-        return Scaffold(
-          appBar: navigationBarManager.buildAppBar,
-          drawer: drawerManager.build,
-          body: Focus(
-              focusNode: _focusNode,
-              autofocus: true,
-              onKeyEvent: (node, KeyEvent event) {
-                trackManager.onKeyEvent(event);
-                return KeyEventResult.handled;
-              },
-              child: ListView.builder(
-                  controller: PageController(viewportFraction: 0.85),
-                  itemCount: _settings.get(AppConfigFieldKey.gridRowsAmount),
-                  itemBuilder: (context, rowIndex) => Row(children: [
-                        rowMenuManager.buildRowButtons(rowIndex),
-                        trackManager.buildRowTracks(rowIndex),
-                      ]))),
-          bottomNavigationBar: navigationBarManager.buildFooter,
-        );
-      });
 }

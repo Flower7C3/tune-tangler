@@ -4,10 +4,10 @@ import '../config/app_config_fields.dart';
 import '../config/app_global_config.dart';
 import '../entity/track.dart';
 import '../entity/track_row.dart';
-import '../wrapper/settings_wrapper.dart';
+import '../wrapper/hive_settings_provider.dart';
 
 class TrackRepository {
-  final SettingsWrapper _settings;
+  final HiveSettingsProvider _settings;
 
   TrackRepository(this._settings) {
     resetTracksCollection();
@@ -24,9 +24,9 @@ class TrackRepository {
   Set<Track> _lazyLoadCollection(int rowIndex) {
     String name = rowIndex < 0 ? 'all' : TrackRow.name(rowIndex);
     if (!_tracksCollection.containsKey(name) || _tracksCollection[name]!.isEmpty) {
-      int colsAmount = _settings.get(AppConfigFieldKey.gridColsAmount);
+      int colsAmount = _settings.getConfig(AppConfigFieldKey.gridColsAmount);
       if (rowIndex < 0) {
-        int rowsAmount = _settings.get(AppConfigFieldKey.gridRowsAmount);
+        int rowsAmount = _settings.getConfig(AppConfigFieldKey.gridRowsAmount);
         for (int rowIndex = 0; rowIndex < rowsAmount; rowIndex++) {
           _lazyLoadRowTracks(name, rowIndex, colsAmount);
         }
@@ -44,8 +44,7 @@ class TrackRepository {
   }
 
   void _lazyLoadTrack(String name, int rowIndex, int columnIndex) {
-    String trackId = Track.buildId(rowIndex, columnIndex);
-    Track track = _settings.get(trackId, space: AppConfigSpace.track, defaultValue: Track(rowIndex, columnIndex));
+    Track track = _settings.getTrack(rowIndex, columnIndex);
 
     if (!_tracksCollection.containsKey(name)) {
       _tracksCollection[name] = {};
@@ -54,7 +53,7 @@ class TrackRepository {
   }
 
   void save(Track track) {
-    _settings.set(track.id, track, space: AppConfigSpace.track);
+    _settings.saveTrack(track);
   }
 
   Future<void> removeTrackRecording(Track track) async {
@@ -127,7 +126,7 @@ class TrackRepository {
 
   void resetTracksName(Set<Track> tracksList) async {
     for (Track track in tracksList) {
-      track.setName(track.id);
+      track.setName(track.id.toString());
       save(track);
     }
   }

@@ -3,7 +3,7 @@ import 'package:hive/hive.dart';
 
 class ReleaseModeAdapter extends TypeAdapter<ReleaseMode> {
   @override
-  final typeId = 114;
+  get typeId => 114;
 
   @override
   ReleaseMode read(BinaryReader reader) {

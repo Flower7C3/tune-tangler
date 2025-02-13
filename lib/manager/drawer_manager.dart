@@ -6,29 +6,24 @@ import 'package:record/record.dart';
 import 'package:tune_tangler/config/config_collection.dart';
 import 'package:tune_tangler/helper/ui_helper.dart';
 import 'package:tune_tangler/repository/track_repository.dart';
-import 'package:tune_tangler/wrapper/settings_wrapper.dart';
+import 'package:tune_tangler/wrapper/hive_settings_provider.dart';
 
 import '../config/app_config_fields.dart';
 import '../config/app_global_config.dart';
 import '../config/app_icon.dart';
 import '../entity/track.dart';
+import '../provider/permission_provider.dart';
 
 class DrawerManager {
   final BuildContext _context;
-  final SettingsWrapper _settings;
+  final HiveSettingsProvider _settings;
+  final PermissionProvider _permissionProvider;
   final AppLocalizations _trans;
   final UIHelper _uiHelper;
   final TrackRepository _trackRepository;
   final AudioRecorder _audioRecorder;
 
-  DrawerManager(
-    this._context,
-    this._settings,
-    this._trans,
-    this._uiHelper,
-    this._trackRepository,
-    this._audioRecorder,
-  );
+  DrawerManager(this._context, this._settings, this._permissionProvider, this._trans, this._uiHelper, this._trackRepository, this._audioRecorder);
 
   Widget get build => StatefulBuilder(
       builder: (BuildContext context, StateSetter setDrawerState) => Drawer(
@@ -44,14 +39,14 @@ class DrawerManager {
                 style: TextStyle(color: Theme.of(context).colorScheme.inversePrimary),
               ),
               currentAccountPicture: Icon(
-                  _settings.get(AppConfigFieldKey.wakelockEnabled) ? AppIcon.logoKeepScreenOnEnabled : AppIcon.logoKeepScreenOnDisabled,
+                  _settings.getConfig(AppConfigFieldKey.wakelockEnabled) ? AppIcon.logoKeepScreenOnEnabled : AppIcon.logoKeepScreenOnDisabled,
                   size: Theme.of(context).textTheme.displayLarge!.fontSize! * UIHelper.iconSizeMultiplier,
                   color: Theme.of(context).colorScheme.inversePrimary),
             ),
             ExpansionTile(
               leading: Icon(AppIcon.recordingSettings),
               title: Text(_trans.recording),
-              initiallyExpanded: true,
+              // initiallyExpanded: true,
               childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
               children: _recordingSettings(setDrawerState),
             ),
@@ -85,8 +80,8 @@ class DrawerManager {
           leading: Icon(AppIcon.recordingInputDevice),
           title: Text(_trans.recordingInputDevice),
           subtitle: Text(
-            _settings.get(AppConfigFieldKey.recordingInputDevice) != null
-                ? _settings.get(AppConfigFieldKey.recordingInputDevice).label
+            _settings.getConfig(AppConfigFieldKey.recordingInputDevice) != null
+                ? _settings.getConfig(AppConfigFieldKey.recordingInputDevice).label
                 : _trans.defaultDevice,
           ),
           onTap: () async {
@@ -95,7 +90,7 @@ class DrawerManager {
                 padding: EdgeInsets.all(16),
                 onPressed: () {
                   Navigator.pop(_context, 'recordingInputDevice');
-                  _settings.set(AppConfigFieldKey.recordingInputDevice, null, updateState: true);
+                  _settings.setConfig(AppConfigFieldKey.recordingInputDevice, null);
                 },
                 child: Text(_trans.defaultDevice)));
             await _audioRecorder.listInputDevices().then((List<InputDevice> inputDevices) {
@@ -103,7 +98,7 @@ class DrawerManager {
                 options.add(SimpleDialogOption(
                     padding: EdgeInsets.all(16),
                     onPressed: () {
-                      _settings.set(AppConfigFieldKey.recordingInputDevice, inputDevice, updateState: true);
+                      _settings.setConfig(AppConfigFieldKey.recordingInputDevice, inputDevice);
                       Navigator.pop(_context, 'recordingInputDevice');
                     },
                     child: Text(_trans.recordingInputDeviceValue(inputDevice.label))));
@@ -116,7 +111,7 @@ class DrawerManager {
         _uiHelper.listTileButtons(
           AppIcon.recordingAudioEncoder,
           _trans.recordingAudioEncoder,
-          _settings.get(AppConfigFieldKey.recordingAudioEncoder),
+          _settings.getConfig(AppConfigFieldKey.recordingAudioEncoder),
           AppGlobalConfig.recordingAudioEncoder.values().toList(),
           helpWidgets: AppGlobalConfig.recordingAudioEncoder
               .values()
@@ -128,35 +123,31 @@ class DrawerManager {
           configCollection: AppGlobalConfig.recordingAudioEncoder,
           trans: _trans,
           successAction: (dynamic value, String formattedValue) {
-            _settings.set(
-              AppConfigFieldKey.recordingAudioEncoder,
-              value,
-              updateState: true,
-            );
+            _settings.setConfig(AppConfigFieldKey.recordingAudioEncoder, value);
             return _trans.recordingAudioEncoderSuccess(formattedValue);
           },
         ),
         _uiHelper.listTileButtons(
           AppIcon.recordingSampleRate,
           _trans.recordingSampleRate,
-          _settings.get(AppConfigFieldKey.recordingSampleRate),
+          _settings.getConfig(AppConfigFieldKey.recordingSampleRate),
           AppGlobalConfig.recordingSampleRate.values().toList(),
           helpMessage: _trans.recordingSampleRateInfo,
           configCollection: AppGlobalConfig.recordingSampleRate,
           successAction: (dynamic value, String formattedValue) {
-            _settings.set(AppConfigFieldKey.recordingSampleRate, value, updateState: true);
+            _settings.setConfig(AppConfigFieldKey.recordingSampleRate, value);
             return _trans.recordingAudioEncoderSuccess(formattedValue);
           },
         ),
         _uiHelper.listTileButtons(
           AppIcon.recordingBitRate,
           _trans.recordingBitRate,
-          _settings.get(AppConfigFieldKey.recordingBitRate),
+          _settings.getConfig(AppConfigFieldKey.recordingBitRate),
           AppGlobalConfig.recordingBitRate.values().toList(),
           helpMessage: _trans.recordingBitRateInfo,
           configCollection: AppGlobalConfig.recordingBitRate,
           successAction: (dynamic value, String formattedValue) {
-            _settings.set(AppConfigFieldKey.recordingBitRate, value, updateState: true);
+            _settings.setConfig(AppConfigFieldKey.recordingBitRate, value);
             return _trans.recordingAudioEncoderSuccess(formattedValue);
           },
         ),
@@ -165,9 +156,9 @@ class DrawerManager {
           _trans.recordingAudioMode,
           disabledIcon: AppIcon.recordingAudioModeMono,
           enabledIcon: AppIcon.recordingAudioModeStereo,
-          switchValue: _settings.get(AppConfigFieldKey.recordingAudioModeStereo),
+          switchValue: _settings.getConfig(AppConfigFieldKey.recordingAudioModeStereo),
           successAction: (bool value) {
-            _settings.set(AppConfigFieldKey.recordingAudioModeStereo, value, updateState: true);
+            _settings.setConfig(AppConfigFieldKey.recordingAudioModeStereo, value);
             return _trans.recordingAudioModeSuccess(value ? _trans.recordingAudioModeOptionStereo : _trans.recordingAudioModeOptionMono);
           },
         ),
@@ -176,9 +167,9 @@ class DrawerManager {
           _trans.recordingAutoGain,
           disabledIcon: AppIcon.no,
           enabledIcon: AppIcon.yes,
-          switchValue: _settings.get(AppConfigFieldKey.recordingAutoGain),
+          switchValue: _settings.getConfig(AppConfigFieldKey.recordingAutoGain),
           successAction: (bool value) {
-            _settings.set(AppConfigFieldKey.recordingAutoGain, value, updateState: true);
+            _settings.setConfig(AppConfigFieldKey.recordingAutoGain, value);
             return _trans.recordingAutoGainSuccess(value ? _trans.yes : _trans.no);
           },
         ),
@@ -187,9 +178,9 @@ class DrawerManager {
           _trans.recordingEchoCancel,
           disabledIcon: AppIcon.no,
           enabledIcon: AppIcon.yes,
-          switchValue: _settings.get(AppConfigFieldKey.recordingEchoCancel),
+          switchValue: _settings.getConfig(AppConfigFieldKey.recordingEchoCancel),
           successAction: (bool value) {
-            _settings.set(AppConfigFieldKey.recordingEchoCancel, value, updateState: true);
+            _settings.setConfig(AppConfigFieldKey.recordingEchoCancel, value);
             return _trans.recordingEchoCancelSuccess(value ? _trans.yes : _trans.no);
           },
         ),
@@ -198,9 +189,9 @@ class DrawerManager {
           _trans.recordingNoiseSuppress,
           disabledIcon: AppIcon.no,
           enabledIcon: AppIcon.yes,
-          switchValue: _settings.get(AppConfigFieldKey.recordingNoiseSuppress),
+          switchValue: _settings.getConfig(AppConfigFieldKey.recordingNoiseSuppress),
           successAction: (bool value) {
-            _settings.set(AppConfigFieldKey.recordingNoiseSuppress, value, updateState: true);
+            _settings.setConfig(AppConfigFieldKey.recordingNoiseSuppress, value);
             return _trans.recordingNoiseSuppressSuccess(value ? _trans.yes : _trans.no);
           },
         ),
@@ -210,9 +201,9 @@ class DrawerManager {
         _uiHelper.listTileListDialog(
           AppIcon.language,
           _trans.languageVersion,
-          listSubtitle: AppGlobalConfig.languages.format(_settings.get(AppConfigFieldKey.locale)),
+          listSubtitle: AppGlobalConfig.languages.format(_settings.getConfig(AppConfigFieldKey.locale)),
           dialogTitle: _trans.changeLanguage,
-          currentValue: _settings.get(AppConfigFieldKey.locale).toLanguageTag(),
+          currentValue: _settings.getConfig(AppConfigFieldKey.locale).toLanguageTag(),
           options: AppGlobalConfig.languages
               .values<Locale>()
               .map((Locale locale) => SimpleDialogOption(
@@ -221,34 +212,38 @@ class DrawerManager {
                         iconColor: Theme.of(_context).colorScheme.inversePrimary),
                     onPressed: () {
                       Navigator.pop(_context, locale);
-                      _settings.set(AppConfigFieldKey.locale, locale, updateState: true);
+                      _settings.setConfig(AppConfigFieldKey.locale, locale);
                     },
                   ))
               .toList(),
         ),
-        _uiHelper.listTileSwitch(
+        _uiHelper.listTileButtons(
           AppIcon.screenThemeMode,
           _trans.screenThemeMode,
-          disabledIcon: AppIcon.screenLightThemeMode,
-          enabledIcon: AppIcon.screenDarkThemeMode,
-          switchValue: _settings.get(AppConfigFieldKey.isThemeModeDark),
-          successAction: (bool value) {
-            _settings.set(AppConfigFieldKey.themeMode, value ? ThemeMode.dark : ThemeMode.light, updateState: true);
-            return null;
+          _settings.getConfig(AppConfigFieldKey.themeMode),
+          AppGlobalConfig.screenThemeMode.values().toList(),
+          trailingValueIcon: true,
+          useAvatar: true,
+          translateChoiceChip: true,
+          configCollection: AppGlobalConfig.screenThemeMode,
+          trans: _trans,
+          successAction: (dynamic value, String formattedValue) {
+            _settings.setConfig(AppConfigFieldKey.themeMode, value);
+            return '';
           },
         ),
         _uiHelper.listTileColorPicker(
           AppIcon.screenThemeColor,
           _trans.screenThemeColor,
-          listSubtitle: AppGlobalConfig.userInterfaceColor.translate(_settings.get(AppConfigFieldKey.themeSeedColor), trans: _trans),
+          listSubtitle: AppGlobalConfig.userInterfaceColor.translate(_settings.getConfig(AppConfigFieldKey.themeSeedColor), trans: _trans),
           dialogTitle: _trans.screenThemeColorTitle,
           dialogInfo: _trans.screenThemeColorInfo,
-          currentValue: _settings.get(AppConfigFieldKey.themeSeedColor),
+          currentValue: _settings.getConfig(AppConfigFieldKey.themeSeedColor),
           values: AppGlobalConfig.userInterfaceColor.values<Color>().toList(),
           configCollection: AppGlobalConfig.userInterfaceColor,
           trans: _trans,
           successAction: (dynamic value, String formattedValue) {
-            _settings.set(AppConfigFieldKey.themeSeedColor, value, updateState: true);
+            _settings.setConfig(AppConfigFieldKey.themeSeedColor, value);
             return _trans.screenThemeColorSuccess(formattedValue);
           },
         ),
@@ -257,9 +252,9 @@ class DrawerManager {
           _trans.keepScreenOn,
           disabledIcon: AppIcon.keepScreenOnDisabled,
           enabledIcon: AppIcon.keepScreenOnEnabled,
-          switchValue: _settings.get(AppConfigFieldKey.wakelockEnabled),
+          switchValue: _settings.getConfig(AppConfigFieldKey.wakelockEnabled),
           successAction: (bool value) {
-            _settings.set(AppConfigFieldKey.wakelockEnabled, value, updateState: true);
+            _settings.setConfig(AppConfigFieldKey.wakelockEnabled, value);
             return value ? _trans.keepScreenOnIsEnabledSuccess : _trans.keepScreenOnIsDisabledSuccess;
           },
         ),
@@ -268,14 +263,14 @@ class DrawerManager {
           _trans.gridRowsAmount,
           _trans.gridRowsAmountTitle,
           _trans.gridRowsAmountInfo,
-          double.parse(_settings.get(AppConfigFieldKey.gridRowsAmount).toString()),
+          double.parse(_settings.getConfig(AppConfigFieldKey.gridRowsAmount).toString()),
           AppGlobalConfig.gridRows.sliderValues.min,
           AppGlobalConfig.gridRows.sliderValues.max,
           AppGlobalConfig.gridRows.sliderValues.divisions,
           _trans.buttonCancel,
           _trans.buttonSave,
           successAction: (double value, String formattedValue) {
-            _settings.set(AppConfigFieldKey.gridRowsAmount, value.toInt(), updateState: true);
+            _settings.setConfig(AppConfigFieldKey.gridRowsAmount, value.toInt());
             _trackRepository.resetTracksCollection();
             return _trans.gridRowsAmountSuccess(formattedValue);
           },
@@ -286,14 +281,14 @@ class DrawerManager {
           _trans.gridColsAmount,
           _trans.gridColsAmountTitle,
           _trans.gridColsAmountInfo,
-          double.parse(_settings.get(AppConfigFieldKey.gridColsAmount).toString()),
+          double.parse(_settings.getConfig(AppConfigFieldKey.gridColsAmount).toString()),
           AppGlobalConfig.gridCols.sliderValues.min,
           AppGlobalConfig.gridCols.sliderValues.max,
           AppGlobalConfig.gridCols.sliderValues.divisions,
           _trans.buttonCancel,
           _trans.buttonSave,
           successAction: (double value, String formattedValue) {
-            _settings.set(AppConfigFieldKey.gridColsAmount, value.toInt(), updateState: true);
+            _settings.setConfig(AppConfigFieldKey.gridColsAmount, value.toInt());
             _trackRepository.resetTracksCollection();
             return _trans.gridColsAmountSuccess(formattedValue);
           },
@@ -304,7 +299,7 @@ class DrawerManager {
   List<Widget> _permissionsList(StateSetter setDrawerState) => [
         ...AppGlobalConfig.permissions.values<Permission>().map(
           (Permission permission) {
-            final status = _settings.permissions[permission] ?? PermissionStatus.denied;
+            final status = _permissionProvider.get(permission) ?? PermissionStatus.denied;
             return ListTile(
               leading: Icon(AppGlobalConfig.permissions.icon(permission)),
               title: Text(AppGlobalConfig.permissions.translate(permission, trans: _trans)),
@@ -315,7 +310,7 @@ class DrawerManager {
                       onPressed: () async {
                         if (status.isDenied) {
                           final status = await permission.request();
-                          _settings.permissions[permission] = status;
+                          _permissionProvider.set(permission, status);
                           setDrawerState(() {});
                         } else {
                           await openAppSettings();
@@ -413,7 +408,8 @@ class DrawerManager {
     _uiHelper.aboutDialog(
       packageInfo,
       details,
-      applicationIcon: Icon(_settings.get(AppConfigFieldKey.wakelockEnabled) ? AppIcon.logoKeepScreenOnEnabled : AppIcon.logoKeepScreenOnDisabled),
+      applicationIcon:
+          Icon(_settings.getConfig(AppConfigFieldKey.wakelockEnabled) ? AppIcon.logoKeepScreenOnEnabled : AppIcon.logoKeepScreenOnDisabled),
       applicationLegalese: _trans.legalNote,
     );
   }
@@ -428,7 +424,7 @@ class DrawerManager {
           _trans.buttonYes,
           () {
             for (AppRecordingConfigField field in AppGlobalConfigFieldsCollection.listRecording) {
-              _settings.set(field.key, field.defaultValue, updateState: true);
+              _settings.setConfig(field.key, field.defaultValue);
             }
             return _trans.recordingSettingsResetSuccess;
           },
@@ -442,7 +438,7 @@ class DrawerManager {
           _trans.buttonYes,
           () {
             for (AppGlobalConfigField field in AppGlobalConfigFieldsCollection.listGlobal) {
-              _settings.set(field.key, field.defaultValue, updateState: true);
+              _settings.setConfig(field.key, field.defaultValue);
             }
             return _trans.screenSettingsResetSuccess;
           },

@@ -13,11 +13,11 @@ import '../config/keyboard.dart';
 import '../entity/track.dart';
 import '../repository/track_repository.dart';
 import '../src/combined_notifier.dart';
-import '../wrapper/settings_wrapper.dart';
+import '../wrapper/hive_settings_provider.dart';
 
 class TrackManager {
   final BuildContext _context;
-  final SettingsWrapper _settings;
+  final HiveSettingsProvider _settings;
   final AppLocalizations _trans;
   final UIHelper _uiHelper;
   final TrackRepository _trackRepository;
@@ -60,13 +60,9 @@ class TrackManager {
           physics: PageScrollPhysics(),
           child: Row(
               children: List.generate(
-                  _settings.get(AppConfigFieldKey.gridColsAmount),
+                  _settings.getConfig(AppConfigFieldKey.gridColsAmount),
                   (columnIndex) => _buildRowTrackContainer(
-                        _settings.get(
-                          Track.buildId(rowIndex, columnIndex),
-                          space: AppConfigSpace.track,
-                          defaultValue: Track(rowIndex, columnIndex),
-                        ),
+                        _settings.getTrack(rowIndex, columnIndex),
                       )))));
 
   Container _buildRowTrackContainer(Track track) => Container(
@@ -162,8 +158,10 @@ class TrackManager {
                             alignment: AlignmentDirectional(1, 1),
                             child: ValueListenableBuilder<ReleaseMode>(
                                 valueListenable: track.playbackReleaseMode,
-                                builder: (context, playbackReleaseMode, child) => Icon(AppGlobalConfig.trackPlaybackReleaseMode.icon(playbackReleaseMode),
-                                    size: Theme.of(context).textTheme.titleMedium!.fontSize, color: track.stateForegroundColor(context)))),
+                                builder: (context, playbackReleaseMode, child) => Icon(
+                                    AppGlobalConfig.trackPlaybackReleaseMode.icon(playbackReleaseMode),
+                                    size: Theme.of(context).textTheme.titleMedium!.fontSize,
+                                    color: track.stateForegroundColor(context)))),
                         Align(
                             alignment: AlignmentDirectional(0, 0.95),
                             child: ValueListenableBuilder<Duration>(

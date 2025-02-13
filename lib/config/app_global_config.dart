@@ -31,7 +31,7 @@ final class AppGlobalConfig {
   static final ConfigCollection permissions = ConfigCollection(
     [
       ConfigItem<Permission>(Permission.microphone, properties: [
-        ConfigItemIconProperty(Icons.mic_rounded),
+        ConfigItemIconProperty(Icons.perm_camera_mic_rounded),
         ConfigItemTranslatableProperty((trans) => trans.microphonePermission),
       ]),
       ConfigItem<Permission>(Permission.notification, properties: [
@@ -39,7 +39,7 @@ final class AppGlobalConfig {
         ConfigItemTranslatableProperty((trans) => trans.notificationPermission),
       ]),
       ConfigItem<Permission>(Permission.audio, properties: [
-        ConfigItemIconProperty(Icons.speaker_rounded),
+        ConfigItemIconProperty(Icons.perm_media_rounded),
         ConfigItemTranslatableProperty((trans) => trans.audioPermission),
       ]),
     ],
@@ -74,6 +74,25 @@ final class AppGlobalConfig {
       ]),
     ],
     defaultValue: ReleaseMode.stop,
+  );
+
+  static final ConfigCollection screenThemeMode = ConfigCollection(
+    [
+      ConfigItem<ThemeMode>(ThemeMode.system, properties: [
+        ConfigItemIconProperty(AppIcon.screenSystemThemeMode),
+        ConfigItemTranslatableProperty((trans) => trans.screenSystemThemeMode),
+      ]),
+      ConfigItem<ThemeMode>(ThemeMode.light, properties: [
+        ConfigItemIconProperty(AppIcon.screenLightThemeMode),
+        ConfigItemTranslatableProperty((trans) => trans.screenLightThemeMode),
+      ]),
+      ConfigItem<ThemeMode>(ThemeMode.dark, properties: [
+        ConfigItemIconProperty(AppIcon.screenDarkThemeMode),
+        ConfigItemTranslatableProperty((trans) => trans.screenDarkThemeMode),
+      ]),
+    ],
+    // format: (dynamic value) => trackPlaybackBalance.text(value),
+    defaultValue: ThemeMode.system,
   );
 
   static final SliderConfigCollection trackPlaybackSpeed = SliderConfigCollection(

@@ -7,6 +7,7 @@ import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:record/record.dart';
 import 'package:tune_tangler/config/app_global_config.dart';
 
+import '../adapter/track_audio_source.dart';
 import '../config/app_icon.dart';
 import '../config/config_collection.dart';
 import '../config/keyboard.dart';
@@ -28,31 +29,32 @@ enum TrackState {
   paused,
 }
 
-enum TrackAudioSource {
-  recording,
-  file,
+
+class TrackId {
+  final int _rowIndex;
+  final int _colIndex;
+
+  TrackId(this._rowIndex, this._colIndex);
+
+  @override
+  String toString() => (TrackRow.name(_rowIndex)) + (_colIndex + 1).toString();
+
+  List<int> toList() => [_rowIndex, _colIndex];
+
+  String get keyboardKey => AppKeyboardKeyMap.trackKeyboardKeyName(TrackRow.name(_rowIndex), _colIndex);
 }
 
 class Track {
   ///*************************************************************************************************************************************************
   /// INDEX
 
-  final int _rowIndex;
-  final int _colIndex;
+  late final TrackId id;
 
-  Track(this._rowIndex, this._colIndex) {
-    setName(buildId(_rowIndex, _colIndex));
+  Track(this.id) {
+    setName(id.toString());
     resetKeyboardKey;
     _player = AudioPlayer();
   }
-
-  String get id => buildId(_rowIndex, _colIndex);
-
-  int get rowIndex => _rowIndex;
-
-  int get colIndex => _colIndex;
-
-  static String buildId(int rowIndex, int colIndex) => (TrackRow.name(rowIndex)) + (colIndex + 1).toString();
 
   ///*************************************************************************************************************************************************
   /// STREAMS
@@ -459,6 +461,6 @@ class Track {
   }
 
   void get resetKeyboardKey {
-    setKeyboardKey(AppKeyboardKeyMap.trackKeyboardKeyName(TrackRow.name(_rowIndex), _colIndex));
+    setKeyboardKey(id.keyboardKey);
   }
 }

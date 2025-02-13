@@ -3,7 +3,7 @@ import 'package:hive/hive.dart';
 
 class LocaleAdapter extends TypeAdapter<Locale> {
   @override
-  final typeId = 102;
+  get typeId => 102;
 
   @override
   Locale read(BinaryReader reader) {

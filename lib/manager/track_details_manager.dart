@@ -19,11 +19,11 @@ import '../config/menu_item_enums.dart';
 import '../entity/track.dart';
 import '../repository/track_repository.dart';
 import '../src/combined_notifier.dart';
-import '../wrapper/settings_wrapper.dart';
+import '../wrapper/hive_settings_provider.dart';
 
 class TrackDetailsManager {
   final BuildContext _context;
-  final SettingsWrapper _settings;
+  final HiveSettingsProvider _settings;
   final AppLocalizations _trans;
   final UIHelper _uiHelper;
   final TrackRepository _trackRepository;
@@ -48,15 +48,15 @@ class TrackDetailsManager {
         break;
       case TrackState.idle:
         track.startPlaying();
-        _trackRepository.save(track);
+        // _trackRepository.save(track);
         break;
       case TrackState.playing:
         track.stopPlaying();
-        _trackRepository.save(track);
+        // _trackRepository.save(track);
         break;
       case TrackState.paused:
         track.resumePlaying();
-        _trackRepository.save(track);
+        // _trackRepository.save(track);
         break;
       default:
     }
@@ -560,17 +560,17 @@ class TrackDetailsManager {
                     onPressed: (track.state.value == TrackState.paused)
                         ? () {
                             track.resumePlaying();
-                            _trackRepository.save(track);
+                            // _trackRepository.save(track);
                           }
                         : ((track.state.value == TrackState.playing)
                             ? () {
                                 track.pausePLaying();
-                                _trackRepository.save(track);
+                                // _trackRepository.save(track);
                               }
                             : ((track.state.value == TrackState.idle)
                                 ? () {
                                     track.startPlaying();
-                                    _trackRepository.save(track);
+                                    // _trackRepository.save(track);
                                   }
                                 : null)),
                     iconSize: Theme.of(_context).textTheme.displayLarge!.fontSize,
@@ -583,7 +583,7 @@ class TrackDetailsManager {
                               onPressed: (track.state.value == TrackState.playing || track.state.value == TrackState.paused || progress > 0)
                                   ? () {
                                       track.stopPlaying();
-                                      _trackRepository.save(track);
+                                      // _trackRepository.save(track);
                                     }
                                   : null)),
                 if (track.recorderState.value != RecorderState.processing)
@@ -650,7 +650,7 @@ class TrackDetailsManager {
                                         textAlign: TextAlign.center,
                                       ),
                                     ),
-                                    locale: _settings.get(AppConfigFieldKey.locale),
+                                    locale: _settings.getConfig(AppConfigFieldKey.locale),
                                     skinToneConfig: const SkinToneConfig(),
                                     categoryViewConfig: CategoryViewConfig(
                                       extraTab: CategoryExtraTab.SEARCH,
@@ -668,12 +668,12 @@ class TrackDetailsManager {
                                   ))),
                         ]),
                         actions: <Widget>[
-                          if (selectedEmoji != track.id)
-                            _uiHelper.errorButton(_trans.buttonResetTo(track.id), () {
-                              track.setName(track.id);
+                          if (selectedEmoji != track.id.toString())
+                            _uiHelper.errorButton(_trans.buttonResetTo(track.id.toString()), () {
+                              track.setName(track.id.toString());
                               _trackRepository.save(track);
                               Navigator.pop(context, track.id);
-                              _uiHelper.toast(_trans.trackNameChangeSuccess(track.id), icon: AppIcon.trackTitle);
+                              _uiHelper.toast(_trans.trackNameChangeSuccess(track.id.toString()), icon: AppIcon.trackTitle);
                             }),
                           _uiHelper.simpleButton(_trans.buttonCancel, () => Navigator.pop(context, 'cancel')),
                           _uiHelper.primaryButton(_trans.buttonSaveTo(selectedEmoji), () {
