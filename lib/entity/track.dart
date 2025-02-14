@@ -29,7 +29,6 @@ enum TrackState {
   paused,
 }
 
-
 class TrackId {
   final int _rowIndex;
   final int _colIndex;
@@ -226,6 +225,11 @@ class Track {
       newValue = trackDuration;
     }
     setPlaybackEndAtPosition(newValue);
+  }
+
+  void setPlaybackStartEndAtPosition(RangeValues value) {
+    setPlaybackStartAtPosition(Duration(milliseconds: value.start.toInt()));
+    setPlaybackEndAtPosition(Duration(milliseconds: value.end.toInt()));
   }
 
   ///*************************************************************************************************************************************************
