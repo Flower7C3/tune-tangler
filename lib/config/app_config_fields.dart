@@ -2,11 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'app_global_config.dart';
 
-enum AppConfigSpace {
-  global,
-  track,
-}
-
 enum AppConfigFieldKey {
   locale,
   themeMode,
@@ -31,22 +26,22 @@ final class AppConfigField {
   AppConfigField(this.key, this.defaultValue);
 }
 
-final class AppGlobalConfigField extends AppConfigField {
-  AppGlobalConfigField(super.key, super.defaultValue);
+final class AppScreenConfigField extends AppConfigField {
+  AppScreenConfigField(super.key, super.defaultValue);
 }
 
 final class AppRecordingConfigField extends AppConfigField {
   AppRecordingConfigField(super.key, super.defaultValue);
 }
 
-final class AppGlobalConfigFieldsCollection {
+final class AppConfigFieldsCollection {
   static final List<AppConfigField> _fields = <AppConfigField>[
-    AppGlobalConfigField(AppConfigFieldKey.locale, AppGlobalConfig.languages.defaultValue),
-    AppGlobalConfigField(AppConfigFieldKey.themeMode, ThemeMode.system),
-    AppGlobalConfigField(AppConfigFieldKey.themeSeedColor, AppGlobalConfig.userInterfaceColor.defaultValue),
-    AppGlobalConfigField(AppConfigFieldKey.wakelockEnabled, false),
-    AppGlobalConfigField(AppConfigFieldKey.gridRowsAmount, AppGlobalConfig.gridRows.defaultValue.toInt()),
-    AppGlobalConfigField(AppConfigFieldKey.gridColsAmount, AppGlobalConfig.gridCols.defaultValue.toInt()),
+    AppScreenConfigField(AppConfigFieldKey.locale, AppGlobalConfig.languages.defaultValue),
+    AppScreenConfigField(AppConfigFieldKey.themeMode, ThemeMode.system),
+    AppScreenConfigField(AppConfigFieldKey.themeSeedColor, AppGlobalConfig.userInterfaceColor.defaultValue),
+    AppScreenConfigField(AppConfigFieldKey.wakelockEnabled, false),
+    AppScreenConfigField(AppConfigFieldKey.gridRowsAmount, AppGlobalConfig.gridRows.defaultValue.toInt()),
+    AppScreenConfigField(AppConfigFieldKey.gridColsAmount, AppGlobalConfig.gridCols.defaultValue.toInt()),
     AppRecordingConfigField(AppConfigFieldKey.recordingInputDevice, null),
     AppRecordingConfigField(AppConfigFieldKey.recordingAudioEncoder, AppGlobalConfig.recordingAudioEncoder.defaultValue),
     AppRecordingConfigField(AppConfigFieldKey.recordingSampleRate, AppGlobalConfig.recordingSampleRate.defaultValue),
@@ -57,11 +52,9 @@ final class AppGlobalConfigFieldsCollection {
     AppRecordingConfigField(AppConfigFieldKey.recordingNoiseSuppress, false),
   ];
 
-  static List<AppConfigField> get list => _fields;
+  static List<AppScreenConfigField> get listScreen => _fields.whereType<AppScreenConfigField>().toList();
 
-  static List<AppGlobalConfigField> get listGlobal => list.whereType<AppGlobalConfigField>().toList();
+  static List<AppRecordingConfigField> get listRecording => _fields.whereType<AppRecordingConfigField>().toList();
 
-  static List<AppRecordingConfigField> get listRecording => list.whereType<AppRecordingConfigField>().toList();
-
-  static AppConfigField field(dynamic key) => list.firstWhere((item) => item.key == key);
+  static AppConfigField field(AppConfigFieldKey key) => _fields.firstWhere((item) => item.key == key);
 }

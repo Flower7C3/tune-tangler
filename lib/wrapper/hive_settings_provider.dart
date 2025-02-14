@@ -12,7 +12,16 @@ class HiveSettingsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Track getTrack(int rowIndex, int columnIndex) => HiveService.get(TrackId(rowIndex, columnIndex));
+  Track getTrack(int rowIndex, int columnIndex) => getAndInitializeTrack(rowIndex, columnIndex);
+
+  Track getAndInitializeTrack(int rowIndex, int columnIndex) {
+    Track track = HiveService.get(TrackId(rowIndex, columnIndex));
+    if (!track.streamsInitialized) {
+      track.setStreamsInitialized();
+      saveTrack(track);
+    }
+    return track;
+  }
 
   Future<void> saveTrack(Track track) async {
     HiveService.set(track.id, track);

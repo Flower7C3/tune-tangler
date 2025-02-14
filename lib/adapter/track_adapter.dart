@@ -14,7 +14,7 @@ class TrackAdapter extends TypeAdapter<Track> {
   Track read(BinaryReader reader) {
     final Map data = reader.readMap();
     TrackId trackId = data[TrackAdapterKey.trackId];
-    var track = Track(trackId);
+    Track track = Track(trackId);
     track.setName(data[TrackAdapterKey.name]);
     track.setPlaybackReleaseMode(ReleaseMode.values[data[TrackAdapterKey.playbackReleaseMode]]);
     track.setPlaybackVolume(data[TrackAdapterKey.playbackVolume] ?? AppGlobalConfig.trackPlaybackVolume.defaultValue);

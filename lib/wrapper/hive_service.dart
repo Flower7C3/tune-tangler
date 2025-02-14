@@ -21,7 +21,7 @@ class HiveService {
   static Future<void> set(dynamic key, dynamic value, {bool updateState = false}) async {
     switch (key) {
       case AppConfigFieldKey _:
-        _globalSettingsBox.put(AppGlobalConfigFieldsCollection.field(key).key.name, value);
+        _globalSettingsBox.put(AppConfigFieldsCollection.field(key).key.name, value);
         switch (key) {
           case AppConfigFieldKey.wakelockEnabled:
             WakelockPlus.toggle(enable: value);
@@ -37,30 +37,28 @@ class HiveService {
 
   static dynamic get(dynamic key, {dynamic defaultValue}) => switch (key) {
         AppConfigFieldKey _ => _globalSettingsBox.get(
-            AppGlobalConfigFieldsCollection.field(key).key.name,
-            defaultValue: AppGlobalConfigFieldsCollection.field(key).defaultValue,
+            AppConfigFieldsCollection.field(key).key.name,
+            defaultValue: AppConfigFieldsCollection.field(key).defaultValue,
           ),
-        TrackId _ => _getTrack(key),
+        TrackId _ => _trackSettingsBox.get(
+            key.toString(),
+            defaultValue: Track(key),
+          ),
         Object() => throw UnimplementedError(),
         null => throw UnimplementedError(),
       };
 
-  static Track _getTrack(TrackId trackId) {
-    Track track = _trackSettingsBox.get(trackId.toString(), defaultValue: Track(trackId));
-    if (!track.streamsInitialized) {
-      track.setStreamsInitialized();
-      set(trackId, track);
-    }
-    return track;
-  }
-
-  static Future<void> delete(String key, {AppConfigSpace space = AppConfigSpace.global}) async => switch (space) {
-        AppConfigSpace.global => _globalSettingsBox.delete(AppGlobalConfigFieldsCollection.field(key).key.name),
-        AppConfigSpace.track => await _trackSettingsBox.delete(key),
+  static Future<void> delete(dynamic key) async => switch (key) {
+        AppConfigFieldKey _ => _globalSettingsBox.delete(AppConfigFieldsCollection.field(key).key.name),
+        TrackId _ => await _trackSettingsBox.delete(key.toString()),
+        Object() => throw UnimplementedError(),
+        null => throw UnimplementedError(),
       };
 
-  static bool containsKey(String key, {AppConfigSpace space = AppConfigSpace.global}) => switch (space) {
-        AppConfigSpace.global => _globalSettingsBox.containsKey(AppGlobalConfigFieldsCollection.field(key).key.name),
-        AppConfigSpace.track => _trackSettingsBox.containsKey(key),
+  static bool containsKey(dynamic key) => switch (key) {
+        AppConfigFieldKey _ => _globalSettingsBox.containsKey(AppConfigFieldsCollection.field(key).key.name),
+        TrackId _ => _trackSettingsBox.containsKey(key.toString()),
+        Object() => throw UnimplementedError(),
+        null => throw UnimplementedError(),
       };
 }

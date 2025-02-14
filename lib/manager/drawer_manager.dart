@@ -423,7 +423,7 @@ class DrawerManager {
           _trans.buttonNo,
           _trans.buttonYes,
           () {
-            for (AppRecordingConfigField field in AppGlobalConfigFieldsCollection.listRecording) {
+            for (AppRecordingConfigField field in AppConfigFieldsCollection.listRecording) {
               _settings.setConfig(field.key, field.defaultValue);
             }
             return _trans.recordingSettingsResetSuccess;
@@ -437,7 +437,7 @@ class DrawerManager {
           _trans.buttonNo,
           _trans.buttonYes,
           () {
-            for (AppGlobalConfigField field in AppGlobalConfigFieldsCollection.listGlobal) {
+            for (AppScreenConfigField field in AppConfigFieldsCollection.listScreen) {
               _settings.setConfig(field.key, field.defaultValue);
             }
             return _trans.screenSettingsResetSuccess;

@@ -38,29 +38,14 @@ class TrackDetailsManager {
     this._recordingManager,
   );
 
-  void runClickAction(Track track) {
-    switch (track.state.value) {
-      case TrackState.empty:
-        _recordingManager.startRecording(track);
-        break;
-      case TrackState.recording:
-        _recordingManager.stopAndSaveRecording(track);
-        break;
-      case TrackState.idle:
-        track.startPlaying();
-        // _trackRepository.save(track);
-        break;
-      case TrackState.playing:
-        track.stopPlaying();
-        // _trackRepository.save(track);
-        break;
-      case TrackState.paused:
-        track.resumePlaying();
-        // _trackRepository.save(track);
-        break;
-      default:
-    }
-  }
+  void runClickAction(Track track) => switch (track.state.value) {
+        TrackState.empty => _recordingManager.startRecording(track),
+        TrackState.recording => _recordingManager.stopAndSaveRecording(track),
+        TrackState.idle => track.startPlaying(),
+        TrackState.playing => track.stopPlaying(),
+        TrackState.paused => track.resumePlaying(),
+        _ => null,
+      };
 
   /// *************************************************************************
   /// TRACK DETAILS
@@ -231,10 +216,8 @@ class TrackDetailsManager {
               max: AppGlobalConfig.trackPlaybackVolume.sliderValues.max,
               divisions: AppGlobalConfig.trackPlaybackVolume.sliderValues.divisions,
               label: AppGlobalConfig.trackPlaybackVolume.format(playbackVolume),
-              onChanged: (double value) {
-                track.setPlaybackVolume(value);
-                _trackRepository.save(track);
-              },
+              onChanged: (double value) => track.setPlaybackVolume(value),
+              onChangeEnd: (double value) => _trackRepository.save(track),
             ),
           ]));
 
@@ -262,10 +245,8 @@ class TrackDetailsManager {
               max: AppGlobalConfig.trackPlaybackBalance.sliderValues.max,
               divisions: AppGlobalConfig.trackPlaybackBalance.sliderValues.divisions,
               label: AppGlobalConfig.trackPlaybackBalance.translate(playbackBalance, trans: _trans),
-              onChanged: (double value) {
-                track.setPlaybackBalance(value);
-                _trackRepository.save(track);
-              },
+              onChanged: (double value) => track.setPlaybackBalance(value),
+              onChangeEnd: (double value) => _trackRepository.save(track),
             ),
           ]));
 
@@ -293,10 +274,8 @@ class TrackDetailsManager {
               max: AppGlobalConfig.trackPlaybackSpeed.sliderValues.max,
               divisions: AppGlobalConfig.trackPlaybackSpeed.sliderValues.divisions,
               label: AppGlobalConfig.trackPlaybackSpeed.format(playbackSpeed),
-              onChanged: (double value) {
-                track.setPlaybackSpeed(value);
-                _trackRepository.save(track);
-              },
+              onChanged: (double value) => track.setPlaybackSpeed(value),
+              onChangeEnd: (double value) => _trackRepository.save(track),
             ),
           ]));
 
@@ -354,16 +333,14 @@ class TrackDetailsManager {
   Widget _trackDetailsClipSlider(Track track) => ValueListenableBuilder(
       valueListenable: CombinedNotifier([track.duration, track.playbackStartAtPosition, track.playbackEndAtPosition]),
       builder: (context, _, __) => Expanded(
-          child: RangeSlider(
-              values: RangeValues(
-                  (track.playbackStartAtPosition.value.inMilliseconds).toDouble(), (track.playbackEndAtPosition.value.inMilliseconds).toDouble()),
-              min: 0,
-              max: (track.duration.value.inMilliseconds).toDouble(),
-              onChanged: (RangeValues value) {
-                track.setPlaybackStartAtPosition(Duration(milliseconds: value.start.toInt()));
-                track.setPlaybackEndAtPosition(Duration(milliseconds: value.end.toInt()));
-                _trackRepository.save(track);
-              })));
+              child: RangeSlider(
+            values: RangeValues(
+                (track.playbackStartAtPosition.value.inMilliseconds).toDouble(), (track.playbackEndAtPosition.value.inMilliseconds).toDouble()),
+            min: 0,
+            max: (track.duration.value.inMilliseconds).toDouble(),
+            onChanged: (RangeValues value) => track.setPlaybackStartEndAtPosition(value),
+            onChangeEnd: (RangeValues value) => _trackRepository.save(track),
+          )));
 
   List<Widget> _trackDetailsClipText(Track track) => [
         ValueListenableBuilder(
@@ -558,21 +535,10 @@ class TrackDetailsManager {
                             ? _trans.trackPlayingPause(track.name.value)
                             : _trans.trackPlayingStart(track.name.value)),
                     onPressed: (track.state.value == TrackState.paused)
-                        ? () {
-                            track.resumePlaying();
-                            // _trackRepository.save(track);
-                          }
+                        ? () => track.resumePlaying()
                         : ((track.state.value == TrackState.playing)
-                            ? () {
-                                track.pausePLaying();
-                                // _trackRepository.save(track);
-                              }
-                            : ((track.state.value == TrackState.idle)
-                                ? () {
-                                    track.startPlaying();
-                                    // _trackRepository.save(track);
-                                  }
-                                : null)),
+                            ? () => track.pausePLaying()
+                            : ((track.state.value == TrackState.idle) ? () => track.startPlaying() : null)),
                     iconSize: Theme.of(_context).textTheme.displayLarge!.fontSize,
                   ),
                 if (track.recorderState.value == RecorderState.ready)
@@ -583,7 +549,6 @@ class TrackDetailsManager {
                               onPressed: (track.state.value == TrackState.playing || track.state.value == TrackState.paused || progress > 0)
                                   ? () {
                                       track.stopPlaying();
-                                      // _trackRepository.save(track);
                                     }
                                   : null)),
                 if (track.recorderState.value != RecorderState.processing)
