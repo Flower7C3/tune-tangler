@@ -571,6 +571,8 @@ class TrackDetailsManager {
         if (state != TrackState.recording) _uiHelper.trackMenuItem(TrackMenuItem.changeName, AppIcon.trackTitle, _trans.trackNameChange),
         if (state != TrackState.recording)
           _uiHelper.trackMenuItem(TrackMenuItem.changeKeyboardKey, AppIcon.trackKeyboardKey, _trans.trackKeyboardKeyChange),
+    if (state != TrackState.empty && state != TrackState.recording)
+          _uiHelper.trackMenuItem(TrackMenuItem.trackRecordingMove, AppIcon.trackRecordingMove, _trans.trackRecordingMove),
         if (state != TrackState.empty && state != TrackState.recording)
           _uiHelper.trackMenuItem(TrackMenuItem.delete, AppIcon.deleteForever, _trans.trackRecordingDelete),
       ];
@@ -676,13 +678,42 @@ class TrackDetailsManager {
                       ));
                 }));
         break;
+      case TrackMenuItem.trackRecordingMove:
+        _uiHelper.alertDialog(AppIcon.trackRecordingMove, _trans.trackRecordingMoveTitle(track.name.value),
+            contentText: _trans.trackRecordingMoveInfo(track.name.value),
+            contentWidget: _uiHelper.gridBuilder(
+                itemCount: _trackRepository.allTracks().length,
+                rowSize: _settings.getConfig(AppConfigFieldKey.gridColsAmount),
+                itemBuilder: (context, index) {
+                  Track loopTrack = _trackRepository.allTracks().toList().elementAt(index);
+                  return OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(UIHelper.gridGap)),
+                        ),
+                        backgroundColor: (loopTrack.id == track.id) ? Theme.of(context).colorScheme.primary : null,
+                      ),
+                      onPressed: (loopTrack.id == track.id)
+                          ? null
+                          : () {
+                              _trackRepository.move(track, loopTrack);
+                              Navigator.pop(context);
+                              Navigator.pop(context);
+                              _uiHelper.toast(_trans.trackRecordingMoveSuccess(track.id.toString(), loopTrack.id.toString()), icon: AppIcon.trackRecordingMove);
+                            },
+                      child: Text(
+                        loopTrack.name.value,
+                        style: TextStyle(color: (loopTrack.id == track.id) ? Theme.of(context).colorScheme.inversePrimary : null),
+                      ));
+                }));
       case TrackMenuItem.delete:
         _uiHelper.alertDialog(AppIcon.deleteForever, _trans.trackRecordingDeleteTitle(track.name.value),
             contentText: _trans.trackRecordingDeleteInfo(track.name.value),
             actions: <Widget>[
               _uiHelper.simpleButton(_trans.buttonNo, () => Navigator.pop(_context, _trans.buttonNo)),
               _uiHelper.errorButton(_trans.buttonYes, () {
-                _trackRepository.removeTrackRecording(track);
+                _trackRepository.trackRecordingDelete(track);
                 Navigator.pop(_context, _trans.buttonYes);
                 _uiHelper.toast(_trans.trackRecordingDeleteSuccess(track.name.value), icon: AppIcon.deleteForever);
               }),

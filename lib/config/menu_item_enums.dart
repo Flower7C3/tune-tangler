@@ -1,5 +1,6 @@
 enum TrackMenuItem {
   changeKeyboardKey,
+  trackRecordingMove,
   changeName,
   delete,
 }

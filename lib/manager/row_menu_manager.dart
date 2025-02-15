@@ -152,7 +152,7 @@ class RowMenuManager {
             actions: <Widget>[
               _uiHelper.simpleButton(_trans.buttonNo, () => Navigator.pop(_context, 'No')),
               _uiHelper.errorButton(_trans.buttonYes, () {
-                _trackRepository.removeTracksRecordings(_trackRepository.rowTracks(rowIndex));
+                _trackRepository.deleteTracksRecordings(_trackRepository.rowTracks(rowIndex));
                 Navigator.pop(_context, 'Yes');
                 _uiHelper.toast(_trans.rowTracksRecordingsDeleteSuccess(TrackRow.name(rowIndex)), icon: AppIcon.deleteForever);
               }),

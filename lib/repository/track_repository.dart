@@ -56,14 +56,14 @@ class TrackRepository {
     _settings.saveTrack(track);
   }
 
-  Future<void> removeTrackRecording(Track track) async {
+  void trackRecordingDelete(Track track) {
     track.setPath(null);
     save(track);
   }
 
-  void removeTracksRecordings(Set<Track> tracksList) async {
+  void deleteTracksRecordings(Set<Track> tracksList) {
     for (Track track in tracksList) {
-      removeTrackRecording(track);
+      trackRecordingDelete(track);
       save(track);
     }
   }
@@ -153,5 +153,22 @@ class TrackRepository {
     for (Track track in tracksList) {
       track.dispose();
     }
+  }
+
+  void updateTrackName(Track track) {
+    // if(track.name)
+  }
+
+  void move(Track sourceTrack, Track selectedTrack) {
+    Track newSourceTrack = Track.fromMap(selectedTrack.toMap());
+    Track newSelectedTrack = Track.fromMap(sourceTrack.toMap());
+
+    sourceTrack.fromTrack(newSourceTrack);
+    selectedTrack.fromTrack(newSelectedTrack);
+
+    save(sourceTrack);
+    save(selectedTrack);
+
+    resetTracksCollection();
   }
 }

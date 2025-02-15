@@ -794,18 +794,26 @@ class UIHelper {
   Flexible gridBuilder({
     required int itemCount,
     required Widget Function(dynamic context, dynamic index) itemBuilder,
+    int? rowSize,
   }) =>
       Flexible(
           child: SizedBox(
               width: double.maxFinite,
               child: GridView.builder(
                 shrinkWrap: true,
-                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                  crossAxisSpacing: gridGap * 4,
-                  mainAxisSpacing: gridGap * 4,
-                  maxCrossAxisExtent: gridGap * 8,
-                  mainAxisExtent: gridGap * 8,
-                ),
+                gridDelegate: (rowSize == null)
+                    ? SliverGridDelegateWithMaxCrossAxisExtent(
+                        crossAxisSpacing: gridGap * 4,
+                        mainAxisSpacing: gridGap * 4,
+                        maxCrossAxisExtent: gridGap * 8,
+                        mainAxisExtent: gridGap * 8,
+                      )
+                    : SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisSpacing: gridGap * 2,
+                        mainAxisSpacing: gridGap * 2,
+                        mainAxisExtent: gridGap * 8,
+                        crossAxisCount: rowSize,
+                      ),
                 padding: const EdgeInsets.all(0),
                 itemCount: itemCount,
                 itemBuilder: itemBuilder,

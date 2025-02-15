@@ -463,7 +463,7 @@ class DrawerManager {
           _trans.buttonNo,
           _trans.buttonYes,
           () {
-            _trackRepository.removeTracksRecordings(_trackRepository.allTracks());
+            _trackRepository.deleteTracksRecordings(_trackRepository.allTracks());
             return _trans.allTracksRecordingsDeleteSuccess;
           },
         ),

@@ -22,6 +22,7 @@ class AppIcon {
   static IconData trackTitleEmojis = Icons.emoji_emotions_rounded;
   static IconData trackTitle = Icons.text_fields;
   static IconData trackKeyboardKey = Icons.keyboard_alt_rounded;
+  static IconData trackRecordingMove = Icons.shuffle_rounded;
 
   static Container trackKeyboardKeyBox(
     String keyName, {

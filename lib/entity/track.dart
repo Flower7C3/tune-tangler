@@ -4,9 +4,12 @@ import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
+import 'package:path/path.dart' as path_provider;
+import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 import 'package:tune_tangler/config/app_global_config.dart';
 
+import '../adapter/track_adapter_key.dart';
 import '../adapter/track_audio_source.dart';
 import '../config/app_icon.dart';
 import '../config/config_collection.dart';
@@ -271,7 +274,7 @@ class Track {
 
   String? get path => _path;
 
-  void setPath(String? newPath, {Duration? playbackStartAtPosition, Duration? playbackEndAtPosition}) async {
+  void setPath(String? newPath, {Duration? playbackStartAtPosition, Duration? playbackEndAtPosition}) {
     if (newPath == null) {
       if (path != null && File(path!).existsSync()) {
         File(path!).delete();
@@ -286,17 +289,17 @@ class Track {
     }
 
     setRecorderState(RecorderState.processing);
+    player.setVolume(playbackVolume.value);
+    player.setBalance(playbackBalance.value);
+    player.setReleaseMode(playbackReleaseMode.value);
+    player.setPlaybackRate(playbackSpeed.value);
+    _path = newPath;
     player.setSourceDeviceFile(newPath).then((value) async {
       setDuration(await player.getDuration() ?? Duration());
       setPosition(Duration());
       setPlaybackStartAtPosition(playbackStartAtPosition ?? Duration());
       setPlaybackEndAtPosition(playbackEndAtPosition ?? duration.value);
-      player.setVolume(playbackVolume.value);
-      player.setBalance(playbackBalance.value);
-      player.setReleaseMode(playbackReleaseMode.value);
-      player.setPlaybackRate(playbackSpeed.value);
       setRecorderState(RecorderState.ready);
-      _path = newPath;
     }).onError((error, stack) {});
   }
 
@@ -467,4 +470,79 @@ class Track {
   void get resetKeyboardKey {
     setKeyboardKey(id.keyboardKey);
   }
+
+  Future<void> fromTrack(Track track) async {
+    if (track.id.toString() == track.name.value) {
+      setName(id.toString());
+    } else {
+      setName(track.name.value);
+    }
+    setPlaybackReleaseMode(track.playbackReleaseMode.value);
+    setPlaybackVolume(track.playbackVolume.value);
+    setPlaybackBalance(track.playbackBalance.value);
+    setPlaybackSpeed(track.playbackSpeed.value);
+    setPlaybackStartAtPosition(track.playbackStartAtPosition.value);
+    setPlaybackEndAtPosition(track.playbackEndAtPosition.value);
+    setDuration(track.duration.value);
+    setPosition(Duration());
+
+    try {
+      if (track.path == null) {
+        throw Exception();
+      }
+      File oldFile = File(track.path!);
+      if (!oldFile.existsSync()) {
+        throw Exception();
+      }
+      Directory appDir = await getApplicationDocumentsDirectory();
+      String newFileName = path_provider.basename(track.path!).replaceFirst(RegExp(r'^[^.]+'), id.toString());
+      String newFilePath = "${appDir.path}/$newFileName";
+      File newFile = oldFile.renameSync(newFilePath);
+      setPath(newFile.path);
+    } catch (e) {
+      _path = null;
+      setRecorderState(RecorderState.empty);
+      updateState();
+    }
+
+    setAudioSource(track.audioSource);
+    setAudioEncoder(track.audioEncoder);
+    setSampleRate(track.sampleRate);
+    setBitRate(track.bitRate);
+  }
+
+  static Track fromMap(Map data) {
+    TrackId trackId = data[TrackAdapterKey.trackId];
+    Track track = Track(trackId);
+    track.setName(data[TrackAdapterKey.name]);
+    track.setPlaybackReleaseMode(ReleaseMode.values[data[TrackAdapterKey.playbackReleaseMode]]);
+    track.setPlaybackVolume(data[TrackAdapterKey.playbackVolume] ?? AppGlobalConfig.trackPlaybackVolume.defaultValue);
+    track.setPlaybackBalance(data[TrackAdapterKey.playbackBalance] ?? AppGlobalConfig.trackPlaybackBalance.defaultValue);
+    track.setPlaybackSpeed(data[TrackAdapterKey.playbackSpeed] ?? AppGlobalConfig.trackPlaybackSpeed.defaultValue);
+    track.setKeyboardKey(data[TrackAdapterKey.keyboardKey] ?? '');
+    track.setAudioSource(data[TrackAdapterKey.audioSource]);
+    track.setAudioEncoder(data[TrackAdapterKey.audioEncoder]);
+    track.setSampleRate(data[TrackAdapterKey.sampleRate]);
+    track.setBitRate(data[TrackAdapterKey.bitRate]);
+    track.setPath(data[TrackAdapterKey.path],
+        playbackStartAtPosition: data[TrackAdapterKey.playbackStartAtPosition], playbackEndAtPosition: data[TrackAdapterKey.playbackEndAtPosition]);
+    return track;
+  }
+
+  Map toMap() => {
+        TrackAdapterKey.trackId: id,
+        TrackAdapterKey.name: name.value,
+        TrackAdapterKey.path: path,
+        TrackAdapterKey.playbackReleaseMode: playbackReleaseMode.value.index,
+        TrackAdapterKey.playbackVolume: playbackVolume.value,
+        TrackAdapterKey.playbackBalance: playbackBalance.value,
+        TrackAdapterKey.playbackSpeed: playbackSpeed.value,
+        TrackAdapterKey.playbackStartAtPosition: playbackStartAtPosition.value,
+        TrackAdapterKey.playbackEndAtPosition: playbackEndAtPosition.value,
+        TrackAdapterKey.keyboardKey: keyboardKey.value,
+        TrackAdapterKey.audioSource: audioSource,
+        TrackAdapterKey.audioEncoder: audioEncoder,
+        TrackAdapterKey.sampleRate: sampleRate,
+        TrackAdapterKey.bitRate: bitRate,
+      };
 }
