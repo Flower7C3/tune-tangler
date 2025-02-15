@@ -1,0 +1,12 @@
+name: tune_tangler
+packages:
+  - . # Jeśli masz monorepo, dodaj inne ścieżki do pakietów
+scripts:
+  update-version:
+    run: dart scripts/version_update.dart
+  build-apk:
+    run: melos run update-version && flutter build apk
+  install-apk:
+    run: melos run build-apk && flutter install
+  build-ios:
+    run: melos run update-version && flutter build ios

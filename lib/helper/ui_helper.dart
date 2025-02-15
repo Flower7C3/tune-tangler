@@ -173,7 +173,7 @@ class UIHelper {
       showAboutDialog(
           context: context,
           applicationName: applicationName ?? packageInfo.appName,
-          applicationVersion: applicationVersion ?? packageInfo.version,
+          applicationVersion: applicationVersion ?? "${packageInfo.version} (${packageInfo.buildNumber})",
           applicationLegalese: applicationLegalese,
           applicationIcon: applicationIcon ?? Icon(AppIcon.logoKeepScreenOnEnabled),
           children: content.toList());

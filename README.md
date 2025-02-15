@@ -25,3 +25,7 @@ samples, guidance on mobile development, and a full API reference.
 - Regenerate splash screen:
 
       flutter pub run flutter_native_splash:create
+
+- Build APK
+
+      melos run build-apk
