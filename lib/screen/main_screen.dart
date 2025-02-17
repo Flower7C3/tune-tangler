@@ -65,7 +65,7 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: AppGlobalConfig.languages.values<Locale>(),
-      locale: _settings.getConfig(AppConfigFieldKey.locale),
+      localeResolutionCallback: (locale, supportedLocales) => _settings.getConfig(AppConfigFieldKey.locale, defaultValue: locale),
       themeAnimationDuration: Duration(seconds: 0),
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
