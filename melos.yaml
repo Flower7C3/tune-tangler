@@ -2,11 +2,23 @@ name: tune_tangler
 packages:
   - . # Jeśli masz monorepo, dodaj inne ścieżki do pakietów
 scripts:
-  update-version:
-    run: dart scripts/version_update.dart
+  update-build-version:
+    run: dart scripts/version_update.dart --build
+  update-patch-version:
+    run: dart scripts/version_update.dart --patch
   build-apk:
-    run: melos run update-version && flutter build apk
+    run: melos run update-patch-version && melos run update-build-version && flutter build apk
   install-apk:
-    run: melos run build-apk && flutter install
-  build-ios:
-    run: melos run update-version && flutter build ios
+#    run: flutter install
+    run: adb install -r build/app/outputs/flutter-apk/app-release.apk
+  apk:
+    run: melos run build-apk && melos run install-apk
+  build-debug-apk:
+    run: melos run update-build-version && flutter build apk --debug
+  install-debug-apk:
+#    run: flutter install --debug
+    run: adb install -r build/app/outputs/flutter-apk/app-debug.apk
+  debug-apk:
+    run: melos run build-debug-apk && melos run install-debug-apk
+#  build-ios:
+#    run: melos run update-version && flutter build ios

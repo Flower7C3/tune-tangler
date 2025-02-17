@@ -10,7 +10,7 @@ class HiveService {
 
   static Future<void> init() async {
     _globalSettingsBox = await Hive.openBox('settings');
-    _trackSettingsBox = await Hive.openBox<Track>('tracks');
+    _trackSettingsBox = await Hive.openBox('track');
   }
 
   static Future<void> dispose() async {

@@ -1,36 +1,51 @@
 import 'dart:io';
 
-void main() {
-  final file = File('pubspec.yaml');
-  final lines = file.readAsLinesSync();
+void main(List<String> arguments) {
+  bool updatePatch = false;
+  bool updateBuildNumber = false;
 
-  // Szukamy linii, która zaczyna się od 'version:'
-  for (var i = 0; i < lines.length; i++) {
-    if (lines[i].startsWith('version:')) {
-      // Rozdzielamy wersję na dwie części: numer wersji i numer builda
-      final parts = lines[i].split('+');
-      if (parts.length == 2) {
-        final version = parts[0].trim();
-        final buildNumber = int.tryParse(parts[1].trim());
-
-        // Jeśli wersja builda jest poprawna, zwiększamy ją
-        if (buildNumber != null) {
-          final newBuildNumber = buildNumber + 1;
-          final newVersion = '$version+$newBuildNumber';
-
-          // Zmieniamy linię w pliku na nową wersję
-          lines[i] = '$newVersion';
-          print('Zmieniono wersję na: $newVersion');
-        } else {
-          print('Nie udało się sparsować numeru builda.');
-        }
-      } else {
-        print('Format wersji jest niepoprawny w pliku pubspec.yaml.');
-      }
-      break; // Kończymy po znalezieniu wersji
+  for (var arg in arguments) {
+    switch (arg) {
+      case '--patch':
+        updatePatch = true;
+        break;
+      case '--build':
+        updateBuildNumber = true;
+        break;
     }
   }
 
-  // Zapisujemy zmienione linie z powrotem do pliku
+  final file = File('pubspec.yaml');
+  final lines = file.readAsLinesSync();
+
+  for (var i = 0; i < lines.length; i++) {
+    if (!lines[i].startsWith('version:')) {
+      continue;
+    }
+    final parts = lines[i].split(':');
+    if (parts.length != 2) {
+      continue;
+    }
+    List<String> versionParts = parts[1].split('+');
+    List<String> versionNumbers = versionParts[0].split('.');
+    int? major = int.tryParse(versionNumbers[0]);
+    int? minor = int.tryParse(versionNumbers[1]);
+    int? patch = int.tryParse(versionNumbers[2]);
+    int? buildNumber = int.tryParse(versionParts[1]);
+    if (patch == null || buildNumber == null) {
+      continue;
+    }
+    if (updatePatch) {
+      patch++;
+    }
+    if (updateBuildNumber) {
+      buildNumber++;
+    }
+    final newVersion = 'version: $major.$minor.$patch+$buildNumber';
+    lines[i] = newVersion;
+
+    break;
+  }
+
   file.writeAsStringSync(lines.join('\n'));
 }
