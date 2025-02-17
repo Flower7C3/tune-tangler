@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -17,6 +16,7 @@ import '../config/app_icon.dart';
 import '../entity/track.dart';
 import '../main.dart';
 import '../repository/track_repository.dart';
+import '../src/generated/app_localizations.dart';
 import '../wrapper/hive_settings_provider.dart';
 
 class RecordingManager {

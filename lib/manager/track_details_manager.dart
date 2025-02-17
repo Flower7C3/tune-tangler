@@ -4,7 +4,6 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:path/path.dart' as path;
 import 'package:share_plus/share_plus.dart';
@@ -19,6 +18,7 @@ import '../config/menu_item_enums.dart';
 import '../entity/track.dart';
 import '../repository/track_repository.dart';
 import '../src/combined_notifier.dart';
+import '../src/generated/app_localizations.dart';
 import '../wrapper/hive_settings_provider.dart';
 
 class TrackDetailsManager {

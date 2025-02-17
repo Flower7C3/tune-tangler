@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:tune_tangler/entity/track.dart';
@@ -8,6 +7,7 @@ import '../config/app_global_config.dart';
 import '../config/app_icon.dart';
 import '../config/config_collection.dart';
 import '../config/menu_item_enums.dart';
+import '../src/generated/app_localizations.dart';
 
 enum DialogType {
   alert,

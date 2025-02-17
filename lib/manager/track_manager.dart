@@ -1,7 +1,6 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:tune_tangler/helper/ui_helper.dart';
 import 'package:tune_tangler/manager/recording_manager.dart';
 import 'package:tune_tangler/manager/track_details_manager.dart';
@@ -13,6 +12,7 @@ import '../config/keyboard.dart';
 import '../entity/track.dart';
 import '../repository/track_repository.dart';
 import '../src/combined_notifier.dart';
+import '../src/generated/app_localizations.dart';
 import '../wrapper/hive_settings_provider.dart';
 
 class TrackManager {

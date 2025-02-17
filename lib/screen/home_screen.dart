@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:record/record.dart';
 
 import '../config/app_config_fields.dart';
@@ -10,6 +9,7 @@ import '../manager/row_menu_manager.dart';
 import '../manager/track_manager.dart';
 import '../provider/permission_provider.dart';
 import '../repository/track_repository.dart';
+import '../src/generated/app_localizations.dart';
 import '../wrapper/hive_settings_provider.dart';
 
 class HomeScreen extends StatelessWidget {

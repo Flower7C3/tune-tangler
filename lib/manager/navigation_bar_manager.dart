@@ -1,6 +1,5 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:tune_tangler/helper/ui_helper.dart';
 import 'package:tune_tangler/repository/track_repository.dart';
 import 'package:tune_tangler/wrapper/hive_settings_provider.dart';
@@ -9,6 +8,7 @@ import '../config/app_config_fields.dart';
 import '../config/app_global_config.dart';
 import '../config/app_icon.dart';
 import '../config/menu_item_enums.dart';
+import '../src/generated/app_localizations.dart';
 
 class NavigationBarManager {
   final BuildContext _context;

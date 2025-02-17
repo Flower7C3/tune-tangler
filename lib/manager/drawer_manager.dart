@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
@@ -13,6 +12,7 @@ import '../config/app_global_config.dart';
 import '../config/app_icon.dart';
 import '../entity/track.dart';
 import '../provider/permission_provider.dart';
+import '../src/generated/app_localizations.dart';
 
 class DrawerManager {
   final BuildContext _context;
