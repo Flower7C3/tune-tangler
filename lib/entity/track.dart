@@ -249,7 +249,7 @@ class Track {
     }
   }
 
-  void pausePLaying() {
+  void pausePlaying() {
     if (path != null) {
       player.pause();
     }

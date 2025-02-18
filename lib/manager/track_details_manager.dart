@@ -461,22 +461,7 @@ class TrackDetailsManager {
                   _uiHelper.mediaPlayerButton(
                     AppIcon.trackRecordingShare,
                     _trans.trackRecordingShare(track.name.value),
-                    onPressed: (track.recorderState.value == RecorderState.ready)
-                        ? () {
-                            if (track.path == null) {
-                              _uiHelper.toast(_trans.trackRecordingShareNoFile(track.name.value),
-                                  icon: AppIcon.trackRecordingShare, type: ToastType.error, duration: 4);
-                              return;
-                            }
-                            File file = File(track.path!);
-                            if (file.existsSync() == false) {
-                              _uiHelper.toast(_trans.trackRecordingShareNoFile(track.name.value),
-                                  icon: AppIcon.trackRecordingShare, type: ToastType.error, duration: 4);
-                              return;
-                            }
-                            Share.shareXFiles([XFile(track.path!)], text: _trans.trackRecordingShareMessage(track.name.value));
-                          }
-                        : null,
+                    onPressed: (track.recorderState.value == RecorderState.ready) ? () => _share(track) : null,
                   ),
                 if (track.recorderState.value != RecorderState.processing)
                   ValueListenableBuilder<ReleaseMode>(
@@ -484,12 +469,7 @@ class TrackDetailsManager {
                       builder: (context, playbackReleaseMode, child) => _uiHelper.mediaPlayerButton(
                             AppGlobalConfig.trackPlaybackReleaseMode.icon(playbackReleaseMode),
                             _trans.trackPlaybackModeToggle(track.name.value),
-                            onPressed: (track.state.value != TrackState.recording)
-                                ? () {
-                                    track.togglePlaybackMode();
-                                    _trackRepository.save(track);
-                                  }
-                                : null,
+                            onPressed: (track.state.value != TrackState.recording) ? () => _trackRepository.togglePlaybackMode(track) : null,
                           )),
                 if (track.recorderState.value == RecorderState.empty)
                   _uiHelper.mediaPlayerButton(
@@ -498,24 +478,25 @@ class TrackDetailsManager {
                     iconSize: Theme.of(_context).textTheme.displayLarge!.fontSize,
                     onPressed: () => _recordingManager.startRecording(track),
                   ),
-                if (track.recorderState.value == RecorderState.empty)
-                  _uiHelper.mediaPlayerButton(
-                    AppIcon.trackRecordingImport,
-                    _trans.trackRecordingImport(track.name.value),
-                    onPressed: () async => _recordingManager.importRecording(track),
-                  ),
                 if (track.recorderState.value == RecorderState.recording)
                   _uiHelper.mediaPlayerButton(
                     AppIcon.trackRecordingStop,
                     _trans.trackRecordingStop(track.name.value),
                     iconSize: Theme.of(_context).textTheme.displayLarge!.fontSize,
                     onPressed: () => _recordingManager.stopAndSaveRecording(track),
+                    borderStyle: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(UIHelper.gridGap * 3))),
                   ),
                 if (track.recorderState.value == RecorderState.recording)
                   _uiHelper.mediaPlayerButton(
                     AppIcon.trackRecordingCancel,
                     _trans.trackRecordingCancel(track.name.value),
                     onPressed: () => _recordingManager.cancelRecording(track),
+                  ),
+                if (track.recorderState.value == RecorderState.empty)
+                  _uiHelper.mediaPlayerButton(
+                    AppIcon.trackRecordingImport,
+                    _trans.trackRecordingImport(track.name.value),
+                    onPressed: () async => _recordingManager.importRecording(track),
                   ),
                 if (track.recorderState.value == RecorderState.processing)
                   _uiHelper.mediaPlayerButton(
@@ -524,33 +505,39 @@ class TrackDetailsManager {
                     iconSize: Theme.of(_context).textTheme.displayLarge!.fontSize,
                     onPressed: null,
                   ),
-                if (track.recorderState.value == RecorderState.ready)
+                if (track.state.value == TrackState.idle)
                   _uiHelper.mediaPlayerButton(
-                    (track.state.value == TrackState.paused)
-                        ? AppIcon.trackPlayingResume
-                        : ((track.state.value == TrackState.playing) ? AppIcon.trackPlayingPause : AppIcon.trackPlayingStart),
-                    (track.state.value == TrackState.paused)
-                        ? _trans.trackPlayingResume(track.name.value)
-                        : ((track.state.value == TrackState.playing)
-                            ? _trans.trackPlayingPause(track.name.value)
-                            : _trans.trackPlayingStart(track.name.value)),
-                    onPressed: (track.state.value == TrackState.paused)
-                        ? () => track.resumePlaying()
-                        : ((track.state.value == TrackState.playing)
-                            ? () => track.pausePLaying()
-                            : ((track.state.value == TrackState.idle) ? () => track.startPlaying() : null)),
+                    AppIcon.trackPlayingStart,
+                    _trans.trackPlayingStart(track.name.value),
+                    onPressed: () => track.startPlaying(),
                     iconSize: Theme.of(_context).textTheme.displayLarge!.fontSize,
+                  ),
+                if (track.state.value == TrackState.playing)
+                  _uiHelper.mediaPlayerButton(
+                    AppIcon.trackPlayingPause,
+                    _trans.trackPlayingPause(track.name.value),
+                    onPressed: () => track.pausePlaying(),
+                    iconSize: Theme.of(_context).textTheme.displayLarge!.fontSize,
+                    borderStyle: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(UIHelper.gridGap * 3))),
+                  ),
+                if (track.state.value == TrackState.paused)
+                  _uiHelper.mediaPlayerButton(
+                    AppIcon.trackPlayingResume,
+                    _trans.trackPlayingResume(track.name.value),
+                    onPressed: () => track.resumePlaying(),
+                    iconSize: Theme.of(_context).textTheme.displayLarge!.fontSize,
+                    borderStyle: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(UIHelper.gridGap * 6))),
                   ),
                 if (track.recorderState.value == RecorderState.ready)
                   ValueListenableBuilder<double>(
                       valueListenable: track.progress,
-                      builder: (context, progress, child) =>
-                          _uiHelper.mediaPlayerButton(AppIcon.trackPlayingStop, _trans.trackPlayingStop(track.name.value),
-                              onPressed: (track.state.value == TrackState.playing || track.state.value == TrackState.paused || progress > 0)
-                                  ? () {
-                                      track.stopPlaying();
-                                    }
-                                  : null)),
+                      builder: (context, progress, child) => _uiHelper.mediaPlayerButton(
+                            AppIcon.trackPlayingStop,
+                            _trans.trackPlayingStop(track.name.value),
+                            onPressed: (track.state.value == TrackState.playing || track.state.value == TrackState.paused || progress > 0)
+                                ? () => track.stopPlaying()
+                                : null,
+                          )),
                 if (track.recorderState.value != RecorderState.processing)
                   PopupMenuButton<TrackMenuItem>(
                     style: _uiHelper.circledButtonStyle(),
@@ -571,7 +558,7 @@ class TrackDetailsManager {
         if (state != TrackState.recording) _uiHelper.trackMenuItem(TrackMenuItem.changeName, AppIcon.trackTitle, _trans.trackNameChange),
         if (state != TrackState.recording)
           _uiHelper.trackMenuItem(TrackMenuItem.changeKeyboardKey, AppIcon.trackKeyboardKey, _trans.trackKeyboardKeyChange),
-    if (state != TrackState.empty && state != TrackState.recording)
+        if (state != TrackState.empty && state != TrackState.recording)
           _uiHelper.trackMenuItem(TrackMenuItem.trackRecordingMove, AppIcon.trackRecordingMove, _trans.trackRecordingMove),
         if (state != TrackState.empty && state != TrackState.recording)
           _uiHelper.trackMenuItem(TrackMenuItem.delete, AppIcon.deleteForever, _trans.trackRecordingDelete),
@@ -700,7 +687,8 @@ class TrackDetailsManager {
                               _trackRepository.move(track, loopTrack);
                               Navigator.pop(context);
                               Navigator.pop(context);
-                              _uiHelper.toast(_trans.trackRecordingMoveSuccess(track.id.toString(), loopTrack.id.toString()), icon: AppIcon.trackRecordingMove);
+                              _uiHelper.toast(_trans.trackRecordingMoveSuccess(track.id.toString(), loopTrack.id.toString()),
+                                  icon: AppIcon.trackRecordingMove);
                             },
                       child: Text(
                         loopTrack.name.value,
@@ -720,5 +708,18 @@ class TrackDetailsManager {
             ]);
         break;
     }
+  }
+
+  void _share(Track track) {
+    if (track.path == null) {
+      _uiHelper.toast(_trans.trackRecordingShareNoFile(track.name.value), icon: AppIcon.trackRecordingShare, type: ToastType.error, duration: 4);
+      return;
+    }
+    File file = File(track.path!);
+    if (file.existsSync() == false) {
+      _uiHelper.toast(_trans.trackRecordingShareNoFile(track.name.value), icon: AppIcon.trackRecordingShare, type: ToastType.error, duration: 4);
+      return;
+    }
+    Share.shareXFiles([XFile(track.path!)], text: _trans.trackRecordingShareMessage(track.name.value));
   }
 }

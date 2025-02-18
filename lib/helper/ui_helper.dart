@@ -389,8 +389,8 @@ class UIHelper {
             })),
       ));
 
-  ButtonStyle circledButtonStyle() => IconButton.styleFrom(
-        shape: CircleBorder(),
+  ButtonStyle circledButtonStyle({OutlinedBorder? borderStyle}) => IconButton.styleFrom(
+        shape: borderStyle ?? CircleBorder(),
         padding: EdgeInsets.zero,
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
       );
@@ -401,6 +401,7 @@ class UIHelper {
     VoidCallback? onPressed,
     double? iconSize,
     double? boxSize,
+    OutlinedBorder? borderStyle,
   }) =>
       Container(
           margin: EdgeInsets.zero,
@@ -408,7 +409,7 @@ class UIHelper {
           height: boxSize,
           padding: EdgeInsets.all(gridGap),
           child: IconButton(
-            style: circledButtonStyle(),
+            style: circledButtonStyle(borderStyle: borderStyle),
             icon: Icon(icon, color: Theme.of(context).colorScheme.primary),
             iconSize: iconSize ?? Theme.of(context).textTheme.headlineSmall!.fontSize,
             padding: EdgeInsets.zero,

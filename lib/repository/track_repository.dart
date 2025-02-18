@@ -61,6 +61,11 @@ class TrackRepository {
     save(track);
   }
 
+  void togglePlaybackMode(Track track) {
+    track.togglePlaybackMode();
+    save(track);
+  }
+
   void deleteTracksRecordings(Set<Track> tracksList) {
     for (Track track in tracksList) {
       trackRecordingDelete(track);
