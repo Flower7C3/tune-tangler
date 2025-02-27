@@ -832,4 +832,38 @@ class UIHelper {
         iconColor: Theme.of(context).colorScheme.secondary,
         textColor: Theme.of(context).colorScheme.secondary,
       ));
+
+  Text buildRichText(
+    String template, {
+    required Map<String, dynamic> data,
+    double iconSize = 16,
+  }) {
+    List<InlineSpan> spans = [];
+    RegExp exp = RegExp(r'\$\[(.*?)\]');
+    List<String> parts = template.split(exp);
+
+    int matchIndex = 0;
+    for (String part in parts) {
+      spans.add(TextSpan(text: part));
+      if (matchIndex < exp.allMatches(template).length) {
+        String key = exp.allMatches(template).elementAt(matchIndex).group(1)!;
+        if (data.containsKey(key)) {
+          if (data[key] is IconData) {
+            spans.add(WidgetSpan(
+              child: Icon(data[key], size: iconSize),
+            ));
+          } else {
+            spans.add(TextSpan(text: data[key].toString()));
+          }
+        }
+        matchIndex++;
+      }
+    }
+
+    return Text.rich(
+      TextSpan(
+        children: spans,
+      ),
+    );
+  }
 }

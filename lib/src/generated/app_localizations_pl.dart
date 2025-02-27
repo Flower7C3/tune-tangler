@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -467,25 +466,34 @@ class AppLocalizationsPl extends AppLocalizations {
   String get settings => 'Ustawienia';
 
   @override
-  String get moreSettings => 'Więcej ustawień...';
-
-  @override
   String get help => 'Pomoc';
 
   @override
   String get helpScreenMessageAboutTitle => 'O aplikacji';
 
   @override
-  String get helpScreenMessageAboutContent => 'Ta aplikacja umożliwia rejestrację dźwięku z mikrofonu lub interfejsu USB audio (urządzenie musi obsługiwać technologię USB OTG) do jednej z wielu ścieżek. Dostępne jest ustawianie kodeka audio, częstotliwości próbkowania, szybkości transmisji, trybu audio, automatycznego wzmocnienie, anulowania echa i tłumienia szumów. Możliwe jest również zaimportowanie istniejącego pliku audio.\n\nNagrania można odtwarzać synchronicznie lub asynchronicznie, w pętli lub bez.\n\nPoszczególne ścieżki mają możliwość ustawienia prędkości, głośności i punktu startu oraz eksportu nagrania.\n\nNagrania i ich ustawienia oraz tryb graficzny i język są zapamiętywane po wyłączeniu aplikacji.';
+  String get helpScreenMessageAboutContent => 'Ta aplikacja umożliwia rejestrację dźwięku z mikrofonu lub interfejsu USB audio (urządzenie musi obsługiwać technologię USB OTG) do jednej z wielu ścieżek. Możliwe jest również zaimportowanie istniejącego pliku audio.\n\nNagrania można odtwarzać synchronicznie lub asynchronicznie, w pętli lub bez.\n\nNagrania i ich ustawienia oraz tryb graficzny i język są zapamiętywane po wyłączeniu aplikacji.';
 
   @override
-  String get helpScreenMessageUsageTitle => 'Używanie aplikacji';
+  String get helpScreenMessageGridScreenTitle => 'Ekran siatki ścieżek';
 
   @override
-  String get helpScreenMessageUsageContent => 'Naciśnij krótko kolorowy blok ścieżki lub użyj klawisza skrótu, aby wykonać jedną z dostępnych akcji.\n\nPrzytrzymaj blok ścieżki lub użyj klawisza skrótu z klawiszem [Control], aby otworzyć detale ścieżki zawierające dodatkowe ustawienia.\n\nKlawisz skrótu jest widoczny na górze ścieżki. Można go też zmienić w widoku detali ścieżki.';
+  String get helpScreenMessageGridScreenContent => 'Naciśnij krótko kolorowy blok ścieżki lub użyj skrótu klawiszowego (widocznego u góry ścieżki), aby wykonać jedną z dostępnych akcji.\n\nPrzytrzymaj blok ścieżki lub użyj skrótu klawiszowego z klawiszem Control \$[controlKey], aby otworzyć szczegóły ścieżki.';
 
   @override
-  String get helpScreenMessageTrackActions => 'Legenda statusów ścieżki i dostępnych akcji';
+  String get helpScreenMessageDetailsScreenTitle => 'Ekran szczegółów ścieżki';
+
+  @override
+  String get helpScreenMessageDetailsScreenContent => 'Istnieje kilka ustawień, takich jak: \$[recordingClip]przycinanie nagrania, \$[playbackMode]tryb odtwarzania, \$[playbackVolume]wartość głośności odtwarzania, \$[playbackBalance]balans audio, \$[playbackSpeed]prędkość odtwarzania, \$[trackName]nazwa ścieżki, \$[keyboardKey]skrót klawiszowy ścieżki.\nMożesz również zmienić lokalizację ścieżki na siatce, \$[import]zaimportować plik nagrania, \$[share]udostępnić lub \$[delete]usunąć nagranie.';
+
+  @override
+  String get helpScreenMessageTrackStates => 'Statusy i akcje ścieżki';
+
+  @override
+  String get helpScreenMessageTrackIcons => 'Ikony informacji o ścieżce';
+
+  @override
+  String get helpScreenMessageSettingsInfo => 'Dostępne jest ustawianie \$[codec]kodeka audio, \$[sampleRate]częstotliwości próbkowania, \$[bitRate]szybkości transmisji, \$[audioMode]trybu audio, \$[gain]automatycznego wzmocnienie, \$[echoCancel]anulowania echa i \$[noiseSuppress]tłumienia szumów.';
 
   @override
   String get stateEmpty => 'ścieżka pusta (kliknij blok, aby rozpocząć nagrywanie ścieżki)';

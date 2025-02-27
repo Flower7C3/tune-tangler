@@ -18,6 +18,10 @@ samples, guidance on mobile development, and a full API reference.
 
 ## How to
 
+- Set app name
+
+      dart run rename_app:main all="Tune Tangler"
+
 - Regenerate icons:
 
       dart run flutter_launcher_icons
@@ -28,4 +32,4 @@ samples, guidance on mobile development, and a full API reference.
 
 - Build APK
 
-      melos run build-apk
+      melos run apk

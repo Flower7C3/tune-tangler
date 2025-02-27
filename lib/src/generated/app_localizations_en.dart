@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -467,25 +466,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings => 'Settings';
 
   @override
-  String get moreSettings => 'More settings...';
-
-  @override
   String get help => 'Help';
 
   @override
   String get helpScreenMessageAboutTitle => 'About';
 
   @override
-  String get helpScreenMessageAboutContent => 'This application allows you to record audio from a microphone or USB audio interface (your device must support USB OTG technology) to one of several tracks. You can set the audio codec, sample rate, bit rate, audio mode, auto gain, echo cancellation and noise suppression. You can also import an existing audio file.\n\nRecordings can be played synchronously or asynchronously, in a loop or not.\n\nIndividual tracks have the ability to set the speed, volume and start point, and export the recording.\n\nRecordings and their settings, as well as the graphic mode and language, are remembered after the application is closed.';
+  String get helpScreenMessageAboutContent => 'This application allows you to record audio from a microphone or USB audio interface (your device must support USB OTG technology) to one of several tracks. You can also import an existing audio file.\n\nRecordings can be played synchronously or asynchronously, in a loop or not.\n\nRecordings and their settings, as well as the graphic mode and language, are remembered after the application is closed.';
 
   @override
-  String get helpScreenMessageUsageTitle => 'Using the app';
+  String get helpScreenMessageGridScreenTitle => 'Tracks grid screen';
 
   @override
-  String get helpScreenMessageUsageContent => 'Short press a colored track block or use a hotkey to perform one of the available actions.\n\nHold the track block or use the hotkey with the [Control] key to open the track details, which contains additional settings.\n\nThe hotkey is visible at the top of the track. You can also change it in the track details view.';
+  String get helpScreenMessageGridScreenContent => 'Short press a colored track block or use a hotkey (visible at the top of the track) to perform one of the available actions.\n\nHold the track block or use the hotkey with the Control key \$[controlKey] to open the track details.';
 
   @override
-  String get helpScreenMessageTrackActions => 'Legend of track status and available actions';
+  String get helpScreenMessageDetailsScreenTitle => 'Track details screen';
+
+  @override
+  String get helpScreenMessageDetailsScreenContent => 'There are several settings, such as: \$[recordingClip]recording trimming, \$[playbackMode]playback mode, \$[playbackVolume]playback volume value, \$[playbackBalance]audio balance, \$[playbackSpeed]playback speed, \$[trackName]track name, \$[keyboardKey]track keyboard shortcut. You can also change the track location on the grid, \$[import]import recording file, \$[share]share or \$[delete]delete recording.';
+
+  @override
+  String get helpScreenMessageTrackStates => 'Track states and actions';
+
+  @override
+  String get helpScreenMessageTrackIcons => 'Track info icons';
+
+  @override
+  String get helpScreenMessageSettingsInfo => 'You can set the audio codec, sample rate, bit rate, audio mode, auto gain, echo cancellation and noise suppression.';
 
   @override
   String get stateEmpty => 'track empty (click on box to start recording)';

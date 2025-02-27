@@ -160,10 +160,6 @@ class TrackRepository {
     }
   }
 
-  void updateTrackName(Track track) {
-    // if(track.name)
-  }
-
   void move(Track sourceTrack, Track selectedTrack) {
     Track newSourceTrack = Track.fromMap(selectedTrack.toMap());
     Track newSelectedTrack = Track.fromMap(sourceTrack.toMap());

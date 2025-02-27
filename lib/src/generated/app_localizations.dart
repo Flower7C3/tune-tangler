@@ -18,7 +18,7 @@ import 'app_localizations_pl.dart';
 /// `supportedLocales` list. For example:
 ///
 /// ```dart
-/// import 'l10n/app_localizations.dart';
+/// import 'generated/app_localizations.dart';
 ///
 /// return MaterialApp(
 ///   localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -785,12 +785,6 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get settings;
 
-  /// No description provided for @moreSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'More settings...'**
-  String get moreSettings;
-
   /// No description provided for @help.
   ///
   /// In en, this message translates to:
@@ -806,26 +800,50 @@ abstract class AppLocalizations {
   /// No description provided for @helpScreenMessageAboutContent.
   ///
   /// In en, this message translates to:
-  /// **'This application allows you to record audio from a microphone or USB audio interface (your device must support USB OTG technology) to one of several tracks. You can set the audio codec, sample rate, bit rate, audio mode, auto gain, echo cancellation and noise suppression. You can also import an existing audio file.\n\nRecordings can be played synchronously or asynchronously, in a loop or not.\n\nIndividual tracks have the ability to set the speed, volume and start point, and export the recording.\n\nRecordings and their settings, as well as the graphic mode and language, are remembered after the application is closed.'**
+  /// **'This application allows you to record audio from a microphone or USB audio interface (your device must support USB OTG technology) to one of several tracks. You can also import an existing audio file.\n\nRecordings can be played synchronously or asynchronously, in a loop or not.\n\nRecordings and their settings, as well as the graphic mode and language, are remembered after the application is closed.'**
   String get helpScreenMessageAboutContent;
 
-  /// No description provided for @helpScreenMessageUsageTitle.
+  /// No description provided for @helpScreenMessageGridScreenTitle.
   ///
   /// In en, this message translates to:
-  /// **'Using the app'**
-  String get helpScreenMessageUsageTitle;
+  /// **'Tracks grid screen'**
+  String get helpScreenMessageGridScreenTitle;
 
-  /// No description provided for @helpScreenMessageUsageContent.
+  /// No description provided for @helpScreenMessageGridScreenContent.
   ///
   /// In en, this message translates to:
-  /// **'Short press a colored track block or use a hotkey to perform one of the available actions.\n\nHold the track block or use the hotkey with the [Control] key to open the track details, which contains additional settings.\n\nThe hotkey is visible at the top of the track. You can also change it in the track details view.'**
-  String get helpScreenMessageUsageContent;
+  /// **'Short press a colored track block or use a hotkey (visible at the top of the track) to perform one of the available actions.\n\nHold the track block or use the hotkey with the Control key \$[controlKey] to open the track details.'**
+  String get helpScreenMessageGridScreenContent;
 
-  /// No description provided for @helpScreenMessageTrackActions.
+  /// No description provided for @helpScreenMessageDetailsScreenTitle.
   ///
   /// In en, this message translates to:
-  /// **'Legend of track status and available actions'**
-  String get helpScreenMessageTrackActions;
+  /// **'Track details screen'**
+  String get helpScreenMessageDetailsScreenTitle;
+
+  /// No description provided for @helpScreenMessageDetailsScreenContent.
+  ///
+  /// In en, this message translates to:
+  /// **'There are several settings, such as: \$[recordingClip]recording trimming, \$[playbackMode]playback mode, \$[playbackVolume]playback volume value, \$[playbackBalance]audio balance, \$[playbackSpeed]playback speed, \$[trackName]track name, \$[keyboardKey]track keyboard shortcut. You can also change the track location on the grid, \$[import]import recording file, \$[share]share or \$[delete]delete recording.'**
+  String get helpScreenMessageDetailsScreenContent;
+
+  /// No description provided for @helpScreenMessageTrackStates.
+  ///
+  /// In en, this message translates to:
+  /// **'Track states and actions'**
+  String get helpScreenMessageTrackStates;
+
+  /// No description provided for @helpScreenMessageTrackIcons.
+  ///
+  /// In en, this message translates to:
+  /// **'Track info icons'**
+  String get helpScreenMessageTrackIcons;
+
+  /// No description provided for @helpScreenMessageSettingsInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'You can set the audio codec, sample rate, bit rate, audio mode, auto gain, echo cancellation and noise suppression.'**
+  String get helpScreenMessageSettingsInfo;
 
   /// No description provided for @stateEmpty.
   ///
