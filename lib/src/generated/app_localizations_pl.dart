@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -484,7 +485,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get helpScreenMessageDetailsScreenTitle => 'Ekran szczegółów ścieżki';
 
   @override
-  String get helpScreenMessageDetailsScreenContent => 'Istnieje kilka ustawień, takich jak: \$[recordingClip]przycinanie nagrania, \$[playbackMode]tryb odtwarzania, \$[playbackVolume]wartość głośności odtwarzania, \$[playbackBalance]balans audio, \$[playbackSpeed]prędkość odtwarzania, \$[trackName]nazwa ścieżki, \$[keyboardKey]skrót klawiszowy ścieżki.\nMożesz również zmienić lokalizację ścieżki na siatce, \$[import]zaimportować plik nagrania, \$[share]udostępnić lub \$[delete]usunąć nagranie.';
+  String get helpScreenMessageDetailsScreenContent => 'Istnieje kilka ustawień, takich jak: \$[recordingClip]przycinanie nagrania, \$[trackPlaybackMode]tryb odtwarzania, \$[trackPlaybackVolume]wartość głośności odtwarzania, \$[trackPlaybackBalance]balans audio, \$[trackPlaybackSpeed]prędkość odtwarzania, \$[trackName]nazwa ścieżki, \$[trackKeyboardKey]skrót klawiszowy ścieżki.\nMożesz również \$[trackRecordingMove]zmienić lokalizację ścieżki na siatce, \$[trackRecordingImport]zaimportować plik nagrania, \$[trackRecordingShare]udostępnić lub \$[deleteForever]usunąć nagranie.';
 
   @override
   String get helpScreenMessageTrackStates => 'Statusy i akcje ścieżki';
@@ -493,7 +494,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get helpScreenMessageTrackIcons => 'Ikony informacji o ścieżce';
 
   @override
-  String get helpScreenMessageSettingsInfo => 'Dostępne jest ustawianie \$[codec]kodeka audio, \$[sampleRate]częstotliwości próbkowania, \$[bitRate]szybkości transmisji, \$[audioMode]trybu audio, \$[gain]automatycznego wzmocnienie, \$[echoCancel]anulowania echa i \$[noiseSuppress]tłumienia szumów.';
+  String get helpScreenMessageSettingsInfo => 'Dostępne jest ustawianie \$[recordingAudioEncoder]kodeka audio, \$[recordingSampleRate]częstotliwości próbkowania, \$[recordingBitRate]szybkości transmisji, \$[recordingAudioMode]trybu audio, \$[recordingAudioGain]automatycznego wzmocnienia, \$[recordingEchoCancel]anulowania echa i \$[recordingNoiseSuppress]tłumienia szumów.';
 
   @override
   String get stateEmpty => 'ścieżka pusta (kliknij blok, aby rozpocząć nagrywanie ścieżki)';

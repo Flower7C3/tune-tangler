@@ -19,8 +19,7 @@ class AppIcon {
   static IconData gridRowsAmount = Icons.table_rows_rounded;
   static IconData gridColsAmount = Icons.view_column_rounded;
 
-  static IconData trackTitleEmojis = Icons.emoji_emotions_rounded;
-  static IconData trackTitle = Icons.text_fields;
+  static IconData trackName = Icons.text_fields;
   static IconData trackKeyboardKey = Icons.keyboard_alt_rounded;
   static IconData trackRecordingMove = Icons.shuffle_rounded;
 

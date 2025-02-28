@@ -824,7 +824,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpScreenMessageDetailsScreenContent.
   ///
   /// In en, this message translates to:
-  /// **'There are several settings, such as: \$[recordingClip]recording trimming, \$[playbackMode]playback mode, \$[playbackVolume]playback volume value, \$[playbackBalance]audio balance, \$[playbackSpeed]playback speed, \$[trackName]track name, \$[keyboardKey]track keyboard shortcut. You can also change the track location on the grid, \$[import]import recording file, \$[share]share or \$[delete]delete recording.'**
+  /// **'There are several settings, such as: \$[recordingClip]recording trimming, \$[trackPlaybackMode]playback mode, \$[trackPlaybackVolume]playback volume value, \$[trackPlaybackBalance]audio balance, \$[trackPlaybackSpeed]playback speed, \$[trackName]track name, \$[trackKeyboardKey]track keyboard shortcut. You can also \$[trackRecordingMove]change the track location on the grid, \$[trackRecordingImport]import recording file, \$[trackRecordingShare]share or \$[deleteForever]delete recording.'**
   String get helpScreenMessageDetailsScreenContent;
 
   /// No description provided for @helpScreenMessageTrackStates.
@@ -842,7 +842,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpScreenMessageSettingsInfo.
   ///
   /// In en, this message translates to:
-  /// **'You can set the audio codec, sample rate, bit rate, audio mode, auto gain, echo cancellation and noise suppression.'**
+  /// **'You can set \$[recordingAudioEncoder]audio codec, \$[recordingSampleRate]sample rate, \$[recordingBitRate]bit rate, \$[recordingAudioMode]audio mode, \$[recordingAudioGain]auto gain, \$[recordingEchoCancel]echo cancel and \$[recordingNoiseSuppress]noise suppression.'**
   String get helpScreenMessageSettingsInfo;
 
   /// No description provided for @stateEmpty.

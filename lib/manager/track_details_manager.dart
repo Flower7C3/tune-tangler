@@ -555,7 +555,7 @@ class TrackDetailsManager {
   /// *************************************************************************
   /// TRACK MENU ITEMS
   List<PopupMenuEntry<TrackMenuItem>> _trackMenuItems(Track track, TrackState state) => [
-        if (state != TrackState.recording) _uiHelper.trackMenuItem(TrackMenuItem.changeName, AppIcon.trackTitle, _trans.trackNameChange),
+        if (state != TrackState.recording) _uiHelper.trackMenuItem(TrackMenuItem.changeName, AppIcon.trackName, _trans.trackNameChange),
         if (state != TrackState.recording)
           _uiHelper.trackMenuItem(TrackMenuItem.changeKeyboardKey, AppIcon.trackKeyboardKey, _trans.trackKeyboardKeyChange),
         if (state != TrackState.empty && state != TrackState.recording)
@@ -574,7 +574,7 @@ class TrackDetailsManager {
             context: _context,
             builder: (BuildContext context) => StatefulBuilder(
                 builder: (context, setDialogState) => AlertDialog(
-                        title: _uiHelper.statusIconTile(AppIcon.trackTitle, _trans.trackNameChangeTitle(track.name.value)),
+                        title: _uiHelper.statusIconTile(AppIcon.trackName, _trans.trackNameChangeTitle(track.name.value)),
                         content: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
                           Text(_trans.trackNameChangeInfo(track.name.value)),
                           SizedBox(height: Theme.of(context).textTheme.labelSmall!.fontSize),
@@ -627,14 +627,14 @@ class TrackDetailsManager {
                               track.setName(track.id.toString());
                               _trackRepository.save(track);
                               Navigator.pop(context, track.id);
-                              _uiHelper.toast(_trans.trackNameChangeSuccess(track.id.toString()), icon: AppIcon.trackTitle);
+                              _uiHelper.toast(_trans.trackNameChangeSuccess(track.id.toString()), icon: AppIcon.trackName);
                             }),
                           _uiHelper.simpleButton(_trans.buttonCancel, () => Navigator.pop(context, 'cancel')),
                           _uiHelper.primaryButton(_trans.buttonSaveTo(selectedEmoji), () {
                             track.setName(selectedEmoji);
                             _trackRepository.save(track);
                             Navigator.pop(context, selectedEmoji);
-                            _uiHelper.toast(_trans.trackNameChangeSuccess(selectedEmoji), icon: AppIcon.trackTitle);
+                            _uiHelper.toast(_trans.trackNameChangeSuccess(selectedEmoji), icon: AppIcon.trackName);
                           }),
                         ])));
         break;
