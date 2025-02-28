@@ -1,15 +1,15 @@
 enum TrackMenuItem {
-  changeKeyboardKey,
-  trackRecordingMove,
-  changeName,
-  delete,
+  keyboardKeyChange,
+  recordingMove,
+  nameChange,
+  recordingDelete,
 }
 
 enum RowMenuItem {
-  playbackMode,
-  playbackSpeed,
-  playbackVolume,
-  playbackBalance,
+  playbackModeSet,
+  playbackSpeedSet,
+  playbackVolumeSet,
+  playbackBalanceSet,
   playbackStartAtPositionReset,
   playbackEndAtPositionReset,
   recordingsDelete,
@@ -22,8 +22,6 @@ enum AllTracksMenuItem {
   playbackBalanceSet,
   playbackStartAtPositionReset,
   playbackEndAtPositionReset,
-  titleReset,
+  nameReset,
   shortcutKeyReset,
-  // settingsReset,
-  // recordingsDelete,
 }

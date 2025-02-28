@@ -68,7 +68,7 @@ class NavigationBarManager {
         _uiHelper.topTrackMenuItem(
             AllTracksMenuItem.playbackEndAtPositionReset, AppIcon.trackPlaybackEndAtPosition, _trans.allTracksPlaybackEndAtPositionReset),
         const PopupMenuDivider(),
-        _uiHelper.topTrackMenuItem(AllTracksMenuItem.titleReset, AppIcon.trackName, _trans.allTracksTitleReset),
+        _uiHelper.topTrackMenuItem(AllTracksMenuItem.nameReset, AppIcon.trackName, _trans.allTracksTitleReset),
         _uiHelper.topTrackMenuItem(AllTracksMenuItem.shortcutKeyReset, AppIcon.trackKeyboardKey, _trans.allTracksShortcutKeyReset),
       ];
 
@@ -182,7 +182,7 @@ class NavigationBarManager {
           },
         );
         break;
-      case AllTracksMenuItem.titleReset:
+      case AllTracksMenuItem.nameReset:
         _uiHelper.alertDialogReset(
           AppIcon.trackName,
           _trans.allTracksTitleResetTitle,

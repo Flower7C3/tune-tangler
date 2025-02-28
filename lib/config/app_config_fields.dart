@@ -52,9 +52,9 @@ final class AppConfigFieldsCollection {
     AppRecordingConfigField(AppConfigFieldKey.recordingNoiseSuppress, false),
   ];
 
-  static List<AppScreenConfigField> get listScreen => _fields.whereType<AppScreenConfigField>().toList();
+  static List<AppScreenConfigField> get screenList => _fields.whereType<AppScreenConfigField>().toList();
 
-  static List<AppRecordingConfigField> get listRecording => _fields.whereType<AppRecordingConfigField>().toList();
+  static List<AppRecordingConfigField> get recordingList => _fields.whereType<AppRecordingConfigField>().toList();
 
-  static AppConfigField field(AppConfigFieldKey key) => _fields.firstWhere((item) => item.key == key);
+  static AppConfigField get(AppConfigFieldKey key) => _fields.firstWhere((item) => item.key == key);
 }

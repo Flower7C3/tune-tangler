@@ -554,21 +554,21 @@ class TrackDetailsManager {
 
   /// *************************************************************************
   /// TRACK MENU ITEMS
-  List<PopupMenuEntry<TrackMenuItem>> _trackMenuItems(Track track, TrackState state) => [
-        if (state != TrackState.recording) _uiHelper.trackMenuItem(TrackMenuItem.changeName, AppIcon.trackName, _trans.trackNameChange),
+  List<PopupMenuEntry<dynamic>> _trackMenuItems(Track track, TrackState state) => [
+        if (state != TrackState.recording) _uiHelper.popupMenuItem(TrackMenuItem.nameChange, AppIcon.trackName, _trans.trackNameChange),
         if (state != TrackState.recording)
-          _uiHelper.trackMenuItem(TrackMenuItem.changeKeyboardKey, AppIcon.trackKeyboardKey, _trans.trackKeyboardKeyChange),
+          _uiHelper.popupMenuItem(TrackMenuItem.keyboardKeyChange, AppIcon.trackKeyboardKey, _trans.trackKeyboardKeyChange),
         if (state != TrackState.empty && state != TrackState.recording)
-          _uiHelper.trackMenuItem(TrackMenuItem.trackRecordingMove, AppIcon.trackRecordingMove, _trans.trackRecordingMove),
+          _uiHelper.popupMenuItem(TrackMenuItem.recordingMove, AppIcon.trackRecordingMove, _trans.trackRecordingMove),
         if (state != TrackState.empty && state != TrackState.recording)
-          _uiHelper.trackMenuItem(TrackMenuItem.delete, AppIcon.deleteForever, _trans.trackRecordingDelete),
+          _uiHelper.popupMenuItem(TrackMenuItem.recordingDelete, AppIcon.deleteForever, _trans.trackRecordingDelete),
       ];
 
   /// *************************************************************************
   /// TRACK MENU SELECTED
   void _trackMenuItemSelected(Track track, TrackMenuItem selection) async {
     switch (selection) {
-      case TrackMenuItem.changeName:
+      case TrackMenuItem.nameChange:
         String selectedEmoji = track.name.value;
         showDialog(
             context: _context,
@@ -638,13 +638,13 @@ class TrackDetailsManager {
                           }),
                         ])));
         break;
-      case TrackMenuItem.changeKeyboardKey:
+      case TrackMenuItem.keyboardKeyChange:
         _uiHelper.alertDialog(AppIcon.trackKeyboardKey, _trans.trackKeyboardKeyChangeTitle(track.name.value),
             contentText: _trans.trackKeyboardKeyChangeInfo(track.name.value),
             contentWidget: _uiHelper.gridBuilder(
                 itemCount: AppKeyboardKeyMap.keyboardKeyNames().length,
                 itemBuilder: (context, index) {
-                  String key = AppKeyboardKeyMap.keyboardKeyNames().elementAt(index);
+                  String key = AppKeyboardKeyMap.keyboardKeyName(index);
                   return OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         padding: EdgeInsets.zero,
@@ -665,7 +665,7 @@ class TrackDetailsManager {
                       ));
                 }));
         break;
-      case TrackMenuItem.trackRecordingMove:
+      case TrackMenuItem.recordingMove:
         _uiHelper.alertDialog(AppIcon.trackRecordingMove, _trans.trackRecordingMoveTitle(track.name.value),
             contentText: _trans.trackRecordingMoveInfo(track.name.value),
             contentWidget: _uiHelper.gridBuilder(
@@ -695,7 +695,7 @@ class TrackDetailsManager {
                         style: TextStyle(color: (loopTrack.id == track.id) ? Theme.of(context).colorScheme.inversePrimary : null),
                       ));
                 }));
-      case TrackMenuItem.delete:
+      case TrackMenuItem.recordingDelete:
         _uiHelper.alertDialog(AppIcon.deleteForever, _trans.trackRecordingDeleteTitle(track.name.value),
             contentText: _trans.trackRecordingDeleteInfo(track.name.value),
             actions: <Widget>[

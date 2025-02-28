@@ -21,7 +21,7 @@ class HiveService {
   static Future<void> set(dynamic key, dynamic value, {bool updateState = false}) async {
     switch (key) {
       case AppConfigFieldKey _:
-        _globalSettingsBox.put(AppConfigFieldsCollection.field(key).key.name, value);
+        _globalSettingsBox.put(AppConfigFieldsCollection.get(key).key.name, value);
         switch (key) {
           case AppConfigFieldKey.wakelockEnabled:
             WakelockPlus.toggle(enable: value);
@@ -37,8 +37,8 @@ class HiveService {
 
   static dynamic get(dynamic key, {dynamic defaultValue}) => switch (key) {
         AppConfigFieldKey _ => _globalSettingsBox.get(
-            AppConfigFieldsCollection.field(key).key.name,
-            defaultValue: AppConfigFieldsCollection.field(key).defaultValue,
+            AppConfigFieldsCollection.get(key).key.name,
+            defaultValue: AppConfigFieldsCollection.get(key).defaultValue,
           ),
         TrackId _ => _trackSettingsBox.get(
             key.toString(),
@@ -49,14 +49,14 @@ class HiveService {
       };
 
   static Future<void> delete(dynamic key) async => switch (key) {
-        AppConfigFieldKey _ => _globalSettingsBox.delete(AppConfigFieldsCollection.field(key).key.name),
+        AppConfigFieldKey _ => _globalSettingsBox.delete(AppConfigFieldsCollection.get(key).key.name),
         TrackId _ => await _trackSettingsBox.delete(key.toString()),
         Object() => throw UnimplementedError(),
         null => throw UnimplementedError(),
       };
 
   static bool containsKey(dynamic key) => switch (key) {
-        AppConfigFieldKey _ => _globalSettingsBox.containsKey(AppConfigFieldsCollection.field(key).key.name),
+        AppConfigFieldKey _ => _globalSettingsBox.containsKey(AppConfigFieldsCollection.get(key).key.name),
         TrackId _ => _trackSettingsBox.containsKey(key.toString()),
         Object() => throw UnimplementedError(),
         null => throw UnimplementedError(),

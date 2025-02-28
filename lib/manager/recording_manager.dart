@@ -57,7 +57,7 @@ class RecordingManager {
     File sourceFile = File(sourcePath);
     await sourceFile.copy(destinationPath);
 
-     track.setPath(destinationPath);
+    track.setPath(destinationPath);
     track.setAudioSource(TrackAudioSource.file);
     _trackRepository.save(track);
 
@@ -155,11 +155,11 @@ class RecordingManager {
     );
   }
 
-  void cancelRecording(Track track) {
+  Future<void> cancelRecording(Track track) async {
     _audioRecorder.cancel();
     flutterLocalNotificationsPlugin.cancel(0);
     track.stopTimer();
-     track.setPath(null);
+    track.setPath(null);
     _trackRepository.save(track);
     _uiHelper.toast(_trans.trackRecordingCancelled(track.name.value), icon: AppGlobalConfig.trackState.icon(TrackState.empty));
   }
@@ -167,7 +167,7 @@ class RecordingManager {
   Future<void> stopAndSaveRecording(Track track) async {
     try {
       String? path = await _audioRecorder.stop();
-       track.setPath(path);
+      track.setPath(path);
       _uiHelper.toast(_trans.trackRecordingStopSuccess(track.name.value), icon: AppGlobalConfig.trackState.icon(TrackState.idle));
     } catch (e) {
       track.setRecorderState(RecorderState.empty);

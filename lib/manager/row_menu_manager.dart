@@ -48,9 +48,9 @@ class RowMenuManager {
       onSelected: (dynamic selection) => _rowMenuItemSelected(selection, rowIndex));
 
   List<PopupMenuEntry<dynamic>> _rowMenuItems(int rowIndex) => <PopupMenuEntry<dynamic>>[
-        _uiHelper.rowMenuButton(RowMenuItem.playbackMode, AppIcon.trackPlaybackMode, _trans.rowTracksPlaybackModeSet,
+        _uiHelper.popupMenuButton(RowMenuItem.playbackModeSet, AppIcon.trackPlaybackMode, _trans.rowTracksPlaybackModeSet,
             itemBuilder: () => [
-                  ...AppGlobalConfig.trackPlaybackReleaseMode.values<ReleaseMode>().map((ReleaseMode value) => _uiHelper.rowPopupMenuItem(
+                  ...AppGlobalConfig.trackPlaybackReleaseMode.values<ReleaseMode>().map((ReleaseMode value) => _uiHelper.popupMenuItem(
                         value,
                         AppGlobalConfig.trackPlaybackReleaseMode.icon(value),
                         _trans.rowTracksPlaybackModeSetTitle(AppGlobalConfig.trackPlaybackReleaseMode.translate(value, trans: _trans)),
@@ -64,9 +64,9 @@ class RowMenuManager {
                   icon: AppIcon.trackPlaybackMode);
               Navigator.pop(_context);
             }),
-        _uiHelper.rowMenuButton(RowMenuItem.playbackVolume, AppIcon.trackPlaybackVolume, _trans.rowTracksPlaybackVolumeSet,
+        _uiHelper.popupMenuButton(RowMenuItem.playbackVolumeSet, AppIcon.trackPlaybackVolume, _trans.rowTracksPlaybackVolumeSet,
             itemBuilder: () => [
-                  ...AppGlobalConfig.trackPlaybackVolume.values<double>().map((double value) => _uiHelper.rowPopupMenuItem(
+                  ...AppGlobalConfig.trackPlaybackVolume.values<double>().map((double value) => _uiHelper.popupMenuItem(
                         value,
                         AppGlobalConfig.trackPlaybackVolume.icon(value),
                         _trans.rowTracksPlaybackVolumeTitleSet(AppGlobalConfig.trackPlaybackVolume.format(value)),
@@ -79,9 +79,9 @@ class RowMenuManager {
                   icon: AppIcon.trackPlaybackSpeed);
               Navigator.pop(_context);
             }),
-        _uiHelper.rowMenuButton(RowMenuItem.playbackBalance, AppIcon.trackPlaybackBalance, _trans.rowTracksPlaybackBalanceSet,
+        _uiHelper.popupMenuButton(RowMenuItem.playbackBalanceSet, AppIcon.trackPlaybackBalance, _trans.rowTracksPlaybackBalanceSet,
             itemBuilder: () => [
-                  ...AppGlobalConfig.trackPlaybackBalance.values<double>().map((double value) => _uiHelper.rowPopupMenuItem(
+                  ...AppGlobalConfig.trackPlaybackBalance.values<double>().map((double value) => _uiHelper.popupMenuItem(
                         value,
                         AppGlobalConfig.trackPlaybackBalance.icon(value),
                         _trans.rowTracksPlaybackBalanceTitleSet(AppGlobalConfig.trackPlaybackBalance.translate(value, trans: _trans)),
@@ -95,9 +95,9 @@ class RowMenuManager {
                   icon: AppIcon.trackPlaybackBalance);
               Navigator.pop(_context);
             }),
-        _uiHelper.rowMenuButton(RowMenuItem.playbackSpeed, AppIcon.trackPlaybackSpeed, _trans.rowTracksPlaybackSpeedSet,
+        _uiHelper.popupMenuButton(RowMenuItem.playbackSpeedSet, AppIcon.trackPlaybackSpeed, _trans.rowTracksPlaybackSpeedSet,
             itemBuilder: () => [
-                  ...AppGlobalConfig.trackPlaybackSpeed.values<double>().map((double value) => _uiHelper.rowPopupMenuItem(
+                  ...AppGlobalConfig.trackPlaybackSpeed.values<double>().map((double value) => _uiHelper.popupMenuItem(
                         value,
                         AppGlobalConfig.trackPlaybackSpeed.icon(value),
                         _trans.rowTracksPlaybackSpeedTitleSet(AppGlobalConfig.trackPlaybackSpeed.format(value)),
@@ -110,12 +110,12 @@ class RowMenuManager {
               Navigator.pop(_context);
             }),
         const PopupMenuDivider(),
-        _uiHelper.rowPopupMenuItem(
+        _uiHelper.popupMenuItem(
             RowMenuItem.playbackStartAtPositionReset, AppIcon.trackPlaybackStartAtPosition, _trans.rowTracksPlaybackStartAtPositionReset),
-        _uiHelper.rowPopupMenuItem(
+        _uiHelper.popupMenuItem(
             RowMenuItem.playbackEndAtPositionReset, AppIcon.trackPlaybackEndAtPosition, _trans.rowTracksPlaybackEndAtPositionReset),
         const PopupMenuDivider(),
-        _uiHelper.rowPopupMenuItem(RowMenuItem.recordingsDelete, AppIcon.deleteForever, _trans.rowTracksRecordingsDelete),
+        _uiHelper.popupMenuItem(RowMenuItem.recordingsDelete, AppIcon.deleteForever, _trans.rowTracksRecordingsDelete),
       ];
 
   void _rowMenuItemSelected(RowMenuItem selection, int rowIndex) {

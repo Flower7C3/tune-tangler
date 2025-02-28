@@ -126,7 +126,7 @@ class UIHelper {
         child: content,
       );
 
-  PopupMenuItem rowPopupMenuItem(
+  PopupMenuItem<dynamic> popupMenuItem(
     dynamic value,
     IconData icon,
     String title,
@@ -136,30 +136,20 @@ class UIHelper {
         child: statusIconTile(icon, title),
       );
 
-  PopupMenuItem<dynamic> rowMenuButton(
+  PopupMenuItem<dynamic> popupMenuButton(
     dynamic value,
     IconData icon,
     String title, {
     required List<PopupMenuItem<dynamic>> Function() itemBuilder,
     required Function(dynamic selection) onSelected,
   }) =>
-      PopupMenuItem(
+      PopupMenuItem<dynamic>(
         value: value,
         child: PopupMenuButton<dynamic>(
+          itemBuilder: (BuildContext context) => itemBuilder(),
           onSelected: onSelected,
           child: statusIconTile(icon, title),
-          itemBuilder: (BuildContext context) => itemBuilder(),
         ),
-      );
-
-  PopupMenuItem<TrackMenuItem> trackMenuItem(
-    TrackMenuItem value,
-    IconData icon,
-    String title,
-  ) =>
-      PopupMenuItem<TrackMenuItem>(
-        value: value,
-        child: statusIconTile(icon, title),
       );
 
   void aboutDialog(
@@ -860,10 +850,6 @@ class UIHelper {
       }
     }
 
-    return Text.rich(
-      TextSpan(
-        children: spans,
-      ),
-    );
+    return Text.rich(TextSpan(children: spans));
   }
 }

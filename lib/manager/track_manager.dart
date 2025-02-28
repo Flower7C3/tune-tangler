@@ -29,10 +29,6 @@ class TrackManager {
   }
 
   void onKeyEvent(KeyEvent event) {
-    bool withControl = (HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.controlLeft) ||
-        HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.controlRight) ||
-        HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.control));
-
     if (event is! KeyDownEvent) {
       return;
     }
@@ -40,6 +36,10 @@ class TrackManager {
     if (event.logicalKey == LogicalKeyboardKey.shiftLeft || event.logicalKey == LogicalKeyboardKey.shiftRight) {
       return;
     }
+
+    bool withControl = (HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.controlLeft) ||
+        HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.controlRight) ||
+        HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.control));
 
     String? pressedKeyName = AppKeyboardKeyMap.findPressedKeyName(event);
     for (Track track in _trackRepository.allTracks()) {
@@ -59,11 +59,8 @@ class TrackManager {
           scrollDirection: Axis.horizontal,
           physics: PageScrollPhysics(),
           child: Row(
-              children: List.generate(
-                  _settings.getConfig(AppConfigFieldKey.gridColsAmount),
-                  (columnIndex) => _buildRowTrackContainer(
-                        _settings.getTrack(rowIndex, columnIndex),
-                      )))));
+              children: List.generate(_settings.getConfig(AppConfigFieldKey.gridColsAmount),
+                  (columnIndex) => _buildRowTrackContainer(_settings.getTrack(rowIndex, columnIndex))))));
 
   Container _buildRowTrackContainer(Track track) => Container(
       margin: EdgeInsets.all(UIHelper.gridGap),

@@ -104,8 +104,12 @@ class DrawerManager {
                     child: Text(_trans.recordingInputDeviceValue(inputDevice.label))));
               }
             });
-            _uiHelper.listDialog(AppIcon.recordingInputDevice, _trans.recordingInputDeviceTitle,
-                contentText: _trans.recordingInputDeviceInfo, actions: options.toList());
+            _uiHelper.listDialog(
+              AppIcon.recordingInputDevice,
+              _trans.recordingInputDeviceTitle,
+              contentText: _trans.recordingInputDeviceInfo,
+              actions: options.toList(),
+            );
           },
         ),
         _uiHelper.listTileButtons(
@@ -301,25 +305,27 @@ class DrawerManager {
           (Permission permission) {
             final status = _permissionProvider.get(permission) ?? PermissionStatus.denied;
             return ListTile(
-              leading: Icon(AppGlobalConfig.permissions.icon(permission)),
-              title: Text(AppGlobalConfig.permissions.translate(permission, trans: _trans)),
-              subtitle: Text(AppGlobalConfig.permissionsStatus.translate(status, trans: _trans)),
-              trailing: status.isGranted
-                  ? Icon(AppIcon.yes, color: Theme.of(_context).colorScheme.primary)
-                  : ElevatedButton(
+                leading: Icon(AppGlobalConfig.permissions.icon(permission)),
+                title: Text(AppGlobalConfig.permissions.translate(permission, trans: _trans)),
+                subtitle: Text(AppGlobalConfig.permissionsStatus.translate(status, trans: _trans)),
+                trailing: switch (status) {
+                  PermissionStatus.granted => Icon(AppIcon.yes, color: Theme.of(_context).colorScheme.primary),
+                  PermissionStatus.denied => ElevatedButton(
                       onPressed: () async {
-                        if (status.isDenied) {
-                          final status = await permission.request();
-                          _permissionProvider.set(permission, status);
-                          setDrawerState(() {});
-                        } else {
-                          await openAppSettings();
-                          setDrawerState(() {});
-                        }
+                        final status = await permission.request();
+                        _permissionProvider.set(permission, status);
+                        setDrawerState(() {});
                       },
                       child: Text(_trans.grantPermission),
                     ),
-            );
+                  _ => ElevatedButton(
+                      onPressed: () async {
+                        await openAppSettings();
+                        setDrawerState(() {});
+                      },
+                      child: Text(_trans.grantPermission),
+                    )
+                });
           },
         )
       ];
@@ -454,7 +460,7 @@ class DrawerManager {
           _trans.buttonNo,
           _trans.buttonYes,
           () {
-            for (AppRecordingConfigField field in AppConfigFieldsCollection.listRecording) {
+            for (AppRecordingConfigField field in AppConfigFieldsCollection.recordingList) {
               _settings.setConfig(field.key, field.defaultValue);
             }
             return _trans.recordingSettingsResetSuccess;
@@ -468,7 +474,7 @@ class DrawerManager {
           _trans.buttonNo,
           _trans.buttonYes,
           () {
-            for (AppScreenConfigField field in AppConfigFieldsCollection.listScreen) {
+            for (AppScreenConfigField field in AppConfigFieldsCollection.screenList) {
               _settings.setConfig(field.key, field.defaultValue);
             }
             return _trans.screenSettingsResetSuccess;
