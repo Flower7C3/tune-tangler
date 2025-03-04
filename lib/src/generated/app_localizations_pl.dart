@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -414,37 +413,37 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
-  String get balanceLeft100 => 'lewa 100%';
+  String get balanceLeft100 => 'lewa 100%, prawa 0%';
 
   @override
-  String get balanceLeft75 => 'lewa 75%';
+  String get balanceLeft75 => 'lewa 100%, prawa 25%';
 
   @override
-  String get balanceLeft50 => 'lewa 50%';
+  String get balanceLeft50 => 'lewa 100%, prawa 50%';
 
   @override
-  String get balanceLeft25 => 'lewa 25%';
+  String get balanceLeft25 => 'lewa 100%, prawa 75%';
 
   @override
-  String get balanceLeft => 'lewa';
+  String get balanceLeft => 'lewa 100%';
 
   @override
-  String get balanceCenter => 'środek';
+  String get balanceCenter => 'centralnie';
 
   @override
-  String get balanceRight => 'prawa';
+  String get balanceRight => 'prawa 100%';
 
   @override
-  String get balanceRight25 => 'prawa 25%';
+  String get balanceRight25 => 'lewa 75%, prawa 100%';
 
   @override
-  String get balanceRight50 => 'prawa 50%';
+  String get balanceRight50 => 'lewa 50%, prawa 100%';
 
   @override
-  String get balanceRight75 => 'prawa 75%';
+  String get balanceRight75 => 'lewa 25%, prawa 100%';
 
   @override
-  String get balanceRight100 => 'prawa 100%';
+  String get balanceRight100 => 'lewa 0%, prawa 100%';
 
   @override
   String languageWithLocale(Object locale, Object name) {

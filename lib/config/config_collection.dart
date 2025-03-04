@@ -12,6 +12,8 @@ enum ConfigItemPropertyDomain {
   info,
   details,
   icon,
+  balanceLeft,
+  balanceRight,
 }
 
 final class ConfigCollection {

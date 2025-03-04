@@ -686,31 +686,31 @@ abstract class AppLocalizations {
   /// No description provided for @balanceLeft100.
   ///
   /// In en, this message translates to:
-  /// **'left 100%'**
+  /// **'left 100%, right 0%'**
   String get balanceLeft100;
 
   /// No description provided for @balanceLeft75.
   ///
   /// In en, this message translates to:
-  /// **'left 75%'**
+  /// **'left 100%, right 25%'**
   String get balanceLeft75;
 
   /// No description provided for @balanceLeft50.
   ///
   /// In en, this message translates to:
-  /// **'left 50%'**
+  /// **'left 100%, right 50%'**
   String get balanceLeft50;
 
   /// No description provided for @balanceLeft25.
   ///
   /// In en, this message translates to:
-  /// **'left 25%'**
+  /// **'left 100%, right 75%'**
   String get balanceLeft25;
 
   /// No description provided for @balanceLeft.
   ///
   /// In en, this message translates to:
-  /// **'left'**
+  /// **'left 100%'**
   String get balanceLeft;
 
   /// No description provided for @balanceCenter.
@@ -722,31 +722,31 @@ abstract class AppLocalizations {
   /// No description provided for @balanceRight.
   ///
   /// In en, this message translates to:
-  /// **'right'**
+  /// **'right 100%'**
   String get balanceRight;
 
   /// No description provided for @balanceRight25.
   ///
   /// In en, this message translates to:
-  /// **'right 25%'**
+  /// **'left 75%, right 100%'**
   String get balanceRight25;
 
   /// No description provided for @balanceRight50.
   ///
   /// In en, this message translates to:
-  /// **'right 50%'**
+  /// **'left 50%, right 100%'**
   String get balanceRight50;
 
   /// No description provided for @balanceRight75.
   ///
   /// In en, this message translates to:
-  /// **'right 75%'**
+  /// **'left 25%, right 100%'**
   String get balanceRight75;
 
   /// No description provided for @balanceRight100.
   ///
   /// In en, this message translates to:
-  /// **'right 100%'**
+  /// **'left 0%, right 100%'**
   String get balanceRight100;
 
   /// No description provided for @languageWithLocale.

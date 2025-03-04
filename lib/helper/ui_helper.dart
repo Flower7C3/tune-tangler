@@ -126,12 +126,12 @@ class UIHelper {
         child: content,
       );
 
-  PopupMenuItem<dynamic> popupMenuItem(
-    dynamic value,
+  PopupMenuItem<T> popupMenuItem<T>(
+    T value,
     IconData icon,
     String title,
   ) =>
-      PopupMenuItem<dynamic>(
+      PopupMenuItem<T>(
         value: value,
         child: statusIconTile(icon, title),
       );
@@ -502,6 +502,16 @@ class UIHelper {
                             }),
                           ]))));
 
+  SliderThemeData balanceSliderThemeData(BuildContext context) => SliderTheme.of(context).copyWith(
+        activeTrackColor: Theme.of(context).colorScheme.primary.withAlpha(12),
+        inactiveTrackColor: Theme.of(context).colorScheme.primary.withAlpha(12),
+        trackHeight: 6,
+        trackShape: RectangularSliderTrackShape(),
+        showValueIndicator: ShowValueIndicator.always,
+        activeTickMarkColor: Theme.of(context).colorScheme.primary.withAlpha(54),
+        inactiveTickMarkColor: Theme.of(context).colorScheme.primary.withAlpha(54),
+      );
+
   void alertDialogSlider(
     IconData icon,
     String dialogTitle,
@@ -516,6 +526,9 @@ class UIHelper {
     bool withTrailing = true,
     ConfigCollection? configCollection,
     AppLocalizations? trans,
+    SliderThemeData? sliderTheme,
+    ConfigItemPropertyDomain? tileLeading,
+    ConfigItemPropertyDomain? tileTrailing,
   }) =>
       showDialog(
           context: context,
@@ -524,20 +537,43 @@ class UIHelper {
                       title: statusIconTile(icon, dialogTitle),
                       content: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
                         Text(dialogInfo),
-                        Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
-                          Slider(
-                              value: currentValue,
-                              min: minValue,
-                              max: maxValue,
-                              divisions: divisions?.toInt(),
-                              label: _translateOrFormat(currentValue, configCollection, trans),
-                              onChanged: (double newValue) {
-                                setModalState(() {
-                                  currentValue = newValue;
-                                });
-                              }),
-                          Text(_format(currentValue, configCollection)),
-                        ]),
+                        if (configCollection != null && tileLeading != null && tileTrailing != null)
+                          ListTile(
+                            leading: Text(configCollection.text(currentValue, domain: tileLeading)),
+                            trailing: Text(configCollection.text(currentValue, domain: tileTrailing)),
+                            minVerticalPadding: 0,
+                          ),
+                        if (tileLeading != null && tileTrailing != null)
+                          SliderTheme(
+                              data: sliderTheme ?? SliderThemeData(),
+                              child: Slider(
+                                  value: currentValue,
+                                  min: minValue,
+                                  max: maxValue,
+                                  divisions: divisions?.toInt(),
+                                  label: _translateOrFormat(currentValue, configCollection, trans),
+                                  onChanged: (double newValue) {
+                                    setModalState(() {
+                                      currentValue = newValue;
+                                    });
+                                  })),
+                        if (tileLeading == null && tileTrailing == null)
+                          Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
+                            SliderTheme(
+                                data: sliderTheme ?? SliderThemeData(),
+                                child: Slider(
+                                    value: currentValue,
+                                    min: minValue,
+                                    max: maxValue,
+                                    divisions: divisions?.toInt(),
+                                    label: _translateOrFormat(currentValue, configCollection, trans),
+                                    onChanged: (double newValue) {
+                                      setModalState(() {
+                                        currentValue = newValue;
+                                      });
+                                    })),
+                            Text(_format(currentValue, configCollection)),
+                          ]),
                       ]),
                       actions: [
                         simpleButton(cancelLabel, () {

@@ -222,33 +222,37 @@ class TrackDetailsManager {
           ]));
 
   Widget _trackDetailsPlaybackBalanceControl(Track track) => ValueListenableBuilder<double>(
-      valueListenable: track.playbackBalance,
-      child: Text(_trans.thePlaybackBalance),
-      builder: (context, playbackBalance, child) => _uiHelper.trackDetailsBox([
-            ListTile(
-              visualDensity: VisualDensity.compact,
-              style: ListTileStyle.drawer,
-              leading: _uiHelper.mediaPlayerButton(
-                AppGlobalConfig.trackPlaybackBalance.icon(track.playbackBalance.value),
-                _trans.trackPlaybackBalanceSet(track.name.value),
-                onPressed: () {
-                  track.setPlaybackBalance(0);
-                  _trackRepository.save(track);
-                },
+        valueListenable: track.playbackBalance,
+        child: Text(_trans.thePlaybackBalance),
+        builder: (context, playbackBalance, child) => _uiHelper.trackDetailsBox([
+              ListTile(
+                visualDensity: VisualDensity.compact,
+                style: ListTileStyle.drawer,
+                leading: _uiHelper.mediaPlayerButton(
+                  AppGlobalConfig.trackPlaybackBalance.icon(track.playbackBalance.value),
+                  _trans.trackPlaybackBalanceSet(track.name.value),
+                  onPressed: () {
+                    track.setPlaybackBalance(0);
+                    _trackRepository.save(track);
+                  },
+                ),
+                trailing: Text(AppGlobalConfig.trackPlaybackBalance.format(playbackBalance)),
+                title: child,
               ),
-              trailing: Text(AppGlobalConfig.trackPlaybackBalance.format(playbackBalance)),
-              title: child,
-            ),
-            Slider(
-              value: playbackBalance,
-              min: AppGlobalConfig.trackPlaybackBalance.sliderValues.min,
-              max: AppGlobalConfig.trackPlaybackBalance.sliderValues.max,
-              divisions: AppGlobalConfig.trackPlaybackBalance.sliderValues.divisions,
-              label: AppGlobalConfig.trackPlaybackBalance.translate(playbackBalance, trans: _trans),
-              onChanged: (double value) => track.setPlaybackBalance(value),
-              onChangeEnd: (double value) => _trackRepository.save(track),
-            ),
-          ]));
+              // SliderTheme(
+              //   data: _uiHelper.balanceSliderThemeData(_context),
+              //   child:
+  Slider(
+                  value: playbackBalance,
+                  min: AppGlobalConfig.trackPlaybackBalance.sliderValues.min,
+                  max: AppGlobalConfig.trackPlaybackBalance.sliderValues.max,
+                  divisions: AppGlobalConfig.trackPlaybackBalance.sliderValues.divisions,
+                  label: AppGlobalConfig.trackPlaybackBalance.translate(playbackBalance, trans: _trans),
+                  onChanged: (double value) => track.setPlaybackBalance(value),
+                  onChangeEnd: (double value) => _trackRepository.save(track),
+                ),
+              // ),
+            ]));
 
   Widget _trackDetailsPlaybackSpeedControl(Track track) => ValueListenableBuilder<double>(
       valueListenable: track.playbackSpeed,
@@ -554,14 +558,15 @@ class TrackDetailsManager {
 
   /// *************************************************************************
   /// TRACK MENU ITEMS
-  List<PopupMenuEntry<dynamic>> _trackMenuItems(Track track, TrackState state) => [
-        if (state != TrackState.recording) _uiHelper.popupMenuItem(TrackMenuItem.nameChange, AppIcon.trackName, _trans.trackNameChange),
+  List<PopupMenuEntry<TrackMenuItem>> _trackMenuItems(Track track, TrackState state) => [
         if (state != TrackState.recording)
-          _uiHelper.popupMenuItem(TrackMenuItem.keyboardKeyChange, AppIcon.trackKeyboardKey, _trans.trackKeyboardKeyChange),
+          _uiHelper.popupMenuItem<TrackMenuItem>(TrackMenuItem.nameChange, AppIcon.trackName, _trans.trackNameChange),
+        if (state != TrackState.recording)
+          _uiHelper.popupMenuItem<TrackMenuItem>(TrackMenuItem.keyboardKeyChange, AppIcon.trackKeyboardKey, _trans.trackKeyboardKeyChange),
         if (state != TrackState.empty && state != TrackState.recording)
-          _uiHelper.popupMenuItem(TrackMenuItem.recordingMove, AppIcon.trackRecordingMove, _trans.trackRecordingMove),
+          _uiHelper.popupMenuItem<TrackMenuItem>(TrackMenuItem.recordingMove, AppIcon.trackRecordingMove, _trans.trackRecordingMove),
         if (state != TrackState.empty && state != TrackState.recording)
-          _uiHelper.popupMenuItem(TrackMenuItem.recordingDelete, AppIcon.deleteForever, _trans.trackRecordingDelete),
+          _uiHelper.popupMenuItem<TrackMenuItem>(TrackMenuItem.recordingDelete, AppIcon.deleteForever, _trans.trackRecordingDelete),
       ];
 
   /// *************************************************************************

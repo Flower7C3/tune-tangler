@@ -7,6 +7,7 @@ import 'package:tune_tangler/wrapper/hive_settings_provider.dart';
 import '../config/app_config_fields.dart';
 import '../config/app_global_config.dart';
 import '../config/app_icon.dart';
+import '../config/config_collection.dart';
 import '../config/menu_item_enums.dart';
 import '../src/generated/app_localizations.dart';
 
@@ -116,6 +117,9 @@ class NavigationBarManager {
           withTrailing: false,
           configCollection: AppGlobalConfig.trackPlaybackBalance,
           trans: _trans,
+          sliderTheme: _uiHelper.balanceSliderThemeData(_context),
+          tileLeading: ConfigItemPropertyDomain.balanceLeft,
+            tileTrailing: ConfigItemPropertyDomain.balanceRight,
         );
         break;
       case AllTracksMenuItem.playbackVolumeSet:
