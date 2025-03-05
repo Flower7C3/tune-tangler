@@ -66,6 +66,7 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
       ],
       supportedLocales: AppGlobalConfig.languages.values<Locale>(),
       localeResolutionCallback: (locale, supportedLocales) => _settings.getConfig(AppConfigFieldKey.locale, defaultValue: locale),
+      locale: _settings.getConfig(AppConfigFieldKey.locale),
       themeAnimationDuration: Duration(seconds: 0),
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
