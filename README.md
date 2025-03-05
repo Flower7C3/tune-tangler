@@ -1,4 +1,4 @@
-# tune_tangler
+# Tune Tangler
 
 Yet another music looper app
 
@@ -30,6 +30,6 @@ samples, guidance on mobile development, and a full API reference.
 
       flutter pub run flutter_native_splash:create
 
-- Build APK
+- Build & install APK via ADB
 
       melos run apk
