@@ -1,13 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg_icons/flutter_svg_icons.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:tune_tangler/helper/ui_helper.dart';
 
 class AppIcon {
   static IconData logoKeepScreenOnEnabled = Icons.dashboard_customize;
   static IconData logoKeepScreenOnDisabled = Icons.dashboard_customize_outlined;
+
+  static Widget appLogo({
+    double? size,
+    Color? color,
+    SvgColorSource colorSource = SvgColorSource.iconThemeColor,
+  }) =>
+      SvgIcon(
+        size: size,
+        color: color,
+        responsiveColor: false,
+        icon: SvgIconData('assets/icons/logo-no-background.svg', colorSource: colorSource),
+      );
+
   static IconData language = Icons.translate_rounded;
   static IconData help = Icons.help_outline_rounded;
-
   static IconData screenThemeMode = Icons.contrast_rounded;
   static IconData screenSystemThemeMode = Icons.brightness_5_outlined;
   static IconData screenLightThemeMode = Icons.light_mode_rounded;
@@ -17,10 +30,11 @@ class AppIcon {
   static IconData keepScreenOnDisabled = Icons.lightbulb_outline_rounded;
   static IconData keepScreenOnEnabled = Icons.lightbulb_rounded;
   static IconData gridRowsAmount = Icons.table_rows_rounded;
-  static IconData gridColsAmount = Icons.view_column_rounded;
 
+  static IconData gridColsAmount = Icons.view_column_rounded;
   static IconData trackName = Icons.text_fields;
   static IconData trackKeyboardKey = Icons.keyboard_alt_rounded;
+
   static IconData trackRecordingMove = Icons.shuffle_rounded;
 
   static Container trackKeyboardKeyBox(

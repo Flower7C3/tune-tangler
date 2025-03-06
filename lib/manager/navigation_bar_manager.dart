@@ -4,7 +4,6 @@ import 'package:tune_tangler/helper/ui_helper.dart';
 import 'package:tune_tangler/repository/track_repository.dart';
 import 'package:tune_tangler/wrapper/hive_settings_provider.dart';
 
-import '../config/app_config_fields.dart';
 import '../config/app_global_config.dart';
 import '../config/app_icon.dart';
 import '../config/config_collection.dart';
@@ -30,7 +29,7 @@ class NavigationBarManager {
           backgroundColor: Theme.of(_context).colorScheme.inversePrimary,
           leading: Builder(
             builder: (context) => IconButton(
-              icon: Icon(_settings.getConfig(AppConfigFieldKey.wakelockEnabled) ? AppIcon.logoKeepScreenOnEnabled : AppIcon.logoKeepScreenOnDisabled),
+              icon: AppIcon.appLogo(),
               onPressed: () => Scaffold.of(context).openDrawer(),
             ),
           ),
@@ -119,7 +118,7 @@ class NavigationBarManager {
           trans: _trans,
           sliderTheme: _uiHelper.balanceSliderThemeData(_context),
           tileLeading: ConfigItemPropertyDomain.balanceLeft,
-            tileTrailing: ConfigItemPropertyDomain.balanceRight,
+          tileTrailing: ConfigItemPropertyDomain.balanceRight,
         );
         break;
       case AllTracksMenuItem.playbackVolumeSet:

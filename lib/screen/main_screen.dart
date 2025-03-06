@@ -5,6 +5,7 @@ import 'package:record/record.dart';
 import 'package:tune_tangler/repository/track_repository.dart';
 import 'package:tune_tangler/screen/home_screen.dart';
 import 'package:tune_tangler/wrapper/hive_service.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../config/app_config_fields.dart';
 import '../config/app_global_config.dart';
@@ -56,6 +57,7 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
   Widget build(BuildContext context) {
     _settings = Provider.of<HiveSettingsProvider>(context);
     _trackRepository = TrackRepository(_settings);
+    WakelockPlus.toggle(enable: _settings.getConfig(AppConfigFieldKey.wakelockEnabled));
 
     return MaterialApp(
       localizationsDelegates: [

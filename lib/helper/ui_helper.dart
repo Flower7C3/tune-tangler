@@ -165,8 +165,9 @@ class UIHelper {
           applicationName: applicationName ?? packageInfo.appName,
           applicationVersion: applicationVersion ?? "${packageInfo.version} (${packageInfo.buildNumber})",
           applicationLegalese: applicationLegalese,
-          applicationIcon: applicationIcon ?? Icon(AppIcon.logoKeepScreenOnEnabled),
-          children: content.toList());
+          applicationIcon: applicationIcon,
+          children: content.toList(),
+      );
 
   void alertDialog(
     IconData icon,

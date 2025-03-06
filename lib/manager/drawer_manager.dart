@@ -29,20 +29,16 @@ class DrawerManager {
       builder: (BuildContext context, StateSetter setDrawerState) => Drawer(
               child: ListView(padding: EdgeInsets.zero, children: [
             UserAccountsDrawerHeader(
-              accountName: Text(_trans.appTitle,
-                  style: TextStyle(
-                    fontSize: Theme.of(context).textTheme.headlineMedium?.fontSize,
-                    color: Theme.of(context).colorScheme.inversePrimary,
-                  )),
-              accountEmail: Text(
-                _trans.legalNote,
-                style: TextStyle(color: Theme.of(context).colorScheme.inversePrimary),
-              ),
-              currentAccountPicture: Icon(
-                  _settings.getConfig(AppConfigFieldKey.wakelockEnabled) ? AppIcon.logoKeepScreenOnEnabled : AppIcon.logoKeepScreenOnDisabled,
-                  size: Theme.of(context).textTheme.displayLarge!.fontSize! * UIHelper.iconSizeMultiplier,
-                  color: Theme.of(context).colorScheme.inversePrimary),
-            ),
+                accountName: Text(_trans.appTitle,
+                    style: TextStyle(
+                      fontSize: Theme.of(context).textTheme.headlineMedium?.fontSize,
+                      color: Theme.of(context).colorScheme.inversePrimary,
+                    )),
+                accountEmail: Text(
+                  _trans.legalNote,
+                  style: TextStyle(color: Theme.of(context).colorScheme.inversePrimary),
+                ),
+                currentAccountPicture: AppIcon.appLogo(color: Theme.of(context).colorScheme.inversePrimary)),
             ExpansionTile(
               leading: Icon(AppIcon.recordingSettings),
               title: Text(_trans.recording),
@@ -445,8 +441,7 @@ class DrawerManager {
     _uiHelper.aboutDialog(
       packageInfo,
       details,
-      applicationIcon:
-          Icon(_settings.getConfig(AppConfigFieldKey.wakelockEnabled) ? AppIcon.logoKeepScreenOnEnabled : AppIcon.logoKeepScreenOnDisabled),
+      applicationIcon: AppIcon.appLogo(),
       applicationLegalese: _trans.legalNote,
     );
   }

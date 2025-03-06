@@ -35,7 +35,7 @@ class HomeScreen extends StatelessWidget {
         trackRepository = TrackRepository(settings);
         NavigationBarManager navigationBarManager = NavigationBarManager(context, settings, trans, uiHelper, trackRepository);
         RowMenuManager rowMenuManager = RowMenuManager(context, trans, uiHelper, trackRepository);
-        DrawerManager drawerManager = DrawerManager(context, settings,permissionProvider, trans, uiHelper, trackRepository, audioRecorder);
+        DrawerManager drawerManager = DrawerManager(context, settings, permissionProvider, trans, uiHelper, trackRepository, audioRecorder);
         TrackManager trackManager = TrackManager(context, settings, trans, uiHelper, trackRepository, audioRecorder);
 
         return Scaffold(
