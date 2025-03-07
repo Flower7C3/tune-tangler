@@ -8,7 +8,7 @@ class SvgColorMapper implements ColorMapper {
     required this.colors,
   });
 
-  final Map<Color, Color> colors;
+  final Map<Color, Color?> colors;
 
   @override
   Color substitute(String? id, String elementName, String attributeName, Color color) {
@@ -25,8 +25,8 @@ class AppIcon {
         SvgAssetLoader(
           'assets/svg/logo-no-background.svg',
           colorMapper: SvgColorMapper(colors: {
-            Colors.black: shapeColor ?? Colors.black,
-            Colors.white: detailColor ?? Colors.white,
+            Color.fromRGBO(17, 17, 17, 1): shapeColor,
+            Colors.white: detailColor,
           }),
         ),
       );
