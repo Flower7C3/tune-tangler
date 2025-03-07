@@ -21,15 +21,12 @@ class SvgColorMapper implements ColorMapper {
 }
 
 class AppIcon {
-  static IconData logoKeepScreenOnEnabled = Icons.dashboard_customize;
-  static IconData logoKeepScreenOnDisabled = Icons.dashboard_customize_outlined;
-
-  static Widget appLogo({Color shapeColor = Colors.black, Color detailColor = Colors.white}) => SvgPicture(
+  static Widget appLogo({Color? shapeColor, Color? detailColor}) => SvgPicture(
         SvgAssetLoader(
-          'assets/icons/logo-no-background.svg',
+          'assets/svg/logo-no-background.svg',
           colorMapper: SvgColorMapper(colors: {
-            Color.fromRGBO(0x11, 0x11, 0x11, 1): shapeColor,
-            Colors.white: detailColor,
+            Colors.black: shapeColor ?? Colors.black,
+            Colors.white: detailColor ?? Colors.white,
           }),
         ),
       );
