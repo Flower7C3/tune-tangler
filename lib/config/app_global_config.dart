@@ -323,7 +323,7 @@ final class AppGlobalConfig {
       ConfigItem<Color>(Colors.yellow, properties: [
         ConfigItemTranslatableProperty((trans) => trans.yellow),
       ]),
-      ConfigItem<Color>(Colors.purple, properties: [
+      ConfigItem<Color>(Color.fromRGBO(162, 0, 255, 1), properties: [
         ConfigItemTranslatableProperty((trans) => trans.purple),
       ]),
       ConfigItem<Color>(Colors.orange, properties: [
