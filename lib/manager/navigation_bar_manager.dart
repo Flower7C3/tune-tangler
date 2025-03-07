@@ -2,7 +2,6 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:tune_tangler/helper/ui_helper.dart';
 import 'package:tune_tangler/repository/track_repository.dart';
-import 'package:tune_tangler/wrapper/hive_settings_provider.dart';
 
 import '../config/app_global_config.dart';
 import '../config/app_icon.dart';
@@ -12,14 +11,12 @@ import '../src/generated/app_localizations.dart';
 
 class NavigationBarManager {
   final BuildContext _context;
-  final HiveSettingsProvider _settings;
   final AppLocalizations _trans;
   final UIHelper _uiHelper;
   final TrackRepository _trackRepository;
 
   NavigationBarManager(
     this._context,
-    this._settings,
     this._trans,
     this._uiHelper,
     this._trackRepository,
@@ -29,7 +26,10 @@ class NavigationBarManager {
           backgroundColor: Theme.of(_context).colorScheme.inversePrimary,
           leading: Builder(
             builder: (context) => IconButton(
-              icon: AppIcon.appLogo(),
+              icon: AppIcon.appLogo(
+                shapeColor: Theme.of(context).colorScheme.primary,
+                detailColor: Theme.of(context).colorScheme.inversePrimary,
+              ),
               onPressed: () => Scaffold.of(context).openDrawer(),
             ),
           ),

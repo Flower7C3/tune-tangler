@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:record/record.dart';
 import 'package:tune_tangler/repository/track_repository.dart';
 import 'package:tune_tangler/screen/home_screen.dart';
+import 'package:tune_tangler/wrapper/app.dart';
 import 'package:tune_tangler/wrapper/hive_service.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
@@ -59,6 +60,14 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
     _trackRepository = TrackRepository(_settings);
     WakelockPlus.toggle(enable: _settings.getConfig(AppConfigFieldKey.wakelockEnabled));
 
+    AppWrapper appWrapper = AppWrapper(
+      settings: _settings,
+      permissionProvider: _permissionProvider,
+      audioRecorder: _audioRecorder,
+      trackRepository: _trackRepository,
+      focusNode: _focusNode,
+    );
+
     return MaterialApp(
       localizationsDelegates: [
         AppLocalizations.delegate,
@@ -85,13 +94,7 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
         useMaterial3: true,
       ),
       themeMode: _settings.getConfig(AppConfigFieldKey.themeMode),
-      home: HomeScreen(
-        settings: _settings,
-        permissionProvider: _permissionProvider,
-        focusNode: _focusNode,
-        audioRecorder: _audioRecorder,
-        trackRepository: _trackRepository,
-      ),
+      home: HomeScreen(appWrapper: appWrapper),
       // initialRoute: '/',
       // routes: {
       //   '/': (context) =>

@@ -26,9 +26,11 @@ class DrawerManager {
   DrawerManager(this._context, this._settings, this._permissionProvider, this._trans, this._uiHelper, this._trackRepository, this._audioRecorder);
 
   Widget get build => StatefulBuilder(
-      builder: (BuildContext context, StateSetter setDrawerState) => Drawer(
-              child: ListView(padding: EdgeInsets.zero, children: [
-            UserAccountsDrawerHeader(
+        builder: (BuildContext context, StateSetter setDrawerState) => Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              UserAccountsDrawerHeader(
                 accountName: Text(_trans.appTitle,
                     style: TextStyle(
                       fontSize: Theme.of(context).textTheme.headlineMedium?.fontSize,
@@ -38,38 +40,49 @@ class DrawerManager {
                   _trans.legalNote,
                   style: TextStyle(color: Theme.of(context).colorScheme.inversePrimary),
                 ),
-                currentAccountPicture: AppIcon.appLogo(color: Theme.of(context).colorScheme.inversePrimary)),
-            ExpansionTile(
-              leading: Icon(AppIcon.recordingSettings),
-              title: Text(_trans.recording),
-              // initiallyExpanded: true,
-              childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
-              children: _recordingSettings(setDrawerState),
-            ),
-            ExpansionTile(
-              leading: Icon(AppIcon.screenSettings),
-              title: Text(_trans.screen),
-              childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
-              children: _screenSettings(setDrawerState),
-            ),
-            ExpansionTile(
-              leading: Icon(AppIcon.permissions),
-              title: Text(_trans.permissions),
-              childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
-              children: _permissionsList(setDrawerState),
-            ),
-            ExpansionTile(
-              leading: Icon(AppIcon.dangerZone),
-              title: Text(_trans.dangerZone),
-              childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
-              children: _dangerZone,
-            ),
-            ListTile(
-              leading: Icon(AppIcon.help),
-              title: Text(_trans.help),
-              onTap: _helpDialog,
-            ),
-          ])));
+                currentAccountPicture: Container(
+                  margin: EdgeInsets.only(bottom: 5),
+                  padding: EdgeInsets.zero,
+                  child: AppIcon.appLogo(
+                    shapeColor: Theme.of(context).colorScheme.inversePrimary,
+                    detailColor: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ),
+              ExpansionTile(
+                leading: Icon(AppIcon.recordingSettings),
+                title: Text(_trans.recording),
+                // initiallyExpanded: true,
+                childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
+                children: _recordingSettings(setDrawerState),
+              ),
+              ExpansionTile(
+                leading: Icon(AppIcon.screenSettings),
+                title: Text(_trans.screen),
+                childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
+                children: _screenSettings(setDrawerState),
+              ),
+              ExpansionTile(
+                leading: Icon(AppIcon.permissions),
+                title: Text(_trans.permissions),
+                childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
+                children: _permissionsList(setDrawerState),
+              ),
+              ExpansionTile(
+                leading: Icon(AppIcon.dangerZone),
+                title: Text(_trans.dangerZone),
+                childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
+                children: _dangerZone,
+              ),
+              ListTile(
+                leading: Icon(AppIcon.help),
+                title: Text(_trans.help),
+                onTap: _helpDialog,
+              ),
+            ],
+          ),
+        ),
+      );
 
   List<Widget> _recordingSettings(StateSetter setDrawerState) => [
         ListTile(
@@ -437,11 +450,19 @@ class DrawerManager {
         ],
       ),
     ];
+    Widget icon = SizedBox(
+      width: Theme.of(_context).textTheme.displayLarge!.fontSize,
+      height: Theme.of(_context).textTheme.displayLarge!.fontSize,
+      child: AppIcon.appLogo(
+        shapeColor: Theme.of(_context).colorScheme.primary,
+        detailColor: Theme.of(_context).colorScheme.surfaceContainerHigh,
+      ),
+    );
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     _uiHelper.aboutDialog(
       packageInfo,
       details,
-      applicationIcon: AppIcon.appLogo(),
+      applicationIcon: icon,
       applicationLegalese: _trans.legalNote,
     );
   }

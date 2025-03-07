@@ -1,22 +1,37 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg_icons/flutter_svg_icons.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:tune_tangler/helper/ui_helper.dart';
+
+class SvgColorMapper implements ColorMapper {
+  const SvgColorMapper({
+    required this.colors,
+  });
+
+  final Map<Color, Color> colors;
+
+  @override
+  Color substitute(String? id, String elementName, String attributeName, Color color) {
+    if (colors.containsKey(color)) {
+      return colors[color] ?? color;
+    }
+
+    return color;
+  }
+}
 
 class AppIcon {
   static IconData logoKeepScreenOnEnabled = Icons.dashboard_customize;
   static IconData logoKeepScreenOnDisabled = Icons.dashboard_customize_outlined;
 
-  static Widget appLogo({
-    double? size,
-    Color? color,
-    SvgColorSource colorSource = SvgColorSource.iconThemeColor,
-  }) =>
-      SvgIcon(
-        size: size,
-        color: color,
-        responsiveColor: false,
-        icon: SvgIconData('assets/icons/logo-no-background.svg', colorSource: colorSource),
+  static Widget appLogo({Color shapeColor = Colors.black, Color detailColor = Colors.white}) => SvgPicture(
+        SvgAssetLoader(
+          'assets/icons/logo-no-background.svg',
+          colorMapper: SvgColorMapper(colors: {
+            Color.fromRGBO(0x11, 0x11, 0x11, 1): shapeColor,
+            Colors.white: detailColor,
+          }),
+        ),
       );
 
   static IconData language = Icons.translate_rounded;
