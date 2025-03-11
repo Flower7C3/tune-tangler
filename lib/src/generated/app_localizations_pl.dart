@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -365,10 +366,10 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
-  String get rowTracksPlaybackStartAtPositionReset => 'Zresetuj początek odtwarzania na';
+  String get rowTracksPlaybackStartAtPositionReset => 'Zresetuj początek odtwarzania';
 
   @override
-  String get rowTracksPlaybackStartAtPositionResetTitle => 'Zresetuj początek odtwarzania utworów wiersza na';
+  String get rowTracksPlaybackStartAtPositionResetTitle => 'Zresetuj początek odtwarzania utworów wiersza';
 
   @override
   String rowTracksPlaybackStartAtPositionResetInfo(Object rowName) {
@@ -381,10 +382,10 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
-  String get rowTracksPlaybackEndAtPositionReset => 'Zresetuj koniec odtwarzania na';
+  String get rowTracksPlaybackEndAtPositionReset => 'Zresetuj koniec odtwarzania';
 
   @override
-  String get rowTracksPlaybackEndAtPositionResetTitle => 'Zresetuj koniec odtwarzania utworów wiersza na';
+  String get rowTracksPlaybackEndAtPositionResetTitle => 'Zresetuj koniec odtwarzania utworów wiersza';
 
   @override
   String rowTracksPlaybackEndAtPositionResetInfo(Object rowName) {
@@ -502,7 +503,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get stateRecording => 'nagrywanie w toku (kliknij blok, aby zatrzymać nagrywanie ścieżki)';
 
   @override
-  String get stateProcessing => 'ładowanie nagrania w trackie';
+  String get stateProcessing => 'ładowanie nagrania w trakcie';
 
   @override
   String get stateIdle => 'bezczynność: nagrywanie zakończone/odtwarzanie zatrzymane (kliknij blok, aby rozpocząć odtwarzanie ścieżki)';

@@ -161,12 +161,12 @@ class UIHelper {
     Widget? applicationIcon,
   }) =>
       showAboutDialog(
-          context: context,
-          applicationName: applicationName ?? packageInfo.appName,
-          applicationVersion: applicationVersion ?? "${packageInfo.version} (${packageInfo.buildNumber})",
-          applicationLegalese: applicationLegalese,
-          applicationIcon: applicationIcon,
-          children: content.toList(),
+        context: context,
+        applicationName: applicationName ?? packageInfo.appName,
+        applicationVersion: applicationVersion ?? "${packageInfo.version} (${packageInfo.buildNumber})",
+        applicationLegalese: applicationLegalese,
+        applicationIcon: applicationIcon,
+        children: content.toList(),
       );
 
   void alertDialog(
@@ -277,6 +277,9 @@ class UIHelper {
     IconData? icon,
     ToastType type = ToastType.success,
   }) {
+    if (text.isEmpty || text == '') {
+      return;
+    }
     Color foregroundColor;
     Color backgroundColor;
     switch (type) {
@@ -757,7 +760,7 @@ class UIHelper {
     required IconData enabledIcon,
     String? enabledLabel,
     required bool switchValue,
-    required String? Function(bool value) successAction,
+    required String Function(bool value) successAction,
   }) {
     List<Widget> subtitle = [];
     if (subtitleText != null) {
@@ -788,12 +791,7 @@ class UIHelper {
             activeColor: Theme.of(context).colorScheme.primary,
             inactiveThumbColor: Theme.of(context).colorScheme.primary,
             value: switchValue,
-            onChanged: (bool value) {
-              String? message = successAction(value);
-              if (message != null) {
-                toast(message, icon: value ? enabledIcon : disabledIcon);
-              }
-            }));
+            onChanged: (bool value) => toast(successAction(value), icon: value ? enabledIcon : disabledIcon)));
   }
 
   ListTile listTileListDialog(
