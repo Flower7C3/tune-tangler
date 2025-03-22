@@ -298,20 +298,28 @@ class UIHelper {
       message.add(SizedBox(width: gridGap * 2));
     }
     message.add(Flexible(child: Text(text, style: TextStyle(color: foregroundColor))));
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        dismissDirection: DismissDirection.none,
-        padding: EdgeInsets.zero,
-        margin: const EdgeInsets.only(bottom: 15, left: 15, right: 15),
-        behavior: SnackBarBehavior.floating,
-        duration: Duration(seconds: duration),
-        content: Center(
+    final overlay = Overlay.of(context);
+    final overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 50,
+        left: MediaQuery.of(context).size.width * 0.1,
+        width: MediaQuery.of(context).size.width * 0.8,
+        child: Material(
+          color: Colors.transparent,
+          child: Center(
             child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
-                decoration: BoxDecoration(borderRadius: BorderRadius.circular(50), color: backgroundColor),
-                child: Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: message.toList())))));
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(50), color: backgroundColor),
+              padding: EdgeInsets.symmetric(vertical: gridGap * 2, horizontal: gridGap * 4),
+              child: Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: message.toList()),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(overlayEntry);
+
+    Future.delayed(Duration(seconds: duration), () => overlayEntry.remove());
   }
 
   TextButton simpleButton(String text, VoidCallback? onPressed) => TextButton(onPressed: onPressed, child: Text(text));
