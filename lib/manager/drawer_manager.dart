@@ -6,10 +6,12 @@ import 'package:tune_tangler/config/config_collection.dart';
 import 'package:tune_tangler/helper/ui_helper.dart';
 import 'package:tune_tangler/repository/track_repository.dart';
 import 'package:tune_tangler/wrapper/hive_settings_provider.dart';
+import 'package:tune_tangler/wrapper/setting_profile_wrapper.dart';
 
 import '../config/app_config_fields.dart';
 import '../config/app_global_config.dart';
 import '../config/app_icon.dart';
+import '../entity/settings_profile.dart';
 import '../entity/track.dart';
 import '../provider/permission_provider.dart';
 import '../src/generated/app_localizations.dart';
@@ -22,8 +24,11 @@ class DrawerManager {
   final UIHelper _uiHelper;
   final TrackRepository _trackRepository;
   final AudioRecorder _audioRecorder;
+  late final SettingProfileWrapper _settingProfileWrapper;
 
-  DrawerManager(this._context, this._settings, this._permissionProvider, this._trans, this._uiHelper, this._trackRepository, this._audioRecorder);
+  DrawerManager(this._context, this._settings, this._permissionProvider, this._trans, this._uiHelper, this._trackRepository, this._audioRecorder) {
+    _settingProfileWrapper = SettingProfileWrapper(_context, _trans, _settings, _uiHelper);
+  }
 
   Widget get build => StatefulBuilder(
         builder: (BuildContext context, StateSetter setDrawerState) => Drawer(
@@ -48,6 +53,12 @@ class DrawerManager {
                     detailColor: Theme.of(context).colorScheme.primary,
                   ),
                 ),
+              ),
+              ListTile(
+                leading: Icon(AppIcon.settingProfiles),
+                title: Text(_trans.settingsProfiles),
+                onTap: _settingProfilesListsDialog,
+                trailing: Icon(AppIcon.modalMenu),
               ),
               ExpansionTile(
                 leading: Icon(AppIcon.recordingSettings),
@@ -93,33 +104,8 @@ class DrawerManager {
                 ? _settings.getConfig(AppConfigFieldKey.recordingInputDevice).label
                 : _trans.defaultDevice,
           ),
-          onTap: () async {
-            var options = <Widget>[];
-            options.add(SimpleDialogOption(
-                padding: EdgeInsets.all(16),
-                onPressed: () {
-                  Navigator.pop(_context, 'recordingInputDevice');
-                  _settings.setConfig(AppConfigFieldKey.recordingInputDevice, null);
-                },
-                child: Text(_trans.defaultDevice)));
-            await _audioRecorder.listInputDevices().then((List<InputDevice> inputDevices) {
-              for (var inputDevice in inputDevices) {
-                options.add(SimpleDialogOption(
-                    padding: EdgeInsets.all(16),
-                    onPressed: () {
-                      _settings.setConfig(AppConfigFieldKey.recordingInputDevice, inputDevice);
-                      Navigator.pop(_context, 'recordingInputDevice');
-                    },
-                    child: Text(_trans.recordingInputDeviceValue(inputDevice.label))));
-              }
-            });
-            _uiHelper.listDialog(
-              AppIcon.recordingInputDevice,
-              _trans.recordingInputDeviceTitle,
-              contentText: _trans.recordingInputDeviceInfo,
-              actions: options.toList(),
-            );
-          },
+          onTap: _recordingSettingsDialog,
+          trailing: Icon(AppIcon.modalMenu),
         ),
         _uiHelper.listTileButtons(
           AppIcon.recordingAudioEncoder,
@@ -176,7 +162,7 @@ class DrawerManager {
           },
         ),
         _uiHelper.listTileSwitch(
-          AppIcon.recordingAudioGain,
+          AppIcon.recordingAutoGain,
           _trans.recordingAutoGain,
           disabledIcon: AppIcon.no,
           enabledIcon: AppIcon.yes,
@@ -210,6 +196,37 @@ class DrawerManager {
         ),
       ];
 
+  Future<void> _recordingSettingsDialog() async {
+    InputDevice? currentValue = _settings.getConfig(AppConfigFieldKey.recordingInputDevice);
+    var options = <Widget>[];
+    options.add(ListTile(
+      title: Text(_trans.defaultDevice),
+      selected: currentValue == null,
+      onTap: () {
+        Navigator.pop(_context, 'recordingInputDevice');
+        _settings.setConfig(AppConfigFieldKey.recordingInputDevice, null);
+      },
+    ));
+    await _audioRecorder.listInputDevices().then((List<InputDevice> inputDevices) {
+      for (var inputDevice in inputDevices) {
+        options.add(ListTile(
+          title: Text(_trans.recordingInputDeviceValue(inputDevice.label)),
+          selected: currentValue == inputDevice,
+          onTap: () {
+            _settings.setConfig(AppConfigFieldKey.recordingInputDevice, inputDevice);
+            Navigator.pop(_context, 'recordingInputDevice');
+          },
+        ));
+      }
+    });
+    _uiHelper.listDialog(
+      AppIcon.recordingInputDevice,
+      _trans.recordingInputDeviceTitle,
+      contentText: _trans.recordingInputDeviceInfo,
+      actions: options.toList(),
+    );
+  }
+
   List<Widget> _screenSettings(StateSetter setDrawerState) => [
         _uiHelper.listTileListDialog(
           AppIcon.language,
@@ -219,11 +236,11 @@ class DrawerManager {
           currentValue: _settings.getConfig(AppConfigFieldKey.locale).toLanguageTag(),
           options: AppGlobalConfig.languages
               .values<Locale>()
-              .map((Locale locale) => SimpleDialogOption(
-                    padding: EdgeInsets.zero,
-                    child: _uiHelper.statusTextTile(locale.toLanguageTag(), AppGlobalConfig.languages.format(locale),
-                        iconColor: Theme.of(_context).colorScheme.inversePrimary),
-                    onPressed: () {
+              .map((Locale locale) => ListTile(
+                    title: Text(AppGlobalConfig.languages.format(locale)),
+                    trailing: Text(locale.toLanguageTag()),
+                    selected: locale == _settings.getConfig(AppConfigFieldKey.locale),
+                    onTap: () {
                       Navigator.pop(_context, locale);
                       _settings.setConfig(AppConfigFieldKey.locale, locale);
                     },
@@ -317,6 +334,7 @@ class DrawerManager {
                 leading: Icon(AppGlobalConfig.permissions.icon(permission)),
                 title: Text(AppGlobalConfig.permissions.translate(permission, trans: _trans)),
                 subtitle: Text(AppGlobalConfig.permissionsStatus.translate(status, trans: _trans)),
+                selected: status == PermissionStatus.granted,
                 trailing: switch (status) {
                   PermissionStatus.granted => Icon(AppIcon.yes, color: Theme.of(_context).colorScheme.primary),
                   PermissionStatus.denied => ElevatedButton(
@@ -338,6 +356,76 @@ class DrawerManager {
           },
         )
       ];
+
+  Future<void> _settingProfilesListsDialog() async {
+    List<Widget> options = [];
+    for (int index = 0; index < _settings.settingsProfilesList.length; index++) {
+      var item = _settings.settingsProfilesList[index];
+      options.add(ListTile(
+        title: _settingProfileWrapper.listTitle(item),
+        subtitle: _settingProfileWrapper.listSubtitle(item),
+        trailing:  Icon(AppIcon.touchLong),
+        onTap: () => _settingProfileWrapper.load(item),
+        onLongPress: () => _settingProfilesDetailDialog(index, item),
+      ));
+    }
+    if (options.isEmpty) {
+      options.add(Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [Text(_trans.settingProfilesEmpty, style: TextStyle(fontSize: 14))]));
+    }
+    options.add(
+      TextButton.icon(
+        icon: Icon(AppIcon.create),
+        label: Text(_trans.settingProfileCreate),
+        onPressed: () {
+          _settingProfileWrapper.create();
+          _settingProfilesListsDialog();
+        },
+      ),
+    );
+    _uiHelper.listDialog(
+      AppIcon.settingProfiles,
+      _trans.settingProfilesListTitle,
+      actions: options.toList(),
+    );
+  }
+
+  Future<void> _settingProfilesDetailDialog(int index, SettingsProfile settingsProfile) async {
+    _uiHelper.alertDialog(
+      AppIcon.settingProfiles,
+      _trans.settingProfile,
+      contentWidget: Column(children: _settingProfileWrapper.toList(settingsProfile)),
+      actions: <Widget>[
+        _uiHelper.simpleButton(_trans.buttonCancel, () {
+          Navigator.pop(_context, 'Cancel');
+        }),
+        _uiHelper.errorButton(_trans.settingProfileDelete, () {
+          _settingProfilesDeleteDialog(index, settingsProfile);
+        }),
+        _uiHelper.primaryButton(_trans.settingProfileLoad, () {
+          Navigator.pop(_context, 'Load');
+          _settingProfileWrapper.load(settingsProfile);
+        }),
+      ],
+    );
+  }
+
+  Future<void> _settingProfilesDeleteDialog(int index, SettingsProfile settingsProfile) async {
+    _uiHelper.alertDialogReset(
+      AppIcon.settingProfiles,
+      _trans.settingProfileDeleteTitle,
+      _trans.settingProfileDeleteInfo,
+      _trans.buttonNo,
+      _trans.buttonYes,
+      () {
+        _settingProfileWrapper.delete(index);
+        _settingProfilesListsDialog();
+        return _trans.settingProfileDeleted;
+      },
+    );
+  }
 
   Future<void> _helpDialog() async {
     List<Widget> details = [
@@ -381,12 +469,12 @@ class DrawerManager {
             'recordingSampleRate': AppIcon.recordingSampleRate,
             'recordingBitRate': AppIcon.recordingBitRate,
             'recordingAudioMode': AppIcon.recordingAudioMode,
-            'recordingAudioGain': AppIcon.recordingAudioGain,
+            'recordingAutoGain': AppIcon.recordingAutoGain,
             'recordingEchoCancel': AppIcon.recordingEchoCancel,
             'recordingNoiseSuppress': AppIcon.recordingNoiseSuppress,
           }),
           ListTile(
-            leading: Icon(AppIcon.recordingAudioGain),
+            leading: Icon(AppIcon.recordingAutoGain),
             title: Text(_trans.recordingAutoGain),
           ),
           Text(_trans.recordingAutoGainInfo),

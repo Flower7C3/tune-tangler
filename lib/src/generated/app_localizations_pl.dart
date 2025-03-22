@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -464,7 +463,43 @@ class AppLocalizationsPl extends AppLocalizations {
   String get menuKeepScreenOn => 'Utrzymaj ekran włączony';
 
   @override
-  String get settings => 'Ustawienia';
+  String get settingProfile => 'Profil ustawień';
+
+  @override
+  String get settingsProfiles => 'Profile ustawień';
+
+  @override
+  String get settingProfilesListTitle => 'Profile ustawień';
+
+  @override
+  String get settingProfilesEmpty => 'Brak zapisanych profili ustawień.';
+
+  @override
+  String get settingProfileDelete => 'Usuń';
+
+  @override
+  String get settingProfileDeleteTitle => 'Usuń profil ustawień';
+
+  @override
+  String get settingProfileDeleteInfo => 'Profil ustawień zostanie usunięty. Kontynuować?';
+
+  @override
+  String get settingProfileDeleted => 'Profil ustawień został usunięty.';
+
+  @override
+  String get settingProfileCreate => 'Utwórz';
+
+  @override
+  String get settingProfileCreated => 'Profil ustawień został utworzony.';
+
+  @override
+  String get settingProfileSaveSuccess => 'Profil ustawień został zapisany.';
+
+  @override
+  String get settingProfileLoad => 'Wczytaj';
+
+  @override
+  String get settingProfileLoaded => 'Profil ustawień został załadowany.';
 
   @override
   String get help => 'Pomoc';
@@ -494,7 +529,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get helpScreenMessageTrackIcons => 'Ikony informacji o ścieżce';
 
   @override
-  String get helpScreenMessageSettingsInfo => 'Dostępne jest ustawianie \$[recordingAudioEncoder]kodeka audio, \$[recordingSampleRate]częstotliwości próbkowania, \$[recordingBitRate]szybkości transmisji, \$[recordingAudioMode]trybu audio, \$[recordingAudioGain]automatycznego wzmocnienia, \$[recordingEchoCancel]anulowania echa i \$[recordingNoiseSuppress]tłumienia szumów.';
+  String get helpScreenMessageSettingsInfo => 'Dostępne jest ustawianie \$[recordingAudioEncoder]kodeka audio, \$[recordingSampleRate]częstotliwości próbkowania, \$[recordingBitRate]szybkości transmisji, \$[recordingAudioMode]trybu audio, \$[recordingAutoGain]automatycznego wzmocnienia, \$[recordingEchoCancel]anulowania echa i \$[recordingNoiseSuppress]tłumienia szumów.';
 
   @override
   String get stateEmpty => 'ścieżka pusta (kliknij blok, aby rozpocząć nagrywanie ścieżki)';
@@ -515,6 +550,9 @@ class AppLocalizationsPl extends AppLocalizations {
   String get statePaused => 'odtwarzanie wstrzymane (kliknij blok, aby wznowić odtwarzanie ścieżki)';
 
   @override
+  String get buttonAdd => 'Dodaj';
+
+  @override
   String get buttonOk => 'Ok';
 
   @override
@@ -533,6 +571,12 @@ class AppLocalizationsPl extends AppLocalizations {
   String buttonResetTo(Object value) {
     return 'Resetuj do $value';
   }
+
+  @override
+  String get buttonLoad => 'Załaduj';
+
+  @override
+  String get buttonDelete => 'Usuń';
 
   @override
   String get buttonSave => 'Zapisz';
@@ -558,7 +602,17 @@ class AppLocalizationsPl extends AppLocalizations {
   String get languageVersion => 'Wersja językowa';
 
   @override
+  String languageVersionValue(Object value) {
+    return 'Wersja językowa: $value';
+  }
+
+  @override
   String get screenThemeMode => 'Tryb motywu ekranu';
+
+  @override
+  String screenThemeModeValue(Object value) {
+    return 'Tryb motywu ekranu: $value';
+  }
 
   @override
   String get screenSystemThemeMode => 'wg urządzenia';
@@ -579,6 +633,11 @@ class AppLocalizationsPl extends AppLocalizations {
   String get screenThemeColor => 'Kolor akcentu motywu';
 
   @override
+  String screenThemeColorValue(Object value) {
+    return 'Kolor akcentu motywu: $value';
+  }
+
+  @override
   String get screenThemeColorTitle => 'Ustaw kolor akcentu motywu';
 
   @override
@@ -593,6 +652,11 @@ class AppLocalizationsPl extends AppLocalizations {
   String get keepScreenOn => 'Utrzymaj ekran włączony';
 
   @override
+  String keepScreenOnValue(Object value) {
+    return 'Utrzymaj ekran włączony: $value';
+  }
+
+  @override
   String get keepScreenOnIsEnabledSuccess => 'Włączono funkcję utrzymywania włączonego ekranu.';
 
   @override
@@ -600,6 +664,11 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get gridRowsAmount => 'Liczba wierszy siatki';
+
+  @override
+  String gridRowsAmountValue(Object value) {
+    return 'Liczba wierszy siatki: $value';
+  }
 
   @override
   String get gridRowsAmountTitle => 'Liczba wierszy siatki';
@@ -614,6 +683,11 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get gridColsAmount => 'Liczba kolumn siatki';
+
+  @override
+  String gridColsAmountValue(Object value) {
+    return 'Liczba kolumn siatki: $value';
+  }
 
   @override
   String get gridColsAmountTitle => 'Liczba kolumn siatki';

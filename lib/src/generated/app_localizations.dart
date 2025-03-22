@@ -779,11 +779,83 @@ abstract class AppLocalizations {
   /// **'Keep screen on'**
   String get menuKeepScreenOn;
 
-  /// No description provided for @settings.
+  /// No description provided for @settingProfile.
   ///
   /// In en, this message translates to:
-  /// **'Settings'**
-  String get settings;
+  /// **'Settings profile'**
+  String get settingProfile;
+
+  /// No description provided for @settingsProfiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings profiles'**
+  String get settingsProfiles;
+
+  /// No description provided for @settingProfilesListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings profiles'**
+  String get settingProfilesListTitle;
+
+  /// No description provided for @settingProfilesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings profiles list is empty.'**
+  String get settingProfilesEmpty;
+
+  /// No description provided for @settingProfileDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get settingProfileDelete;
+
+  /// No description provided for @settingProfileDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete settings profile'**
+  String get settingProfileDeleteTitle;
+
+  /// No description provided for @settingProfileDeleteInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings profile will be deleted. Continue?'**
+  String get settingProfileDeleteInfo;
+
+  /// No description provided for @settingProfileDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings profile deleted.'**
+  String get settingProfileDeleted;
+
+  /// No description provided for @settingProfileCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get settingProfileCreate;
+
+  /// No description provided for @settingProfileCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings profile created.'**
+  String get settingProfileCreated;
+
+  /// No description provided for @settingProfileSaveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings profile saved.'**
+  String get settingProfileSaveSuccess;
+
+  /// No description provided for @settingProfileLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Load'**
+  String get settingProfileLoad;
+
+  /// No description provided for @settingProfileLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings profile loaded.'**
+  String get settingProfileLoaded;
 
   /// No description provided for @help.
   ///
@@ -842,7 +914,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpScreenMessageSettingsInfo.
   ///
   /// In en, this message translates to:
-  /// **'You can set \$[recordingAudioEncoder]audio codec, \$[recordingSampleRate]sample rate, \$[recordingBitRate]bit rate, \$[recordingAudioMode]audio mode, \$[recordingAudioGain]auto gain, \$[recordingEchoCancel]echo cancel and \$[recordingNoiseSuppress]noise suppression.'**
+  /// **'You can set \$[recordingAudioEncoder]audio codec, \$[recordingSampleRate]sample rate, \$[recordingBitRate]bit rate, \$[recordingAudioMode]audio mode, \$[recordingAutoGain]auto gain, \$[recordingEchoCancel]echo cancel and \$[recordingNoiseSuppress]noise suppression.'**
   String get helpScreenMessageSettingsInfo;
 
   /// No description provided for @stateEmpty.
@@ -881,6 +953,12 @@ abstract class AppLocalizations {
   /// **'playing paused (click on box to unpause playing)'**
   String get statePaused;
 
+  /// No description provided for @buttonAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get buttonAdd;
+
   /// No description provided for @buttonOk.
   ///
   /// In en, this message translates to:
@@ -916,6 +994,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reset to {value}'**
   String buttonResetTo(Object value);
+
+  /// No description provided for @buttonLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Load'**
+  String get buttonLoad;
+
+  /// No description provided for @buttonDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get buttonDelete;
 
   /// No description provided for @buttonSave.
   ///
@@ -959,11 +1049,23 @@ abstract class AppLocalizations {
   /// **'Language version'**
   String get languageVersion;
 
+  /// No description provided for @languageVersionValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Language version: {value}'**
+  String languageVersionValue(Object value);
+
   /// No description provided for @screenThemeMode.
   ///
   /// In en, this message translates to:
   /// **'Screen theme mode'**
   String get screenThemeMode;
+
+  /// No description provided for @screenThemeModeValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Screen theme mode: {value}'**
+  String screenThemeModeValue(Object value);
 
   /// No description provided for @screenSystemThemeMode.
   ///
@@ -1001,6 +1103,12 @@ abstract class AppLocalizations {
   /// **'Theme accent color'**
   String get screenThemeColor;
 
+  /// No description provided for @screenThemeColorValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme accent color: {value}'**
+  String screenThemeColorValue(Object value);
+
   /// No description provided for @screenThemeColorTitle.
   ///
   /// In en, this message translates to:
@@ -1025,6 +1133,12 @@ abstract class AppLocalizations {
   /// **'Keep screen on'**
   String get keepScreenOn;
 
+  /// No description provided for @keepScreenOnValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep screen on: {value}'**
+  String keepScreenOnValue(Object value);
+
   /// No description provided for @keepScreenOnIsEnabledSuccess.
   ///
   /// In en, this message translates to:
@@ -1042,6 +1156,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Grid rows amount'**
   String get gridRowsAmount;
+
+  /// No description provided for @gridRowsAmountValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid rows amount: {value}'**
+  String gridRowsAmountValue(Object value);
 
   /// No description provided for @gridRowsAmountTitle.
   ///
@@ -1066,6 +1186,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Grid columns amount'**
   String get gridColsAmount;
+
+  /// No description provided for @gridColsAmountValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid columns amount: {value}'**
+  String gridColsAmountValue(Object value);
 
   /// No description provided for @gridColsAmountTitle.
   ///

@@ -1,19 +1,29 @@
 import 'package:hive/hive.dart';
+import 'package:tune_tangler/entity/settings_profile.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../config/app_config_fields.dart';
 import '../entity/track.dart';
 
+enum HiveServiceBox {
+  settingsProfiles,
+  globalSettings,
+  trackSettings,
+}
+
 class HiveService {
+  static late Box _settingProfilesBox;
   static late Box _globalSettingsBox;
   static late Box _trackSettingsBox;
 
   static Future<void> init() async {
+    _settingProfilesBox = await Hive.openBox('profiles');
     _globalSettingsBox = await Hive.openBox('settings');
     _trackSettingsBox = await Hive.openBox('track');
   }
 
   static Future<void> dispose() async {
+    _settingProfilesBox.close();
     _globalSettingsBox.close();
     _trackSettingsBox.close();
   }
@@ -49,7 +59,7 @@ class HiveService {
       };
 
   static Future<void> delete(dynamic key) async => switch (key) {
-        AppConfigFieldKey _ => _globalSettingsBox.delete(AppConfigFieldsCollection.get(key).key.name),
+        AppConfigFieldKey _ => await _globalSettingsBox.delete(AppConfigFieldsCollection.get(key).key.name),
         TrackId _ => await _trackSettingsBox.delete(key.toString()),
         Object() => throw UnimplementedError(),
         null => throw UnimplementedError(),
@@ -61,4 +71,10 @@ class HiveService {
         Object() => throw UnimplementedError(),
         null => throw UnimplementedError(),
       };
+
+  static List<SettingsProfile> get listProfiles => _settingProfilesBox.values.whereType<SettingsProfile>().toList();
+
+  static Future<void> addProfile(SettingsProfile value, {bool updateState = false}) async => _settingProfilesBox.add(value);
+
+  static Future<void> deleteProfile(int index) async => _settingProfilesBox.deleteAt(index);
 }

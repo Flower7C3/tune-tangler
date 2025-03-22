@@ -5,8 +5,10 @@ import 'package:hive_flutter/adapters.dart';
 import 'package:provider/provider.dart';
 import 'package:tune_tangler/adapter/audio_input_device_adapter.dart';
 import 'package:tune_tangler/adapter/duration_adapter.dart';
+import 'package:tune_tangler/adapter/settings_profile.dart';
 import 'package:tune_tangler/wrapper/hive_settings_provider.dart';
 
+import 'adapter/app_config_field_key.dart';
 import 'adapter/audio_encoder_adapter.dart';
 import 'adapter/locale_adapter.dart';
 import 'adapter/release_mode_adapter.dart';
@@ -37,6 +39,8 @@ Future<void> main() async {
   Hive.registerAdapter(TrackAudioSourceAdapter());
   Hive.registerAdapter(TrackIdAdapter());
   Hive.registerAdapter(TrackAdapter());
+  Hive.registerAdapter(SettingsProfileAdapter());
+  Hive.registerAdapter(AppConfigFieldKeyAdapter());
   await HiveService.init();
 
   const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');

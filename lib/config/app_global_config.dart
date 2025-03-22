@@ -269,9 +269,69 @@ final class AppGlobalConfig {
     decode: (dynamic value) => value,
   );
 
+  static final ConfigCollection recordingAutoGain = ConfigCollection(
+    [
+      ConfigItem<bool>(false, properties: [
+        ConfigItemTranslatableProperty((trans) => trans.no),
+      ]),
+      ConfigItem<bool>(true, properties: [
+        ConfigItemTranslatableProperty((trans) => trans.yes),
+      ]),
+    ],
+    // decode: (value) => (value == 1),
+    format: (value) => recordingAutoGain.text(value),
+  );
+
   static final ConfigCollection recordingAudioMode = ConfigCollection(
-    [],
+    [
+      ConfigItem<bool>(false, properties: [
+        ConfigItemTranslatableProperty((trans) => trans.recordingAudioModeOptionMono),
+      ]),
+      ConfigItem<bool>(true, properties: [
+        ConfigItemTranslatableProperty((trans) => trans.recordingAudioModeOptionStereo),
+      ]),
+    ],
     decode: (value) => (value == true) ? 2 : 1,
+    format: (value) => recordingAutoGain.text(value),//recordingAudioMode.text(value),
+  );
+
+  static final ConfigCollection recordingEchoCancel = ConfigCollection(
+    [
+      ConfigItem<bool>(false, properties: [
+        ConfigItemTranslatableProperty((trans) => trans.no),
+      ]),
+      ConfigItem<bool>(true, properties: [
+        ConfigItemTranslatableProperty((trans) => trans.yes),
+      ]),
+    ],
+    // decode: (value) => (value == 1),
+    format: (value) => recordingEchoCancel.text(value),
+  );
+
+  static final ConfigCollection recordingNoiseSuppress = ConfigCollection(
+    [
+      ConfigItem<bool>(false, properties: [
+        ConfigItemTranslatableProperty((trans) => trans.no),
+      ]),
+      ConfigItem<bool>(true, properties: [
+        ConfigItemTranslatableProperty((trans) => trans.yes),
+      ]),
+    ],
+    // decode: (value) => (value == 1),
+    format: (value) => recordingNoiseSuppress.text(value),
+  );
+
+  static final ConfigCollection keepScreenOn = ConfigCollection(
+    [
+      ConfigItem<bool>(false, properties: [
+        ConfigItemTranslatableProperty((trans) => trans.no),
+      ]),
+      ConfigItem<bool>(true, properties: [
+        ConfigItemTranslatableProperty((trans) => trans.yes),
+      ]),
+    ],
+    // decode: (value) => (value == 1),
+    format: (value) => keepScreenOn.text(value),
   );
 
   static final ConfigCollection recordingSampleRate = ConfigCollection(
@@ -348,7 +408,7 @@ final class AppGlobalConfig {
         ConfigItemTranslatableProperty((trans) => trans.black),
       ]),
     ],
-    defaultValue: Colors.purple,
+    defaultValue: Color.fromRGBO(162, 0, 255, 1),
   );
 
   static final ConfigCollection trackState = ConfigCollection(

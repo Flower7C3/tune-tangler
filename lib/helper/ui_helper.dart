@@ -229,9 +229,11 @@ class UIHelper {
                   content.add(contentWidget);
                 }
                 return AlertDialog(
-                    title: statusIconTile(icon, titleText),
-                    content: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: content.toList()),
-                    actions: actions ?? <Widget>[]);
+                  title: statusIconTile(icon, titleText),
+                  content: SingleChildScrollView(
+                      child: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: content.toList())),
+                  actions: actions ?? <Widget>[],
+                );
               case DialogType.list:
                 var title = <Widget>[];
                 title.add(statusIconTile(icon, titleText));
@@ -243,8 +245,9 @@ class UIHelper {
                   ));
                 }
                 return SimpleDialog(
-                    title: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: title.toList()),
-                    children: actions);
+                  title: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: title.toList()),
+                  children: actions,
+                );
               default:
                 throw Exception('Dialog type not implemented.');
             }
@@ -808,7 +811,7 @@ class UIHelper {
     String? listSubtitle,
     required String dialogTitle,
     required String currentValue,
-    required List<SimpleDialogOption> options,
+    required List<ListTile> options,
   }) =>
       ListTile(
         leading: Icon(icon),

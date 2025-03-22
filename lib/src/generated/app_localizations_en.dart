@@ -463,7 +463,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String get menuKeepScreenOn => 'Keep screen on';
 
   @override
-  String get settings => 'Settings';
+  String get settingProfile => 'Settings profile';
+
+  @override
+  String get settingsProfiles => 'Settings profiles';
+
+  @override
+  String get settingProfilesListTitle => 'Settings profiles';
+
+  @override
+  String get settingProfilesEmpty => 'Settings profiles list is empty.';
+
+  @override
+  String get settingProfileDelete => 'Delete';
+
+  @override
+  String get settingProfileDeleteTitle => 'Delete settings profile';
+
+  @override
+  String get settingProfileDeleteInfo => 'Settings profile will be deleted. Continue?';
+
+  @override
+  String get settingProfileDeleted => 'Settings profile deleted.';
+
+  @override
+  String get settingProfileCreate => 'Create';
+
+  @override
+  String get settingProfileCreated => 'Settings profile created.';
+
+  @override
+  String get settingProfileSaveSuccess => 'Settings profile saved.';
+
+  @override
+  String get settingProfileLoad => 'Load';
+
+  @override
+  String get settingProfileLoaded => 'Settings profile loaded.';
 
   @override
   String get help => 'Help';
@@ -493,7 +529,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get helpScreenMessageTrackIcons => 'Track info icons';
 
   @override
-  String get helpScreenMessageSettingsInfo => 'You can set \$[recordingAudioEncoder]audio codec, \$[recordingSampleRate]sample rate, \$[recordingBitRate]bit rate, \$[recordingAudioMode]audio mode, \$[recordingAudioGain]auto gain, \$[recordingEchoCancel]echo cancel and \$[recordingNoiseSuppress]noise suppression.';
+  String get helpScreenMessageSettingsInfo => 'You can set \$[recordingAudioEncoder]audio codec, \$[recordingSampleRate]sample rate, \$[recordingBitRate]bit rate, \$[recordingAudioMode]audio mode, \$[recordingAutoGain]auto gain, \$[recordingEchoCancel]echo cancel and \$[recordingNoiseSuppress]noise suppression.';
 
   @override
   String get stateEmpty => 'track empty (click on box to start recording)';
@@ -514,6 +550,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statePaused => 'playing paused (click on box to unpause playing)';
 
   @override
+  String get buttonAdd => 'Add';
+
+  @override
   String get buttonOk => 'Ok';
 
   @override
@@ -532,6 +571,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String buttonResetTo(Object value) {
     return 'Reset to $value';
   }
+
+  @override
+  String get buttonLoad => 'Load';
+
+  @override
+  String get buttonDelete => 'Delete';
 
   @override
   String get buttonSave => 'Save';
@@ -557,7 +602,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get languageVersion => 'Language version';
 
   @override
+  String languageVersionValue(Object value) {
+    return 'Language version: $value';
+  }
+
+  @override
   String get screenThemeMode => 'Screen theme mode';
+
+  @override
+  String screenThemeModeValue(Object value) {
+    return 'Screen theme mode: $value';
+  }
 
   @override
   String get screenSystemThemeMode => 'device settings';
@@ -578,6 +633,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screenThemeColor => 'Theme accent color';
 
   @override
+  String screenThemeColorValue(Object value) {
+    return 'Theme accent color: $value';
+  }
+
+  @override
   String get screenThemeColorTitle => 'Set theme accent color';
 
   @override
@@ -592,6 +652,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get keepScreenOn => 'Keep screen on';
 
   @override
+  String keepScreenOnValue(Object value) {
+    return 'Keep screen on: $value';
+  }
+
+  @override
   String get keepScreenOnIsEnabledSuccess => 'Enabled keep screen on feature.';
 
   @override
@@ -599,6 +664,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gridRowsAmount => 'Grid rows amount';
+
+  @override
+  String gridRowsAmountValue(Object value) {
+    return 'Grid rows amount: $value';
+  }
 
   @override
   String get gridRowsAmountTitle => 'Grid rows amount';
@@ -613,6 +683,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gridColsAmount => 'Grid columns amount';
+
+  @override
+  String gridColsAmountValue(Object value) {
+    return 'Grid columns amount: $value';
+  }
 
   @override
   String get gridColsAmountTitle => 'Grid columns amount';
