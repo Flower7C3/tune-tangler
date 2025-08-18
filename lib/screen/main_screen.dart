@@ -4,6 +4,9 @@ import 'package:provider/provider.dart';
 import 'package:record/record.dart';
 import 'package:tune_tangler/repository/track_repository.dart';
 import 'package:tune_tangler/src/audio_isolate_service.dart';
+import 'package:tune_tangler/src/audio_memory_pool.dart';
+import 'package:tune_tangler/src/icon_optimization_service.dart';
+import 'package:tune_tangler/src/lazy_loading_manager.dart';
 import 'package:tune_tangler/screen/home_screen.dart';
 import 'package:tune_tangler/wrapper/app.dart';
 import 'package:tune_tangler/wrapper/hive_service.dart';
@@ -47,6 +50,12 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
     _trackRepository.stopTracksPlaying(_trackRepository.allTracks());
     _trackRepository.dispose(_trackRepository.allTracks());
     AudioIsolateService.dispose();
+    
+    // Dispose optimization services
+    AudioMemoryPool().dispose();
+    IconOptimizationService().dispose();
+    LazyLoadingManager().dispose();
+    
     super.dispose();
   }
 

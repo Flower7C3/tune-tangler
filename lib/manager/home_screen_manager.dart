@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tune_tangler/wrapper/app.dart';
+import 'package:tune_tangler/src/lazy_loading_manager.dart';
 
 import '../config/app_config_fields.dart';
 import '../manager/drawer_manager.dart';
@@ -13,6 +14,7 @@ class HomeScreenManager {
   late DrawerManager _drawerManager;
   late RowMenuManager _rowMenuManager;
   late TrackManager _trackManager;
+  final LazyLoadingManager _lazyLoadingManager = LazyLoadingManager();
 
   HomeScreenManager(this._appWrapper) {
     _navigationBarManager = NavigationBarManager(
@@ -57,11 +59,15 @@ class HomeScreenManager {
   get tracksList => ListView.builder(
       controller: PageController(viewportFraction: 0.85),
       itemCount: _appWrapper.settings.getConfig(AppConfigFieldKey.gridRowsAmount),
-      itemBuilder: (context, rowIndex) => RepaintBoundary(
-        child: Row(children: [
-          _rowMenuManager.buildRowButtons(rowIndex),
-          _trackManager.buildRowTracks(rowIndex),
-        ]),
+      itemBuilder: (context, rowIndex) => _lazyLoadingManager.lazyLoadWidget(
+        key: 'row_$rowIndex',
+        builder: () => RepaintBoundary(
+          child: Row(children: [
+            _rowMenuManager.buildRowButtons(rowIndex),
+            _trackManager.buildRowTracks(rowIndex),
+          ]),
+        ),
+        placeholder: const SizedBox(height: 100),
       ));
 
   KeyEventResult keyEvent(node, KeyEvent event) {

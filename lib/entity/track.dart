@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 import 'package:tune_tangler/config/app_global_config.dart';
 import 'package:tune_tangler/src/audio_isolate_service.dart';
+import 'package:tune_tangler/src/audio_memory_pool.dart';
 
 import '../adapter/track_adapter_key.dart';
 import '../adapter/track_audio_source.dart';
@@ -602,6 +603,9 @@ class Track {
     try {
       state.value = TrackState.processing;
       
+      // Get buffer from memory pool for audio processing
+      final buffer = AudioMemoryPool().getBuffer(1024 * 1024); // 1MB buffer
+      
       final result = await AudioIsolateService.processAudioFile(filePath);
       
       if (result.success) {
@@ -613,6 +617,9 @@ class Track {
       } else {
         debugPrint('Audio processing failed: ${result.error}');
       }
+      
+      // Return buffer to pool
+      buffer.returnToPool();
     } catch (e) {
       debugPrint('Error in audio isolate processing: $e');
     } finally {
@@ -623,10 +630,16 @@ class Track {
   /// Analyze audio metadata using isolate
   Future<AudioMetadata?> analyzeAudioMetadataInIsolate(String filePath) async {
     try {
+      // Get buffer from memory pool for metadata analysis
+      final buffer = AudioMemoryPool().getBuffer(64 * 1024); // 64KB buffer
+      
       final metadata = await AudioIsolateService.analyzeAudioMetadata(filePath);
       
       // Update track duration and other metadata
       duration.value = metadata.duration;
+      
+      // Return buffer to pool
+      buffer.returnToPool();
       
       return metadata;
     } catch (e) {
@@ -644,6 +657,9 @@ class Track {
     try {
       state.value = TrackState.processing;
       
+      // Get buffer from memory pool for format conversion
+      final buffer = AudioMemoryPool().getBuffer(2 * 1024 * 1024); // 2MB buffer
+      
       final result = await AudioIsolateService.convertAudioFormat(
         inputPath,
         outputPath,
@@ -653,9 +669,15 @@ class Track {
       if (result.success) {
         // Update track with new audio file
         debugPrint('Audio format converted successfully in isolate');
+        
+        // Return buffer to pool
+        buffer.returnToPool();
         return true;
       } else {
         debugPrint('Audio format conversion failed: ${result.error}');
+        
+        // Return buffer to pool even on failure
+        buffer.returnToPool();
         return false;
       }
     } catch (e) {

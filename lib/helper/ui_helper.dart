@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:tune_tangler/entity/track.dart';
+import 'package:tune_tangler/src/icon_optimization_service.dart';
 
 import '../config/app_global_config.dart';
 import '../config/app_icon.dart';
@@ -52,7 +53,16 @@ class UIHelper {
     Color? textColor,
     double? fontSize,
   }) =>
-      statusWidgetTile(Icon(icon, size: fontSize, color: iconColor), text, textColor: textColor, fontSize: fontSize);
+      statusWidgetTile(
+        Icon(
+          IconOptimizationService().getOptimizedIcon(icon),
+          size: iconSize ?? IconOptimizationService().getOptimizedIconSize(context, IconSize.medium),
+          color: iconColor,
+        ),
+        text,
+        textColor: textColor,
+        fontSize: fontSize,
+      );
 
   ListTile statusTextTile(
     String icon,
@@ -77,13 +87,21 @@ class UIHelper {
     bool wrapExpanded = true,
   }) =>
       Row(mainAxisAlignment: mainAxisAlignment, children: [
-        if (iconAlignment == IconAlignment.start) Icon(icon, size: iconSize, color: iconColor),
+        if (iconAlignment == IconAlignment.start) Icon(
+          IconOptimizationService().getOptimizedIcon(icon),
+          size: iconSize ?? IconOptimizationService().getOptimizedIconSize(context, IconSize.medium),
+          color: iconColor,
+        ),
         if (iconAlignment == IconAlignment.start) SizedBox(width: separatorSize),
         (wrapExpanded == true)
             ? Expanded(child: Text(text, style: TextStyle(color: textColor, fontSize: fontSize)))
             : Text(text, style: TextStyle(color: textColor, fontSize: fontSize)),
         if (iconAlignment == IconAlignment.end) SizedBox(width: separatorSize),
-        if (iconAlignment == IconAlignment.end) Icon(icon, size: iconSize, color: iconColor),
+        if (iconAlignment == IconAlignment.end) Icon(
+          IconOptimizationService().getOptimizedIcon(icon),
+          size: iconSize ?? IconOptimizationService().getOptimizedIconSize(context, IconSize.medium),
+          color: iconColor,
+        ),
       ]);
 
   SingleChildScrollView trackDetailsTabElement(List<Widget> items) =>

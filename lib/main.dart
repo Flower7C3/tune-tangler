@@ -20,6 +20,9 @@ import 'adapter/track_id.dart';
 import 'screen/main_screen.dart';
 import 'wrapper/hive_service.dart';
 import 'src/audio_isolate_service.dart';
+import 'src/audio_memory_pool.dart';
+import 'src/icon_optimization_service.dart';
+import 'src/lazy_loading_manager.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
@@ -44,6 +47,11 @@ Future<void> main() async {
   Hive.registerAdapter(AppConfigFieldKeyAdapter());
   await HiveService.init();
   await AudioIsolateService.initialize();
+  
+  // Initialize optimization services
+  AudioMemoryPool();
+  IconOptimizationService();
+  LazyLoadingManager();
 
   const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
 
