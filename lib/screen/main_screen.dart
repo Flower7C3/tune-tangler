@@ -3,16 +3,18 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:record/record.dart';
 import 'package:tune_tangler/repository/track_repository.dart';
+import 'package:tune_tangler/src/audio_isolate_service.dart';
 import 'package:tune_tangler/screen/home_screen.dart';
 import 'package:tune_tangler/wrapper/app.dart';
 import 'package:tune_tangler/wrapper/hive_service.dart';
+import 'package:tune_tangler/wrapper/hive_settings_provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../config/app_config_fields.dart';
 import '../config/app_global_config.dart';
 import '../provider/permission_provider.dart';
 import '../src/generated/app_localizations.dart';
-import '../wrapper/hive_settings_provider.dart';
+
 
 class MainScreenApp extends StatefulWidget {
   const MainScreenApp({super.key});
@@ -44,6 +46,7 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
     HiveService.dispose();
     _trackRepository.stopTracksPlaying(_trackRepository.allTracks());
     _trackRepository.dispose(_trackRepository.allTracks());
+    AudioIsolateService.dispose();
     super.dispose();
   }
 

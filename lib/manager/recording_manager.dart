@@ -102,11 +102,20 @@ class RecordingManager {
       if (await _audioRecorder.isRecording()) {
         throw Exception(_trans.trackRecordingAlreadyStarted);
       }
-      if (!await _audioRecorder.hasPermission()) {
+      // Request permissions sequentially to avoid overlapping dialogs
+      final micGranted = await Permission.microphone.request().isGranted;
+      if (!micGranted) {
         throw Exception(_trans.trackRecordingStartNoAudioPermission);
       }
-      if (!await Permission.notification.request().isGranted) {
+
+      final notifGranted = await Permission.notification.request().isGranted;
+      if (!notifGranted) {
         throw Exception(_trans.trackRecordingStartNoNotificationPermission);
+      }
+
+      // Double-check via record plugin (should be fast now and not prompt again)
+      if (!await _audioRecorder.hasPermission()) {
+        throw Exception(_trans.trackRecordingStartNoAudioPermission);
       }
 
       RecordConfig recordConfig = _recordConfig();

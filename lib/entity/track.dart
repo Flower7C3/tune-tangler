@@ -8,6 +8,7 @@ import 'package:path/path.dart' as path_provider;
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 import 'package:tune_tangler/config/app_global_config.dart';
+import 'package:tune_tangler/src/audio_isolate_service.dart';
 
 import '../adapter/track_adapter_key.dart';
 import '../adapter/track_audio_source.dart';
@@ -170,9 +171,9 @@ class Track {
 
   void startTimer() {
     clock.value = 0;
-    _timer = Timer.periodic(Duration(milliseconds: 16), (timer) {
+    _timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
       if (state.value == TrackState.recording) {
-        clock.value = clock.value + 0.016;
+        clock.value = clock.value + 100; // milliseconds
       }
     });
   }
@@ -591,4 +592,77 @@ class Track {
         TrackAdapterKey.sampleRate: sampleRate,
         TrackAdapterKey.bitRate: bitRate,
       };
+
+  ///*************************************************************************************************************************************************
+  /// AUDIO ISOLATE OPERATIONS
+  ///*************************************************************************************************************************************************
+
+  /// Process audio file using isolate to prevent blocking main thread
+  Future<void> processAudioFileInIsolate(String filePath) async {
+    try {
+      state.value = TrackState.processing;
+      
+      final result = await AudioIsolateService.processAudioFile(filePath);
+      
+      if (result.success) {
+        // Update track with processed audio data
+        if (result.data != null) {
+          // Handle processed data
+          debugPrint('Audio processed successfully in isolate');
+        }
+      } else {
+        debugPrint('Audio processing failed: ${result.error}');
+      }
+    } catch (e) {
+      debugPrint('Error in audio isolate processing: $e');
+    } finally {
+      state.value = TrackState.idle;
+    }
+  }
+
+  /// Analyze audio metadata using isolate
+  Future<AudioMetadata?> analyzeAudioMetadataInIsolate(String filePath) async {
+    try {
+      final metadata = await AudioIsolateService.analyzeAudioMetadata(filePath);
+      
+      // Update track duration and other metadata
+      duration.value = metadata.duration;
+      
+      return metadata;
+    } catch (e) {
+      debugPrint('Error analyzing audio metadata in isolate: $e');
+      return null;
+    }
+  }
+
+  /// Convert audio format using isolate
+  Future<bool> convertAudioFormatInIsolate(
+    String inputPath,
+    String outputPath,
+    AudioFormat targetFormat,
+  ) async {
+    try {
+      state.value = TrackState.processing;
+      
+      final result = await AudioIsolateService.convertAudioFormat(
+        inputPath,
+        outputPath,
+        targetFormat,
+      );
+      
+      if (result.success) {
+        // Update track with new audio file
+        debugPrint('Audio format converted successfully in isolate');
+        return true;
+      } else {
+        debugPrint('Audio format conversion failed: ${result.error}');
+        return false;
+      }
+    } catch (e) {
+      debugPrint('Error in audio format conversion isolate: $e');
+      return false;
+    } finally {
+      state.value = TrackState.idle;
+    }
+  }
 }

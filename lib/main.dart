@@ -19,6 +19,7 @@ import 'adapter/track_audio_source.dart';
 import 'adapter/track_id.dart';
 import 'screen/main_screen.dart';
 import 'wrapper/hive_service.dart';
+import 'src/audio_isolate_service.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
@@ -42,6 +43,7 @@ Future<void> main() async {
   Hive.registerAdapter(SettingsProfileAdapter());
   Hive.registerAdapter(AppConfigFieldKeyAdapter());
   await HiveService.init();
+  await AudioIsolateService.initialize();
 
   const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
 
