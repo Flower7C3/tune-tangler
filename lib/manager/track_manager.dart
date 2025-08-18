@@ -67,17 +67,20 @@ class TrackManager {
           width: Theme.of(_context).textTheme.displaySmall!.fontSize! * 2.1,
           child: ValueListenableBuilder<TrackState>(
               valueListenable: track.state,
-              builder: (context, state, child) => ElevatedButton(
-                    onPressed: () => _trackDetailsManager.runClickAction(track),
-                    onLongPress: () => _trackDetailsManager.openModal(track),
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.all(UIHelper.gridGap),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(UIHelper.gridGap * 2)),
-                      backgroundColor: track.stateBackgroundColor(context),
-                      foregroundColor: track.stateForegroundColor(context),
-                    ),
-                    child: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: _buildTrackButton(track)),
-                  ))));
+              builder: (context, state, child) => AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                child: ElevatedButton(
+                  onPressed: () => _trackDetailsManager.runClickAction(track),
+                  onLongPress: () => _trackDetailsManager.openModal(track),
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.all(UIHelper.gridGap),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(UIHelper.gridGap * 2)),
+                    backgroundColor: track.stateBackgroundColor(context),
+                    foregroundColor: track.stateForegroundColor(context),
+                  ),
+                  child: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: _buildTrackButton(track)),
+                ),
+              ))));
 
   List<Widget> _buildTrackButton(Track track) => [
         SizedBox(
@@ -86,8 +89,14 @@ class TrackManager {
                 fit: StackFit.expand,
                 children: (track.state.value == TrackState.processing)
                     ? [
-                        CircularProgressIndicator(
-                            strokeWidth: UIHelper.gridGap, color: track.stateProgressColor(_context), strokeCap: StrokeCap.round),
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          child: CircularProgressIndicator(
+                            strokeWidth: UIHelper.gridGap,
+                            color: track.stateProgressColor(_context),
+                            strokeCap: StrokeCap.round,
+                          ),
+                        ),
                         Align(
                             alignment: Alignment.center,
                             child: ValueListenableBuilder<String>(
@@ -188,17 +197,23 @@ class TrackManager {
                       ])),
         if (track.state.value != TrackState.processing)
           (track.state.value == TrackState.recording)
-              ? LinearProgressIndicator(
-                  color: track.stateForegroundColor(_context),
-                  backgroundColor: track.stateProgressColor(_context),
+              ? AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  child: LinearProgressIndicator(
+                    color: track.stateForegroundColor(_context),
+                    backgroundColor: track.stateProgressColor(_context),
+                  ),
                 )
               : RepaintBoundary(
                   child: ValueListenableBuilder(
                     valueListenable: CombinedNotifier([track.progress, track.state]),
-                    builder: (context, _, __) => LinearProgressIndicator(
-                      value: track.progress.value,
-                      color: track.stateForegroundColor(context),
-                      backgroundColor: track.stateProgressColor(context),
+                    builder: (context, _, __) => AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      child: LinearProgressIndicator(
+                        value: track.progress.value,
+                        color: track.stateForegroundColor(context),
+                        backgroundColor: track.stateProgressColor(context),
+                      ),
                     ),
                   ),
                 ),

@@ -427,31 +427,35 @@ class UIHelper {
     OutlinedBorder? borderStyle,
   }) =>
       RepaintBoundary(
-        child: Container(
-            margin: EdgeInsets.zero,
-            width: boxSize,
-            height: boxSize,
-            padding: EdgeInsets.all(gridGap),
-            child: IconButton(
-              style: circledButtonStyle(borderStyle: borderStyle),
-              icon: Icon(icon, color: Theme.of(context).colorScheme.primary),
-              iconSize: iconSize ?? Theme.of(context).textTheme.headlineSmall!.fontSize,
-              padding: EdgeInsets.zero,
-              tooltip: tooltip,
-              onPressed: onPressed,
-            )),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          margin: EdgeInsets.zero,
+          width: boxSize,
+          height: boxSize,
+          padding: EdgeInsets.all(gridGap),
+          child: IconButton(
+            style: circledButtonStyle(borderStyle: borderStyle),
+            icon: Icon(icon, color: Theme.of(context).colorScheme.primary),
+            iconSize: iconSize ?? Theme.of(context).textTheme.headlineSmall!.fontSize,
+            padding: EdgeInsets.zero,
+            tooltip: tooltip,
+            onPressed: onPressed,
+          ),
+        ),
       );
 
   Widget helpTrackState(TrackState state, String message) => RepaintBoundary(
-        child: Container(
-        padding: EdgeInsets.zero,
-        color: AppGlobalConfig.trackState.color(state, context: context, domain: ConfigItemPropertyDomain.backgroundColor),
-        child: statusIconTile(
-          AppGlobalConfig.trackState.icon(state),
-          message,
-          textColor: AppGlobalConfig.trackState.color(state, context: context, domain: ConfigItemPropertyDomain.foregroundColor),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          padding: EdgeInsets.zero,
+          color: AppGlobalConfig.trackState.color(state, context: context, domain: ConfigItemPropertyDomain.backgroundColor),
+          child: statusIconTile(
+            AppGlobalConfig.trackState.icon(state),
+            message,
+            textColor: AppGlobalConfig.trackState.color(state, context: context, domain: ConfigItemPropertyDomain.foregroundColor),
+          ),
         ),
-      ));
+      );
 
   Divider settingsTileDivider() => Divider(height: 0, thickness: 1, indent: 20, endIndent: 20, color: Theme.of(context).colorScheme.inversePrimary);
 
