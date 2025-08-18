@@ -150,7 +150,7 @@ class TrackManager {
                                           AppGlobalConfig.trackPlaybackBalance.format(track.playbackBalance.value),
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
-                                              fontSize: Theme.of(context).textTheme.titleSmall!.fontSize, color: track.stateForegroundColor(context)),
+                                              fontSize: Theme.of(context).textTheme.labelSmall!.fontSize, color: track.stateForegroundColor(context)),
                                         ),
                                       )),
                               Align(
