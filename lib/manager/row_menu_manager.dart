@@ -22,24 +22,25 @@ class RowMenuManager {
     this._trackRepository,
   );
 
-  Container buildRowButtons(int rowIndex) => Container(
-      width: Theme.of(_context).textTheme.displaySmall!.fontSize,
-      padding: EdgeInsets.zero,
-      child: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
-        _uiHelper.mediaPlayerButton(
-          AppIcon.trackPlayingStart,
-          _trans.rowTracksPlayingStart(rowIndex),
-          boxSize: Theme.of(_context).textTheme.displaySmall!.fontSize! * 0.9,
-          onPressed: () => _trackRepository.startTracksPlaying(_trackRepository.rowTracks(rowIndex)),
-        ),
-        _uiHelper.mediaPlayerButton(
-          AppIcon.trackPlayingStop,
-          _trans.rowTracksPlayingStop(rowIndex),
-          boxSize: Theme.of(_context).textTheme.displaySmall!.fontSize! * 0.9,
-          onPressed: () => _trackRepository.stopTracksPlaying(_trackRepository.rowTracks(rowIndex)),
-        ),
-        _uiHelper.rowButton(_rowMenuActions(rowIndex)),
-      ]));
+  Widget buildRowButtons(int rowIndex) => RepaintBoundary(
+      child: Container(
+          width: Theme.of(_context).textTheme.displaySmall!.fontSize,
+          padding: EdgeInsets.zero,
+          child: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
+            _uiHelper.mediaPlayerButton(
+              AppIcon.trackPlayingStart,
+              _trans.rowTracksPlayingStart(rowIndex),
+              boxSize: Theme.of(_context).textTheme.displaySmall!.fontSize! * 0.9,
+              onPressed: () => _trackRepository.startTracksPlaying(_trackRepository.rowTracks(rowIndex)),
+            ),
+            _uiHelper.mediaPlayerButton(
+              AppIcon.trackPlayingStop,
+              _trans.rowTracksPlayingStop(rowIndex),
+              boxSize: Theme.of(_context).textTheme.displaySmall!.fontSize! * 0.9,
+              onPressed: () => _trackRepository.stopTracksPlaying(_trackRepository.rowTracks(rowIndex)),
+            ),
+            _uiHelper.rowButton(_rowMenuActions(rowIndex)),
+          ])));
 
   PopupMenuButton _rowMenuActions(int rowIndex) => PopupMenuButton<dynamic>(
       style: _uiHelper.circledButtonStyle(),

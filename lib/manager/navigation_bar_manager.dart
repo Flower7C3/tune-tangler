@@ -35,21 +35,27 @@ class NavigationBarManager {
           ),
           title: Text(_trans.appTitle),
           actions: [
-            IconButton(
-              icon: Icon(AppIcon.trackPlayingStart),
-              tooltip: _trans.allTracksPlayingStart,
-              onPressed: () => _trackRepository.startTracksPlaying(_trackRepository.allTracks()),
+            RepaintBoundary(
+              child: IconButton(
+                icon: Icon(AppIcon.trackPlayingStart),
+                tooltip: _trans.allTracksPlayingStart,
+                onPressed: () => _trackRepository.startTracksPlaying(_trackRepository.allTracks()),
+              ),
             ),
-            IconButton(
-              icon: Icon(AppIcon.trackPlayingStop),
-              tooltip: _trans.allTracksPlayingStop,
-              onPressed: () => _trackRepository.stopTracksPlaying(_trackRepository.allTracks()),
+            RepaintBoundary(
+              child: IconButton(
+                icon: Icon(AppIcon.trackPlayingStop),
+                tooltip: _trans.allTracksPlayingStop,
+                onPressed: () => _trackRepository.stopTracksPlaying(_trackRepository.allTracks()),
+              ),
             ),
-            PopupMenuButton<String>(
-              icon: Icon(AppIcon.moreMenu),
-              itemBuilder: (BuildContext context) => _trackSettingsMenu,
-              onSelected: (String selection) =>
-                  _trackSettingsMenuItemSelected(AllTracksMenuItem.values.byName(selection.replaceAll('AllTracksMenuItem.', ''))),
+            RepaintBoundary(
+              child: PopupMenuButton<String>(
+                icon: Icon(AppIcon.moreMenu),
+                itemBuilder: (BuildContext context) => _trackSettingsMenu,
+                onSelected: (String selection) =>
+                    _trackSettingsMenuItemSelected(AllTracksMenuItem.values.byName(selection.replaceAll('AllTracksMenuItem.', ''))),
+              ),
             ),
           ]);
 

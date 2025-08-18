@@ -72,25 +72,26 @@ class Track {
   StreamSubscription? playerCompleteSubscription;
 
   StreamSubscription? playerStateChangeSubscription;
+  
+  // Throttling mechanism for performance
+  Timer? _throttleTimer;
+  Duration? _lastPositionUpdate;
+  Duration? _lastDurationUpdate;
+  PlayerState? _lastPlayerStateUpdate;
+  
+  static const Duration _throttleInterval = Duration(milliseconds: 16); // 60 FPS
 
   void setStreamsInitialized() {
     durationSubscription = player.onDurationChanged.listen((Duration value) {
-      setDuration(value);
+      _throttledDurationUpdate(value);
     });
 
     positionSubscription = player.onPositionChanged.listen((Duration position) {
-      if (position >= playbackEndAtPosition.value) {
-        if (isPlaybackReleaseModeSingle(playbackReleaseMode.value)) {
-          stopPlaying();
-        }
-        position = playbackStartAtPosition.value;
-        player.seek(position);
-      }
-      setPosition(position);
+      _throttledPositionUpdate(position);
     });
 
     playerStateChangeSubscription = player.onPlayerStateChanged.listen((PlayerState state) {
-      setPlayerState(state);
+      _throttledPlayerStateUpdate(state);
     });
 
     playerCompleteSubscription = player.onPlayerComplete.listen((event) {
@@ -99,13 +100,56 @@ class Track {
 
     _streamsInitialized = true;
   }
+  
+  void _throttledPositionUpdate(Duration position) {
+    final now = Duration(milliseconds: DateTime.now().millisecondsSinceEpoch);
+    
+    if (_lastPositionUpdate == null || 
+        now.inMilliseconds - _lastPositionUpdate!.inMilliseconds >= _throttleInterval.inMilliseconds) {
+      _lastPositionUpdate = now;
+      
+      if (position >= playbackEndAtPosition.value) {
+        if (isPlaybackReleaseModeSingle(playbackReleaseMode.value)) {
+          stopPlaying();
+        }
+        position = playbackStartAtPosition.value;
+        player.seek(position);
+      }
+      setPosition(position);
+    }
+  }
+  
+  void _throttledDurationUpdate(Duration value) {
+    final now = Duration(milliseconds: DateTime.now().millisecondsSinceEpoch);
+    
+    if (_lastDurationUpdate == null || 
+        now.inMilliseconds - _lastDurationUpdate!.inMilliseconds >= _throttleInterval.inMilliseconds) {
+      _lastDurationUpdate = now;
+      setDuration(value);
+    }
+  }
+  
+  void _throttledPlayerStateUpdate(PlayerState state) {
+    final now = Duration(milliseconds: DateTime.now().millisecondsSinceEpoch);
+    
+    if (_lastPlayerStateUpdate == null || 
+        now.inMilliseconds - (_lastPlayerStateUpdate == null ? 0 : _lastPlayerStateUpdate!.index * 16) >= _throttleInterval.inMilliseconds) {
+      _lastPlayerStateUpdate = state;
+      setPlayerState(state);
+    }
+  }
 
   void dispose() {
+    _throttleTimer?.cancel();
+    _throttleTimer = null;
+    
+    durationSubscription?.cancel();
+    positionSubscription?.cancel();
+    playerCompleteSubscription?.cancel();
+    playerStateChangeSubscription?.cancel();
+    
     player.dispose().then((status) {
-      durationSubscription?.cancel();
-      positionSubscription?.cancel();
-      playerCompleteSubscription?.cancel();
-      playerStateChangeSubscription?.cancel();
+      // Cleanup completed
     });
   }
 
@@ -122,17 +166,19 @@ class Track {
   /// TIMER
 
   final ValueNotifier<double> clock = ValueNotifier(0);
-  Timer? timer;
+  Timer? _timer;
 
   void startTimer() {
     clock.value = 0;
-    timer = Timer.periodic(Duration(milliseconds: 10), (Timer t) {
-      clock.value += 10;
+    _timer = Timer.periodic(Duration(milliseconds: 16), (timer) {
+      if (state.value == TrackState.recording) {
+        clock.value = clock.value + 0.016;
+      }
     });
   }
 
   void stopTimer() {
-    timer?.cancel();
+    _timer?.cancel();
   }
 
   ///*************************************************************************************************************************************************

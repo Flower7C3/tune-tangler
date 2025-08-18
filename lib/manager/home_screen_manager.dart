@@ -57,10 +57,12 @@ class HomeScreenManager {
   get tracksList => ListView.builder(
       controller: PageController(viewportFraction: 0.85),
       itemCount: _appWrapper.settings.getConfig(AppConfigFieldKey.gridRowsAmount),
-      itemBuilder: (context, rowIndex) => Row(children: [
-            _rowMenuManager.buildRowButtons(rowIndex),
-            _trackManager.buildRowTracks(rowIndex),
-          ]));
+      itemBuilder: (context, rowIndex) => RepaintBoundary(
+        child: Row(children: [
+          _rowMenuManager.buildRowButtons(rowIndex),
+          _trackManager.buildRowTracks(rowIndex),
+        ]),
+      ));
 
   KeyEventResult keyEvent(node, KeyEvent event) {
     _trackManager.onKeyEvent(event);

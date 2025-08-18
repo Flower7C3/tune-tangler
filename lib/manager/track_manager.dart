@@ -1,4 +1,3 @@
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tune_tangler/helper/ui_helper.dart';
@@ -62,22 +61,23 @@ class TrackManager {
               children: List.generate(_settings.getConfig(AppConfigFieldKey.gridColsAmount),
                   (columnIndex) => _buildRowTrackContainer(_settings.getTrack(rowIndex, columnIndex))))));
 
-  Container _buildRowTrackContainer(Track track) => Container(
-      margin: EdgeInsets.all(UIHelper.gridGap),
-      width: Theme.of(_context).textTheme.displaySmall!.fontSize! * 2.1,
-      child: ValueListenableBuilder<TrackState>(
-          valueListenable: track.state,
-          builder: (context, state, child) => ElevatedButton(
-                onPressed: () => _trackDetailsManager.runClickAction(track),
-                onLongPress: () => _trackDetailsManager.openModal(track),
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.all(UIHelper.gridGap),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(UIHelper.gridGap * 2)),
-                  backgroundColor: track.stateBackgroundColor(context),
-                  foregroundColor: track.stateForegroundColor(context),
-                ),
-                child: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: _buildTrackButton(track)),
-              )));
+  Widget _buildRowTrackContainer(Track track) => RepaintBoundary(
+      child: Container(
+          margin: EdgeInsets.all(UIHelper.gridGap),
+          width: Theme.of(_context).textTheme.displaySmall!.fontSize! * 2.1,
+          child: ValueListenableBuilder<TrackState>(
+              valueListenable: track.state,
+              builder: (context, state, child) => ElevatedButton(
+                    onPressed: () => _trackDetailsManager.runClickAction(track),
+                    onLongPress: () => _trackDetailsManager.openModal(track),
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.all(UIHelper.gridGap),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(UIHelper.gridGap * 2)),
+                      backgroundColor: track.stateBackgroundColor(context),
+                      foregroundColor: track.stateForegroundColor(context),
+                    ),
+                    child: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: _buildTrackButton(track)),
+                  ))));
 
   List<Widget> _buildTrackButton(Track track) => [
         SizedBox(
@@ -93,84 +93,98 @@ class TrackManager {
                             child: ValueListenableBuilder<String>(
                                 valueListenable: track.name,
                                 builder: (context, name, child) => Text(_trans.cell(name),
-                                    style: TextStyle(fontSize: Theme.of(context).textTheme.headlineMedium!.fontSize, fontWeight: FontWeight.bold)))),
+                                    style: const TextStyle(fontWeight: FontWeight.bold)))),
                       ]
                     : [
-                        Align(
-                            alignment: Alignment.center,
-                            child: ValueListenableBuilder<String>(
-                                valueListenable: track.name,
-                                builder: (context, name, child) => Text(_trans.cell(name),
-                                    style: TextStyle(fontSize: Theme.of(context).textTheme.headlineMedium!.fontSize, fontWeight: FontWeight.bold)))),
-                        Align(
-                            alignment: Alignment.topLeft,
-                            child: Icon(track.stateIcon,
-                                size: Theme.of(_context).textTheme.titleMedium!.fontSize, color: track.stateForegroundColor(_context))),
-                        Align(
-                            alignment: Alignment.topRight,
-                            child: ValueListenableBuilder<String>(
-                                valueListenable: track.keyboardKey,
-                                builder: (context, keyboardKey, child) => AppIcon.trackKeyboardKeyBox(keyboardKey,
-                                    foregroundColor: track.stateBackgroundColor(context),
-                                    backgroundColor: track.stateForegroundColor(context),
-                                    size: Theme.of(context).textTheme.titleMedium!.fontSize!))),
-                        Align(
-                            alignment: Alignment.topCenter,
-                            child: ValueListenableBuilder<double>(
-                                valueListenable: track.playbackVolume,
-                                builder: (context, playbackVolume, child) => Icon(track.playbackVolumeIcon,
-                                    size: Theme.of(context).textTheme.titleMedium!.fontSize, color: track.stateForegroundColor(context)))),
-                        Align(
-                            alignment: Alignment.centerLeft,
-                            child: Icon(track.audioSourceIcon,
-                                size: Theme.of(_context).textTheme.titleMedium!.fontSize, color: track.stateForegroundColor(_context))),
-                        Align(
-                            alignment: AlignmentDirectional(1, -0.3),
-                            child: ValueListenableBuilder<double>(
-                                valueListenable: track.playbackBalance,
-                                builder: (context, playbackBalance, child) => SizedBox(
-                                      width: Theme.of(context).textTheme.titleMedium!.fontSize,
-                                      height: Theme.of(context).textTheme.titleMedium!.fontSize,
-                                      child: Text(
-                                        AppGlobalConfig.trackPlaybackBalance.format(playbackBalance),
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                            fontSize: Theme.of(context).textTheme.titleSmall!.fontSize, color: track.stateForegroundColor(context)),
-                                      ),
-                                    ))),
-                        Align(
-                            alignment: AlignmentDirectional(1, 0.25),
-                            child: ValueListenableBuilder<double>(
-                                valueListenable: track.playbackBalance,
-                                builder: (context, playbackBalance, child) => Icon(AppGlobalConfig.trackPlaybackBalance.icon(playbackBalance),
-                                    size: Theme.of(context).textTheme.titleMedium!.fontSize, color: track.stateForegroundColor(context)))),
-                        Align(
-                            alignment: AlignmentDirectional(-1, 1),
-                            child: ValueListenableBuilder<double>(
-                                valueListenable: track.playbackSpeed,
-                                builder: (context, playbackSpeed, child) => Text(AppGlobalConfig.trackPlaybackSpeed.format(playbackSpeed),
-                                    style: TextStyle(
-                                        fontSize: Theme.of(context).textTheme.labelMedium!.fontSize, color: track.stateForegroundColor(context))))),
-                        Align(
-                            alignment: AlignmentDirectional(1, 1),
-                            child: ValueListenableBuilder<ReleaseMode>(
-                                valueListenable: track.playbackReleaseMode,
-                                builder: (context, playbackReleaseMode, child) => Icon(
-                                    AppGlobalConfig.trackPlaybackReleaseMode.icon(playbackReleaseMode),
-                                    size: Theme.of(context).textTheme.titleMedium!.fontSize,
-                                    color: track.stateForegroundColor(context)))),
-                        Align(
-                            alignment: AlignmentDirectional(0, 0.95),
-                            child: ValueListenableBuilder<Duration>(
-                                valueListenable: track.playbackStartAtPosition,
-                                builder: (context, time, child) => Icon(track.playbackStartAtPositionIcon,
-                                    size: Theme.of(context).textTheme.labelLarge!.fontSize, color: track.stateForegroundColor(context)))),
-                        Align(
-                            alignment: AlignmentDirectional(0.3, 0.95),
-                            child: ValueListenableBuilder<Duration>(
-                                valueListenable: track.playbackEndAtPosition,
-                                builder: (context, time, child) => Icon(track.playbackEndAtPositionIcon,
-                                    size: Theme.of(context).textTheme.labelLarge!.fontSize, color: track.stateForegroundColor(context)))),
+                        // Single ValueListenableBuilder for entire track content
+                        ValueListenableBuilder(
+                          valueListenable: CombinedNotifier([
+                            track.state,
+                            track.name,
+                            track.keyboardKey,
+                            track.playbackVolume,
+                            track.playbackBalance,
+                            track.playbackSpeed,
+                            track.playbackReleaseMode,
+                            track.playbackStartAtPosition,
+                            track.playbackEndAtPosition,
+                          ]),
+                          builder: (context, _, __) => Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              // Grupa 1: Nazwa i klawisz klawiatury
+                              Align(
+                                  alignment: Alignment.center,
+                                  child: Text(_trans.cell(track.name.value),
+                                      style: TextStyle(fontSize: Theme.of(context).textTheme.headlineMedium!.fontSize, fontWeight: FontWeight.bold))),
+                              Align(
+                                  alignment: Alignment.topRight,
+                                  child: AppIcon.trackKeyboardKeyBox(track.keyboardKey.value,
+                                      foregroundColor: track.stateBackgroundColor(context),
+                                      backgroundColor: track.stateForegroundColor(context),
+                                      size: Theme.of(context).textTheme.titleMedium!.fontSize!)),
+                              
+                              // Grupa 2: Ikony stanu i źródła audio (nie zmieniają się często)
+                              Align(
+                                  alignment: Alignment.topLeft,
+                                  child: Icon(track.stateIcon,
+                                      size: Theme.of(_context).textTheme.titleMedium!.fontSize, color: track.stateForegroundColor(_context))),
+                              Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Icon(track.audioSourceIcon,
+                                      size: Theme.of(_context).textTheme.titleMedium!.fontSize, color: track.stateForegroundColor(_context))),
+                              
+                              // Grupa 3: Kontrolki odtwarzania
+                              Align(
+                                  alignment: Alignment.topCenter,
+                                  child: Icon(track.playbackVolumeIcon,
+                                      size: Theme.of(context).textTheme.titleMedium!.fontSize, color: track.stateForegroundColor(context))),
+                              
+                              // Grupa 4: Balans audio (tekst + ikona)
+                              Align(
+                                  alignment: AlignmentDirectional(1, -0.3),
+                                  child: SizedBox(
+                                        width: Theme.of(context).textTheme.titleMedium!.fontSize,
+                                        height: Theme.of(context).textTheme.titleMedium!.fontSize,
+                                        child: Text(
+                                          AppGlobalConfig.trackPlaybackBalance.format(track.playbackBalance.value),
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                              fontSize: Theme.of(context).textTheme.titleSmall!.fontSize, color: track.stateForegroundColor(context)),
+                                        ),
+                                      )),
+                              Align(
+                                  alignment: AlignmentDirectional(1, 0.25),
+                                  child: Icon(AppGlobalConfig.trackPlaybackBalance.icon(track.playbackBalance.value),
+                                      size: Theme.of(context).textTheme.titleMedium!.fontSize, color: track.stateForegroundColor(context))),
+                              
+                              // Grupa 5: Prędkość odtwarzania
+                              Align(
+                                  alignment: AlignmentDirectional(-1, 1),
+                                  child: Text(AppGlobalConfig.trackPlaybackSpeed.format(track.playbackSpeed.value),
+                                      style: TextStyle(
+                                          fontSize: Theme.of(context).textTheme.labelMedium!.fontSize, color: track.stateForegroundColor(context)))),
+                              
+                              // Grupa 6: Tryb odtwarzania
+                              Align(
+                                  alignment: AlignmentDirectional(1, 1),
+                                  child: Icon(
+                                      AppGlobalConfig.trackPlaybackReleaseMode.icon(track.playbackReleaseMode.value),
+                                      size: Theme.of(context).textTheme.titleMedium!.fontSize,
+                                      color: track.stateForegroundColor(context))),
+                              
+                              // Grupa 7: Pozycje odtwarzania (start/end)
+                              Align(
+                                  alignment: AlignmentDirectional(0, 0.95),
+                                  child: Icon(track.playbackStartAtPositionIcon,
+                                      size: Theme.of(context).textTheme.labelLarge!.fontSize, color: track.stateForegroundColor(context))),
+                              Align(
+                                  alignment: AlignmentDirectional(0.3, 0.95),
+                                  child: Icon(track.playbackEndAtPositionIcon,
+                                      size: Theme.of(context).textTheme.labelLarge!.fontSize, color: track.stateForegroundColor(context))),
+                            ],
+                          ),
+                        ),
                       ])),
         if (track.state.value != TrackState.processing)
           (track.state.value == TrackState.recording)
@@ -178,35 +192,47 @@ class TrackManager {
                   color: track.stateForegroundColor(_context),
                   backgroundColor: track.stateProgressColor(_context),
                 )
-              : ValueListenableBuilder<double>(
-                  valueListenable: track.progress,
-                  builder: (context, progress, child) => LinearProgressIndicator(
-                    value: progress,
-                    color: track.stateForegroundColor(context),
-                    backgroundColor: track.stateProgressColor(context),
+              : RepaintBoundary(
+                  child: ValueListenableBuilder(
+                    valueListenable: CombinedNotifier([track.progress, track.state]),
+                    builder: (context, _, __) => LinearProgressIndicator(
+                      value: track.progress.value,
+                      color: track.stateForegroundColor(context),
+                      backgroundColor: track.stateProgressColor(context),
+                    ),
                   ),
                 ),
         if (track.state.value != TrackState.processing)
-          (track.state.value == TrackState.recording)
-              ? ValueListenableBuilder<double>(
-                  valueListenable: track.clock,
-                  builder: (context, clock, child) => _uiHelper.statusIconRow(
-                        AppIcon.trackTimer,
-                        _uiHelper.formatTime(clock.toInt()),
-                        iconColor: track.stateForegroundColor(context),
-                        iconSize: Theme.of(context).textTheme.labelLarge!.fontSize! / 1.4 * UIHelper.iconSizeMultiplier,
-                        textColor: track.stateForegroundColor(context),
-                        fontSize: Theme.of(context).textTheme.labelLarge!.fontSize! / 1.4,
-                      ))
-              : ValueListenableBuilder(
-                  valueListenable: CombinedNotifier([track.durationAfterCut, track.playbackSpeed]),
-                  builder: (context, _, __) => _uiHelper.statusIconRow(
-                        AppIcon.trackPosition,
-                        _uiHelper.formatTime((track.durationAfterCut.value.inMilliseconds * 1 / track.playbackSpeed.value).toInt()),
-                        iconColor: track.stateForegroundColor(context),
-                        iconSize: Theme.of(context).textTheme.labelLarge!.fontSize! / 1.4 * UIHelper.iconSizeMultiplier,
-                        textColor: track.stateForegroundColor(context),
-                        fontSize: Theme.of(context).textTheme.labelLarge!.fontSize! / 1.4,
-                      )),
+          RepaintBoundary(
+            child: ValueListenableBuilder(
+              valueListenable: CombinedNotifier([
+                track.state,
+                track.clock,
+                track.durationAfterCut,
+                track.playbackSpeed,
+              ]),
+              builder: (context, _, __) {
+                if (track.state.value == TrackState.recording) {
+                  return _uiHelper.statusIconRow(
+                    AppIcon.trackTimer,
+                    _uiHelper.formatTime(track.clock.value.toInt()),
+                    iconColor: track.stateForegroundColor(context),
+                    iconSize: Theme.of(context).textTheme.labelLarge!.fontSize! / 1.4 * UIHelper.iconSizeMultiplier,
+                    textColor: track.stateForegroundColor(context),
+                    fontSize: Theme.of(context).textTheme.labelLarge!.fontSize! / 1.4,
+                  );
+                } else {
+                  return _uiHelper.statusIconRow(
+                    AppIcon.trackPosition,
+                    _uiHelper.formatTime((track.durationAfterCut.value.inMilliseconds * 1 / track.playbackSpeed.value).toInt()),
+                    iconColor: track.stateForegroundColor(context),
+                    iconSize: Theme.of(context).textTheme.labelLarge!.fontSize! / 1.4 * UIHelper.iconSizeMultiplier,
+                    textColor: track.stateForegroundColor(context),
+                    fontSize: Theme.of(context).textTheme.labelLarge!.fontSize! / 1.4,
+                  );
+                }
+              },
+            ),
+          ),
       ];
 }

@@ -400,7 +400,7 @@ class UIHelper {
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
       );
 
-  Container mediaPlayerButton(
+  Widget mediaPlayerButton(
     IconData icon,
     String tooltip, {
     VoidCallback? onPressed,
@@ -408,21 +408,24 @@ class UIHelper {
     double? boxSize,
     OutlinedBorder? borderStyle,
   }) =>
-      Container(
-          margin: EdgeInsets.zero,
-          width: boxSize,
-          height: boxSize,
-          padding: EdgeInsets.all(gridGap),
-          child: IconButton(
-            style: circledButtonStyle(borderStyle: borderStyle),
-            icon: Icon(icon, color: Theme.of(context).colorScheme.primary),
-            iconSize: iconSize ?? Theme.of(context).textTheme.headlineSmall!.fontSize,
-            padding: EdgeInsets.zero,
-            tooltip: tooltip,
-            onPressed: onPressed,
-          ));
+      RepaintBoundary(
+        child: Container(
+            margin: EdgeInsets.zero,
+            width: boxSize,
+            height: boxSize,
+            padding: EdgeInsets.all(gridGap),
+            child: IconButton(
+              style: circledButtonStyle(borderStyle: borderStyle),
+              icon: Icon(icon, color: Theme.of(context).colorScheme.primary),
+              iconSize: iconSize ?? Theme.of(context).textTheme.headlineSmall!.fontSize,
+              padding: EdgeInsets.zero,
+              tooltip: tooltip,
+              onPressed: onPressed,
+            )),
+      );
 
-  Container helpTrackState(TrackState state, String message) => Container(
+  Widget helpTrackState(TrackState state, String message) => RepaintBoundary(
+        child: Container(
         padding: EdgeInsets.zero,
         color: AppGlobalConfig.trackState.color(state, context: context, domain: ConfigItemPropertyDomain.backgroundColor),
         child: statusIconTile(
@@ -430,7 +433,7 @@ class UIHelper {
           message,
           textColor: AppGlobalConfig.trackState.color(state, context: context, domain: ConfigItemPropertyDomain.foregroundColor),
         ),
-      );
+      ));
 
   Divider settingsTileDivider() => Divider(height: 0, thickness: 1, indent: 20, endIndent: 20, color: Theme.of(context).colorScheme.inversePrimary);
 
