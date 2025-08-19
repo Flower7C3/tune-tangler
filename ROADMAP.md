@@ -8,9 +8,12 @@
 
 - ✅ **Zacinanie aplikacji**: Optymalizacja `ValueListenableBuilder`
 - ✅ **Niska liczba ramek (FPS)**: Przepisanie mechanizmu stanu
-- ✅ **Problemy z odtwarzaniem**: Przywrócenie `audioplayers`
+- ✅ **Problemy z odtwarzaniem**: Przywrócenie `audioplayers` i naprawa `duration`
+- ✅ **Progress bar i licznik sekund**: Poprawne działanie po imporcie plików
+- ✅ **Jednoczesne odtwarzanie**: Konfiguracja `AudioContext` dla multi-track playback
 - ✅ **Optymalizacje UI**: `RepaintBoundary`, throttling, lazy loading
 - ✅ **Zarządzanie pamięcią**: `AudioMemoryPool`, `IconOptimizationService`
+- ✅ **Aktualizacja bibliotek**: 38 zależności zaktualizowanych do najnowszych wersji
 
 ### **2. Ulepszenia UI (Średni Priorytet – UKOŃCZONE ✅)**
 
@@ -33,7 +36,7 @@
 - ❌ **Dodatkowe gesty** - część już jest (swipe do poruszania ścieżek), reszta zbędna
 - ❌ **Pinch-to-zoom** - niepotrzebne w kontekście aplikacji
 
-### **3. Eksport i Import (Wysoki Priorytet)**
+### **3. Eksport i Import (Wysoki Priorytet – W TRAKCIE ROZWOJU)**
 
 #### **Eksport Wszystkich Ścieżek**
 
@@ -51,7 +54,7 @@
 - **Walidacja**: Sprawdzanie integralności importowanych danych
 - **Preview**: Podgląd przed importem
 
-### **4. Efekty Audio (Odłożone na Później)**
+### **4. Efekty Audio (Odłożone na Później – WYMAGA NOWEJ BIBLIOTEKI)**
 
 - **Podstawowe efekty**:
   - Reverb (pomieszczenie, hala, echo)
@@ -109,6 +112,23 @@
 - **Desktop**: Rozszerzenie na Windows/macOS/Linux
 - **Web**: PWA w przeglądarce
 
+## **Ostatnie Naprawy (Grudzień 2024)**
+
+### **Rozwiązane Problemy Audio**
+
+- ✅ **Problem z `duration`**: Pliki po imporcie nie ustawiały długości
+- ✅ **Progress bar nie działał**: Brak aktualizacji postępu odtwarzania
+- ✅ **Opóźnienia w odtwarzaniu**: `PlayerMode.lowLatency` powodował timeouty
+- ✅ **Jednoczesne odtwarzanie**: Naprawione przez konfigurację `AudioContext`
+- ✅ **Aktualizacja bibliotek**: `audioplayers` 6.5.0 + 38 innych zależności
+
+### **Rozwiązanie Techniczne**
+
+- **Usunięto `PlayerMode.lowLatency`** - blokował `getDuration()`
+- **Użyto `PlayerMode.mediaPlayer`** - pozwala na prawidłowe odczytanie metadanych
+- **Zachowano `AudioContext`** - z `mixWithOthers` i `audioFocus: none` dla multi-track
+- **Uproszczono `seek()` operacje** - usunięto timeouty powodujące opóźnienia
+
 ## **Uwagi i Ustalenia**
 
 ### **Zrezygnowano z:**
@@ -123,11 +143,13 @@
 - **Brak współpracy online** – wszystkie funkcje lokalne
 - **MIDI nie jest potrzebne** – skupienie na audio processing
 - **Wydajność jest krytyczna** ✅ – problemy z zacinaniem zostały naprawione
-- **Stabilność audio** ✅ – przywrócono `audioplayers` zamiast `just_audio`
+- **Stabilność audio** ✅ – przywrócono `audioplayers` i naprawiono problemy z `duration`
+- **Progress bar działa** ✅ – poprawnie pokazuje postęp po imporcie plików
+- **Multi-track playback** ✅ – jednoczesne odtwarzanie wielu ścieżek działa stabilnie
 
 ### **Następne Kroki:**
 
-1. **Ulepszenia UI** – dalsze poprawki interfejsu użytkownika
-2. **Eksport/Import** – kluczowa funkcja dla użytkowników profesjonalnych
-3. **System licencji** – umożliwia rozwój aplikacji przy zachowaniu podstawowych funkcji bezpłatnych
-4. **Efekty audio** – implementacja w przyszłości z lepszą biblioteką
+1. **Eksport/Import** – kluczowa funkcja dla użytkowników profesjonalnych
+2. **System licencji** – umożliwia rozwój aplikacji przy zachowaniu podstawowych funkcji bezpłatnych
+3. **Efekty audio** – implementacja w przyszłości z lepszą biblioteką audio
+4. **Dalsze ulepszenia UI** – gdy podstawowe funkcje będą gotowe
