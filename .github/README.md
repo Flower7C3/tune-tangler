@@ -6,7 +6,7 @@ Ten katalog zawiera automatyczne workflowy GitHub Actions dla projektu TuneTangl
 
 ### 1. CI (Continuous Integration)
 **Plik:** `ci.yml`
-**Uruchamiany:** Przy każdym push i pull request na branchy `main`, `develop`, `new-features`
+**Uruchamiany:** Przy każdym push i pull request na branchy `master`, `develop`, `new-features`
 
 **Co robi:**
 - ✅ Weryfikuje kod (analyze, testy)
@@ -27,7 +27,7 @@ Ten katalog zawiera automatyczne workflowy GitHub Actions dla projektu TuneTangl
 
 ### 3. Auto Tag
 **Plik:** `auto-tag.yml`
-**Uruchamiany:** Przy push na branch `main`
+**Uruchamiany:** Przy push na branch `master`
 
 **Co robi:**
 - ✅ Automatycznie tworzy tag wersji na podstawie `pubspec.yaml`
@@ -37,7 +37,7 @@ Ten katalog zawiera automatyczne workflowy GitHub Actions dla projektu TuneTangl
 ## Jak używać
 
 ### Automatyczne Release
-1. Zmergeuj zmiany do `main` branch
+1. Zmergeuj zmiany do `master` branch
 2. Workflow Auto Tag automatycznie utworzy tag (np. `v1.1.4`)
 3. Workflow Release automatycznie utworzy release z APK
 
