@@ -108,7 +108,7 @@ run-release: ##BUILD## Run app (release)
 .PHONY: increment-build-version
 increment-build-version: ##BUILD## Increment build version
 	@echo "$(@FORMAT_BOLD)$(@ICON_BUILD)$(@ICON_INFO) Increment build version...$(@FORMAT_RESET)"
-	@dart scripts/version_update.dart
+	@./scripts/increment_build.sh
 
 .PHONY: build-apk
 build-apk: build-apk-debug ##BUILD## Build APK (debug) - alias
