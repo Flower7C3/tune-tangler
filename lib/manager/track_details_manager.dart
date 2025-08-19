@@ -18,6 +18,8 @@ import '../entity/track.dart';
 import '../repository/track_repository.dart';
 import '../src/combined_notifier.dart';
 import '../src/generated/app_localizations.dart';
+import '../src/warnings/audio_quality_checker.dart';
+import '../src/warnings/audio_warning.dart';
 import '../wrapper/hive_settings_provider.dart';
 
 class TrackDetailsManager {
@@ -188,6 +190,8 @@ class TrackDetailsManager {
               AppIcon.recordingBitRate, _trans.recordingBitRateValue(AppGlobalConfig.recordingBitRate.format(track.bitRate?.toDouble())),
               iconSize: Theme.of(_context).textTheme.bodyLarge!.fontSize! * UIHelper.iconSizeMultiplier,
               fontSize: Theme.of(_context).textTheme.bodyLarge!.fontSize!),
+        // Sekcja ostrzeżeń
+        _buildWarningsSection(track),
       ]);
 
   Widget _trackDetailsRecordingBox(Track track) => _uiHelper.trackDetailsBox([
@@ -726,4 +730,47 @@ class TrackDetailsManager {
     }
     Share.shareXFiles([XFile(track.path!)], text: _trans.trackRecordingShareMessage(track.name.value));
   }
+  
+  /// *************************************************************************
+  /// WARNINGS SECTION
+  Widget _buildWarningsSection(Track track) {
+    final warnings = AudioQualityChecker.checkTrack(track, _trans);
+    
+    if (warnings.isEmpty) return const SizedBox.shrink();
+    
+    return ExpansionTile(
+      leading: Icon(
+        AppIcon.exception,
+        color: AudioWarning.getWarningColorForList(warnings),
+      ),
+      title: Text(_trans.audioWarningsCount(warnings.length.toString())),
+      children: warnings.map((warning) => _buildWarningTile(warning)).toList(),
+    );
+  }
+  
+  Widget _buildWarningTile(AudioWarning warning) {
+    return ListTile(
+      dense: true,
+      leading: Icon(
+        warning.getWarningTypeIcon(),
+        size: 20,
+        color: warning.severity.color,
+      ),
+      title: Text(
+        warning.message,
+        style: const TextStyle(fontSize: 14),
+      ),
+      subtitle: warning.suggestion != null
+          ? Text(
+              warning.suggestion!,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[600],
+              ),
+            )
+          : null,
+    );
+  }
+  
+
 }

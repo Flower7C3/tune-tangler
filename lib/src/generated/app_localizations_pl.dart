@@ -1155,4 +1155,98 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get grantPermission => 'Zezwól';
+
+  @override
+  String get audioWarnings => 'Ostrzeżenia Audio';
+
+  @override
+  String audioWarningsCount(Object count) {
+    return 'Ostrzeżenia ($count)';
+  }
+
+  @override
+  String get audioWarningFileSize => 'Rozmiar pliku';
+
+  @override
+  String get audioWarningDuration => 'Długość nagrania';
+
+  @override
+  String get audioWarningsSampleRate => 'Częstotliwość próbkowania';
+
+  @override
+  String get audioWarningBitRate => 'Bitrate';
+
+  @override
+  String get audioWarningChannels => 'Kanały audio';
+
+  @override
+  String get audioWarningFileCorruption => 'Uszkodzenie pliku';
+
+  @override
+  String audioWarningFileSizeLarge(Object size) {
+    return 'Duży plik (${size}MB)';
+  }
+
+  @override
+  String audioWarningFileSizeVeryLarge(Object size) {
+    return 'Bardzo duży plik (${size}MB) - może spowalniać odtwarzanie';
+  }
+
+  @override
+  String audioWarningDurationLong(Object minutes) {
+    return 'Długie nagranie (${minutes}min)';
+  }
+
+  @override
+  String audioWarningDurationMedium(Object minutes) {
+    return 'Średnie nagranie (${minutes}min)';
+  }
+
+  @override
+  String audioWarningSampleRateNonStandard(Object sampleRate) {
+    return 'Niestandardowa częstotliwość: ${sampleRate}Hz';
+  }
+
+  @override
+  String audioWarningBitRateHigh(Object bitRate) {
+    return 'Wysoki bitrate: ${bitRate}kbps';
+  }
+
+  @override
+  String audioWarningBitRateLow(Object bitRate) {
+    return 'Niski bitrate: ${bitRate}kbps';
+  }
+
+  @override
+  String get audioWarningChannelsMicrophone => 'Nagrywanie mikrofonem';
+
+  @override
+  String get audioWarningFileNotExists => 'Plik nie istnieje';
+
+  @override
+  String get audioWarningSuggestionCompress => 'Rozważ kompresję lub podział na mniejsze części';
+
+  @override
+  String get audioWarningSuggestionPerformance => 'Może wpływać na wydajność';
+
+  @override
+  String get audioWarningSuggestionInterfaceDelays => 'Może powodować opóźnienia w interfejsie';
+
+  @override
+  String get audioWarningSuggestionMultiTrackPerformance => 'Uwaga na wydajność przy wielu ścieżkach';
+
+  @override
+  String get audioWarningSuggestionCompatibility => 'Może powodować problemy z kompatybilnością';
+
+  @override
+  String get audioWarningSuggestionFileSize => 'Może wpływać na rozmiar pliku';
+
+  @override
+  String get audioWarningSuggestionAudioQuality => 'Może wpływać na jakość dźwięku';
+
+  @override
+  String get audioWarningSuggestionChannelSettings => 'Sprawdź ustawienia kanałów audio';
+
+  @override
+  String get audioWarningSuggestionCheckFile => 'Sprawdź czy plik nie został przeniesiony lub usunięty';
 }

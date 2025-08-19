@@ -1155,4 +1155,98 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get grantPermission => 'Allow';
+
+  @override
+  String get audioWarnings => 'Audio Warnings';
+
+  @override
+  String audioWarningsCount(Object count) {
+    return 'Warnings ($count)';
+  }
+
+  @override
+  String get audioWarningFileSize => 'File size';
+
+  @override
+  String get audioWarningDuration => 'Recording length';
+
+  @override
+  String get audioWarningsSampleRate => 'Sample rate';
+
+  @override
+  String get audioWarningBitRate => 'Bit rate';
+
+  @override
+  String get audioWarningChannels => 'Audio channels';
+
+  @override
+  String get audioWarningFileCorruption => 'File corruption';
+
+  @override
+  String audioWarningFileSizeLarge(Object size) {
+    return 'Large file (${size}MB)';
+  }
+
+  @override
+  String audioWarningFileSizeVeryLarge(Object size) {
+    return 'Very large file (${size}MB) - may slow down playback';
+  }
+
+  @override
+  String audioWarningDurationLong(Object minutes) {
+    return 'Long recording (${minutes}min)';
+  }
+
+  @override
+  String audioWarningDurationMedium(Object minutes) {
+    return 'Medium recording (${minutes}min)';
+  }
+
+  @override
+  String audioWarningSampleRateNonStandard(Object sampleRate) {
+    return 'Non-standard frequency: ${sampleRate}Hz';
+  }
+
+  @override
+  String audioWarningBitRateHigh(Object bitRate) {
+    return 'High bitrate: ${bitRate}kbps';
+  }
+
+  @override
+  String audioWarningBitRateLow(Object bitRate) {
+    return 'Low bitrate: ${bitRate}kbps';
+  }
+
+  @override
+  String get audioWarningChannelsMicrophone => 'Microphone recording';
+
+  @override
+  String get audioWarningFileNotExists => 'File does not exist';
+
+  @override
+  String get audioWarningSuggestionCompress => 'Consider compression or splitting into smaller parts';
+
+  @override
+  String get audioWarningSuggestionPerformance => 'May affect performance';
+
+  @override
+  String get audioWarningSuggestionInterfaceDelays => 'May cause interface delays';
+
+  @override
+  String get audioWarningSuggestionMultiTrackPerformance => 'Watch performance with multiple tracks';
+
+  @override
+  String get audioWarningSuggestionCompatibility => 'May cause compatibility issues';
+
+  @override
+  String get audioWarningSuggestionFileSize => 'May affect file size';
+
+  @override
+  String get audioWarningSuggestionAudioQuality => 'May affect audio quality';
+
+  @override
+  String get audioWarningSuggestionChannelSettings => 'Check audio channel settings';
+
+  @override
+  String get audioWarningSuggestionCheckFile => 'Check if file was moved or deleted';
 }

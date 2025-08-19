@@ -2038,6 +2038,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Allow'**
   String get grantPermission;
+
+  /// No description provided for @audioWarnings.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio Warnings'**
+  String get audioWarnings;
+
+  /// No description provided for @audioWarningsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Warnings ({count})'**
+  String audioWarningsCount(Object count);
+
+  /// No description provided for @audioWarningFileSize.
+  ///
+  /// In en, this message translates to:
+  /// **'File size'**
+  String get audioWarningFileSize;
+
+  /// No description provided for @audioWarningDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording length'**
+  String get audioWarningDuration;
+
+  /// No description provided for @audioWarningsSampleRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample rate'**
+  String get audioWarningsSampleRate;
+
+  /// No description provided for @audioWarningBitRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Bit rate'**
+  String get audioWarningBitRate;
+
+  /// No description provided for @audioWarningChannels.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio channels'**
+  String get audioWarningChannels;
+
+  /// No description provided for @audioWarningFileCorruption.
+  ///
+  /// In en, this message translates to:
+  /// **'File corruption'**
+  String get audioWarningFileCorruption;
+
+  /// No description provided for @audioWarningFileSizeLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Large file ({size}MB)'**
+  String audioWarningFileSizeLarge(Object size);
+
+  /// No description provided for @audioWarningFileSizeVeryLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Very large file ({size}MB) - may slow down playback'**
+  String audioWarningFileSizeVeryLarge(Object size);
+
+  /// No description provided for @audioWarningDurationLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Long recording ({minutes}min)'**
+  String audioWarningDurationLong(Object minutes);
+
+  /// No description provided for @audioWarningDurationMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium recording ({minutes}min)'**
+  String audioWarningDurationMedium(Object minutes);
+
+  /// No description provided for @audioWarningSampleRateNonStandard.
+  ///
+  /// In en, this message translates to:
+  /// **'Non-standard frequency: {sampleRate}Hz'**
+  String audioWarningSampleRateNonStandard(Object sampleRate);
+
+  /// No description provided for @audioWarningBitRateHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High bitrate: {bitRate}kbps'**
+  String audioWarningBitRateHigh(Object bitRate);
+
+  /// No description provided for @audioWarningBitRateLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low bitrate: {bitRate}kbps'**
+  String audioWarningBitRateLow(Object bitRate);
+
+  /// No description provided for @audioWarningChannelsMicrophone.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone recording'**
+  String get audioWarningChannelsMicrophone;
+
+  /// No description provided for @audioWarningFileNotExists.
+  ///
+  /// In en, this message translates to:
+  /// **'File does not exist'**
+  String get audioWarningFileNotExists;
+
+  /// No description provided for @audioWarningSuggestionCompress.
+  ///
+  /// In en, this message translates to:
+  /// **'Consider compression or splitting into smaller parts'**
+  String get audioWarningSuggestionCompress;
+
+  /// No description provided for @audioWarningSuggestionPerformance.
+  ///
+  /// In en, this message translates to:
+  /// **'May affect performance'**
+  String get audioWarningSuggestionPerformance;
+
+  /// No description provided for @audioWarningSuggestionInterfaceDelays.
+  ///
+  /// In en, this message translates to:
+  /// **'May cause interface delays'**
+  String get audioWarningSuggestionInterfaceDelays;
+
+  /// No description provided for @audioWarningSuggestionMultiTrackPerformance.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch performance with multiple tracks'**
+  String get audioWarningSuggestionMultiTrackPerformance;
+
+  /// No description provided for @audioWarningSuggestionCompatibility.
+  ///
+  /// In en, this message translates to:
+  /// **'May cause compatibility issues'**
+  String get audioWarningSuggestionCompatibility;
+
+  /// No description provided for @audioWarningSuggestionFileSize.
+  ///
+  /// In en, this message translates to:
+  /// **'May affect file size'**
+  String get audioWarningSuggestionFileSize;
+
+  /// No description provided for @audioWarningSuggestionAudioQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'May affect audio quality'**
+  String get audioWarningSuggestionAudioQuality;
+
+  /// No description provided for @audioWarningSuggestionChannelSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Check audio channel settings'**
+  String get audioWarningSuggestionChannelSettings;
+
+  /// No description provided for @audioWarningSuggestionCheckFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Check if file was moved or deleted'**
+  String get audioWarningSuggestionCheckFile;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
