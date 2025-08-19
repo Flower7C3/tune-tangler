@@ -241,6 +241,25 @@ enable-git-hook: ##UTILITIES## Enable pre-commit git hook
 		echo "$(@COLOR_RED)$(@ICON_ERROR) Git hook not found or already enabled"; \
 	fi
 
+.PHONY: create-tag
+create-tag: ##UTILITIES## Create and push version tag
+	@echo "$(@FORMAT_BOLD)$(@COLOR_BLUE)$(@ICON_INFO) Creating version tag...$(@FORMAT_RESET)"
+	@if [ -f pubspec.yaml ]; then \
+		VERSION=$$(grep '^version:' pubspec.yaml | sed 's/.*version: //' | sed 's/+.*//'); \
+		echo "$(@COLOR_CYAN)Creating tag v$$VERSION...$(@FORMAT_RESET)"; \
+		git tag "v$$VERSION"; \
+		git push origin "v$$VERSION"; \
+		echo "$(@COLOR_GREEN)$(@ICON_CHECK) Tag v$$VERSION created and pushed"; \
+	else \
+		echo "$(@COLOR_RED)$(@ICON_ERROR) pubspec.yaml not found!$(@FORMAT_RESET)"; \
+		exit 1; \
+	fi
+
+.PHONY: list-tags
+list-tags: ##UTILITIES## List all version tags
+	@echo "$(@FORMAT_BOLD)$(@COLOR_BLUE)$(@ICON_INFO) Available version tags:$(@FORMAT_RESET)"
+	@git tag --sort=-version:refname | head -10
+
 #.PHONY: rename
 #rename: ## Change name
 #	@echo "$(@FORMAT_BOLD)$(@ICON_INFO) Changing app name...$(@FORMAT_RESET)"
