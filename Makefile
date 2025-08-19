@@ -108,23 +108,18 @@ run-release: ##BUILD## Run app (release)
 .PHONY: increment-build-version
 increment-build-version: ##BUILD## Increment build version
 	@echo "$(@FORMAT_BOLD)$(@ICON_BUILD)$(@ICON_INFO) Increment build version...$(@FORMAT_RESET)"
-	@dart scripts/version_update.dart --build
-
-.PHONY: increment-patch-version
-increment-patch-version: ##BUILD## Increment patch version
-	@echo "$(@FORMAT_BOLD)$(@ICON_BUILD)$(@ICON_INFO) Increment patch version...$(@FORMAT_RESET)"
-	@dart scripts/version_update.dart --patch
+	@dart scripts/version_update.dart
 
 .PHONY: build-apk
 build-apk: build-apk-debug ##BUILD## Build APK (debug) - alias
 
 .PHONY: build-apk-debug
-build-apk-debug: increment-build-version ##BUILD## Build APK (debug with patch version incrementation)
+build-apk-debug: increment-build-version ##BUILD## Build APK (debug with build version incrementation)
 	@echo "$(@FORMAT_BOLD)$(@ICON_BUILD)$(@ICON_INFO) Building APK (debug)...$(@FORMAT_RESET)"
 	@flutter build apk --debug
 
 .PHONY: build-apk-release
-build-apk-release: increment-build-version ##BUILD## Build APK (release, with patch and build version incrementation)
+build-apk-release: increment-build-version ##BUILD## Build APK (release, with build version incrementation)
 	@echo "$(@FORMAT_BOLD)$(@ICON_BUILD)$(@ICON_INFO) Building APK (release)...$(@FORMAT_RESET)"
 	@flutter build apk --release
 
