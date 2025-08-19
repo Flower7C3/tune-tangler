@@ -57,7 +57,7 @@ class HomeScreenManager {
 
   Widget get bottomNavigationBar => _navigationBarManager.buildFooter;
 
-  get tracksList => ListView.builder(
+  Widget get tracksList => ListView.builder(
       controller: PageController(viewportFraction: 0.85),
       itemCount: _appWrapper.settings.getConfig(AppConfigFieldKey.gridRowsAmount),
       itemBuilder: (context, rowIndex) => _lazyLoadingManager.lazyLoadWidget(
@@ -71,7 +71,7 @@ class HomeScreenManager {
         placeholder: const SizedBox(height: 100),
       ));
 
-  KeyEventResult keyEvent(node, KeyEvent event) {
+  KeyEventResult keyEvent(FocusNode node, KeyEvent event) {
     _trackManager.onKeyEvent(event);
     return KeyEventResult.handled;
   }

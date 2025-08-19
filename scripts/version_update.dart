@@ -1,51 +1,103 @@
+#!/usr/bin/env dart
+
 import 'dart:io';
+import 'dart:convert';
 
-void main(List<String> arguments) {
-  bool updatePatch = false;
-  bool updateBuildNumber = false;
-
-  for (var arg in arguments) {
-    switch (arg) {
-      case '--patch':
-        updatePatch = true;
-        break;
-      case '--build':
-        updateBuildNumber = true;
-        break;
-    }
+void main(List<String> args) {
+  final script = VersionUpdater();
+  
+  if (args.contains('--patch')) {
+    script.incrementPatchVersion();
+  } else if (args.contains('--build')) {
+    script.incrementBuildVersion();
+  } else {
+    print('Usage: dart scripts/version_update.dart --patch|--build');
+    print('  --patch: Increment patch version (1.2.0+1 -> 1.2.1+1)');
+    print('  --build: Increment build version (1.2.0+1 -> 1.2.0+2)');
+    exit(1);
   }
+}
 
-  final file = File('pubspec.yaml');
-  final lines = file.readAsLinesSync();
-
-  for (var i = 0; i < lines.length; i++) {
-    if (!lines[i].startsWith('version:')) {
-      continue;
+class VersionUpdater {
+  static const String pubspecPath = 'pubspec.yaml';
+  
+  void incrementPatchVersion() {
+    final file = File(pubspecPath);
+    if (!file.existsSync()) {
+      print('Error: $pubspecPath not found!');
+      exit(1);
     }
-    final parts = lines[i].split(':');
-    if (parts.length != 2) {
-      continue;
+    
+    final content = file.readAsStringSync();
+    final lines = content.split('\n');
+    
+    for (int i = 0; i < lines.length; i++) {
+      if (lines[i].trim().startsWith('version:')) {
+        final currentVersion = lines[i].split(':')[1].trim();
+        print('Current version: $currentVersion');
+        
+        final parts = currentVersion.split('+');
+        if (parts.length != 2) {
+          print('Error: Invalid version format. Expected: X.Y.Z+N');
+          exit(1);
+        }
+        
+        final versionParts = parts[0].split('.');
+        if (versionParts.length != 3) {
+          print('Error: Invalid version format. Expected: X.Y.Z');
+          exit(1);
+        }
+        
+        final major = int.parse(versionParts[0]);
+        final minor = int.parse(versionParts[1]);
+        final patch = int.parse(versionParts[2]);
+        final build = int.parse(parts[1]);
+        
+        final newPatch = patch + 1;
+        final newVersion = '$major.$minor.$newPatch+$build';
+        
+        lines[i] = '  version: $newVersion';
+        print('Version updated to: $newVersion');
+        break;
+      }
     }
-    List<String> versionParts = parts[1].split('+');
-    List<String> versionNumbers = versionParts[0].split('.');
-    int? major = int.tryParse(versionNumbers[0]);
-    int? minor = int.tryParse(versionNumbers[1]);
-    int? patch = int.tryParse(versionNumbers[2]);
-    int? buildNumber = int.tryParse(versionParts[1]);
-    if (patch == null || buildNumber == null) {
-      continue;
-    }
-    if (updatePatch) {
-      patch++;
-    }
-    if (updateBuildNumber) {
-      buildNumber++;
-    }
-    final newVersion = 'version: $major.$minor.$patch+$buildNumber';
-    lines[i] = newVersion;
-
-    break;
+    
+    file.writeAsStringSync(lines.join('\n'));
   }
-
-  file.writeAsStringSync(lines.join('\n'));
+  
+  void incrementBuildVersion() {
+    final file = File(pubspecPath);
+    if (!file.existsSync()) {
+      print('Error: $pubspecPath not found!');
+      exit(1);
+    }
+    
+    final content = file.readAsStringSync();
+    final lines = content.split('\n');
+    
+    for (int i = 0; i < lines.length; i++) {
+      if (lines[i].trim().startsWith('version:')) {
+        final currentVersion = lines[i].split(':')[1].trim();
+        print('Current version: $currentVersion');
+        
+        final parts = currentVersion.split('+');
+        if (parts.length != 2) {
+          print('Error: Invalid version format. Expected: X.Y.Z+N');
+          exit(1);
+        }
+        
+        final version = parts[0];
+        final build = int.parse(parts[1]);
+        
+        final newBuild = build + 1;
+        final newVersion = '$version+$newBuild';
+        
+        lines[i] = '  version: $newVersion';
+        print('Build version updated to: $newVersion');
+        break;
+      }
+    }
+    
+    file.writeAsStringSync(lines.join('\n'));
+  }
 }

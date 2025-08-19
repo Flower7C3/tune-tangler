@@ -222,7 +222,7 @@ class UIHelper {
       );
 
   void _dialogBuilder(
-    type,
+    DialogType type,
     IconData icon,
     String titleText, {
     bool barrierDismissible = true,
@@ -233,7 +233,7 @@ class UIHelper {
       showDialog(
           context: context,
           barrierDismissible: barrierDismissible,
-          builder: (context) {
+          builder: (BuildContext buildContext) {
             switch (type) {
               case DialogType.alert:
                 var content = <Widget>[];
@@ -266,8 +266,6 @@ class UIHelper {
                   title: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: title.toList()),
                   children: actions,
                 );
-              default:
-                throw Exception('Dialog type not implemented.');
             }
           });
 
@@ -372,7 +370,7 @@ class UIHelper {
       onPressed: onPressed,
       child: Text(text));
 
-  Widget trailingLabel(text) => Container(
+  Widget trailingLabel(String text) => Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.inversePrimary,
         borderRadius: BorderRadius.circular(24),
@@ -547,7 +545,7 @@ class UIHelper {
         inactiveTrackColor: Theme.of(context).colorScheme.primary.withAlpha(12),
         trackHeight: 6,
         trackShape: RectangularSliderTrackShape(),
-        showValueIndicator: ShowValueIndicator.always,
+        showValueIndicator: ShowValueIndicator.onDrag,
         activeTickMarkColor: Theme.of(context).colorScheme.primary.withAlpha(54),
         inactiveTickMarkColor: Theme.of(context).colorScheme.primary.withAlpha(54),
       );
@@ -824,7 +822,7 @@ class UIHelper {
                 (Set<WidgetState> states) => Icon(switchValue ? enabledIcon : disabledIcon, color: Colors.white)),
             trackColor: WidgetStatePropertyAll(Theme.of(context).colorScheme.inversePrimary),
             trackOutlineColor: WidgetStatePropertyAll(Theme.of(context).colorScheme.inversePrimary),
-            activeColor: Theme.of(context).colorScheme.primary,
+            activeThumbColor: Theme.of(context).colorScheme.primary,
             inactiveThumbColor: Theme.of(context).colorScheme.primary,
             value: switchValue,
             onChanged: (bool value) => toast(successAction(value), icon: value ? enabledIcon : disabledIcon)));

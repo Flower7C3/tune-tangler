@@ -370,7 +370,7 @@ class Track {
     });
   }
 
-  _clearPath() {
+  void _clearPath() {
     setRecorderState(RecorderState.processing);
     setAudioSource(null);
     setAudioEncoder(null);
@@ -504,7 +504,7 @@ class Track {
 
   final ValueNotifier<ReleaseMode> playbackReleaseMode = ValueNotifier(AppGlobalConfig.trackPlaybackReleaseMode.defaultValue);
 
-  static isPlaybackReleaseModeSingle(ReleaseMode mode) => mode == ReleaseMode.stop;
+  static bool isPlaybackReleaseModeSingle(ReleaseMode mode) => mode == ReleaseMode.stop;
 
   void setPlaybackReleaseMode(ReleaseMode value) {
     player.setReleaseMode(value);

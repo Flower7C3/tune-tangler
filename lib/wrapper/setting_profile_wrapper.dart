@@ -156,7 +156,7 @@ class SettingProfileWrapper {
       '\$[recordingAudioEncoderIcon]\$[recordingAudioEncoderValue] \$[recordingSampleRateIcon]\$[recordingSampleRateValue] \$[recordingBitRateIcon]\$[recordingBitRateValue] \n\$[recordingAudioModeIcon]\$[recordingAutoGainIcon]\$[recordingEchoCancelIcon] \$[themeModeIcon]\$[wakelockEnabled] \$[gridIcon]\$[gridRowsAmount]x\$[gridColsAmount] \$[colorIcon]\$[themeSeedColorName] (\$[localeTag])',
       data: _data(item));
 
-  _data(SettingsProfile item) => {
+  Map<String, dynamic> _data(SettingsProfile item) => {
         'recordingInputDeviceIcon': AppIcon.recordingInputDevice,
         'recordingInputDeviceValue': item.recordingInputDevice != null ? item.recordingInputDevice!.label : _trans.defaultDevice,
         'recordingAudioEncoderIcon': AppIcon.recordingAudioEncoder,

@@ -30,7 +30,7 @@ final class ConfigCollection {
 
   Iterable<T> values<T>() => items.map((item) => item.value as T);
 
-  valueAt<T>(int index) => values().elementAt(index);
+  T valueAt<T>(int index) => values().elementAt(index);
 
   Iterable<ConfigItem> _getByValue(dynamic value) => items.where((item) => item.value == value);
 

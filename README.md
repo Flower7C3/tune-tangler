@@ -2,33 +2,81 @@
 
 Yet another music looper app
 
-## Getting Started
+## Przygotowanie środowiska developerskiego
 
-This project is a starting point for a Flutter application.
+### 1. Instalacja Flutter
 
-A few resources to get you started if this is your first Flutter project:
+- **Pobierz Flutter SDK:**
+    - Przejdź na stronę [Flutter Downloads](https://docs.flutter.dev/get-started/install) i pobierz najnowszą stabilną
+      wersję odpowiednią dla Twojego systemu operacyjnego.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- **Instalacja:**
+    - Rozpakuj pobrany plik do wybranej lokalizacji na swoim komputerze.
+    - Dodaj ścieżkę do katalogu `bin` Fluttera do zmiennej środowiskowej `PATH`.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- **Weryfikacja instalacji:**
+    - Otwórz terminal i uruchom:
+      ```bash
+      flutter doctor
+      ```
+    - To polecenie sprawdzi, czy wszystkie niezbędne komponenty są zainstalowane i skonfigurowane poprawnie.
 
-## How to
+### 2. Instalacja Android Studio
 
-- Set app name
+- **Pobierz i zainstaluj Android Studio:**
+    - Pobierz najnowszą wersję z [oficjalnej strony](https://developer.android.com/studio).
+    - Zainstaluj program, postępując zgodnie z instrukcjami instalatora.
 
-      dart run rename_app:main all="Tune Tangler"
+- **Konfiguracja:**
+    - Uruchom Android Studio i przejdź przez kreator konfiguracji, akceptując domyślne ustawienia.
+    - Zainstaluj wymagane komponenty, takie jak Android SDK, Platform-Tools i Build-Tools.
 
-- Regenerate icons:
+### 3. Konfiguracja emulatora Androida
 
-      dart run flutter_launcher_icons
+- **Tworzenie nowego urządzenia wirtualnego (AVD):**
+    - W Android Studio przejdź do `Tools` > `AVD Manager`.
+    - Kliknij `Create Virtual Device` i wybierz preferowane urządzenie.
+    - Wybierz wersję systemu Android i zakończ proces tworzenia emulatora.
 
-- Regenerate splash screen:
+- **Uruchamianie emulatora:**
+    - W `AVD Manager` kliknij ikonę `Start` obok utworzonego urządzenia, aby uruchomić emulator.
 
-      dart run flutter_native_splash:create
+### 4. Przygotowanie projektu
 
-- Build & install APK via ADB
+- **Pobranie zależności:**
+  ```bash
+  flutter pub get
+  ```
 
-      melos run apk
+- **Weryfikacja konfiguracji:**
+  ```bash
+  flutter doctor
+  flutter analyze
+  ```
+
+### 5. Uruchamianie aplikacji na emulatorze
+
+- **Sprawdź dostępne urządzenia:**
+  ```bash
+  flutter devices
+  ```
+
+- **Uruchomienie aplikacji:**
+    - Upewnij się, że emulator jest uruchomiony.
+    - W terminalu, w katalogu głównym projektu, uruchom:
+      ```bash
+      flutter run
+      ```
+    - Aplikacja zostanie skompilowana i uruchomiona na emulatorze.
+
+- **Hot Reload:**
+    - Podczas działania aplikacji w trybie debug, możesz użyć klawisza `r` w terminalu, aby zastosować zmiany na żywo
+      bez pełnego restartowania aplikacji.
+
+**Uwaga:** W przypadku problemów z konfiguracją lub uruchamianiem, sprawdź oficjalną
+dokumentację [Flutter](https://docs.flutter.dev/) lub [Android Studio](https://developer.android.com/studio/intro).
+
+## Makefile
+
+Build & install APK via ADB: `make install-apk-release`.
+Pełna lista komend dostępna po uruchomieniu `make help`.

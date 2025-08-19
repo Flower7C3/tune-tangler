@@ -142,13 +142,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get trackRecordingAlreadyStarted => 'Another recording has already been started.';
+  String get trackRecordingAlreadyStarted =>
+      'Another recording has already been started.';
 
   @override
-  String get trackRecordingStartNoAudioPermission => 'No permissions to audio recording.';
+  String get trackRecordingStartNoAudioPermission =>
+      'No permissions to audio recording.';
 
   @override
-  String get trackRecordingStartNoNotificationPermission => 'No permissions to recording notification.';
+  String get trackRecordingStartNoNotificationPermission =>
+      'No permissions to recording notification.';
 
   @override
   String trackRecordingStartError(Object error, Object trackName) {
@@ -196,34 +199,43 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get trackPlaybackStartAtPositionSub10 => 'Change track playback start at by -0.01 s';
+  String get trackPlaybackStartAtPositionSub10 =>
+      'Change track playback start at by -0.01 s';
 
   @override
-  String get trackPlaybackStartAtPositionSub100 => 'Change track playback start at by -0.1 s';
+  String get trackPlaybackStartAtPositionSub100 =>
+      'Change track playback start at by -0.1 s';
 
   @override
-  String get trackPlaybackStartAtPositionReset => 'Reset track playback start at';
+  String get trackPlaybackStartAtPositionReset =>
+      'Reset track playback start at';
 
   @override
-  String get trackPlaybackStartAtPositionAdd100 => 'Change track playback start at by +0.1 s';
+  String get trackPlaybackStartAtPositionAdd100 =>
+      'Change track playback start at by +0.1 s';
 
   @override
-  String get trackPlaybackStartAtPositionAdd10 => 'Change track playback start at by +0.01 s';
+  String get trackPlaybackStartAtPositionAdd10 =>
+      'Change track playback start at by +0.01 s';
 
   @override
-  String get trackPlaybackEndAtPositionSub10 => 'Change track playback end at by -0.01 s';
+  String get trackPlaybackEndAtPositionSub10 =>
+      'Change track playback end at by -0.01 s';
 
   @override
-  String get trackPlaybackEndAtPositionSub100 => 'Change track playback end at by -0.1 s';
+  String get trackPlaybackEndAtPositionSub100 =>
+      'Change track playback end at by -0.1 s';
 
   @override
   String get trackPlaybackEndAtPositionReset => 'Reset track playback end at';
 
   @override
-  String get trackPlaybackEndAtPositionAdd100 => 'Change track playback end at by +0.1 s';
+  String get trackPlaybackEndAtPositionAdd100 =>
+      'Change track playback end at by +0.1 s';
 
   @override
-  String get trackPlaybackEndAtPositionAdd10 => 'Change track playback end at by +0.01 s';
+  String get trackPlaybackEndAtPositionAdd10 =>
+      'Change track playback end at by +0.01 s';
 
   @override
   String get trackNameChange => 'Change track name';
@@ -275,7 +287,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String trackRecordingMoveSuccess(Object firstTrackName, Object secondTrackName) {
+  String trackRecordingMoveSuccess(
+      Object firstTrackName, Object secondTrackName) {
     return 'Swapped location of #$firstTrackName and #$secondTrackName recordings.';
   }
 
@@ -368,7 +381,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rowTracksPlaybackStartAtPositionReset => 'Reset playback start at';
 
   @override
-  String get rowTracksPlaybackStartAtPositionResetTitle => 'Reset row tracks playback start at';
+  String get rowTracksPlaybackStartAtPositionResetTitle =>
+      'Reset row tracks playback start at';
 
   @override
   String rowTracksPlaybackStartAtPositionResetInfo(Object rowName) {
@@ -384,7 +398,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rowTracksPlaybackEndAtPositionReset => 'Reset playback end at';
 
   @override
-  String get rowTracksPlaybackEndAtPositionResetTitle => 'Reset row tracks playback end at';
+  String get rowTracksPlaybackEndAtPositionResetTitle =>
+      'Reset row tracks playback end at';
 
   @override
   String rowTracksPlaybackEndAtPositionResetInfo(Object rowName) {
@@ -481,7 +496,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingProfileDeleteTitle => 'Delete settings profile';
 
   @override
-  String get settingProfileDeleteInfo => 'Settings profile will be deleted. Continue?';
+  String get settingProfileDeleteInfo =>
+      'Settings profile will be deleted. Continue?';
 
   @override
   String get settingProfileDeleted => 'Settings profile deleted.';
@@ -508,19 +524,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get helpScreenMessageAboutTitle => 'About';
 
   @override
-  String get helpScreenMessageAboutContent => 'This application allows you to record audio from a microphone or USB audio interface (your device must support USB OTG technology) to one of several tracks. You can also import an existing audio file.\n\nRecordings can be played synchronously or asynchronously, in a loop or not.\n\nRecordings and their settings, as well as the graphic mode and language, are remembered after the application is closed.';
+  String get helpScreenMessageAboutContent =>
+      'This application allows you to record audio from a microphone or USB audio interface (your device must support USB OTG technology) to one of several tracks. You can also import an existing audio file.\n\nRecordings can be played synchronously or asynchronously, in a loop or not.\n\nRecordings and their settings, as well as the graphic mode and language, are remembered after the application is closed.';
 
   @override
   String get helpScreenMessageGridScreenTitle => 'Tracks grid screen';
 
   @override
-  String get helpScreenMessageGridScreenContent => 'Short press a colored track block or use a hotkey (visible at the top of the track) to perform one of the available actions.\n\nHold the track block or use the hotkey with the Control key \$[controlKey] to open the track details.';
+  String get helpScreenMessageGridScreenContent =>
+      'Short press a colored track block or use a hotkey (visible at the top of the track) to perform one of the available actions.\n\nHold the track block or use the hotkey with the Control key \$[controlKey] to open the track details.';
 
   @override
   String get helpScreenMessageDetailsScreenTitle => 'Track details screen';
 
   @override
-  String get helpScreenMessageDetailsScreenContent => 'There are several settings, such as: \$[recordingClip]recording trimming, \$[trackPlaybackMode]playback mode, \$[trackPlaybackVolume]playback volume value, \$[trackPlaybackBalance]audio balance, \$[trackPlaybackSpeed]playback speed, \$[trackName]track name, \$[trackKeyboardKey]track keyboard shortcut. You can also \$[trackRecordingMove]change the track location on the grid, \$[trackRecordingImport]import recording file, \$[trackRecordingShare]share or \$[deleteForever]delete recording.';
+  String get helpScreenMessageDetailsScreenContent =>
+      'There are several settings, such as: \$[recordingClip]recording trimming, \$[trackPlaybackMode]playback mode, \$[trackPlaybackVolume]playback volume value, \$[trackPlaybackBalance]audio balance, \$[trackPlaybackSpeed]playback speed, \$[trackName]track name, \$[trackKeyboardKey]track keyboard shortcut. You can also \$[trackRecordingMove]change the track location on the grid, \$[trackRecordingImport]import recording file, \$[trackRecordingShare]share or \$[deleteForever]delete recording.';
 
   @override
   String get helpScreenMessageTrackStates => 'Track states and actions';
@@ -529,22 +548,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get helpScreenMessageTrackIcons => 'Track info icons';
 
   @override
-  String get helpScreenMessageSettingsInfo => 'You can set \$[recordingAudioEncoder]audio codec, \$[recordingSampleRate]sample rate, \$[recordingBitRate]bit rate, \$[recordingAudioMode]audio mode, \$[recordingAutoGain]auto gain, \$[recordingEchoCancel]echo cancel and \$[recordingNoiseSuppress]noise suppression.';
+  String get helpScreenMessageSettingsInfo =>
+      'You can set \$[recordingAudioEncoder]audio codec, \$[recordingSampleRate]sample rate, \$[recordingBitRate]bit rate, \$[recordingAudioMode]audio mode, \$[recordingAutoGain]auto gain, \$[recordingEchoCancel]echo cancel and \$[recordingNoiseSuppress]noise suppression.';
 
   @override
   String get stateEmpty => 'track empty (click on box to start recording)';
 
   @override
-  String get stateRecording => 'recording in progress (click on box to stop recording)';
+  String get stateRecording =>
+      'recording in progress (click on box to stop recording)';
 
   @override
   String get stateProcessing => 'track processing in progress';
 
   @override
-  String get stateIdle => 'idle: recording done/playing stopped (click on box to start playing)';
+  String get stateIdle =>
+      'idle: recording done/playing stopped (click on box to start playing)';
 
   @override
-  String get statePlaying => 'playing started track (click on box to stop playing)';
+  String get statePlaying =>
+      'playing started track (click on box to stop playing)';
 
   @override
   String get statePaused => 'playing paused (click on box to unpause playing)';
@@ -641,7 +664,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screenThemeColorTitle => 'Set theme accent color';
 
   @override
-  String get screenThemeColorInfo => 'Choose color that will be applied as theme accent.';
+  String get screenThemeColorInfo =>
+      'Choose color that will be applied as theme accent.';
 
   @override
   String screenThemeColorSuccess(Object name) {
@@ -660,7 +684,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get keepScreenOnIsEnabledSuccess => 'Enabled keep screen on feature.';
 
   @override
-  String get keepScreenOnIsDisabledSuccess => 'Disabled keep screen on feature.';
+  String get keepScreenOnIsDisabledSuccess =>
+      'Disabled keep screen on feature.';
 
   @override
   String get gridRowsAmount => 'Grid rows amount';
@@ -674,7 +699,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gridRowsAmountTitle => 'Grid rows amount';
 
   @override
-  String get gridRowsAmountInfo => 'Set grid rows amount, that will be visible on tracks list.';
+  String get gridRowsAmountInfo =>
+      'Set grid rows amount, that will be visible on tracks list.';
 
   @override
   String gridRowsAmountSuccess(Object value) {
@@ -693,7 +719,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gridColsAmountTitle => 'Grid columns amount';
 
   @override
-  String get gridColsAmountInfo => 'Set grid columns amount, that will be visible on tracks list.';
+  String get gridColsAmountInfo =>
+      'Set grid columns amount, that will be visible on tracks list.';
 
   @override
   String gridColsAmountSuccess(Object value) {
@@ -713,10 +740,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trackTitleEmojisTitle => 'Track title emojis';
 
   @override
-  String get trackTitleEmojisInfo => 'Set emojis that might be used as track title.';
+  String get trackTitleEmojisInfo =>
+      'Set emojis that might be used as track title.';
 
   @override
-  String get trackTitleEmojisSuccess => 'Setted emojis that might be used as track title.';
+  String get trackTitleEmojisSuccess =>
+      'Setted emojis that might be used as track title.';
 
   @override
   String get allTracksTitleReset => 'Reset tracks title';
@@ -725,7 +754,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allTracksTitleResetTitle => 'Reset tracks title';
 
   @override
-  String get allTracksTitleResetInfo => 'All tracks will have default title. Continue?';
+  String get allTracksTitleResetInfo =>
+      'All tracks will have default title. Continue?';
 
   @override
   String get allTracksTitleResetSuccess => 'Resetted all tracks title.';
@@ -737,10 +767,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allTracksShortcutKeyResetTitle => 'Reset all tracks shortcut key';
 
   @override
-  String get allTracksShortcutKeyResetInfo => 'All tracks will have default shortcut key. Continue?';
+  String get allTracksShortcutKeyResetInfo =>
+      'All tracks will have default shortcut key. Continue?';
 
   @override
-  String get allTracksShortcutKeyResetSuccess => 'Resetted all tracks shortcut key.';
+  String get allTracksShortcutKeyResetSuccess =>
+      'Resetted all tracks shortcut key.';
 
   @override
   String get allTracksPlaybackModeSet => 'Set tracks playback mode';
@@ -749,7 +781,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allTracksPlaybackModeTitleSet => 'Set all tracks playback mode';
 
   @override
-  String get allTracksPlaybackModeInfoSet => 'Select playback mode to which all track will be setted.';
+  String get allTracksPlaybackModeInfoSet =>
+      'Select playback mode to which all track will be setted.';
 
   @override
   String allTracksPlaybackModeSuccessSet(Object mode) {
@@ -766,10 +799,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allTracksPlaybackVolumeSet => 'Set tracks volume';
 
   @override
-  String get allTracksPlaybackVolumeTitleSet => 'Set all tracks playback volume';
+  String get allTracksPlaybackVolumeTitleSet =>
+      'Set all tracks playback volume';
 
   @override
-  String get allTracksPlaybackVolumeInfoSet => 'Select volume to which all track will be setted.';
+  String get allTracksPlaybackVolumeInfoSet =>
+      'Select volume to which all track will be setted.';
 
   @override
   String allTracksPlaybackVolumeSuccessSet(Object value) {
@@ -780,10 +815,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allTracksPlaybackBalanceSet => 'Set tracks balance';
 
   @override
-  String get allTracksPlaybackBalanceTitleSet => 'Set all tracks playback balance';
+  String get allTracksPlaybackBalanceTitleSet =>
+      'Set all tracks playback balance';
 
   @override
-  String get allTracksPlaybackBalanceInfoSet => 'Select balance to which all track will be setted.';
+  String get allTracksPlaybackBalanceInfoSet =>
+      'Select balance to which all track will be setted.';
 
   @override
   String allTracksPlaybackBalanceSuccessSet(Object value) {
@@ -797,7 +834,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allTracksPlaybackSpeedTitleSet => 'Set all tracks playback speed';
 
   @override
-  String get allTracksPlaybackSpeedInfoSet => 'Select track speed which all track will be setted.';
+  String get allTracksPlaybackSpeedInfoSet =>
+      'Select track speed which all track will be setted.';
 
   @override
   String allTracksPlaybackSpeedSuccessSet(Object value) {
@@ -808,25 +846,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allTracksPlaybackStartAtPositionReset => 'Reset playback start at';
 
   @override
-  String get allTracksPlaybackStartAtPositionResetTitle => 'Reset all tracks playback start at';
+  String get allTracksPlaybackStartAtPositionResetTitle =>
+      'Reset all tracks playback start at';
 
   @override
-  String get allTracksPlaybackStartAtPositionResetInfo => 'All tracks will have default playback start at. Continue?';
+  String get allTracksPlaybackStartAtPositionResetInfo =>
+      'All tracks will have default playback start at. Continue?';
 
   @override
-  String get allTracksPlaybackStartAtPositionResetSuccess => 'Resetted all tracks playback start at.';
+  String get allTracksPlaybackStartAtPositionResetSuccess =>
+      'Resetted all tracks playback start at.';
 
   @override
   String get allTracksPlaybackEndAtPositionReset => 'Reset playback end at';
 
   @override
-  String get allTracksPlaybackEndAtPositionResetTitle => 'Reset all tracks playback end at';
+  String get allTracksPlaybackEndAtPositionResetTitle =>
+      'Reset all tracks playback end at';
 
   @override
-  String get allTracksPlaybackEndAtPositionResetInfo => 'All tracks will have default playback end at. Continue?';
+  String get allTracksPlaybackEndAtPositionResetInfo =>
+      'All tracks will have default playback end at. Continue?';
 
   @override
-  String get allTracksPlaybackEndAtPositionResetSuccess => 'Resetted all tracks playback end at.';
+  String get allTracksPlaybackEndAtPositionResetSuccess =>
+      'Resetted all tracks playback end at.';
 
   @override
   String get allTracksSettingsReset => 'Reset tracks settings';
@@ -835,10 +879,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allTracksSettingsResetTitle => 'Reset all tracks settings';
 
   @override
-  String get allTracksSettingsResetInfo => 'All all tracks settings will be restored to default. Continue?';
+  String get allTracksSettingsResetInfo =>
+      'All all tracks settings will be restored to default. Continue?';
 
   @override
-  String get allTracksSettingsResetSuccess => 'All all tracks settings was restored to default.';
+  String get allTracksSettingsResetSuccess =>
+      'All all tracks settings was restored to default.';
 
   @override
   String get allTracksRecordingsDelete => 'Delete tracks recordings';
@@ -847,10 +893,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allTracksRecordingsDeleteTitle => 'Delete all tracks recordings';
 
   @override
-  String get allTracksRecordingsDeleteInfo => 'Recordings for all track will be deleted permanently. Continue?';
+  String get allTracksRecordingsDeleteInfo =>
+      'Recordings for all track will be deleted permanently. Continue?';
 
   @override
-  String get allTracksRecordingsDeleteSuccess => 'Deleted recordings for all tracks.';
+  String get allTracksRecordingsDeleteSuccess =>
+      'Deleted recordings for all tracks.';
 
   @override
   String get recordingSettings => 'Recording settings';
@@ -903,40 +951,49 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get audioRecorderAacHeName => 'MPEG-4 AAC HE (Advanced Audio Codec - High Efficiency)';
+  String get audioRecorderAacHeName =>
+      'MPEG-4 AAC HE (Advanced Audio Codec - High Efficiency)';
 
   @override
-  String get audioRecorderAacHeInfo => 'Internet radio and streaming at low bitrates';
+  String get audioRecorderAacHeInfo =>
+      'Internet radio and streaming at low bitrates';
 
   @override
-  String get audioRecorderAacHeDetails => 'Designed for low bitrates (e.g. 32-64 kbps). Used for radio broadcasts and streaming. Higher latency compared to AAC LC.';
+  String get audioRecorderAacHeDetails =>
+      'Designed for low bitrates (e.g. 32-64 kbps). Used for radio broadcasts and streaming. Higher latency compared to AAC LC.';
 
   @override
-  String get audioRecorderAacEldName => 'MPEG-4 AAC ELD (Advanced Audio Codec - Enhanced Low Delay)';
+  String get audioRecorderAacEldName =>
+      'MPEG-4 AAC ELD (Advanced Audio Codec - Enhanced Low Delay)';
 
   @override
   String get audioRecorderAacEldInfo => 'Real-time voice communication';
 
   @override
-  String get audioRecorderAacEldDetails => 'Optimized for very low latency. Lower quality than AAC LC, but better for live communication.';
+  String get audioRecorderAacEldDetails =>
+      'Optimized for very low latency. Lower quality than AAC LC, but better for live communication.';
 
   @override
-  String get audioRecorderAacLcName => 'MPEG-4 AAC LC (Advanced Audio Codec - Low Complexity)';
+  String get audioRecorderAacLcName =>
+      'MPEG-4 AAC LC (Advanced Audio Codec - Low Complexity)';
 
   @override
   String get audioRecorderAacLcInfo => 'Good quality music at low bitrates';
 
   @override
-  String get audioRecorderAacLcDetails => 'Lossy compression, but better quality than MP3 at the same bitrate. Good for music and video.';
+  String get audioRecorderAacLcDetails =>
+      'Lossy compression, but better quality than MP3 at the same bitrate. Good for music and video.';
 
   @override
-  String get audioRecorderWavName => 'Waveform Audio File (pcm16bit with headers)';
+  String get audioRecorderWavName =>
+      'Waveform Audio File (pcm16bit with headers)';
 
   @override
   String get audioRecorderWavInfo => 'High quality recording';
 
   @override
-  String get audioRecorderWavDetails => 'Lossless audio format, uses no compression. Very large files, but excellent quality. Perfect for professional editing and recording.';
+  String get audioRecorderWavDetails =>
+      'Lossless audio format, uses no compression. Very large files, but excellent quality. Perfect for professional editing and recording.';
 
   @override
   String get audioRecorderFlacName => 'FLAC (Free Lossless Audio Codec)';
@@ -945,7 +1002,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get audioRecorderFlacInfo => 'Audiophile music collection';
 
   @override
-  String get audioRecorderFlacDetails => 'Lossless, but compressed (about 50-70% less than WAV). Supports metadata, which WAV cannot. Great for archiving high-quality music.';
+  String get audioRecorderFlacDetails =>
+      'Lossless, but compressed (about 50-70% less than WAV). Supports metadata, which WAV cannot. Great for archiving high-quality music.';
 
   @override
   String recordingDurationValue(Object value) {
@@ -964,7 +1022,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recordingSampleRateTitle => 'Sample rate';
 
   @override
-  String get recordingSampleRateInfo => 'The sample rate for audio in samples per second (if available on the device).';
+  String get recordingSampleRateInfo =>
+      'The sample rate for audio in samples per second (if available on the device).';
 
   @override
   String recordingSampleRateSuccess(Object value) {
@@ -983,7 +1042,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recordingBitRateTitle => 'Bit rate';
 
   @override
-  String get recordingBitRateInfo => 'The audio encoding bit rate in bits per second (if available on the device).';
+  String get recordingBitRateInfo =>
+      'The audio encoding bit rate in bits per second (if available on the device).';
 
   @override
   String recordingBitRateSuccess(Object value) {
@@ -1018,7 +1078,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get recordingAutoGainInfo => 'The recorder will try to auto adjust recording volume in a limited range (if available on the device). Recording volume may be lowered by using this.';
+  String get recordingAutoGainInfo =>
+      'The recorder will try to auto adjust recording volume in a limited range (if available on the device). Recording volume may be lowered by using this.';
 
   @override
   String recordingAutoGainSuccess(Object value) {
@@ -1034,7 +1095,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get recordingEchoCancelInfo => 'The recorder will try to reduce echo (if available on the device). Recording volume may be lowered by using this.';
+  String get recordingEchoCancelInfo =>
+      'The recorder will try to reduce echo (if available on the device). Recording volume may be lowered by using this.';
 
   @override
   String recordingEchoCancelSuccess(Object value) {
@@ -1050,7 +1112,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get recordingNoiseSuppressInfo => 'The recorder will try to negates the input noise (if available on the device). Recording volume may be lowered by using this.';
+  String get recordingNoiseSuppressInfo =>
+      'The recorder will try to negates the input noise (if available on the device). Recording volume may be lowered by using this.';
 
   @override
   String recordingNoiseSuppressSuccess(Object value) {
@@ -1070,10 +1133,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get screenSettingsResetTitle => 'Reset screen settings';
 
   @override
-  String get screenSettingsResetInfo => 'All screen settings will be restored to default. Continue?';
+  String get screenSettingsResetInfo =>
+      'All screen settings will be restored to default. Continue?';
 
   @override
-  String get screenSettingsResetSuccess => 'All screen settings was restored to default.';
+  String get screenSettingsResetSuccess =>
+      'All screen settings was restored to default.';
 
   @override
   String get recordingSettingsReset => 'Reset recording settings';
@@ -1082,10 +1147,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recordingSettingsResetTitle => 'Reset recording settings';
 
   @override
-  String get recordingSettingsResetInfo => 'All recording settings will be restored to default. Continue?';
+  String get recordingSettingsResetInfo =>
+      'All recording settings will be restored to default. Continue?';
 
   @override
-  String get recordingSettingsResetSuccess => 'All recording settings was restored to default.';
+  String get recordingSettingsResetSuccess =>
+      'All recording settings was restored to default.';
 
   @override
   String get red => 'red';
@@ -1145,7 +1212,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get permissionStatusDenied => 'Denied';
 
   @override
-  String get permissionStatusPermanentlyDenied => 'Permanently denied (settings)';
+  String get permissionStatusPermanentlyDenied =>
+      'Permanently denied (settings)';
 
   @override
   String get permissionStatusRestricted => 'Restricted';
@@ -1224,19 +1292,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get audioWarningFileNotExists => 'File does not exist';
 
   @override
-  String get audioWarningSuggestionCompress => 'Consider compression or splitting into smaller parts';
+  String get audioWarningSuggestionCompress =>
+      'Consider compression or splitting into smaller parts';
 
   @override
   String get audioWarningSuggestionPerformance => 'May affect performance';
 
   @override
-  String get audioWarningSuggestionInterfaceDelays => 'May cause interface delays';
+  String get audioWarningSuggestionInterfaceDelays =>
+      'May cause interface delays';
 
   @override
-  String get audioWarningSuggestionMultiTrackPerformance => 'Watch performance with multiple tracks';
+  String get audioWarningSuggestionMultiTrackPerformance =>
+      'Watch performance with multiple tracks';
 
   @override
-  String get audioWarningSuggestionCompatibility => 'May cause compatibility issues';
+  String get audioWarningSuggestionCompatibility =>
+      'May cause compatibility issues';
 
   @override
   String get audioWarningSuggestionFileSize => 'May affect file size';
@@ -1245,8 +1317,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get audioWarningSuggestionAudioQuality => 'May affect audio quality';
 
   @override
-  String get audioWarningSuggestionChannelSettings => 'Check audio channel settings';
+  String get audioWarningSuggestionChannelSettings =>
+      'Check audio channel settings';
 
   @override
-  String get audioWarningSuggestionCheckFile => 'Check if file was moved or deleted';
+  String get audioWarningSuggestionCheckFile =>
+      'Check if file was moved or deleted';
 }

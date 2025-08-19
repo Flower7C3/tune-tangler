@@ -142,13 +142,16 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
-  String get trackRecordingAlreadyStarted => 'Inne nagrywanie już zostało rozpoczęte.';
+  String get trackRecordingAlreadyStarted =>
+      'Inne nagrywanie już zostało rozpoczęte.';
 
   @override
-  String get trackRecordingStartNoAudioPermission => 'Brak uprawnień do nagrywania dźwięku.';
+  String get trackRecordingStartNoAudioPermission =>
+      'Brak uprawnień do nagrywania dźwięku.';
 
   @override
-  String get trackRecordingStartNoNotificationPermission => 'Brak uprawnień do powiadamiania o nagrywaniu.';
+  String get trackRecordingStartNoNotificationPermission =>
+      'Brak uprawnień do powiadamiania o nagrywaniu.';
 
   @override
   String trackRecordingStartError(Object error, Object trackName) {
@@ -196,34 +199,44 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
-  String get trackPlaybackStartAtPositionSub10 => 'Zmień początek odtwarzania ścieżki o -0.01 s';
+  String get trackPlaybackStartAtPositionSub10 =>
+      'Zmień początek odtwarzania ścieżki o -0.01 s';
 
   @override
-  String get trackPlaybackStartAtPositionSub100 => 'Zmień początek odtwarzania ścieżki o -0,1 s';
+  String get trackPlaybackStartAtPositionSub100 =>
+      'Zmień początek odtwarzania ścieżki o -0,1 s';
 
   @override
-  String get trackPlaybackStartAtPositionReset => 'Zresetuj początek odtwarzania ścieżki';
+  String get trackPlaybackStartAtPositionReset =>
+      'Zresetuj początek odtwarzania ścieżki';
 
   @override
-  String get trackPlaybackStartAtPositionAdd100 => 'Zmień początek odtwarzania ścieżki o +0,1 s';
+  String get trackPlaybackStartAtPositionAdd100 =>
+      'Zmień początek odtwarzania ścieżki o +0,1 s';
 
   @override
-  String get trackPlaybackStartAtPositionAdd10 => 'Zmień początek odtwarzania ścieżki o +0.01 s';
+  String get trackPlaybackStartAtPositionAdd10 =>
+      'Zmień początek odtwarzania ścieżki o +0.01 s';
 
   @override
-  String get trackPlaybackEndAtPositionSub10 => 'Zmień koniec odtwarzania ścieżki o -0.01 s';
+  String get trackPlaybackEndAtPositionSub10 =>
+      'Zmień koniec odtwarzania ścieżki o -0.01 s';
 
   @override
-  String get trackPlaybackEndAtPositionSub100 => 'Zmień koniec odtwarzania ścieżki o -0,1 s';
+  String get trackPlaybackEndAtPositionSub100 =>
+      'Zmień koniec odtwarzania ścieżki o -0,1 s';
 
   @override
-  String get trackPlaybackEndAtPositionReset => 'Resetuj koniec odtwarzania ścieżki';
+  String get trackPlaybackEndAtPositionReset =>
+      'Resetuj koniec odtwarzania ścieżki';
 
   @override
-  String get trackPlaybackEndAtPositionAdd100 => 'Zmień koniec odtwarzania ścieżki o +0,1 s';
+  String get trackPlaybackEndAtPositionAdd100 =>
+      'Zmień koniec odtwarzania ścieżki o +0,1 s';
 
   @override
-  String get trackPlaybackEndAtPositionAdd10 => 'Zmień koniec odtwarzania ścieżki o +0.01 s';
+  String get trackPlaybackEndAtPositionAdd10 =>
+      'Zmień koniec odtwarzania ścieżki o +0.01 s';
 
   @override
   String get trackNameChange => 'Zmień nazwę ścieżki';
@@ -275,7 +288,8 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
-  String trackRecordingMoveSuccess(Object firstTrackName, Object secondTrackName) {
+  String trackRecordingMoveSuccess(
+      Object firstTrackName, Object secondTrackName) {
     return 'Zamieniono lokalizację dla nagrań #$firstTrackName i #$secondTrackName.';
   }
 
@@ -365,10 +379,12 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
-  String get rowTracksPlaybackStartAtPositionReset => 'Zresetuj początek odtwarzania';
+  String get rowTracksPlaybackStartAtPositionReset =>
+      'Zresetuj początek odtwarzania';
 
   @override
-  String get rowTracksPlaybackStartAtPositionResetTitle => 'Zresetuj początek odtwarzania utworów wiersza';
+  String get rowTracksPlaybackStartAtPositionResetTitle =>
+      'Zresetuj początek odtwarzania utworów wiersza';
 
   @override
   String rowTracksPlaybackStartAtPositionResetInfo(Object rowName) {
@@ -381,10 +397,12 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
-  String get rowTracksPlaybackEndAtPositionReset => 'Zresetuj koniec odtwarzania';
+  String get rowTracksPlaybackEndAtPositionReset =>
+      'Zresetuj koniec odtwarzania';
 
   @override
-  String get rowTracksPlaybackEndAtPositionResetTitle => 'Zresetuj koniec odtwarzania utworów wiersza';
+  String get rowTracksPlaybackEndAtPositionResetTitle =>
+      'Zresetuj koniec odtwarzania utworów wiersza';
 
   @override
   String rowTracksPlaybackEndAtPositionResetInfo(Object rowName) {
@@ -454,7 +472,8 @@ class AppLocalizationsPl extends AppLocalizations {
   String get keepScreenOnEnabled => 'Utrzymywanie włączonego ekranu aktywne';
 
   @override
-  String get keepScreenOnDisabled => 'Utrzymywanie włączonego ekranu nieaktywne';
+  String get keepScreenOnDisabled =>
+      'Utrzymywanie włączonego ekranu nieaktywne';
 
   @override
   String get changeLanguage => 'Zmień język';
@@ -481,7 +500,8 @@ class AppLocalizationsPl extends AppLocalizations {
   String get settingProfileDeleteTitle => 'Usuń profil ustawień';
 
   @override
-  String get settingProfileDeleteInfo => 'Profil ustawień zostanie usunięty. Kontynuować?';
+  String get settingProfileDeleteInfo =>
+      'Profil ustawień zostanie usunięty. Kontynuować?';
 
   @override
   String get settingProfileDeleted => 'Profil ustawień został usunięty.';
@@ -508,19 +528,22 @@ class AppLocalizationsPl extends AppLocalizations {
   String get helpScreenMessageAboutTitle => 'O aplikacji';
 
   @override
-  String get helpScreenMessageAboutContent => 'Ta aplikacja umożliwia rejestrację dźwięku z mikrofonu lub interfejsu USB audio (urządzenie musi obsługiwać technologię USB OTG) do jednej z wielu ścieżek. Możliwe jest również zaimportowanie istniejącego pliku audio.\n\nNagrania można odtwarzać synchronicznie lub asynchronicznie, w pętli lub bez.\n\nNagrania i ich ustawienia oraz tryb graficzny i język są zapamiętywane po wyłączeniu aplikacji.';
+  String get helpScreenMessageAboutContent =>
+      'Ta aplikacja umożliwia rejestrację dźwięku z mikrofonu lub interfejsu USB audio (urządzenie musi obsługiwać technologię USB OTG) do jednej z wielu ścieżek. Możliwe jest również zaimportowanie istniejącego pliku audio.\n\nNagrania można odtwarzać synchronicznie lub asynchronicznie, w pętli lub bez.\n\nNagrania i ich ustawienia oraz tryb graficzny i język są zapamiętywane po wyłączeniu aplikacji.';
 
   @override
   String get helpScreenMessageGridScreenTitle => 'Ekran siatki ścieżek';
 
   @override
-  String get helpScreenMessageGridScreenContent => 'Naciśnij krótko kolorowy blok ścieżki lub użyj skrótu klawiszowego (widocznego u góry ścieżki), aby wykonać jedną z dostępnych akcji.\n\nPrzytrzymaj blok ścieżki lub użyj skrótu klawiszowego z klawiszem Control \$[controlKey], aby otworzyć szczegóły ścieżki.';
+  String get helpScreenMessageGridScreenContent =>
+      'Naciśnij krótko kolorowy blok ścieżki lub użyj skrótu klawiszowego (widocznego u góry ścieżki), aby wykonać jedną z dostępnych akcji.\n\nPrzytrzymaj blok ścieżki lub użyj skrótu klawiszowego z klawiszem Control \$[controlKey], aby otworzyć szczegóły ścieżki.';
 
   @override
   String get helpScreenMessageDetailsScreenTitle => 'Ekran szczegółów ścieżki';
 
   @override
-  String get helpScreenMessageDetailsScreenContent => 'Istnieje kilka ustawień, takich jak: \$[recordingClip]przycinanie nagrania, \$[trackPlaybackMode]tryb odtwarzania, \$[trackPlaybackVolume]wartość głośności odtwarzania, \$[trackPlaybackBalance]balans audio, \$[trackPlaybackSpeed]prędkość odtwarzania, \$[trackName]nazwa ścieżki, \$[trackKeyboardKey]skrót klawiszowy ścieżki.\nMożesz również \$[trackRecordingMove]zmienić lokalizację ścieżki na siatce, \$[trackRecordingImport]zaimportować plik nagrania, \$[trackRecordingShare]udostępnić lub \$[deleteForever]usunąć nagranie.';
+  String get helpScreenMessageDetailsScreenContent =>
+      'Istnieje kilka ustawień, takich jak: \$[recordingClip]przycinanie nagrania, \$[trackPlaybackMode]tryb odtwarzania, \$[trackPlaybackVolume]wartość głośności odtwarzania, \$[trackPlaybackBalance]balans audio, \$[trackPlaybackSpeed]prędkość odtwarzania, \$[trackName]nazwa ścieżki, \$[trackKeyboardKey]skrót klawiszowy ścieżki.\nMożesz również \$[trackRecordingMove]zmienić lokalizację ścieżki na siatce, \$[trackRecordingImport]zaimportować plik nagrania, \$[trackRecordingShare]udostępnić lub \$[deleteForever]usunąć nagranie.';
 
   @override
   String get helpScreenMessageTrackStates => 'Statusy i akcje ścieżki';
@@ -529,25 +552,31 @@ class AppLocalizationsPl extends AppLocalizations {
   String get helpScreenMessageTrackIcons => 'Ikony informacji o ścieżce';
 
   @override
-  String get helpScreenMessageSettingsInfo => 'Dostępne jest ustawianie \$[recordingAudioEncoder]kodeka audio, \$[recordingSampleRate]częstotliwości próbkowania, \$[recordingBitRate]szybkości transmisji, \$[recordingAudioMode]trybu audio, \$[recordingAutoGain]automatycznego wzmocnienia, \$[recordingEchoCancel]anulowania echa i \$[recordingNoiseSuppress]tłumienia szumów.';
+  String get helpScreenMessageSettingsInfo =>
+      'Dostępne jest ustawianie \$[recordingAudioEncoder]kodeka audio, \$[recordingSampleRate]częstotliwości próbkowania, \$[recordingBitRate]szybkości transmisji, \$[recordingAudioMode]trybu audio, \$[recordingAutoGain]automatycznego wzmocnienia, \$[recordingEchoCancel]anulowania echa i \$[recordingNoiseSuppress]tłumienia szumów.';
 
   @override
-  String get stateEmpty => 'ścieżka pusta (kliknij blok, aby rozpocząć nagrywanie ścieżki)';
+  String get stateEmpty =>
+      'ścieżka pusta (kliknij blok, aby rozpocząć nagrywanie ścieżki)';
 
   @override
-  String get stateRecording => 'nagrywanie w toku (kliknij blok, aby zatrzymać nagrywanie ścieżki)';
+  String get stateRecording =>
+      'nagrywanie w toku (kliknij blok, aby zatrzymać nagrywanie ścieżki)';
 
   @override
   String get stateProcessing => 'ładowanie nagrania w trakcie';
 
   @override
-  String get stateIdle => 'bezczynność: nagrywanie zakończone/odtwarzanie zatrzymane (kliknij blok, aby rozpocząć odtwarzanie ścieżki)';
+  String get stateIdle =>
+      'bezczynność: nagrywanie zakończone/odtwarzanie zatrzymane (kliknij blok, aby rozpocząć odtwarzanie ścieżki)';
 
   @override
-  String get statePlaying => 'odtwarzanie rozpoczętej ścieżki (kliknij blok, aby zatrzymać odtwarzanie ścieżki)';
+  String get statePlaying =>
+      'odtwarzanie rozpoczętej ścieżki (kliknij blok, aby zatrzymać odtwarzanie ścieżki)';
 
   @override
-  String get statePaused => 'odtwarzanie wstrzymane (kliknij blok, aby wznowić odtwarzanie ścieżki)';
+  String get statePaused =>
+      'odtwarzanie wstrzymane (kliknij blok, aby wznowić odtwarzanie ścieżki)';
 
   @override
   String get buttonAdd => 'Dodaj';
@@ -641,7 +670,8 @@ class AppLocalizationsPl extends AppLocalizations {
   String get screenThemeColorTitle => 'Ustaw kolor akcentu motywu';
 
   @override
-  String get screenThemeColorInfo => 'Wybierz kolor, który zostanie zastosowany jako akcent motywu.';
+  String get screenThemeColorInfo =>
+      'Wybierz kolor, który zostanie zastosowany jako akcent motywu.';
 
   @override
   String screenThemeColorSuccess(Object name) {
@@ -657,10 +687,12 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
-  String get keepScreenOnIsEnabledSuccess => 'Włączono funkcję utrzymywania włączonego ekranu.';
+  String get keepScreenOnIsEnabledSuccess =>
+      'Włączono funkcję utrzymywania włączonego ekranu.';
 
   @override
-  String get keepScreenOnIsDisabledSuccess => 'Wyłączono funkcję utrzymywania włączonego ekranu.';
+  String get keepScreenOnIsDisabledSuccess =>
+      'Wyłączono funkcję utrzymywania włączonego ekranu.';
 
   @override
   String get gridRowsAmount => 'Liczba wierszy siatki';
@@ -674,7 +706,8 @@ class AppLocalizationsPl extends AppLocalizations {
   String get gridRowsAmountTitle => 'Liczba wierszy siatki';
 
   @override
-  String get gridRowsAmountInfo => 'Ustaw liczbę wierszy siatki, która będzie widoczna na liście ścieżek.';
+  String get gridRowsAmountInfo =>
+      'Ustaw liczbę wierszy siatki, która będzie widoczna na liście ścieżek.';
 
   @override
   String gridRowsAmountSuccess(Object value) {
@@ -693,7 +726,8 @@ class AppLocalizationsPl extends AppLocalizations {
   String get gridColsAmountTitle => 'Liczba kolumn siatki';
 
   @override
-  String get gridColsAmountInfo => 'Ustaw liczbę kolumn siatki, która będzie widoczna na liście ścieżek.';
+  String get gridColsAmountInfo =>
+      'Ustaw liczbę kolumn siatki, która będzie widoczna na liście ścieżek.';
 
   @override
   String gridColsAmountSuccess(Object value) {
@@ -713,10 +747,12 @@ class AppLocalizationsPl extends AppLocalizations {
   String get trackTitleEmojisTitle => 'Emoji tytułu ścieżki';
 
   @override
-  String get trackTitleEmojisInfo => 'Ustaw emoji, które mogą być używane jako tytuł ścieżki.';
+  String get trackTitleEmojisInfo =>
+      'Ustaw emoji, które mogą być używane jako tytuł ścieżki.';
 
   @override
-  String get trackTitleEmojisSuccess => 'Ustawiono emoji, które mogą być używane jako tytuł ścieżki.';
+  String get trackTitleEmojisSuccess =>
+      'Ustawiono emoji, które mogą być używane jako tytuł ścieżki.';
 
   @override
   String get allTracksTitleReset => 'Zresetuj tytuły';
@@ -725,22 +761,27 @@ class AppLocalizationsPl extends AppLocalizations {
   String get allTracksTitleResetTitle => 'Zresetuj tytuły ścieżek';
 
   @override
-  String get allTracksTitleResetInfo => 'Wszystkie ścieżki będą miały domyślny tytuł. Kontynuować?';
+  String get allTracksTitleResetInfo =>
+      'Wszystkie ścieżki będą miały domyślny tytuł. Kontynuować?';
 
   @override
-  String get allTracksTitleResetSuccess => 'Zresetowano tytuły dla wszystkich ścieżek.';
+  String get allTracksTitleResetSuccess =>
+      'Zresetowano tytuły dla wszystkich ścieżek.';
 
   @override
   String get allTracksShortcutKeyReset => 'Zresetuj klawisze skrótu';
 
   @override
-  String get allTracksShortcutKeyResetTitle => 'Zresetuj klawisze skrótu ścieżek';
+  String get allTracksShortcutKeyResetTitle =>
+      'Zresetuj klawisze skrótu ścieżek';
 
   @override
-  String get allTracksShortcutKeyResetInfo => 'Wszystkie ścieżki będą miały domyślny klawisz skrótu. Kontynuować?';
+  String get allTracksShortcutKeyResetInfo =>
+      'Wszystkie ścieżki będą miały domyślny klawisz skrótu. Kontynuować?';
 
   @override
-  String get allTracksShortcutKeyResetSuccess => 'Zresetowano klawisze skrótu dla wszystkich ścieżek.';
+  String get allTracksShortcutKeyResetSuccess =>
+      'Zresetowano klawisze skrótu dla wszystkich ścieżek.';
 
   @override
   String get allTracksPlaybackModeSet => 'Ustaw tryb odtwarzania';
@@ -749,7 +790,8 @@ class AppLocalizationsPl extends AppLocalizations {
   String get allTracksPlaybackModeTitleSet => 'Ustaw tryb odtwarzania ścieżek';
 
   @override
-  String get allTracksPlaybackModeInfoSet => 'Wybierz tryb odtwarzania, na który zostaną ustawione wszystkie ścieżki.';
+  String get allTracksPlaybackModeInfoSet =>
+      'Wybierz tryb odtwarzania, na który zostaną ustawione wszystkie ścieżki.';
 
   @override
   String allTracksPlaybackModeSuccessSet(Object mode) {
@@ -769,7 +811,8 @@ class AppLocalizationsPl extends AppLocalizations {
   String get allTracksPlaybackVolumeTitleSet => 'Ustaw głośność ścieżek';
 
   @override
-  String get allTracksPlaybackVolumeInfoSet => 'Wybierz głośność, na którą zostaną ustawione wszystkie ścieżki.';
+  String get allTracksPlaybackVolumeInfoSet =>
+      'Wybierz głośność, na którą zostaną ustawione wszystkie ścieżki.';
 
   @override
   String allTracksPlaybackVolumeSuccessSet(Object value) {
@@ -780,10 +823,12 @@ class AppLocalizationsPl extends AppLocalizations {
   String get allTracksPlaybackBalanceSet => 'Ustaw balans odtwarzania';
 
   @override
-  String get allTracksPlaybackBalanceTitleSet => 'Ustaw balans odtwarzania wszystkich ścieżek';
+  String get allTracksPlaybackBalanceTitleSet =>
+      'Ustaw balans odtwarzania wszystkich ścieżek';
 
   @override
-  String get allTracksPlaybackBalanceInfoSet => 'Wybierz balans odtwarzania, na który zostaną ustawione wszystkie ścieżki.';
+  String get allTracksPlaybackBalanceInfoSet =>
+      'Wybierz balans odtwarzania, na który zostaną ustawione wszystkie ścieżki.';
 
   @override
   String allTracksPlaybackBalanceSuccessSet(Object value) {
@@ -797,7 +842,8 @@ class AppLocalizationsPl extends AppLocalizations {
   String get allTracksPlaybackSpeedTitleSet => 'Ustaw prędkość ścieżek';
 
   @override
-  String get allTracksPlaybackSpeedInfoSet => 'Wybierz prędkość, na którą będą ustawione wszystkie ścieżki.';
+  String get allTracksPlaybackSpeedInfoSet =>
+      'Wybierz prędkość, na którą będą ustawione wszystkie ścieżki.';
 
   @override
   String allTracksPlaybackSpeedSuccessSet(Object value) {
@@ -805,40 +851,51 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
-  String get allTracksPlaybackStartAtPositionReset => 'Zresetuj początek odtwarzania na';
+  String get allTracksPlaybackStartAtPositionReset =>
+      'Zresetuj początek odtwarzania na';
 
   @override
-  String get allTracksPlaybackStartAtPositionResetTitle => 'Zresetuj początek odtwarzania wszystkich ścieżek na';
+  String get allTracksPlaybackStartAtPositionResetTitle =>
+      'Zresetuj początek odtwarzania wszystkich ścieżek na';
 
   @override
-  String get allTracksPlaybackStartAtPositionResetInfo => 'Wszystkie ścieżki będą miały domyślny początek odtwarzania na. Kontynuować?';
+  String get allTracksPlaybackStartAtPositionResetInfo =>
+      'Wszystkie ścieżki będą miały domyślny początek odtwarzania na. Kontynuować?';
 
   @override
-  String get allTracksPlaybackStartAtPositionResetSuccess => 'Zresetowano początek odtwarzania wszystkich ścieżek na.';
+  String get allTracksPlaybackStartAtPositionResetSuccess =>
+      'Zresetowano początek odtwarzania wszystkich ścieżek na.';
 
   @override
-  String get allTracksPlaybackEndAtPositionReset => 'Zresetowano koniec odtwarzania na';
+  String get allTracksPlaybackEndAtPositionReset =>
+      'Zresetowano koniec odtwarzania na';
 
   @override
-  String get allTracksPlaybackEndAtPositionResetTitle => 'Zresetowano koniec odtwarzania wszystkich ścieżek na';
+  String get allTracksPlaybackEndAtPositionResetTitle =>
+      'Zresetowano koniec odtwarzania wszystkich ścieżek na';
 
   @override
-  String get allTracksPlaybackEndAtPositionResetInfo => 'Wszystkie ścieżki będą miały domyślny koniec odtwarzania na. Kontynuować?';
+  String get allTracksPlaybackEndAtPositionResetInfo =>
+      'Wszystkie ścieżki będą miały domyślny koniec odtwarzania na. Kontynuować?';
 
   @override
-  String get allTracksPlaybackEndAtPositionResetSuccess => 'Zresetowano koniec odtwarzania wszystkich ścieżek na.';
+  String get allTracksPlaybackEndAtPositionResetSuccess =>
+      'Zresetowano koniec odtwarzania wszystkich ścieżek na.';
 
   @override
   String get allTracksSettingsReset => 'Zresetuj ustawienia ścieżek';
 
   @override
-  String get allTracksSettingsResetTitle => 'Zresetuj ustawienia wszystkich ścieżek';
+  String get allTracksSettingsResetTitle =>
+      'Zresetuj ustawienia wszystkich ścieżek';
 
   @override
-  String get allTracksSettingsResetInfo => 'Ustawienia wszystkich ścieżek zostaną przywrócone do domyślnych. Kontynuować?';
+  String get allTracksSettingsResetInfo =>
+      'Ustawienia wszystkich ścieżek zostaną przywrócone do domyślnych. Kontynuować?';
 
   @override
-  String get allTracksSettingsResetSuccess => 'Ustawienia wszystkich ścieżek zostały przywrócone do domyślnych.';
+  String get allTracksSettingsResetSuccess =>
+      'Ustawienia wszystkich ścieżek zostały przywrócone do domyślnych.';
 
   @override
   String get allTracksRecordingsDelete => 'Usuń wszystkie nagrania';
@@ -847,10 +904,12 @@ class AppLocalizationsPl extends AppLocalizations {
   String get allTracksRecordingsDeleteTitle => 'Usuń wszystkie nagrania';
 
   @override
-  String get allTracksRecordingsDeleteInfo => 'Wszystkie nagrania zostaną trwale usunięte. Kontynuować?';
+  String get allTracksRecordingsDeleteInfo =>
+      'Wszystkie nagrania zostaną trwale usunięte. Kontynuować?';
 
   @override
-  String get allTracksRecordingsDeleteSuccess => 'Wszystkie nagrania zostały trwale usunięte.';
+  String get allTracksRecordingsDeleteSuccess =>
+      'Wszystkie nagrania zostały trwale usunięte.';
 
   @override
   String get recordingSettings => 'Ustawienia nagrywania';
@@ -876,7 +935,8 @@ class AppLocalizationsPl extends AppLocalizations {
   String get recordingInputDeviceTitle => 'Urządzenie wejściowe';
 
   @override
-  String get recordingInputDeviceInfo => 'Ustaw urządzenie wejściowe do nagrywania dźwięku.';
+  String get recordingInputDeviceInfo =>
+      'Ustaw urządzenie wejściowe do nagrywania dźwięku.';
 
   @override
   String recordingInputDeviceSuccess(Object value) {
@@ -903,40 +963,51 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
-  String get audioRecorderAacHeName => 'MPEG-4 AAC HE (Advanced Audio Codec - High Efficiency)';
+  String get audioRecorderAacHeName =>
+      'MPEG-4 AAC HE (Advanced Audio Codec - High Efficiency)';
 
   @override
-  String get audioRecorderAacHeInfo => 'Radio internetowe i strumieniowanie przy niskim bitrate';
+  String get audioRecorderAacHeInfo =>
+      'Radio internetowe i strumieniowanie przy niskim bitrate';
 
   @override
-  String get audioRecorderAacHeDetails => 'Stratna kompresja, ale lepsza jakość niż MP3 przy tym samym bitrate. Świetnie nadaje się do muzyki i wideo.';
+  String get audioRecorderAacHeDetails =>
+      'Stratna kompresja, ale lepsza jakość niż MP3 przy tym samym bitrate. Świetnie nadaje się do muzyki i wideo.';
 
   @override
-  String get audioRecorderAacEldName => 'MPEG-4 AAC ELD (Advanced Audio Codec - Enhanced Low Delay)';
+  String get audioRecorderAacEldName =>
+      'MPEG-4 AAC ELD (Advanced Audio Codec - Enhanced Low Delay)';
 
   @override
-  String get audioRecorderAacEldInfo => 'Komunikacja głosowa w czasie rzeczywistym';
+  String get audioRecorderAacEldInfo =>
+      'Komunikacja głosowa w czasie rzeczywistym';
 
   @override
-  String get audioRecorderAacEldDetails => 'Optymalizowany pod kątem bardzo niskiego opóźnienia. Mniejsza jakość niż AAC LC, ale lepsza w komunikacji na żywo.';
+  String get audioRecorderAacEldDetails =>
+      'Optymalizowany pod kątem bardzo niskiego opóźnienia. Mniejsza jakość niż AAC LC, ale lepsza w komunikacji na żywo.';
 
   @override
-  String get audioRecorderAacLcName => 'MPEG-4 AAC LC (Advanced Audio Codec - Low Complexity)';
+  String get audioRecorderAacLcName =>
+      'MPEG-4 AAC LC (Advanced Audio Codec - Low Complexity)';
 
   @override
-  String get audioRecorderAacLcInfo => 'Muzyka w dobrej jakości przy niskim bitrate';
+  String get audioRecorderAacLcInfo =>
+      'Muzyka w dobrej jakości przy niskim bitrate';
 
   @override
-  String get audioRecorderAacLcDetails => 'Zaprojektowany dla niskiego bitrate (np. 32-64 kbps). Używany do transmisji radiowych i strumieniowania. Wyższe opóźnienie w porównaniu do AAC LC.';
+  String get audioRecorderAacLcDetails =>
+      'Zaprojektowany dla niskiego bitrate (np. 32-64 kbps). Używany do transmisji radiowych i strumieniowania. Wyższe opóźnienie w porównaniu do AAC LC.';
 
   @override
-  String get audioRecorderWavName => 'Waveform Audio File (pcm16bit with headers)';
+  String get audioRecorderWavName =>
+      'Waveform Audio File (pcm16bit with headers)';
 
   @override
   String get audioRecorderWavInfo => 'Nagrywanie w wysokiej jakości';
 
   @override
-  String get audioRecorderWavDetails => 'Bezstratny format audio, nie stosuje kompresji. Bardzo duże pliki, ale doskonała jakość. Idealny do profesjonalnej edycji i nagrywania.';
+  String get audioRecorderWavDetails =>
+      'Bezstratny format audio, nie stosuje kompresji. Bardzo duże pliki, ale doskonała jakość. Idealny do profesjonalnej edycji i nagrywania.';
 
   @override
   String get audioRecorderFlacName => 'FLAC (Free Lossless Audio Codec)';
@@ -945,7 +1016,8 @@ class AppLocalizationsPl extends AppLocalizations {
   String get audioRecorderFlacInfo => 'Audiofilska kolekcja muzyczna';
 
   @override
-  String get audioRecorderFlacDetails => 'Bezstratny, ale z kompresją (ok. 50-70% mniejszy niż WAV). Obsługuje metadane, czego WAV nie potrafi. Świetny do archiwizacji muzyki w wysokiej jakości.';
+  String get audioRecorderFlacDetails =>
+      'Bezstratny, ale z kompresją (ok. 50-70% mniejszy niż WAV). Obsługuje metadane, czego WAV nie potrafi. Świetny do archiwizacji muzyki w wysokiej jakości.';
 
   @override
   String recordingDurationValue(Object value) {
@@ -964,7 +1036,8 @@ class AppLocalizationsPl extends AppLocalizations {
   String get recordingSampleRateTitle => 'Częstotliwość próbkowania';
 
   @override
-  String get recordingSampleRateInfo => 'Częstotliwość próbkowania dźwięku w próbkach na sekundę (jeśli jest dostępne na urządzeniu).';
+  String get recordingSampleRateInfo =>
+      'Częstotliwość próbkowania dźwięku w próbkach na sekundę (jeśli jest dostępne na urządzeniu).';
 
   @override
   String recordingSampleRateSuccess(Object value) {
@@ -983,7 +1056,8 @@ class AppLocalizationsPl extends AppLocalizations {
   String get recordingBitRateTitle => 'Szybkość transmisji';
 
   @override
-  String get recordingBitRateInfo => 'Szybkość kodowania dźwięku w bitach na sekundę (jeśli jest dostępne na urządzeniu).';
+  String get recordingBitRateInfo =>
+      'Szybkość kodowania dźwięku w bitach na sekundę (jeśli jest dostępne na urządzeniu).';
 
   @override
   String recordingBitRateSuccess(Object value) {
@@ -1018,7 +1092,8 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
-  String get recordingAutoGainInfo => 'Rejestrator spróbuje automatycznie dostosować głośność nagrywania w ograniczonym zakresie (jeśli jest dostępna na urządzeniu). Głośność nagrywania może być mniejsza przy użyciu tej opcji.';
+  String get recordingAutoGainInfo =>
+      'Rejestrator spróbuje automatycznie dostosować głośność nagrywania w ograniczonym zakresie (jeśli jest dostępna na urządzeniu). Głośność nagrywania może być mniejsza przy użyciu tej opcji.';
 
   @override
   String recordingAutoGainSuccess(Object value) {
@@ -1034,7 +1109,8 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
-  String get recordingEchoCancelInfo => 'Rejestrator spróbuje zmniejszyć echo (jeśli jest dostępne na urządzeniu). Głośność nagrywania może być mniejsza przy użyciu tej opcji.';
+  String get recordingEchoCancelInfo =>
+      'Rejestrator spróbuje zmniejszyć echo (jeśli jest dostępne na urządzeniu). Głośność nagrywania może być mniejsza przy użyciu tej opcji.';
 
   @override
   String recordingEchoCancelSuccess(Object value) {
@@ -1050,7 +1126,8 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
-  String get recordingNoiseSuppressInfo => 'Rejestrator spróbuje zniwelować szum wejściowy (jeśli jest dostępny na urządzeniu). Głośność nagrywania może być mniejsza przy użyciu tej opcji.';
+  String get recordingNoiseSuppressInfo =>
+      'Rejestrator spróbuje zniwelować szum wejściowy (jeśli jest dostępny na urządzeniu). Głośność nagrywania może być mniejsza przy użyciu tej opcji.';
 
   @override
   String recordingNoiseSuppressSuccess(Object value) {
@@ -1070,10 +1147,12 @@ class AppLocalizationsPl extends AppLocalizations {
   String get screenSettingsResetTitle => 'Zresetuj ustawienia ekranu';
 
   @override
-  String get screenSettingsResetInfo => 'Wszystkie ustawienia ekranu zostaną przywrócone do domyślnych. Kontynuować?';
+  String get screenSettingsResetInfo =>
+      'Wszystkie ustawienia ekranu zostaną przywrócone do domyślnych. Kontynuować?';
 
   @override
-  String get screenSettingsResetSuccess => 'Wszystkie ustawienia ekranu zostały przywrócone do domyślnych.';
+  String get screenSettingsResetSuccess =>
+      'Wszystkie ustawienia ekranu zostały przywrócone do domyślnych.';
 
   @override
   String get recordingSettingsReset => 'Zresetuj ustawienia nagrywania';
@@ -1082,10 +1161,12 @@ class AppLocalizationsPl extends AppLocalizations {
   String get recordingSettingsResetTitle => 'Zresetuj ustawienia nagrywania';
 
   @override
-  String get recordingSettingsResetInfo => 'Wszystkie ustawienia nagrywania zostaną przywrócone do domyślnych. Kontynuować?';
+  String get recordingSettingsResetInfo =>
+      'Wszystkie ustawienia nagrywania zostaną przywrócone do domyślnych. Kontynuować?';
 
   @override
-  String get recordingSettingsResetSuccess => 'Wszystkie ustawienia nagrywania zostały przywrócone do domyślnych.';
+  String get recordingSettingsResetSuccess =>
+      'Wszystkie ustawienia nagrywania zostały przywrócone do domyślnych.';
 
   @override
   String get red => 'czerwony';
@@ -1136,7 +1217,8 @@ class AppLocalizationsPl extends AppLocalizations {
   String get microphonePermission => 'Nagrywanie dźwięku przez mikrofon';
 
   @override
-  String get notificationPermission => 'Wyświetlanie powiadomienia o stanie nagrywania';
+  String get notificationPermission =>
+      'Wyświetlanie powiadomienia o stanie nagrywania';
 
   @override
   String get permissionStatusGranted => 'Przyznane';
@@ -1145,7 +1227,8 @@ class AppLocalizationsPl extends AppLocalizations {
   String get permissionStatusDenied => 'Odmówione';
 
   @override
-  String get permissionStatusPermanentlyDenied => 'Odmówione na stałe (ustawienia)';
+  String get permissionStatusPermanentlyDenied =>
+      'Odmówione na stałe (ustawienia)';
 
   @override
   String get permissionStatusRestricted => 'Ograniczone';
@@ -1224,29 +1307,36 @@ class AppLocalizationsPl extends AppLocalizations {
   String get audioWarningFileNotExists => 'Plik nie istnieje';
 
   @override
-  String get audioWarningSuggestionCompress => 'Rozważ kompresję lub podział na mniejsze części';
+  String get audioWarningSuggestionCompress =>
+      'Rozważ kompresję lub podział na mniejsze części';
 
   @override
   String get audioWarningSuggestionPerformance => 'Może wpływać na wydajność';
 
   @override
-  String get audioWarningSuggestionInterfaceDelays => 'Może powodować opóźnienia w interfejsie';
+  String get audioWarningSuggestionInterfaceDelays =>
+      'Może powodować opóźnienia w interfejsie';
 
   @override
-  String get audioWarningSuggestionMultiTrackPerformance => 'Uwaga na wydajność przy wielu ścieżkach';
+  String get audioWarningSuggestionMultiTrackPerformance =>
+      'Uwaga na wydajność przy wielu ścieżkach';
 
   @override
-  String get audioWarningSuggestionCompatibility => 'Może powodować problemy z kompatybilnością';
+  String get audioWarningSuggestionCompatibility =>
+      'Może powodować problemy z kompatybilnością';
 
   @override
   String get audioWarningSuggestionFileSize => 'Może wpływać na rozmiar pliku';
 
   @override
-  String get audioWarningSuggestionAudioQuality => 'Może wpływać na jakość dźwięku';
+  String get audioWarningSuggestionAudioQuality =>
+      'Może wpływać na jakość dźwięku';
 
   @override
-  String get audioWarningSuggestionChannelSettings => 'Sprawdź ustawienia kanałów audio';
+  String get audioWarningSuggestionChannelSettings =>
+      'Sprawdź ustawienia kanałów audio';
 
   @override
-  String get audioWarningSuggestionCheckFile => 'Sprawdź czy plik nie został przeniesiony lub usunięty';
+  String get audioWarningSuggestionCheckFile =>
+      'Sprawdź czy plik nie został przeniesiony lub usunięty';
 }
