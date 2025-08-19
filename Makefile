@@ -220,26 +220,7 @@ gen-splash: ##UTILITIES## Generate splash screen
 	@echo "$(@FORMAT_BOLD)$(@ICON_INFO) Generating splash screen...$(@FORMAT_RESET)"
 	@dart run flutter_native_splash:create
 
-.PHONY: disable-git-hook
-disable-git-hook: ##UTILITIES## Disable pre-commit git hook
-	@echo "$(@FORMAT_BOLD)$(@COLOR_YELLOW)$(@ICON_WARN) Disabling pre-commit git hook...$(@FORMAT_RESET)"
-	@if [ -f .git/hooks/pre-commit ]; then \
-		mv .git/hooks/pre-commit .git/hooks/pre-commit.disabled; \
-		echo "$(@COLOR_GREEN)$(@ICON_CHECK) Git hook disabled. Renamed to pre-commit.disabled"; \
-	else \
-		echo "$(@COLOR_RED)$(@ICON_ERROR) Git hook not found or already disabled"; \
-	fi
-
-.PHONY: enable-git-hook
-enable-git-hook: ##UTILITIES## Enable pre-commit git hook
-	@echo "$(@FORMAT_BOLD)$(@COLOR_GREEN)$(@ICON_INFO) Enabling pre-commit git hook...$(@FORMAT_RESET)"
-	@if [ -f .git/hooks/pre-commit.disabled ]; then \
-		mv .git/hooks/pre-commit.disabled .git/hooks/pre-commit; \
-		chmod +x .git/hooks/pre-commit; \
-		echo "$(@COLOR_GREEN)$(@ICON_CHECK) Git hook enabled"; \
-	else \
-		echo "$(@COLOR_RED)$(@ICON_ERROR) Git hook not found or already enabled"; \
-	fi
+# Git hook commands removed - version incrementing now handled by GitHub workflow
 
 .PHONY: create-tag
 create-tag: ##UTILITIES## Create and push version tag

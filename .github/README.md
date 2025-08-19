@@ -11,6 +11,7 @@ Ten katalog zawiera automatyczne workflowy GitHub Actions dla projektu TuneTangl
 **Co robi:**
 - ✅ Weryfikuje kod (analyze, testy)
 - ✅ Generuje pliki lokalizacji
+- ✅ Automatycznie zwiększa patch version i build number (przy push na master)
 - ✅ Buduje APK release
 - ✅ Automatycznie tworzy tag wersji (przy push na master)
 - ✅ Tworzy GitHub Release z APK

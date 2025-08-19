@@ -10,6 +10,10 @@ on:
 jobs:
   verify-and-build:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      version_only: ${{ steps.version.outputs.version_only }}
+      tag: ${{ steps.version.outputs.version_only }}
     
     steps:
       - name: Checkout code
@@ -52,23 +56,51 @@ jobs:
       - name: Generate localization files
         run: flutter gen-l10n
         
+      - name: Increment version before build
+        id: version
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/.*version: //')
+          VERSION_ONLY=$(echo $VERSION | sed 's/+.*//')
+          BUILD_NUM=$(echo $VERSION | sed 's/.*+//')
+          
+          # Split version into major.minor.patch
+          MAJOR=$(echo $VERSION_ONLY | cut -d. -f1)
+          MINOR=$(echo $VERSION_ONLY | cut -d. -f2)
+          PATCH=$(echo $VERSION_ONLY | cut -d. -f3)
+          
+          # Increment both patch and build
+          NEW_PATCH=$((PATCH + 1))
+          NEW_BUILD_NUM=$((BUILD_NUM + 1))
+          NEW_VERSION_ONLY="$MAJOR.$MINOR.$NEW_PATCH"
+          NEW_VERSION="$NEW_VERSION_ONLY+$NEW_BUILD_NUM"
+          
+          echo "Current version: $VERSION"
+          echo "New version: $NEW_VERSION (patch: $PATCH->$NEW_PATCH, build: $BUILD_NUM->$NEW_BUILD_NUM)"
+          
+          # Update pubspec.yaml
+          sed -i "s/^version: .*/version: $NEW_VERSION/" pubspec.yaml
+          
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "version_only=$NEW_VERSION_ONLY" >> $GITHUB_OUTPUT
+          echo "build_num=$NEW_BUILD_NUM" >> $GITHUB_OUTPUT
+          
       - name: Build APK Release
         run: flutter build apk --release
-        
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-release
           path: build/app/outputs/flutter-apk/app-release.apk
           
-      - name: Get version from pubspec
-        id: version
+      - name: Commit version update
+        if: github.ref == 'refs/heads/master'
         run: |
-          VERSION=$(grep '^version:' pubspec.yaml | sed 's/.*version: //')
-          VERSION_ONLY=$(echo $VERSION | sed 's/+.*//')
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "version_only=$VERSION_ONLY" >> $GITHUB_OUTPUT
-          
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add pubspec.yaml
+          git commit -m "chore: increment version to ${{ steps.version.outputs.version }} [skip ci]" || echo "No changes to commit"
+
       - name: Check if tag exists
         id: check-tag
         run: |
@@ -105,34 +137,26 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: app-release
-          path: ./apk
-          
-      - name: Get version from pubspec
-        id: version
-        run: |
-          VERSION=$(grep '^version:' pubspec.yaml | sed 's/.*version: //')
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-          
+          path: ./apk          
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ steps.version.outputs.tag }}
-          name: Release ${{ steps.version.outputs.version }}
+          tag_name: v${{ needs.verify-and-build.outputs.version_only }}
+          name: Release ${{ needs.verify-and-build.outputs.version }}
           body: |
-            ## Release ${{ steps.version.outputs.version }}
+            ## Release ${{ needs.verify-and-build.outputs.version }}
             
-            ### Changes in this release:
-            - Automated build and verification
-            - APK release build
+            ### 🚀 What's New
+            ${{ github.event.head_commit.message }}
             
-            ### Download:
+            ### 📱 Download
             APK file is attached to this release.
             
-            ### Build Info:
+            ### 🔧 Build Info
             - Flutter: 3.35.1
-            - Build Date: ${{ github.event.head_commit.timestamp }}
-            - Commit: ${{ github.sha }}
+            - Build: ${{ github.run_number }}
+            - Date: ${{ github.event.head_commit.timestamp }}
           files: ./apk/*.apk
           draft: false
           prerelease: false
