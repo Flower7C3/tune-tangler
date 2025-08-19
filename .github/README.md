@@ -14,25 +14,17 @@ Ten katalog zawiera automatyczne workflowy GitHub Actions dla projektu TuneTangl
 - ✅ Buduje APK debug
 - ✅ Uploaduje APK debug jako artifact
 
-### 2. Release
+### 2. Release + Auto Tag (Integrated)
 **Plik:** `release.yml`
-**Uruchamiany:** Przy push tagów wersji (np. `v1.1.4`) lub manualnie
+**Uruchamiany:** Przy push na branch `master` lub tagów wersji
 
 **Co robi:**
 - ✅ Weryfikuje kod (analyze, testy)
 - ✅ Generuje pliki lokalizacji
 - ✅ Buduje APK release
+- ✅ Automatycznie tworzy tag wersji (przy push na master)
 - ✅ Tworzy GitHub Release z APK
 - ✅ Uploaduje APK release jako artifact
-
-### 3. Auto Tag
-**Plik:** `auto-tag.yml`
-**Uruchamiany:** Przy push na branch `master`
-
-**Co robi:**
-- ✅ Automatycznie tworzy tag wersji na podstawie `pubspec.yaml`
-- ✅ Pushuje tag na GitHub
-- ✅ Uruchamia workflow Release
 
 ## Jak używać
 

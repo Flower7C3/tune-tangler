@@ -2,6 +2,7 @@ name: Release Workflow
 
 on:
   push:
+    branches: [ master ]
     tags:
       - 'v*'  # Trigger on version tags (e.g., v1.1.4)
   workflow_dispatch:  # Allow manual trigger
@@ -13,6 +14,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
         
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -56,6 +60,37 @@ jobs:
         with:
           name: app-release
           path: build/app/outputs/flutter-apk/app-release.apk
+          
+      - name: Get version from pubspec
+        id: version
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/.*version: //')
+          VERSION_ONLY=$(echo $VERSION | sed 's/+.*//')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "version_only=$VERSION_ONLY" >> $GITHUB_OUTPUT
+          
+      - name: Check if tag exists
+        id: check-tag
+        run: |
+          if git rev-parse "v${{ steps.version.outputs.version_only }}" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Create and push tag
+        if: steps.check-tag.outputs.exists == 'false' && github.ref == 'refs/heads/master'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git tag "v${{ steps.version.outputs.version_only }}"
+          git push origin "v${{ steps.version.outputs.version_only }}"
+          echo "Created and pushed tag v${{ steps.version.outputs.version_only }}"
+          
+      - name: Tag already exists
+        if: steps.check-tag.outputs.exists == 'true'
+        run: |
+          echo "Tag v${{ steps.version.outputs.version_only }} already exists, skipping"
           
   create-release:
     needs: verify-and-build
