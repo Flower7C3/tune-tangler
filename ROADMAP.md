@@ -1,102 +1,92 @@
 # TuneTangler - Plan Rozwoju (Roadmap)
 
-## **Punkty Rozwoju — Zaktualizowane**
+## **Punkty Rozwoju**
 
-### **1. Efekty Audio (Wysoki Priorytet)**
+### **1. Optymalizacje Wydajności (Najwyższy Priorytet – UKOŃCZONE ✅)**
+
+#### **Naprawione Problemy**
+
+- ✅ **Zacinanie aplikacji**: Optymalizacja `ValueListenableBuilder`
+- ✅ **Niska liczba ramek (FPS)**: Przepisanie mechanizmu stanu
+- ✅ **Problemy z odtwarzaniem**: Przywrócenie `audioplayers`
+- ✅ **Optymalizacje UI**: `RepaintBoundary`, throttling, lazy loading
+- ✅ **Zarządzanie pamięcią**: `AudioMemoryPool`, `IconOptimizationService`
+
+### **2. Ulepszenia UI (Średni Priorytet – UKOŃCZONE ✅)**
+
+#### **Proste Animacje**
+
+- ✅ **Animacje przejść**: `AnimatedContainer`, `AnimatedOpacity`
+- ✅ **Responsive UI**: Płynne przejścia między stanami
+- ✅ **Loading indicators**: `LinearProgressIndicator`, `CircularProgressIndicator`
+
+#### **Interface Elements**
+
+- ✅ **Grupowanie menu**: Menu kontekstowe dla ścieżek już zorganizowane
+- ✅ **Szybkie akcje**: Globalne akcje i per-row już dostępne
+- ✅ **Modalne okna**: `showModalBottomSheet` dla szczegółów ścieżki, `AlertDialog`/`SimpleDialog` dla ustawień
+- ✅ **Tooltips**: Implementowane w szczegółach ścieżki i przyciskach
+
+#### **Uwagi dotyczące UI:**
+
+- ❌ **Vibrace/Haptic feedback** - mogłyby się nagrywać na ścieżkę audio
+- ❌ **Dodatkowe gesty** - część już jest (swipe do poruszania ścieżek), reszta zbędna
+- ❌ **Pinch-to-zoom** - niepotrzebne w kontekście aplikacji
+
+### **3. Eksport i Import (Wysoki Priorytet)**
+
+#### **Eksport Wszystkich Ścieżek**
+
+- **Kompletny backup**: Wszystkie ścieżki wraz z nagraniami
+- **Ustawienia**: Profile konfiguracyjne, preferencje użytkownika
+- **Metadane**: Nazwy, skróty klawiszowe, pozycje na siatce
+- **Formaty**: ZIP z zachowaniem struktury katalogów
+- **Wersjonowanie**: Automatyczne tworzenie kopii zapasowych
+
+#### **Import Ścieżek**
+
+- **Przywracanie**: Pełne przywracanie z backupu
+- **Merge**: Łączenie z istniejącymi ścieżkami
+- **Konflikty**: Rozwiązywanie konfliktów nazw i ID
+- **Walidacja**: Sprawdzanie integralności importowanych danych
+- **Preview**: Podgląd przed importem
+
+### **4. Efekty Audio (Odłożone na Później)**
 
 - **Podstawowe efekty**:
-    - Reverb (pomieszczenie, hala, echo)
-    - Delay/Echo (z kontrolą czasu i feedback)
-    - Compression (dynamika, punch)
-    - EQ (3-5 pasmowe, low/high pass)
+  - Reverb (pomieszczenie, hala, echo)
+  - Delay/Echo (z kontrolą czasu i feedback)
+  - Compression (dynamika, punch)
+  - EQ (3-5 pasmowe, low/high pass)
 
 - **Zaawansowane efekty**:
-    - Distortion/Overdrive
-    - Chorus/Flanger
-    - Pitch shift (transpozycja w czasie rzeczywistym)
-    - Time stretching (bez zmiany pitch)
+  - Distortion/Overdrive
+  - Chorus/Flanger
+  - Pitch shift (transpozycja w czasie rzeczywistym)
+  - Time stretching (bez zmiany pitch)
 
-### **2. Analityki Lokalne (Bez Chmury)**
+### **5. System Licencji (Średni Priorytet)**
 
-#### **Statystyki Użytkowania**
+#### **Funkcje Podstawowe (Bezpłatne)**
 
-- **Czas nagrywania**: Łączny czas nagrań dziennie/tygodniowo
-- **Liczba ścieżek**: Ile ścieżek zostało użytych
-- **Tryby odtwarzania**: Preferowane ustawienia (loop vs single)
-- **Częstotliwość użytkowania**: Kiedy aplikacja jest najczęściej używana
+- **Nagrywanie**: Podstawowe nagrywanie audio
+- **Odtwarzanie**: Podstawowe odtwarzanie ścieżek
+- **Siatka**: Podstawowa siatka 6×4
+- **Ulepszenia UI**: Wszystkie optymalizacje interfejsu
 
-#### **Analiza Audio**
+#### **Funkcje Zaawansowane (Licencja)**
 
-- **Poziomy głośności**: Średnia głośność nagrań
-- **Częstotliwości**: Dominujące pasma w nagraniach
-- **Długość nagrań**: Statystyki długości ścieżek
-- **Jakość audio**: Porównanie różnych ustawień kodowania
+- **Profile**: Zaawansowane profile ustawień
+- **Eksport/Import**: Pełne funkcje backupu i przywracania
+- **Efekty Audio**: Wszystkie efekty audio (gdy zostaną zaimplementowane)
+- **Siatka Rozszerzona**: Duże siatki (8×6, 10×8)
 
-#### **Wzorce Użytkowania**
+#### **Model Licencjonowania**
 
-- **Preferowane ustawienia**: Najczęściej używane sample rate, bitrate
-- **Konfiguracje siatki**: Preferowane rozmiary (6 × 4, 8 × 6, etc.)
-- **Profile ustawień**: Które profile są najpopularniejsze
-- **Skróty klawiszowe**: Najczęściej używane klawisze
+- **Jednorazowa płatność**: Wszystkie funkcje dostępne
+- **Bezpłatne**: Podstawowe funkcje zawsze dostępne
 
-#### **Wydajność**
-
-- **Użycie pamięci**: Ile miejsca zajmują nagrania
-- **Czas przetwarzania**: Jak długo trwa kodowanie/odkodowanie
-- **Bateria**: Wpływ na żywotność urządzenia
-- **Stabilność**: Liczba błędów i crashy
-
-### **3. Funkcje Prywatności**
-
-#### **Szyfrowanie Lokalne**
-
-- **Szyfrowanie plików**: AES-256 dla nagrań
-- **Szyfrowanie ustawień**: Ochrona profili konfiguracyjnych
-- **Bezpieczne usuwanie**: Overwrite przed usunięciem plików
-
-#### **Kontrola Dostępu**
-
-- **Biometria**: Odcisk palca/Face ID
-- **PIN**: Kod dostępu do aplikacji
-- **Ukrywanie**: Możliwość ukrycia aplikacji w launcherze
-
-### **4. Ulepszenia UX/UI**
-
-#### **Interfejs**
-
-- **Gestury**: Swipe, pinch-to-zoom na siatce
-- **Haptic feedback**: Wibracje przy interakcji
-- **Animacje**: Płynne przejścia między stanami
-- **Dark mode**: Automatyczne przełączanie według pory dnia
-
-#### **Dostępność**
-
-- **Screen reader**: Pełna obsługa VoiceOver/TalkBack
-- **Kontrast**: Wysoki kontrast dla słabowidzących
-- **Skalowanie**: Większe elementy UI
-- **Skróty klawiszowe**: Rozszerzone opcje klawiatury
-
-### **5. Optymalizacje Techniczne (Wysoki Priorytet - Problem z Zacinaniem)**
-
-#### **Wydajność**
-
-- **Lazy loading**: Ładowanie ścieżek na żądanie
-- **Cache**: Inteligentne buforowanie audio
-- **Compression**: Optymalizacja rozmiaru plików
-- **Background processing**: Przetwarzanie w tle
-- **Frame rate optimization**: Naprawa zacinania się i niskiej liczby ramek
-- **UI rendering**: Optymalizacja renderowania interfejsu
-- **Memory management**: Lepsze zarządzanie pamięcią
-- **Audio buffer optimization**: Optymalizacja buforów audio
-
-#### **Kompatybilność**
-
-- **iOS 17+**: Pełna obsługa nowych funkcji
-- **Android 14+**: Material You, dynamic colors
-- **Desktop**: Rozszerzenie na Windows/macOS/Linux
-- **Web**: PWA w przeglądarce
-
-### **6. Funkcje Audio**
+### **6. Funkcje Audio (Niski Priorytet)**
 
 #### **Przetwarzanie**
 
@@ -112,24 +102,32 @@
 - **Waveform visualization**: Wizualizacja fali dźwiękowej
 - **Spectral analysis**: Analiza częstotliwości
 
-## **Priorytety Implementacji**
+### **7. Kompatybilność Platformowa (Niski Priorytet)**
 
-1. **Wysoki**: Optymalizacja wydajności (naprawa zacinania, FPS)
-2. **Wysoki**: Efekty audio podstawowe (reverb, delay, compression)
-3. **Wysoki**: Analityki lokalne (statystyki użytkowania)
-4. **Średni**: Funkcje prywatności (szyfrowanie, biometria)
-5. **Średni**: Ulepszenia UX (gesty, animacje)
-6. **Niski**: Zaawansowane efekty audio
-7. **Niski**: Rozszerzenia platformowe
+- **iOS 17+**: Pełna obsługa nowych funkcji
+- **Android 14+**: Material You, dynamic colors
+- **Desktop**: Rozszerzenie na Windows/macOS/Linux
+- **Web**: PWA w przeglądarce
 
-## **Uwagi**
+## **Uwagi i Ustalenia**
+
+### **Zrezygnowano z:**
+
+- ❌ **Funkcji Prywatności** (szyfrowanie, biometria) – niepotrzebne komplikacje
+- ❌ **Analityk Lokalnych** (statystyki użytkowania) – narusza prywatność
+- ❌ **Mechaniki efektów audio** (tymczasowo usunięta) – problemy z `just_audio`
+
+### **Kluczowe Zasady:**
 
 - **Aplikacja ma pozostać maksymalnie prywatna** – brak synchronizacji z chmurą
 - **Brak współpracy online** – wszystkie funkcje lokalne
 - **MIDI nie jest potrzebne** – skupienie na audio processing
-- **Analityki tylko lokalne** – bez wysyłania danych na zewnątrz
-- **Wydajność jest krytyczna** – aplikacja nie może się zacinać ani mieć niskiej liczby ramek
+- **Wydajność jest krytyczna** ✅ – problemy z zacinaniem zostały naprawione
+- **Stabilność audio** ✅ – przywrócono `audioplayers` zamiast `just_audio`
 
----
+### **Następne Kroki:**
 
-*Ostatnia aktualizacja: $(date)*
+1. **Ulepszenia UI** – dalsze poprawki interfejsu użytkownika
+2. **Eksport/Import** – kluczowa funkcja dla użytkowników profesjonalnych
+3. **System licencji** – umożliwia rozwój aplikacji przy zachowaniu podstawowych funkcji bezpłatnych
+4. **Efekty audio** – implementacja w przyszłości z lepszą biblioteką

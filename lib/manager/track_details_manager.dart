@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:audioplayers/audioplayers.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter/material.dart';
@@ -75,35 +74,39 @@ class TrackDetailsManager {
   /// TRACK DETAILS PLAYER ICONS
   List<Widget> _trackDetailsTitle(Track track) => [
         _uiHelper.dragHandle,
-        ListTile(
-          leading: ValueListenableBuilder<TrackState>(
-              valueListenable: track.state,
-              builder: (context, state, child) => Tooltip(
-                    message: AppGlobalConfig.trackState.translate(state, trans: _trans),
-                    child: Icon(track.stateIcon, size: Theme.of(context).textTheme.headlineMedium!.fontSize! * UIHelper.iconSizeMultiplier),
-                  )),
-          trailing: ValueListenableBuilder(
-              valueListenable: CombinedNotifier([track.name, track.keyboardKey]),
-              builder: (context, _, __) => Tooltip(
-                  message: _trans.trackKeyboardKey(track.name.value),
-                  child: AppIcon.trackKeyboardKeyBox(
-                    track.keyboardKey.value,
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    foregroundColor: track.stateBackgroundColor(context),
-                    size: Theme.of(context).textTheme.headlineSmall!.fontSize!,
-                  ))),
-          title: ValueListenableBuilder<String>(
-            valueListenable: track.name,
-            builder: (context, name, child) => Text(_trans.trackTitle(name)),
-          ),
-          titleAlignment: ListTileTitleAlignment.top,
-          titleTextStyle: Theme.of(_context).textTheme.headlineMedium,
-          subtitle: ValueListenableBuilder<TrackState>(
-            valueListenable: track.state,
-            builder: (context, state, child) => Text(track.path == null ? '' : path.basename(track.path.toString())),
-          ),
-          subtitleTextStyle: Theme.of(_context).textTheme.labelSmall,
-        )
+        // Optimized: Single ValueListenableBuilder for title with keyboard key
+        ValueListenableBuilder(
+            valueListenable: CombinedNotifier([track.state, track.name, track.keyboardKey]),
+            builder: (context, _, __) => ListTile(
+                  leading: Tooltip(
+                    message: AppGlobalConfig.trackState
+                        .translate(track.state.value, trans: _trans),
+                    child: Icon(track.stateIcon,
+                        size: Theme.of(context)
+                                .textTheme
+                                .headlineMedium!
+                                .fontSize! *
+                            UIHelper.iconSizeMultiplier),
+                  ),
+                  title: Text(_trans.trackTitle(track.name.value)),
+                  titleAlignment: ListTileTitleAlignment.top,
+                  titleTextStyle: Theme.of(_context).textTheme.headlineMedium,
+                  subtitle: Text(track.path == null
+                      ? ''
+                      : path.basename(track.path.toString())),
+                  subtitleTextStyle: Theme.of(_context).textTheme.labelSmall,
+                  trailing: Tooltip(
+                      message: _trans.trackKeyboardKey(track.name.value),
+                      child: AppIcon.trackKeyboardKeyBox(
+                        track.keyboardKey.value,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: track.stateBackgroundColor(context),
+                        size: Theme.of(context)
+                            .textTheme
+                            .headlineSmall!
+                            .fontSize!,
+                      )),
+                )),
       ];
 
   Expanded _trackDetailsTabs(Track track) => Expanded(
@@ -140,16 +143,22 @@ class TrackDetailsManager {
                         _trackDetailsClip(track),
                       ]),
                     if (recorderState == RecorderState.empty || recorderState == RecorderState.ready)
-                      _uiHelper.trackDetailsTabElement([
-                        _trackDetailsPlaybackVolumeControl(track),
-                        _trackDetailsPlaybackBalanceControl(track),
-                        _trackDetailsPlaybackSpeedControl(track),
-                      ]),
+                        ValueListenableBuilder(
+                          valueListenable: CombinedNotifier([
+                            track.playbackVolume,
+                            track.playbackBalance,
+                            track.playbackSpeed,
+                          ]),
+                          builder: (context, _, __) => _uiHelper.trackDetailsTabElement([
+                              _trackDetailsPlaybackVolumeControl(track),
+                              _trackDetailsPlaybackBalanceControl(track),
+                              _trackDetailsPlaybackSpeedControl(track),
+                            ])),
                     if (recorderState == RecorderState.ready)
                       _uiHelper.trackDetailsTabElement([
                         _trackDetailsInfoBox(track),
                       ]),
-                  ]))
+                  ])),
               ]))));
 
   _trackDetailsInfoBox(Track track) => _uiHelper.trackDetailsBox([
@@ -191,96 +200,87 @@ class TrackDetailsManager {
         ]),
       ]);
 
-  Widget _trackDetailsPlaybackVolumeControl(Track track) => ValueListenableBuilder<double>(
-      valueListenable: track.playbackVolume,
-      child: Text(_trans.thePlaybackVolume),
-      builder: (context, playbackVolume, child) => _uiHelper.trackDetailsBox([
-            ListTile(
-              visualDensity: VisualDensity.compact,
-              leading: _uiHelper.mediaPlayerButton(
-                track.playbackVolumeIcon,
-                _trans.trackPlaybackVolumeSet(track.name.value),
-                onPressed: () {
-                  track.setPlaybackVolume((playbackVolume == AppGlobalConfig.trackPlaybackVolume.sliderValues.min)
-                      ? AppGlobalConfig.trackPlaybackVolume.sliderValues.max
-                      : AppGlobalConfig.trackPlaybackVolume.sliderValues.min);
-                  _trackRepository.save(track);
-                },
-              ),
-              trailing: Text(AppGlobalConfig.trackPlaybackVolume.format(playbackVolume)),
-              title: child,
-            ),
-            Slider(
-              value: playbackVolume,
-              min: AppGlobalConfig.trackPlaybackVolume.sliderValues.min,
-              max: AppGlobalConfig.trackPlaybackVolume.sliderValues.max,
-              divisions: AppGlobalConfig.trackPlaybackVolume.sliderValues.divisions,
-              label: AppGlobalConfig.trackPlaybackVolume.format(playbackVolume),
-              onChanged: (double value) => track.setPlaybackVolume(value),
-              onChangeEnd: (double value) => _trackRepository.save(track),
-            ),
-          ]));
+  Widget _trackDetailsPlaybackVolumeControl(Track track) => _uiHelper.trackDetailsBox([
+        ListTile(
+          visualDensity: VisualDensity.compact,
+          leading: _uiHelper.mediaPlayerButton(
+            track.playbackVolumeIcon,
+            _trans.trackPlaybackVolumeSet(track.name.value),
+            onPressed: () {
+              track.setPlaybackVolume((track.playbackVolume.value == AppGlobalConfig.trackPlaybackVolume.sliderValues.min)
+                  ? AppGlobalConfig.trackPlaybackVolume.sliderValues.max
+                  : AppGlobalConfig.trackPlaybackVolume.sliderValues.min);
+              _trackRepository.save(track);
+            },
+          ),
+          trailing: Text(AppGlobalConfig.trackPlaybackVolume.format(track.playbackVolume.value)),
+          title: Text(_trans.thePlaybackVolume),
+        ),
+        Slider(
+          value: track.playbackVolume.value,
+          min: AppGlobalConfig.trackPlaybackVolume.sliderValues.min,
+          max: AppGlobalConfig.trackPlaybackVolume.sliderValues.max,
+          divisions: AppGlobalConfig.trackPlaybackVolume.sliderValues.divisions,
+          label: AppGlobalConfig.trackPlaybackVolume.format(track.playbackVolume.value),
+          onChanged: (double value) => track.setPlaybackVolume(value),
+          onChangeEnd: (double value) => _trackRepository.save(track),
+        ),
+      ]);
 
-  Widget _trackDetailsPlaybackBalanceControl(Track track) => ValueListenableBuilder<double>(
-      valueListenable: track.playbackBalance,
-      child: Text(_trans.thePlaybackBalance),
-      builder: (context, playbackBalance, child) => _uiHelper.trackDetailsBox([
-            ListTile(
-              visualDensity: VisualDensity.compact,
-              style: ListTileStyle.drawer,
-              leading: _uiHelper.mediaPlayerButton(
-                AppGlobalConfig.trackPlaybackBalance.icon(track.playbackBalance.value),
-                _trans.trackPlaybackBalanceSet(track.name.value),
-                onPressed: () {
-                  track.setPlaybackBalance(0);
-                  _trackRepository.save(track);
-                },
-              ),
-              trailing: Text(AppGlobalConfig.trackPlaybackBalance.format(playbackBalance)),
-              title: child,
-            ),
-            SliderTheme(
-              data: _uiHelper.balanceSliderThemeData(_context),
-              child: Slider(
-                value: playbackBalance,
-                min: AppGlobalConfig.trackPlaybackBalance.sliderValues.min,
-                max: AppGlobalConfig.trackPlaybackBalance.sliderValues.max,
-                divisions: AppGlobalConfig.trackPlaybackBalance.sliderValues.divisions,
-                label: AppGlobalConfig.trackPlaybackBalance.translate(playbackBalance, trans: _trans),
-                onChanged: (double value) => track.setPlaybackBalance(value),
-                onChangeEnd: (double value) => _trackRepository.save(track),
-              ),
-            ),
-          ]));
+  Widget _trackDetailsPlaybackBalanceControl(Track track) => _uiHelper.trackDetailsBox([
+        ListTile(
+          visualDensity: VisualDensity.compact,
+          style: ListTileStyle.drawer,
+          leading: _uiHelper.mediaPlayerButton(
+            AppGlobalConfig.trackPlaybackBalance.icon(track.playbackBalance.value),
+            _trans.trackPlaybackBalanceSet(track.name.value),
+            onPressed: () {
+              track.setPlaybackBalance(0);
+              _trackRepository.save(track);
+            },
+          ),
+          trailing: Text(AppGlobalConfig.trackPlaybackBalance.format(track.playbackBalance.value)),
+          title: Text(_trans.thePlaybackBalance),
+        ),
+        SliderTheme(
+          data: _uiHelper.balanceSliderThemeData(_context),
+          child: Slider(
+            value: track.playbackBalance.value,
+            min: AppGlobalConfig.trackPlaybackBalance.sliderValues.min,
+            max: AppGlobalConfig.trackPlaybackBalance.sliderValues.max,
+            divisions: AppGlobalConfig.trackPlaybackBalance.sliderValues.divisions,
+            label: AppGlobalConfig.trackPlaybackBalance.translate(track.playbackBalance.value, trans: _trans),
+            onChanged: (double value) => track.setPlaybackBalance(value),
+            onChangeEnd: (double value) => _trackRepository.save(track),
+          ),
+        ),
+      ]);
 
-  Widget _trackDetailsPlaybackSpeedControl(Track track) => ValueListenableBuilder<double>(
-      valueListenable: track.playbackSpeed,
-      child: Text(_trans.thePlaybackSpeed),
-      builder: (context, playbackSpeed, child) => _uiHelper.trackDetailsBox([
-            ListTile(
-              visualDensity: VisualDensity.compact,
-              style: ListTileStyle.drawer,
-              leading: _uiHelper.mediaPlayerButton(
-                AppIcon.trackPlaybackSpeed,
-                _trans.trackPlaybackSpeedSet(track.name.value),
-                onPressed: () {
-                  track.setPlaybackSpeed(1);
-                  _trackRepository.save(track);
-                },
-              ),
-              trailing: Text(AppGlobalConfig.trackPlaybackSpeed.format(playbackSpeed)),
-              title: child,
-            ),
-            Slider(
-              value: playbackSpeed,
-              min: AppGlobalConfig.trackPlaybackSpeed.sliderValues.min,
-              max: AppGlobalConfig.trackPlaybackSpeed.sliderValues.max,
-              divisions: AppGlobalConfig.trackPlaybackSpeed.sliderValues.divisions,
-              label: AppGlobalConfig.trackPlaybackSpeed.format(playbackSpeed),
-              onChanged: (double value) => track.setPlaybackSpeed(value),
-              onChangeEnd: (double value) => _trackRepository.save(track),
-            ),
-          ]));
+  Widget _trackDetailsPlaybackSpeedControl(Track track) => _uiHelper.trackDetailsBox([
+        ListTile(
+          visualDensity: VisualDensity.compact,
+          style: ListTileStyle.drawer,
+          leading: _uiHelper.mediaPlayerButton(
+            AppIcon.trackPlaybackSpeed,
+            _trans.trackPlaybackSpeedSet(track.name.value),
+            onPressed: () {
+              track.setPlaybackSpeed(1);
+              _trackRepository.save(track);
+            },
+          ),
+          trailing: Text(AppGlobalConfig.trackPlaybackSpeed.format(track.playbackSpeed.value)),
+          title: Text(_trans.thePlaybackSpeed),
+        ),
+        Slider(
+          value: track.playbackSpeed.value,
+          min: AppGlobalConfig.trackPlaybackSpeed.sliderValues.min,
+          max: AppGlobalConfig.trackPlaybackSpeed.sliderValues.max,
+          divisions: AppGlobalConfig.trackPlaybackSpeed.sliderValues.divisions,
+          label: AppGlobalConfig.trackPlaybackSpeed.format(track.playbackSpeed.value),
+          onChanged: (double value) => track.setPlaybackSpeed(value),
+          onChangeEnd: (double value) => _trackRepository.save(track),
+        ),
+      ]);
 
   Widget _trackDetailsProgress(Track track) => _uiHelper.trackDetailsBox([
         _uiHelper.trackDetailsLine([
@@ -457,7 +457,11 @@ class TrackDetailsManager {
           color: Theme.of(_context).colorScheme.surfaceContainer,
           padding: EdgeInsets.all(Theme.of(_context).textTheme.titleSmall!.fontSize!),
           child: ValueListenableBuilder(
-            valueListenable: CombinedNotifier([track.recorderState, track.state]),
+            valueListenable: CombinedNotifier([
+              track.recorderState,
+              track.state,
+              track.playbackReleaseMode,
+              track.progress,]),
             builder: (context, recorderState, child) => _uiHelper.trackDetailsLine(
               [
                 if (track.recorderState.value != RecorderState.processing)
@@ -467,13 +471,11 @@ class TrackDetailsManager {
                     onPressed: (track.recorderState.value == RecorderState.ready) ? () => _share(track) : null,
                   ),
                 if (track.recorderState.value != RecorderState.processing)
-                  ValueListenableBuilder<ReleaseMode>(
-                      valueListenable: track.playbackReleaseMode,
-                      builder: (context, playbackReleaseMode, child) => _uiHelper.mediaPlayerButton(
-                            AppGlobalConfig.trackPlaybackReleaseMode.icon(playbackReleaseMode),
+                      _uiHelper.mediaPlayerButton(
+                            AppGlobalConfig.trackPlaybackReleaseMode.icon(track.playbackReleaseMode.value),
                             _trans.trackPlaybackModeToggle(track.name.value),
                             onPressed: (track.state.value != TrackState.recording) ? () => _trackRepository.togglePlaybackMode(track) : null,
-                          )),
+                      ),
                 if (track.recorderState.value == RecorderState.empty)
                   _uiHelper.mediaPlayerButton(
                     AppIcon.trackRecordingStart,
@@ -532,15 +534,13 @@ class TrackDetailsManager {
                     borderStyle: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(UIHelper.gridGap * 6))),
                   ),
                 if (track.recorderState.value == RecorderState.ready)
-                  ValueListenableBuilder<double>(
-                      valueListenable: track.progress,
-                      builder: (context, progress, child) => _uiHelper.mediaPlayerButton(
-                            AppIcon.trackPlayingStop,
-                            _trans.trackPlayingStop(track.name.value),
-                            onPressed: (track.state.value == TrackState.playing || track.state.value == TrackState.paused || progress > 0)
-                                ? () => track.stopPlaying()
-                                : null,
-                          )),
+                     _uiHelper.mediaPlayerButton(
+                          AppIcon.trackPlayingStop,
+                          _trans.trackPlayingStop(track.name.value),
+                          onPressed: (track.state.value == TrackState.playing || track.state.value == TrackState.paused || track.progress.value > 0)
+                              ? () => track.stopPlaying()
+                              : null,
+                     ),
                 if (track.recorderState.value != RecorderState.processing)
                   PopupMenuButton<TrackMenuItem>(
                     style: _uiHelper.circledButtonStyle(),

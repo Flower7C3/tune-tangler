@@ -1,23 +1,20 @@
-import 'dart:async';
 import 'dart:io';
-
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
+import 'package:tune_tangler/config/app_global_config.dart';
+import 'package:tune_tangler/config/app_icon.dart';
 import 'package:tune_tangler/config/config_collection.dart';
 import 'package:tune_tangler/helper/ui_helper.dart';
-
-import '../adapter/track_audio_source.dart';
-import '../config/app_config_fields.dart';
-import '../config/app_global_config.dart';
-import '../config/app_icon.dart';
-import '../entity/track.dart';
-import '../main.dart';
-import '../repository/track_repository.dart';
-import '../src/generated/app_localizations.dart';
-import '../wrapper/hive_settings_provider.dart';
+import 'package:tune_tangler/repository/track_repository.dart';
+import 'package:tune_tangler/entity/track.dart';
+import 'package:tune_tangler/adapter/track_audio_source.dart';
+import 'package:tune_tangler/config/app_config_fields.dart';
+import 'package:tune_tangler/src/generated/app_localizations.dart';
+import 'package:tune_tangler/wrapper/hive_settings_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:tune_tangler/main.dart';
 
 class RecordingManager {
   final HiveSettingsProvider _settings;
@@ -176,10 +173,18 @@ class RecordingManager {
   Future<void> stopAndSaveRecording(Track track) async {
     try {
       String? path = await _audioRecorder.stop();
+      track.setRecorderState(RecorderState.ready);
       track.setPath(path);
       _uiHelper.toast(_trans.trackRecordingStopSuccess(track.name.value), icon: AppGlobalConfig.trackState.icon(TrackState.idle));
+      _trackRepository.save(track);
     } catch (e) {
       track.setRecorderState(RecorderState.empty);
+      track.setAudioSource(null);
+      track.setAudioEncoder(null);
+      track.setSampleRate(null);
+      track.setBitRate(null);
+      track.setPath(null);
+      _trackRepository.save(track);
       _uiHelper.toast(_trans.trackRecordingStopError(e.toString(), track.name.value), icon: AppIcon.exception, type: ToastType.error, duration: 4);
     }
     flutterLocalNotificationsPlugin.cancel(0);

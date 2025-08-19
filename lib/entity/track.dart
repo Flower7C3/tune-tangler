@@ -4,12 +4,10 @@ import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
-import 'package:path/path.dart' as path_provider;
 import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path_provider;
 import 'package:record/record.dart';
 import 'package:tune_tangler/config/app_global_config.dart';
-import 'package:tune_tangler/src/audio_isolate_service.dart';
-import 'package:tune_tangler/src/audio_memory_pool.dart';
 
 import '../adapter/track_adapter_key.dart';
 import '../adapter/track_audio_source.dart';
@@ -58,6 +56,23 @@ class Track {
     setName(id.toString());
     resetKeyboardKey;
     _player = AudioPlayer();
+    // Użyj normalnego trybu ale z konfiguracją audio pozwalającą na mieszanie
+    _player.setPlayerMode(PlayerMode.mediaPlayer);
+    _player.setAudioContext(AudioContext(
+      iOS: AudioContextIOS(
+        category: AVAudioSessionCategory.playback,
+        options: {
+          AVAudioSessionOptions.mixWithOthers, // Kluczowe dla jednoczesnego odtwarzania
+        },
+      ),
+      android: AudioContextAndroid(
+        isSpeakerphoneOn: true,
+        stayAwake: true,
+        contentType: AndroidContentType.music,
+        usageType: AndroidUsageType.media,
+        audioFocus: AndroidAudioFocus.none, // Kluczowe - nie przejmuj audio focus
+      ),
+    ));
   }
 
   ///*************************************************************************************************************************************************
@@ -343,12 +358,16 @@ class Track {
     player.setPlaybackRate(playbackSpeed.value);
     _path = newPath;
     player.setSourceDeviceFile(newPath).then((value) async {
-      setDuration(await player.getDuration() ?? Duration());
+      Duration trackDuration = await player.getDuration() ?? Duration();
+      setDuration(trackDuration);
       setPosition(Duration());
       setPlaybackStartAtPosition(playbackStartAtPosition ?? Duration());
-      setPlaybackEndAtPosition(playbackEndAtPosition ?? duration.value);
+      setPlaybackEndAtPosition(playbackEndAtPosition ?? trackDuration);
       setRecorderState(RecorderState.ready);
-    }).onError((error, stack) {});
+    }).onError((error, stack) {
+      debugPrint('Error in setPath: $error');
+      _clearPath();
+    });
   }
 
   _clearPath() {
@@ -568,12 +587,13 @@ class Track {
     track.setPlaybackBalance(data[TrackAdapterKey.playbackBalance] ?? AppGlobalConfig.trackPlaybackBalance.defaultValue);
     track.setPlaybackSpeed(data[TrackAdapterKey.playbackSpeed] ?? AppGlobalConfig.trackPlaybackSpeed.defaultValue);
     track.setKeyboardKey(data[TrackAdapterKey.keyboardKey] ?? '');
-    track.setAudioSource(data[TrackAdapterKey.audioSource]);
-    track.setAudioEncoder(data[TrackAdapterKey.audioEncoder]);
+    track.setAudioSource(data[TrackAdapterKey.audioSource] != null ? TrackAudioSource.values[data[TrackAdapterKey.audioSource]] : null);
+    track.setAudioEncoder(data[TrackAdapterKey.audioEncoder] != null ? AudioEncoder.values[data[TrackAdapterKey.audioEncoder]] : null);
     track.setSampleRate(data[TrackAdapterKey.sampleRate]);
     track.setBitRate(data[TrackAdapterKey.bitRate]);
     track.setPath(data[TrackAdapterKey.path],
         playbackStartAtPosition: data[TrackAdapterKey.playbackStartAtPosition], playbackEndAtPosition: data[TrackAdapterKey.playbackEndAtPosition]);
+    track.updateState();
     return track;
   }
 
@@ -588,103 +608,9 @@ class Track {
         TrackAdapterKey.playbackStartAtPosition: playbackStartAtPosition.value,
         TrackAdapterKey.playbackEndAtPosition: playbackEndAtPosition.value,
         TrackAdapterKey.keyboardKey: keyboardKey.value,
-        TrackAdapterKey.audioSource: audioSource,
-        TrackAdapterKey.audioEncoder: audioEncoder,
+        TrackAdapterKey.audioSource: audioSource?.index,
+        TrackAdapterKey.audioEncoder: audioEncoder?.index,
         TrackAdapterKey.sampleRate: sampleRate,
         TrackAdapterKey.bitRate: bitRate,
       };
-
-  ///*************************************************************************************************************************************************
-  /// AUDIO ISOLATE OPERATIONS
-  ///*************************************************************************************************************************************************
-
-  /// Process audio file using isolate to prevent blocking main thread
-  Future<void> processAudioFileInIsolate(String filePath) async {
-    try {
-      state.value = TrackState.processing;
-      
-      // Get buffer from memory pool for audio processing
-      final buffer = AudioMemoryPool().getBuffer(1024 * 1024); // 1MB buffer
-      
-      final result = await AudioIsolateService.processAudioFile(filePath);
-      
-      if (result.success) {
-        // Update track with processed audio data
-        if (result.data != null) {
-          // Handle processed data
-          debugPrint('Audio processed successfully in isolate');
-        }
-      } else {
-        debugPrint('Audio processing failed: ${result.error}');
-      }
-      
-      // Return buffer to pool
-      buffer.returnToPool();
-    } catch (e) {
-      debugPrint('Error in audio isolate processing: $e');
-    } finally {
-      state.value = TrackState.idle;
-    }
-  }
-
-  /// Analyze audio metadata using isolate
-  Future<AudioMetadata?> analyzeAudioMetadataInIsolate(String filePath) async {
-    try {
-      // Get buffer from memory pool for metadata analysis
-      final buffer = AudioMemoryPool().getBuffer(64 * 1024); // 64KB buffer
-      
-      final metadata = await AudioIsolateService.analyzeAudioMetadata(filePath);
-      
-      // Update track duration and other metadata
-      duration.value = metadata.duration;
-      
-      // Return buffer to pool
-      buffer.returnToPool();
-      
-      return metadata;
-    } catch (e) {
-      debugPrint('Error analyzing audio metadata in isolate: $e');
-      return null;
-    }
-  }
-
-  /// Convert audio format using isolate
-  Future<bool> convertAudioFormatInIsolate(
-    String inputPath,
-    String outputPath,
-    AudioFormat targetFormat,
-  ) async {
-    try {
-      state.value = TrackState.processing;
-      
-      // Get buffer from memory pool for format conversion
-      final buffer = AudioMemoryPool().getBuffer(2 * 1024 * 1024); // 2MB buffer
-      
-      final result = await AudioIsolateService.convertAudioFormat(
-        inputPath,
-        outputPath,
-        targetFormat,
-      );
-      
-      if (result.success) {
-        // Update track with new audio file
-        debugPrint('Audio format converted successfully in isolate');
-        
-        // Return buffer to pool
-        buffer.returnToPool();
-        return true;
-      } else {
-        debugPrint('Audio format conversion failed: ${result.error}');
-        
-        // Return buffer to pool even on failure
-        buffer.returnToPool();
-        return false;
-      }
-    } catch (e) {
-      debugPrint('Error in audio format conversion isolate: $e');
-      return false;
-    } finally {
-      state.value = TrackState.idle;
-    }
-  }
 }

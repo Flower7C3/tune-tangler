@@ -105,23 +105,17 @@ class TrackManager {
                                     style: const TextStyle(fontWeight: FontWeight.bold)))),
                       ]
                     : [
-                        // Single ValueListenableBuilder for entire track content
+                        // Optimized: Single ValueListenableBuilder for frequently changing values
                         ValueListenableBuilder(
                           valueListenable: CombinedNotifier([
                             track.state,
                             track.name,
                             track.keyboardKey,
-                            track.playbackVolume,
-                            track.playbackBalance,
-                            track.playbackSpeed,
-                            track.playbackReleaseMode,
-                            track.playbackStartAtPosition,
-                            track.playbackEndAtPosition,
                           ]),
                           builder: (context, _, __) => Stack(
                             fit: StackFit.expand,
                             children: [
-                              // Grupa 1: Nazwa i klawisz klawiatury
+                              // Grupa 1: Nazwa i klawisz klawiatury (często zmieniające się)
                               Align(
                                   alignment: Alignment.center,
                                   child: Text(_trans.cell(track.name.value),
@@ -142,14 +136,27 @@ class TrackManager {
                                   alignment: Alignment.centerLeft,
                                   child: Icon(track.audioSourceIcon,
                                       size: Theme.of(_context).textTheme.titleMedium!.fontSize, color: track.stateForegroundColor(_context))),
-                              
-                              // Grupa 3: Kontrolki odtwarzania
+                            ],
+                          ),
+                        ),
+                        
+                        // Separate ValueListenableBuilder for playback controls (less frequent changes)
+                        ValueListenableBuilder(
+                          valueListenable: CombinedNotifier([
+                            track.playbackVolume,
+                            track.playbackBalance,
+                            track.playbackSpeed,
+                            track.playbackReleaseMode,
+                          ]),
+                          builder: (context, _, __) => Stack(
+                            children: [
+                              // Kontrolki odtwarzania
                               Align(
                                   alignment: Alignment.topCenter,
                                   child: Icon(track.playbackVolumeIcon,
                                       size: Theme.of(context).textTheme.titleMedium!.fontSize, color: track.stateForegroundColor(context))),
-                              
-                              // Grupa 4: Balans audio (tekst + ikona)
+
+                              // Balans audio (tekst + ikona)
                               Align(
                                   alignment: AlignmentDirectional(1, -0.3),
                                   child: SizedBox(
@@ -167,22 +174,35 @@ class TrackManager {
                                   child: Icon(AppGlobalConfig.trackPlaybackBalance.icon(track.playbackBalance.value),
                                       size: Theme.of(context).textTheme.titleMedium!.fontSize, color: track.stateForegroundColor(context))),
                               
-                              // Grupa 5: Prędkość odtwarzania
+                              // Prędkość odtwarzania
                               Align(
                                   alignment: AlignmentDirectional(-1, 1),
                                   child: Text(AppGlobalConfig.trackPlaybackSpeed.format(track.playbackSpeed.value),
                                       style: TextStyle(
                                           fontSize: Theme.of(context).textTheme.labelMedium!.fontSize, color: track.stateForegroundColor(context)))),
                               
-                              // Grupa 6: Tryb odtwarzania
+                              // Tryb odtwarzania
                               Align(
                                   alignment: AlignmentDirectional(1, 1),
                                   child: Icon(
-                                      AppGlobalConfig.trackPlaybackReleaseMode.icon(track.playbackReleaseMode.value),
-                                      size: Theme.of(context).textTheme.titleMedium!.fontSize,
-                                      color: track.stateForegroundColor(context))),
-                              
-                              // Grupa 7: Pozycje odtwarzania (start/end)
+                                    AppGlobalConfig.trackPlaybackReleaseMode.icon(track.playbackReleaseMode.value),
+                                    size: Theme.of(context).textTheme.titleMedium!.fontSize,
+                                    color: track.stateForegroundColor(context),
+                                  ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        
+                        // Separate ValueListenableBuilder for position controls (least frequent changes)
+                        ValueListenableBuilder(
+                          valueListenable: CombinedNotifier([
+                            track.playbackStartAtPosition,
+                            track.playbackEndAtPosition,
+                          ]),
+                          builder: (context, _, __) => Stack(
+                            children: [
+                              // Pozycje odtwarzania (start/end)
                               Align(
                                   alignment: AlignmentDirectional(0, 0.95),
                                   child: Icon(track.playbackStartAtPositionIcon,

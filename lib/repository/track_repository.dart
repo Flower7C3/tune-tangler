@@ -75,8 +75,11 @@ class TrackRepository {
 
   void startTracksPlaying(Set<Track> tracksList) async {
     for (Track track in tracksList) {
-      track.startPlaying();
-      save(track);
+      // Sprawdź czy ścieżka ma nagranie i jest gotowa do odtwarzania
+      if (track.path != null && track.recorderState.value == RecorderState.ready) {
+        track.startPlaying();
+        save(track);
+      }
     }
   }
 
