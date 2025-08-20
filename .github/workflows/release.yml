@@ -1,49 +1,68 @@
 name: Release Workflow
 
 on:
-  push:
-    branches: [ master ]
-    tags:
-      - 'v*'  # Trigger on version tags (e.g., v1.1.4)
-  workflow_dispatch:  # Allow manual trigger
+  workflow_dispatch:  # Only manual trigger - no automatic runs
 
 jobs:
-  verify-and-build:
+  # STEP 1: Setup Environment
+  setup-environment:
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.version.outputs.version }}
-      version_only: ${{ steps.version.outputs.version_only }}
-      tag: ${{ steps.version.outputs.version_only }}
+      flutter_version: ${{ steps.flutter-version.outputs.version }}
     
     steps:
-      - name: Checkout code
+      - name: "🔧 STEP 1.1: Checkout code"
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+          permissions: write-all
         
-      - name: Setup Flutter
+      - name: "🔧 STEP 1.2: Setup Flutter"
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.35.1'
           channel: 'stable'
           
-      - name: Setup Java
+      - name: "🔧 STEP 1.3: Get Flutter version"
+        id: flutter-version
+        run: |
+          FLUTTER_VER=$(flutter --version | grep -o 'Flutter [0-9]\+\.[0-9]\+\.[0-9]\+' | head -1 | cut -d' ' -f2)
+          echo "version=$FLUTTER_VER" >> $GITHUB_OUTPUT
+          echo "Flutter version: $FLUTTER_VER"
+          
+      - name: "🔧 STEP 1.4: Setup Java"
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
           cache: 'gradle'
           
-      - name: Verify Java setup
+      - name: "🔧 STEP 1.5: Debug environment after setup"
         run: |
+          echo "=== Environment Debug ==="
+          echo "Flutter version:"
+          flutter --version
           echo "Java version:"
           java -version
           echo "JAVA_HOME: $JAVA_HOME"
           echo "Java location:"
           which java
+          echo "Current directory: $(pwd)"
+          echo "Android directory contents:"
+          ls -la android/
+          echo "Gradle wrapper check:"
+          if [ -f "android/gradlew" ]; then
+            echo "gradlew exists"
+            cd android && ./gradlew --version
+            cd ..
+          else
+            echo "gradlew not found, checking gradle wrapper:"
+            ls -la android/gradle/wrapper/ || echo "gradle/wrapper not found"
+          fi
+          echo "========================"
           
-      - name: Cache dependencies
+      - name: "🔧 STEP 1.6: Cache dependencies"
         uses: actions/cache@v4
         with:
           path: |
@@ -52,23 +71,52 @@ jobs:
           key: ${{ runner.os }}-deps-${{ hashFiles('**/pubspec.lock', '**/android/gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-deps-
-            
-      - name: Get dependencies
+
+  # STEP 2: Code Quality and Testing
+  code-quality:
+    needs: setup-environment
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: "📋 STEP 2.1: Checkout code"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+          permissions: write-all
+          
+      - name: "📋 STEP 2.2: Get dependencies (cached)"
         run: flutter pub get
         
-      - name: Flutter doctor
+      - name: "📋 STEP 2.3: Flutter doctor"
         run: flutter doctor -v
         
-      - name: Analyze code
+      - name: "📋 STEP 2.4: Analyze code"
         run: flutter analyze
         
-      - name: Run tests
+      - name: "📋 STEP 2.5: Run tests"
         run: flutter test
         
-      - name: Generate localization files
+      - name: "📋 STEP 2.6: Generate localization files"
         run: flutter gen-l10n
-        
-      - name: Increment version before build
+
+  # STEP 3: Version Management
+  version-management:
+    needs: [code-quality, setup-environment]
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      version_only: ${{ steps.version.outputs.version_only }}
+    
+    steps:
+      - name: "🏷️ STEP 3.1: Checkout code"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+          permissions: write-all
+          
+      - name: "🏷️ STEP 3.2: Increment version"
         id: version
         run: |
           VERSION=$(grep '^version:' pubspec.yaml | sed 's/.*version: //')
@@ -95,102 +143,132 @@ jobs:
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "version_only=$NEW_VERSION_ONLY" >> $GITHUB_OUTPUT
           echo "build_num=$NEW_BUILD_NUM" >> $GITHUB_OUTPUT
+
+  # STEP 4: Build APK
+  build-apk:
+    needs: [version-management, setup-environment]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: "🔨 STEP 4.1: Checkout code"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+          permissions: write-all
           
-      - name: Debug environment before build
-        run: |
-          echo "=== Environment Debug ==="
-          echo "Flutter version:"
-          flutter --version
-          echo "Java version:"
-          java -version
-          echo "JAVA_HOME: $JAVA_HOME"
-          echo "Current directory: $(pwd)"
-          echo "Android directory contents:"
-          ls -la android/
-          echo "Gradle wrapper check:"
-          if [ -f "android/gradlew" ]; then
-            echo "gradlew exists"
-            cd android && ./gradlew --version
-            cd ..
-          else
-            echo "gradlew not found, checking gradle wrapper:"
-            ls -la android/gradle/wrapper/ || echo "gradle/wrapper not found"
-          fi
-          echo "========================"
-          
-      - name: Build APK Release
+      - name: "🔨 STEP 4.2: Get dependencies (cached)"
+        run: flutter pub get
+        
+      - name: "🔨 STEP 4.3: Build APK Release"
         run: flutter build apk --release
 
-      - name: Upload APK artifact
+      - name: "🔨 STEP 4.4: Upload APK artifact"
         uses: actions/upload-artifact@v4
         with:
           name: app-release
           path: build/app/outputs/flutter-apk/app-release.apk
+
+  # STEP 5: Commit Version (after successful build)
+  commit-version:
+    needs: [build-apk, version-management]
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ needs.version-management.outputs.version }}
+      version_only: ${{ needs.version-management.outputs.version_only }}
+    
+    steps:
+      - name: "🏷️ STEP 5.1: Checkout code"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+          permissions: write-all
           
-      - name: Commit version update
-        if: github.ref == 'refs/heads/master'
+      - name: "🏷️ STEP 5.2: Commit version update"
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add pubspec.yaml
-          git commit -m "chore: increment version to ${{ steps.version.outputs.version }} [skip ci]" || echo "No changes to commit"
+          git commit -m "chore: increment version to ${{ needs.version-management.outputs.version }} [skip ci]" || echo "No changes to commit"
 
-      - name: Check if tag exists
+  # STEP 6: Tagging
+  tagging:
+    needs: [commit-version, build-apk, setup-environment]
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ needs.commit-version.outputs.version }}
+      version_only: ${{ needs.commit-version.outputs.version_only }}
+      flutter_version: ${{ needs.setup-environment.outputs.flutter_version }}
+    
+    steps:
+      - name: "🏷️ STEP 6.1: Checkout code"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+          permissions: write-all
+          
+      - name: "🏷️ STEP 6.2: Check if tag exists"
         id: check-tag
         run: |
-          if git rev-parse "v${{ steps.version.outputs.version_only }}" >/dev/null 2>&1; then
+          if git rev-parse "v${{ needs.commit-version.outputs.version_only }}" >/dev/null 2>&1; then
             echo "exists=true" >> $GITHUB_OUTPUT
           else
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
           
-      - name: Create and push tag
-        if: steps.check-tag.outputs.exists == 'false' && github.ref == 'refs/heads/master'
+      - name: "🏷️ STEP 6.3: Create and push tag"
+        if: steps.check-tag.outputs.exists == 'false'
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git tag "v${{ steps.version.outputs.version_only }}"
-          git push origin "v${{ steps.version.outputs.version_only }}"
-          echo "Created and pushed tag v${{ steps.version.outputs.version_only }}"
+          git tag "v${{ needs.commit-version.outputs.version_only }}"
+          git push origin "v${{ needs.commit-version.outputs.version_only }}"
+          echo "Created and pushed tag v${{ needs.commit-version.outputs.version_only }}"
           
-      - name: Tag already exists
+      - name: "🏷️ STEP 6.4: Tag already exists"
         if: steps.check-tag.outputs.exists == 'true'
         run: |
-          echo "Tag v${{ steps.version.outputs.version_only }} already exists, skipping"
-          
+          echo "Tag v${{ needs.commit-version.outputs.version_only }} already exists, skipping"
+
+  # STEP 7: Create GitHub Release
   create-release:
-    needs: verify-and-build
+    needs: [build-apk, tagging]
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
     
     steps:
-      - name: Checkout code
+      - name: "🚀 STEP 7.1: Checkout code"
         uses: actions/checkout@v4
         
-      - name: Download APK artifact
+      - name: "🚀 STEP 7.2: Download APK artifact"
         uses: actions/download-artifact@v4
         with:
           name: app-release
           path: ./apk          
 
-      - name: Create Release
+      - name: "🚀 STEP 7.3: Create Release"
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v${{ needs.verify-and-build.outputs.version_only }}
-          name: Release ${{ needs.verify-and-build.outputs.version }}
+          tag_name: v${{ needs.tagging.outputs.version_only }}
+          name: Release ${{ needs.tagging.outputs.version }}
           body: |
-            ## Release ${{ needs.verify-and-build.outputs.version }}
-            
-            ### 🚀 What's New
-            ${{ github.event.head_commit.message }}
-            
-            ### 📱 Download
-            APK file is attached to this release.
+            ## Release ${{ needs.tagging.outputs.version }}
             
             ### 🔧 Build Info
-            - Flutter: 3.35.1
-            - Build: ${{ github.run_number }}
-            - Date: ${{ github.event.head_commit.timestamp }}
+            - **Flutter Version:** ${{ needs.tagging.outputs.flutter_version }}
+            - **Build Number:** ${{ github.run_number }}
+            - **Commit SHA:** ${{ github.sha }}
+            
+            ### 📋 Release Notes
+            - **Build Status:** ✅ Successfully built and tested
+            - **APK Size:** Ready for download
+            - **Compatibility:** Android devices (API 21+)
+            - **Installation:** Direct APK installation supported
+            
+            ### 🔄 Recent Changes
+            - **Latest commit:** ${{ github.sha }}
+            - **Workflow run:** [${{ github.repository }}/actions/runs/${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
           files: ./apk/*.apk
           draft: false
           prerelease: false
