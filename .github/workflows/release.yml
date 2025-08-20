@@ -168,15 +168,8 @@ jobs:
           tag_name: ${{ needs.build.outputs.tag_name }}
           name: Release ${{ needs.build.outputs.version }}
           body: |
-            ## Release ${{ needs.build.outputs.version }}
-            
-            ### 🔧 Build Info
-            - **Flutter Version:** ${{ env.FLUTTER_VERSION }}
             - **Build Number:** ${{ github.run_number }}
-            - **Commit SHA:** ${{ github.sha }}
-
-            ### 🔄 Recent Changes
-            - **Latest commit:** ${{ github.sha }}
+            - **Flutter Version:** ${{ env.FLUTTER_VERSION }}
             - **Workflow run:** [${{ github.repository }}/actions/runs/${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
           files: app-release.apk
           draft: false
