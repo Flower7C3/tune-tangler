@@ -12,50 +12,41 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [ubuntu-latest]
+        setup: [{flutter-version: 'flutter-3.35.1', java-version: 'java-17'}]
+        task: ['analyze', 'test', 'localization', 'build']
         include:
-          # Matrix setup + zadania w jednym
-          - os: ubuntu-latest
-            flutter-version: '3.35.1'
-            java-version: '17'
-            task: analyze
-            command: flutter analyze
+          # Matrix zadań - setup i os są automatycznie łączone
+          - task: analyze
             step_name: "Analyze code"
-          - os: ubuntu-latest
-            flutter-version: '3.35.1'
-            java-version: '17'
-            task: test
-            command: flutter test
+            command: flutter analyze
+          - task: test
             step_name: "Run tests"
-          - os: ubuntu-latest
-            flutter-version: '3.35.1'
-            java-version: '17'
-            task: localization
-            command: flutter gen-l10n
+            command: flutter test
+          - task: localization
             step_name: "Generate localization files"
-          - os: ubuntu-latest
-            flutter-version: '3.35.1'
-            java-version: '17'
-            task: build
-            command: flutter build apk --release
+            command: flutter gen-l10n
+          - task: build
             step_name: "Build APK"
+            command: flutter build apk --release
     
     steps:
       - name: "🔧 Checkout code"
         uses: actions/checkout@v4
         
       # Setup Flutter (z matrix)
-      - name: "🔧 Setup Flutter ${{ matrix.flutter-version }}"
+      - name: "🔧 Setup Flutter ${{ matrix.setup.flutter-version }}"
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ matrix.flutter-version }}
+          flutter-version: ${{ matrix.setup.flutter-version }}
           channel: 'stable'
           
       # Setup Java (z matrix)
-      - name: "🔧 Setup Java ${{ matrix.java-version }}"
+      - name: "🔧 Setup Java ${{ matrix.setup.java-version }}"
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: ${{ matrix.java-version }}
+          java-version: ${{ matrix.setup.java-version }}
           cache: 'gradle'
           
       # Cache dependencies
@@ -65,7 +56,7 @@ jobs:
           path: |
             ~/.pub-cache
             ~/.gradle/caches
-          key: ${{ matrix.os }}-flutter-${{ matrix.flutter-version }}-java-${{ matrix.java-version }}-${{ hashFiles('**/pubspec.lock') }}
+          key: ${{ matrix.os }}-${{ matrix.setup.flutter-version }}-${{ matrix.setup.java-version }}-${{ hashFiles('**/pubspec.lock') }}
           
       - name: " Get dependencies"
         run: flutter pub get
@@ -142,7 +133,7 @@ jobs:
             ## Release ${{ steps.version.outputs.version }}
             
             ### 🔧 Build Info
-            - **Flutter Version:** ${{ matrix.flutter-version }}
+            - **Flutter Version:** ${{ matrix.setup.flutter-version }}
             - **Build Number:** ${{ github.run_number }}
             - **Commit SHA:** ${{ github.sha }}
             
