@@ -3,162 +3,61 @@ name: Release Workflow
 on:
   workflow_dispatch:  # Only manual trigger - no automatic runs
 
+permissions:
+  contents: write
+  packages: write
+
 jobs:
-  # STEP 1: Setup Environment (Parallel)
-  setup-flutter:
-    runs-on: ubuntu-latest
-    outputs:
-      flutter_version: ${{ steps.flutter-version.outputs.version }}
-    
-    steps:
-      - name: "🔧 STEP 1.1: Checkout code"
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-        
-      - name: "🔧 STEP 1.2: Setup Flutter"
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.35.1'
-          channel: 'stable'
-          
-      - name: "🔧 STEP 1.3: Get Flutter version"
-        id: flutter-version
-        run: |
-          FLUTTER_VER=$(flutter --version | grep -o 'Flutter [0-9]\+\.[0-9]\+\.[0-9]\+' | head -1 | cut -d' ' -f2)
-          echo "version=$FLUTTER_VER" >> $GITHUB_OUTPUT
-          echo "Flutter version: $FLUTTER_VER"
+  # STEP 1: Setup Environment (Reusable Workflow)
+  setup-environment:
+    uses: ./.github/workflows/setup.yml
+    with:
+      flutter-version: '3.35.1'
+      java-version: '17'
 
-  setup-java:
+  # STEP 2: Code Quality and Testing (Matrix Strategy)
+  code-quality:
+    needs: setup-environment
     runs-on: ubuntu-latest
-    
-    steps:
-      - name: "🔧 STEP 1.1: Checkout code"
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-        
-      - name: "🔧 STEP 1.2: Setup Java"
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-          cache: 'gradle'
-
-  setup-cache:
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: "🔧 STEP 1.1: Checkout code"
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-        
-      - name: "🔧 STEP 1.2: Setup Flutter (for cache)"
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.35.1'
-          channel: 'stable'
-          
-      - name: "🔧 STEP 1.3: Cache dependencies"
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.pub-cache
-            ~/.gradle/caches
-          key: ${{ runner.os }}-deps-${{ hashFiles('**/pubspec.lock', '**/android/gradle/wrapper/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-deps-
-
-  # STEP 2: Code Quality and Testing (Parallel)
-  analyze-code:
-    needs: [setup-flutter, setup-cache]
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: "📋 STEP 2.1: Checkout code"
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: "📋 STEP 2.2: Setup Flutter"
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.35.1'
-          channel: 'stable'
-          
-      - name: "📋 STEP 2.3: Get dependencies (cached)"
+    strategy:
+      matrix:
+        task: [analyze, test, localization]
+        include:
+          - task: analyze
+            command: flutter analyze
+            step_name: "Analyze code"
+          - task: test
+            command: flutter test
+            step_name: "Run tests"
+          - task: localization
+            command: flutter gen-l10n
+            step_name: "Generate localization files"
+      
+    steps:       
+      - name: "📋 Get dependencies (cached)"
         run: flutter pub get
         
-      - name: "📋 STEP 2.4: Analyze code"
-        run: flutter analyze
-
-  run-tests:
-    needs: [setup-flutter, setup-cache]
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: "📋 STEP 2.1: Checkout code"
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: "📋 STEP 2.2: Setup Flutter"
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.35.1'
-          channel: 'stable'
-          
-      - name: "📋 STEP 2.3: Get dependencies (cached)"
-        run: flutter pub get
-        
-      - name: "📋 STEP 2.4: Run tests"
-        run: flutter test
-
-  generate-localization:
-    needs: [setup-flutter, setup-cache]
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: "📋 STEP 2.1: Checkout code"
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: "📋 STEP 2.2: Setup Flutter"
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.35.1'
-          channel: 'stable'
-          
-      - name: "📋 STEP 2.3: Get dependencies (cached)"
-        run: flutter pub get
-        
-      - name: "📋 STEP 2.4: Generate localization files"
-        run: flutter gen-l10n
+      - name: "📋 ${{ matrix.step_name }}"
+        run: ${{ matrix.command }}
 
   # STEP 3: Version Management
   version-management:
-    needs: [analyze-code, run-tests, generate-localization, setup-flutter]
+    needs: [code-quality, setup-environment]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     outputs:
       version: ${{ steps.version.outputs.version }}
       version_only: ${{ steps.version.outputs.version_only }}
     
     steps:
-      - name: "🏷️ STEP 3.1: Checkout code"
+      - name: "🏷️ Checkout code"
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: "🏷️ STEP 3.2: Increment version"
+      - name: "🏷️ Increment version"
         id: version
         run: |
           VERSION=$(grep '^version:' pubspec.yaml | sed 's/.*version: //')
@@ -188,36 +87,17 @@ jobs:
 
   # STEP 4: Build APK
   build-apk:
-    needs: [version-management, setup-flutter, setup-java, setup-cache]
+    needs: [setup-environment, version-management]
     runs-on: ubuntu-latest
     
     steps:
-      - name: "🔨 STEP 4.1: Checkout code"
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: "🔨 STEP 4.2: Setup Flutter"
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.35.1'
-          channel: 'stable'
-          
-      - name: "🔨 STEP 4.3: Setup Java"
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-          cache: 'gradle'
-          
-      - name: "🔨 STEP 4.4: Get dependencies (cached)"
+      - name: "🔨 Get dependencies (cached)"
         run: flutter pub get
         
-      - name: "🔨 STEP 4.5: Build APK Release"
+      - name: "🔨 Build APK Release"
         run: flutter build apk --release
 
-      - name: "🔨 STEP 4.6: Upload APK artifact"
+      - name: "🔨 Upload APK artifact"
         uses: actions/upload-artifact@v4
         with:
           name: app-release
@@ -227,18 +107,20 @@ jobs:
   commit-version:
     needs: [build-apk, version-management]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     outputs:
       version: ${{ needs.version-management.outputs.version }}
       version_only: ${{ needs.version-management.outputs.version_only }}
     
     steps:
-      - name: "🏷️ STEP 5.1: Checkout code"
+      - name: "🏷️ Checkout code"
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: "🏷️ STEP 5.2: Commit version update"
+      - name: "🏷️ Commit version update"
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
@@ -247,21 +129,23 @@ jobs:
 
   # STEP 6: Tagging
   tagging:
-    needs: [commit-version, build-apk, setup-flutter]
+    needs: [commit-version, build-apk, setup-environment]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     outputs:
       version: ${{ needs.commit-version.outputs.version }}
       version_only: ${{ needs.commit-version.outputs.version_only }}
-      flutter_version: ${{ needs.setup-flutter.outputs.flutter_version }}
+      flutter_version: ${{ needs.setup-environment.outputs.flutter_version }}
     
     steps:
-      - name: "🏷️ STEP 6.1: Checkout code"
+      - name: "🏷️ Checkout code"
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: "🏷️ STEP 6.2: Check if tag exists"
+      - name: "🏷️ Check if tag exists"
         id: check-tag
         run: |
           if git rev-parse "v${{ needs.commit-version.outputs.version_only }}" >/dev/null 2>&1; then
@@ -270,7 +154,7 @@ jobs:
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
           
-      - name: "🏷️ STEP 6.3: Create and push tag"
+      - name: "🏷️ Create and push tag"
         if: steps.check-tag.outputs.exists == 'false'
         run: |
           git config --local user.email "action@github.com"
@@ -279,7 +163,7 @@ jobs:
           git push origin "v${{ needs.commit-version.outputs.version_only }}"
           echo "Created and pushed tag v${{ needs.commit-version.outputs.version_only }}"
           
-      - name: "🏷️ STEP 6.4: Tag already exists"
+      - name: "🏷️ Tag already exists"
         if: steps.check-tag.outputs.exists == 'true'
         run: |
           echo "Tag v${{ needs.commit-version.outputs.version_only }} already exists, skipping"
@@ -290,16 +174,16 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - name: "🚀 STEP 7.1: Checkout code"
+      - name: "🚀 Checkout code"
         uses: actions/checkout@v4
         
-      - name: "🚀 STEP 7.2: Download APK artifact"
+      - name: "🚀 Download APK artifact"
         uses: actions/download-artifact@v4
         with:
           name: app-release
           path: ./apk          
 
-      - name: "🚀 STEP 7.3: Create Release"
+      - name: "🚀 Create Release"
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ needs.tagging.outputs.version_only }}
