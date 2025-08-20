@@ -34,16 +34,6 @@ jobs:
         with:
           distribution: ${{ env.JAVA_DISTRIBUTION }}
           java-version: ${{ env.JAVA_VERSION }}
-          cache: 'gradle'
-          
-      # Cache dependencies for faster builds
-      - name: "📦 Cache dependencies"
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.pub-cache
-            ~/.gradle/caches
-          key: test-ubuntu-latest-flutter-${{ env.FLUTTER_VERSION }}-java-${{ env.JAVA_VERSION }}-${{ hashFiles('**/pubspec.lock') }}
           
       # Get Flutter dependencies
       - name: "📦 Get dependencies"

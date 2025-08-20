@@ -17,14 +17,14 @@ CURRENT_VERSION=$(grep '^version:' "$PUBSPEC_PATH" | sed 's/.*version: //')
 echo "Current version: $CURRENT_VERSION"
 
 # Split version into parts
-VERSION_ONLY=$(echo "$CURRENT_VERSION" | sed 's/+.*//')
-BUILD_NUM=$(echo "$CURRENT_VERSION" | sed 's/.*+//')
+CURRENT_SEMANTIC_VERSION=$(echo "$CURRENT_VERSION" | sed 's/+.*//')
+CURRENT_BUILD=$(echo "$CURRENT_VERSION" | sed 's/.*+//')
 
 # Increment build number
-NEW_BUILD_NUM=$((BUILD_NUM + 1))
-NEW_VERSION="$VERSION_ONLY+$NEW_BUILD_NUM"
+NEW_BUILD=$((CURRENT_BUILD + 1))
+NEW_VERSION="$CURRENT_SEMANTIC_VERSION+$NEW_BUILD"
 
-echo "Version updated to: $NEW_VERSION (build: $BUILD_NUM->$NEW_BUILD_NUM)"
+echo "Version updated to: $NEW_VERSION (build: $CURRENT_BUILD->$NEW_BUILD)"
 
 # Update pubspec.yaml
 sed -i '' "s/^version: .*/version: $NEW_VERSION/" "$PUBSPEC_PATH"

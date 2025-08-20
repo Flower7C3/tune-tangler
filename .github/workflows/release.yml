@@ -17,6 +17,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag_name: ${{ steps.version.outputs.tag_name }}
+      flutter_version: ${{ env.FLUTTER_VERSION }}
+    
     # Version variables for dependencies
     env:
       FLUTTER_VERSION: '3.35.1'
@@ -24,17 +29,13 @@ jobs:
       JAVA_VERSION: '17'
       JAVA_DISTRIBUTION: 'zulu'
     
-    outputs:
-      version: ${{ steps.version.outputs.version }}
-      version_only: ${{ steps.version.outputs.version_only }}
-      build_num: ${{ steps.version.outputs.build_num }}
-    
     steps:
       - name: "🔧 Checkout code"
         uses: actions/checkout@v4
         
       # Setup Flutter
       - name: "🔧 Setup Flutter"
+        if: ${{ !inputs.mock_build }}
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
@@ -42,62 +43,63 @@ jobs:
           
       # Setup Java
       - name: "🔧 Setup Java"
+        if: ${{ !inputs.mock_build }}
         uses: actions/setup-java@v4
         with:
           distribution: ${{ env.JAVA_DISTRIBUTION }}
           java-version: ${{ env.JAVA_VERSION }}
-          cache: 'gradle'
           
-      # Cache dependencies
-      - name: "📦 Cache dependencies"
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.pub-cache
-            ~/.gradle/caches
-          key: ubuntu-latest-flutter-${{ env.FLUTTER_VERSION }}-java-${{ env.JAVA_VERSION }}-${{ hashFiles('**/pubspec.lock') }}
-          
+      # Get Flutter dependencies
       - name: "📦 Get dependencies"
+        if: ${{ !inputs.mock_build }}
         run: flutter pub get
         
       # WYKONANIE ZADAŃ (sekwencyjnie)
       - name: "🔍 Analyze code"
+        if: ${{ !inputs.mock_build }}
         run: flutter analyze
         
       - name: "🧪 Run tests"
+        if: ${{ !inputs.mock_build }}
         run: flutter test
         
       - name: "🌐 Generate localization files"
+        if: ${{ !inputs.mock_build }}
         run: flutter gen-l10n
         
       # Version management - BEFORE building
       - name: "🏷️ Increment version"
         id: version
         run: |
-          VERSION=$(grep '^version:' pubspec.yaml | sed 's/.*version: //')
-          VERSION_ONLY=$(echo $VERSION | sed 's/+.*//')
-          BUILD_NUM=$(echo $VERSION | sed 's/.*+//')
-          
+          CURRENT_VERSION=$(grep '^version:' pubspec.yaml | sed 's/.*version: //')
+          echo "Current version: $CURRENT_VERSION"
+
           # Split version into major.minor.patch
-          MAJOR=$(echo $VERSION_ONLY | cut -d. -f1)
-          MINOR=$(echo $VERSION_ONLY | cut -d. -f2)
-          PATCH=$(echo $VERSION_ONLY | cut -d. -f3)
+          CURRENT_SEMANTIC_VERSION=$(echo $CURRENT_VERSION | sed 's/+.*//')
+          CURRENT_MAJOR=$(echo $CURRENT_SEMANTIC_VERSION | cut -d. -f1)
+          CURRENT_MINOR=$(echo $CURRENT_SEMANTIC_VERSION | cut -d. -f2)
+          CURRENT_PATCH=$(echo $CURRENT_SEMANTIC_VERSION | cut -d. -f3)
+          CURRENT_BUILD=$(echo $CURRENT_VERSION | sed 's/.*+//')          
           
           # Increment both patch and build
-          NEW_PATCH=$((PATCH + 1))
-          NEW_BUILD_NUM=$((BUILD_NUM + 1))
-          NEW_VERSION_ONLY="$MAJOR.$MINOR.$NEW_PATCH"
-          NEW_VERSION="$NEW_VERSION_ONLY+$NEW_BUILD_NUM"
+          NEW_MAJOR=$CURRENT_MAJOR
+          NEW_MINOR=$CURRENT_MINOR
+          NEW_PATCH=$((CURRENT_PATCH + 1))
+          NEW_BUILD=$((CURRENT_BUILD + 1))
+
+          # Create new version
+          NEW_SEMANTIC_VERSION="$NEW_MAJOR.$NEW_MINOR.$NEW_PATCH"
+          NEW_VERSION="$NEW_SEMANTIC_VERSION+$NEW_BUILD"
           
-          echo "Current version: $VERSION"
-          echo "New version: $NEW_VERSION (patch: $PATCH->$NEW_PATCH, build: $BUILD_NUM->$NEW_BUILD_NUM)"
-          
+          # Output new version
+          echo "New version: $NEW_VERSION"
+
           # Update pubspec.yaml
           sed -i "s/^version: .*/version: $NEW_VERSION/" pubspec.yaml
           
+          # Output new version
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
-          echo "version_only=$NEW_VERSION_ONLY" >> $GITHUB_OUTPUT
-          echo "build_num=$NEW_BUILD_NUM" >> $GITHUB_OUTPUT
+          echo "tag_name=v$NEW_SEMANTIC_VERSION" >> $GITHUB_OUTPUT
         
       # Build APK with new version
       - name: "🏗️ Build APK"
@@ -128,8 +130,15 @@ jobs:
         with:
           name: app-release
           path: build/app/outputs/flutter-apk/app-release.apk
+          
+      # Upload modified pubspec.yaml for version-control job
+      - name: "📤 Upload modified pubspec.yaml"
+        uses: actions/upload-artifact@v4
+        with:
+          name: modified-pubspec
+          path: pubspec.yaml
 
-  # STEP 2: Version Commit and Tag (after artifacts are uploaded)
+  # STEP 2: Version Control (commit and tag using modified pubspec.yaml)
   version-control:
     needs: build
     runs-on: ubuntu-latest
@@ -138,8 +147,16 @@ jobs:
       - name: "🔧 Checkout code"
         uses: actions/checkout@v4
         
+      # Download modified pubspec.yaml
+      - name: "📥 Download modified pubspec.yaml"
+        uses: actions/download-artifact@v4
+        with:
+          name: modified-pubspec
+          path: ./
+          
       # Commit version update
       - name: "🏷️ Commit version update"
+        if: ${{ !inputs.mock_build }}
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
@@ -148,12 +165,22 @@ jobs:
           
       # Create and push tag
       - name: "🏷️ Create and push tag"
+        if: ${{ !inputs.mock_build }}
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git tag "v${{ needs.build.outputs.version_only }}"
-          git push origin "v${{ needs.build.outputs.version_only }}"
-          echo "Created and pushed tag v${{ needs.build.outputs.version_only }}"
+          git tag "${{ needs.build.outputs.tag_name }}"
+          git push origin "${{ needs.build.outputs.tag_name }}"
+          echo "Created and pushed tag ${{ needs.build.outputs.tag_name }}"
+      
+      # Mock version-control step for testing (when mock_build is enabled)
+      - name: "🏷️ Mock version-control step (testing only)"
+        if: ${{ inputs.mock_build }}
+        run: |
+          echo "🚀 Mock version-control step - simulating version control for testing purposes"
+          echo "📦 This would normally commit and push the version tag ${{ needs.build.outputs.tag_name }}, but we're just testing the workflow"
+          sleep 5
+          echo "✅ Mock version-control completed successfully!"          
 
   # STEP 3: Create GitHub Release
   create-release:
@@ -170,27 +197,42 @@ jobs:
           
       # Create GitHub Release
       - name: "🚀 Create GitHub Release"
+        if: ${{ !inputs.mock_build }}
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v${{ needs.build.outputs.version_only }}
+          tag_name: ${{ needs.build.outputs.tag_name }}
           name: Release ${{ needs.build.outputs.version }}
           body: |
             ## Release ${{ needs.build.outputs.version }}
             
             ### 🔧 Build Info
-            - **Flutter Version:** 3.35.1
+            - **Flutter Version:** ${{ needs.build.outputs.flutter_version }}
             - **Build Number:** ${{ github.run_number }}
             - **Commit SHA:** ${{ github.sha }}
-            
-            ### 📋 Release Notes
-            - **Build Status:** ✅ Successfully built and tested
-            - **APK Size:** Ready for download
-            - **Compatibility:** Android devices (API 21+)
-            - **Installation:** Direct APK installation supported
-            
+
             ### 🔄 Recent Changes
             - **Latest commit:** ${{ github.sha }}
             - **Workflow run:** [${{ github.repository }}/actions/runs/${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
           files: app-release.apk
           draft: false
           prerelease: false
+
+      # Mock create-release step for testing (when mock_build is enabled)
+      - name: "🚀 Mock create-release step (testing only)"
+        if: ${{ inputs.mock_build }}
+        run: |
+          echo "🚀 Mock create-release step - simulating GitHub release for testing purposes"
+          echo "📦 This would normally create a GitHub release ${{ needs.build.outputs.version }}, but we're just testing the workflow"
+          echo ""
+            
+          echo "### 🔧 Build Info"
+          echo " - **Flutter Version:** ${{ needs.build.outputs.flutter_version }}"
+          echo " - **Build Number:** ${{ github.run_number }}"
+          echo " - **Commit SHA:** ${{ github.sha }}"
+          echo ""
+
+          echo "### 🔄 Recent Changes"
+          echo " - **Latest commit:** ${{ github.sha }}"
+          echo " - **Workflow run:** [${{ github.repository }}/actions/runs/${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+
+          echo "✅ Mock create-release completed successfully!"
