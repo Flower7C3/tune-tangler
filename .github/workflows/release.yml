@@ -1,5 +1,11 @@
 name: Release Workflow
 
+# IMPORTANT: This workflow requires a Personal Access Token (PAT) to be configured
+# as a repository secret named 'PAT_TOKEN' with 'repo' scope for private repositories.
+# Go to Settings > Secrets and variables > Actions > New repository secret
+# Name: PAT_TOKEN
+# Value: Your GitHub Personal Access Token with 'repo' scope
+
 on:
   workflow_dispatch:  # Only manual trigger - no automatic runs
 
@@ -56,6 +62,12 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: "🏷️ Configure git for private repo"
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git
           
       - name: "🏷️ Increment version"
         id: version
@@ -120,10 +132,14 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
           
+      - name: "🏷️ Configure git for private repo"
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git
+          
       - name: "🏷️ Commit version update"
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
           git add pubspec.yaml
           git commit -m "chore: increment version to ${{ needs.version-management.outputs.version }} [skip ci]" || echo "No changes to commit"
 
@@ -145,6 +161,12 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
           
+      - name: "🏷️ Configure git for private repo"
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git
+          
       - name: "🏷️ Check if tag exists"
         id: check-tag
         run: |
@@ -157,8 +179,6 @@ jobs:
       - name: "🏷️ Create and push tag"
         if: steps.check-tag.outputs.exists == 'false'
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
           git tag "v${{ needs.commit-version.outputs.version_only }}"
           git push origin "v${{ needs.commit-version.outputs.version_only }}"
           echo "Created and pushed tag v${{ needs.commit-version.outputs.version_only }}"
