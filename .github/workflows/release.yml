@@ -33,6 +33,15 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '17'
+          cache: 'gradle'
+          
+      - name: Verify Java setup
+        run: |
+          echo "Java version:"
+          java -version
+          echo "JAVA_HOME: $JAVA_HOME"
+          echo "Java location:"
+          which java
           
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -83,6 +92,19 @@ jobs:
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "version_only=$NEW_VERSION_ONLY" >> $GITHUB_OUTPUT
           echo "build_num=$NEW_BUILD_NUM" >> $GITHUB_OUTPUT
+          
+      - name: Debug environment before build
+        run: |
+          echo "=== Environment Debug ==="
+          echo "Flutter version:"
+          flutter --version
+          echo "Java version:"
+          java -version
+          echo "JAVA_HOME: $JAVA_HOME"
+          echo "Gradle version:"
+          cd android && ./gradlew --version
+          cd ..
+          echo "========================"
           
       - name: Build APK Release
         run: flutter build apk --release
