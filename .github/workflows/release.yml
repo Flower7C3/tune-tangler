@@ -4,8 +4,8 @@ on:
   workflow_dispatch:  # Only manual trigger - no automatic runs
 
 jobs:
-  # STEP 1: Setup Environment
-  setup-environment:
+  # STEP 1: Setup Environment (Parallel)
+  setup-flutter:
     runs-on: ubuntu-latest
     outputs:
       flutter_version: ${{ steps.flutter-version.outputs.version }}
@@ -16,7 +16,6 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-          permissions: write-all
         
       - name: "🔧 STEP 1.2: Setup Flutter"
         uses: subosito/flutter-action@v2
@@ -30,39 +29,41 @@ jobs:
           FLUTTER_VER=$(flutter --version | grep -o 'Flutter [0-9]\+\.[0-9]\+\.[0-9]\+' | head -1 | cut -d' ' -f2)
           echo "version=$FLUTTER_VER" >> $GITHUB_OUTPUT
           echo "Flutter version: $FLUTTER_VER"
-          
-      - name: "🔧 STEP 1.4: Setup Java"
+
+  setup-java:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: "🔧 STEP 1.1: Checkout code"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+        
+      - name: "🔧 STEP 1.2: Setup Java"
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
           cache: 'gradle'
+
+  setup-cache:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: "🔧 STEP 1.1: Checkout code"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+        
+      - name: "🔧 STEP 1.2: Setup Flutter (for cache)"
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.1'
+          channel: 'stable'
           
-      - name: "🔧 STEP 1.5: Debug environment after setup"
-        run: |
-          echo "=== Environment Debug ==="
-          echo "Flutter version:"
-          flutter --version
-          echo "Java version:"
-          java -version
-          echo "JAVA_HOME: $JAVA_HOME"
-          echo "Java location:"
-          which java
-          echo "Current directory: $(pwd)"
-          echo "Android directory contents:"
-          ls -la android/
-          echo "Gradle wrapper check:"
-          if [ -f "android/gradlew" ]; then
-            echo "gradlew exists"
-            cd android && ./gradlew --version
-            cd ..
-          else
-            echo "gradlew not found, checking gradle wrapper:"
-            ls -la android/gradle/wrapper/ || echo "gradle/wrapper not found"
-          fi
-          echo "========================"
-          
-      - name: "🔧 STEP 1.6: Cache dependencies"
+      - name: "🔧 STEP 1.3: Cache dependencies"
         uses: actions/cache@v4
         with:
           path: |
@@ -72,9 +73,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-deps-
 
-  # STEP 2: Code Quality and Testing
-  code-quality:
-    needs: setup-environment
+  # STEP 2: Code Quality and Testing (Parallel)
+  analyze-code:
+    needs: [setup-flutter, setup-cache]
     runs-on: ubuntu-latest
     
     steps:
@@ -83,26 +84,68 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-          permissions: write-all
           
-      - name: "📋 STEP 2.2: Get dependencies (cached)"
+      - name: "📋 STEP 2.2: Setup Flutter"
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.1'
+          channel: 'stable'
+          
+      - name: "📋 STEP 2.3: Get dependencies (cached)"
         run: flutter pub get
-        
-      - name: "📋 STEP 2.3: Flutter doctor"
-        run: flutter doctor -v
         
       - name: "📋 STEP 2.4: Analyze code"
         run: flutter analyze
+
+  run-tests:
+    needs: [setup-flutter, setup-cache]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: "📋 STEP 2.1: Checkout code"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: "📋 STEP 2.2: Setup Flutter"
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.1'
+          channel: 'stable'
+          
+      - name: "📋 STEP 2.3: Get dependencies (cached)"
+        run: flutter pub get
         
-      - name: "📋 STEP 2.5: Run tests"
+      - name: "📋 STEP 2.4: Run tests"
         run: flutter test
+
+  generate-localization:
+    needs: [setup-flutter, setup-cache]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: "📋 STEP 2.1: Checkout code"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: "📋 STEP 2.2: Setup Flutter"
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.1'
+          channel: 'stable'
+          
+      - name: "📋 STEP 2.3: Get dependencies (cached)"
+        run: flutter pub get
         
-      - name: "📋 STEP 2.6: Generate localization files"
+      - name: "📋 STEP 2.4: Generate localization files"
         run: flutter gen-l10n
 
   # STEP 3: Version Management
   version-management:
-    needs: [code-quality, setup-environment]
+    needs: [analyze-code, run-tests, generate-localization, setup-flutter]
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
@@ -114,7 +157,6 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-          permissions: write-all
           
       - name: "🏷️ STEP 3.2: Increment version"
         id: version
@@ -146,7 +188,7 @@ jobs:
 
   # STEP 4: Build APK
   build-apk:
-    needs: [version-management, setup-environment]
+    needs: [version-management, setup-flutter, setup-java, setup-cache]
     runs-on: ubuntu-latest
     
     steps:
@@ -155,15 +197,27 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-          permissions: write-all
           
-      - name: "🔨 STEP 4.2: Get dependencies (cached)"
+      - name: "🔨 STEP 4.2: Setup Flutter"
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.1'
+          channel: 'stable'
+          
+      - name: "🔨 STEP 4.3: Setup Java"
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+          
+      - name: "🔨 STEP 4.4: Get dependencies (cached)"
         run: flutter pub get
         
-      - name: "🔨 STEP 4.3: Build APK Release"
+      - name: "🔨 STEP 4.5: Build APK Release"
         run: flutter build apk --release
 
-      - name: "🔨 STEP 4.4: Upload APK artifact"
+      - name: "🔨 STEP 4.6: Upload APK artifact"
         uses: actions/upload-artifact@v4
         with:
           name: app-release
@@ -183,7 +237,6 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-          permissions: write-all
           
       - name: "🏷️ STEP 5.2: Commit version update"
         run: |
@@ -194,12 +247,12 @@ jobs:
 
   # STEP 6: Tagging
   tagging:
-    needs: [commit-version, build-apk, setup-environment]
+    needs: [commit-version, build-apk, setup-flutter]
     runs-on: ubuntu-latest
     outputs:
       version: ${{ needs.commit-version.outputs.version }}
       version_only: ${{ needs.commit-version.outputs.version_only }}
-      flutter_version: ${{ needs.setup-environment.outputs.flutter_version }}
+      flutter_version: ${{ needs.setup-flutter.outputs.flutter_version }}
     
     steps:
       - name: "🏷️ STEP 6.1: Checkout code"
@@ -207,7 +260,6 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-          permissions: write-all
           
       - name: "🏷️ STEP 6.2: Check if tag exists"
         id: check-tag
