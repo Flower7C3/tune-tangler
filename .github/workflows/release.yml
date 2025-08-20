@@ -95,7 +95,7 @@ jobs:
           # Output new version
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "tag_name=v$NEW_SEMANTIC_VERSION" >> $GITHUB_OUTPUT
-        
+          
       # Build APK with new version
       - name: "🏗️ Build APK"
         run: flutter build apk --release
@@ -106,6 +106,7 @@ jobs:
         with:
           name: app-release
           path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 1
           
       # Upload modified pubspec.yaml for version-control job
       - name: "📤 Upload modified pubspec.yaml"
@@ -119,6 +120,10 @@ jobs:
     name: Version Control
     needs: [test, build]
     runs-on: ubuntu-latest
+    
+    outputs:
+      commits: ${{ steps.commits.outputs.commits }}
+    
     steps:
       - name: "🔧 Checkout code"
         uses: actions/checkout@v4
@@ -135,6 +140,31 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
+          
+      # Collect commits since last tag (BEFORE committing new version)
+      - name: "📝 Collect commits since last tag"
+        id: commits
+        run: |
+          # Get the last tag
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          
+          if [ -n "$LAST_TAG" ]; then
+            echo "Last tag: $LAST_TAG"
+            # Get commits since last tag and escape properly for GITHUB_OUTPUT
+            git log --oneline --no-merges ${LAST_TAG}..HEAD | sed 's/^/- /' > commits.txt
+            echo "commits<<EOF" >> $GITHUB_OUTPUT
+            cat commits.txt >> $GITHUB_OUTPUT
+            echo "EOF"
+            echo "✅ Collected commits from $LAST_TAG to HEAD"
+          else
+            echo "No previous tags found, getting all commits"
+            # Get all commits if no previous tags
+            git log --oneline --no-merges | sed 's/^/- /' > commits.txt
+            echo "commits<<EOF" >> $GITHUB_OUTPUT
+            cat commits.txt >> $GITHUB_OUTPUT
+            echo "EOF"
+            echo "✅ Collected all commits"
+          fi
           
       # Commit version update
       - name: "🏷️ Commit version update"
@@ -169,16 +199,26 @@ jobs:
           name: app-release
           path: ./
           
+      # Rename APK for release
+      - name: "🏷️ Rename APK for release"
+        run: |
+          mv app-release.apk "tune-tangler-${{ needs.build.outputs.version }}.apk"
+          echo "✅ APK renamed to: tune-tangler-${{ needs.build.outputs.version }}.apk"
+          
       # Create GitHub Release
       - name: "🚀 Create GitHub Release"
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ needs.build.outputs.tag_name }}
           name: Release ${{ needs.build.outputs.version }}
-          body: |
-            - **Build Number:** ${{ github.run_number }}
+          body: |          
+            ### 🔧 Build Info
             - **Flutter Version:** ${{ env.FLUTTER_VERSION }}
-            - **Workflow run:** [${{ github.repository }}/actions/runs/${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
-          files: app-release.apk
+            - **Java Version:** ${{ env.JAVA_VERSION }}/${{ env.JAVA_DISTRIBUTION }}
+            - **Workflow run:** [${{ github.run_number }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            
+            ### 📝 Changes since last release
+            ${{ needs.version-control.outputs.commits }}            
+          files: tune-tangler-${{ needs.build.outputs.version }}.apk
           draft: false
           prerelease: false
