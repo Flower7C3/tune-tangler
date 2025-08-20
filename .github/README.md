@@ -5,10 +5,12 @@ Ten katalog zawiera automatyczne workflowy GitHub Actions dla projektu TuneTangl
 ## Workflowy
 
 ### 1. Release + Auto Tag (Integrated)
+
 **Plik:** `release.yml`
 **Uruchamiany:** Przy push na branch `master` lub tagów wersji
 
 **Co robi:**
+
 - ✅ Weryfikuje kod (analyze, testy)
 - ✅ Generuje pliki lokalizacji
 - ✅ Automatycznie zwiększa patch version i build number (przy push na master)
@@ -20,16 +22,19 @@ Ten katalog zawiera automatyczne workflowy GitHub Actions dla projektu TuneTangl
 ## Jak używać
 
 ### Automatyczne Release
+
 1. Zmergeuj zmiany do `master` branch
 2. Workflow automatycznie utworzy tag (np. `v1.1.4`)
 3. Workflow automatycznie utworzy release z APK
 
 ### Manualne Release
+
 1. Utwórz tag lokalnie: `git tag v1.1.4`
 2. Pushuj tag: `git push origin v1.1.4`
 3. Workflow automatycznie się uruchomi
 
 ### Pominięcie Workflow
+
 Dodaj `[skip ci]` do wiadomości commita aby pominąć automatyczne workflowy.
 
 ## Wymagania
@@ -42,6 +47,7 @@ Dodaj `[skip ci]` do wiadomości commita aby pominąć automatyczne workflowy.
 ## Cache
 
 Workflowy używają cache dla:
+
 - `~/.pub-cache` (Flutter dependencies)
 - `~/.gradle/caches` (Android dependencies)
 
@@ -53,10 +59,13 @@ Workflowy używają cache dla:
 ## Troubleshooting
 
 ### Błąd "Permission denied"
+
 Upewnij się że workflow ma dostęp do `GITHUB_TOKEN` (domyślnie dostępny).
 
 ### Błąd "Flutter not found"
+
 Sprawdź czy używasz poprawnej wersji Flutter w workflow.
 
 ### Błąd "Java not found"
+
 Sprawdź czy używasz poprawnej wersji Java w workflow.

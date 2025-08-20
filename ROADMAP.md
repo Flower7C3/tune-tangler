@@ -27,7 +27,8 @@
 
 - ✅ **Grupowanie menu**: Menu kontekstowe dla ścieżek już zorganizowane
 - ✅ **Szybkie akcje**: Globalne akcje i per-row już dostępne
-- ✅ **Modalne okna**: `showModalBottomSheet` dla szczegółów ścieżki, `AlertDialog`/`SimpleDialog` dla ustawień
+- ✅ **Modalne okna**: `showModalBottomSheet` dla szczegółów ścieżki,
+  `AlertDialog`/`SimpleDialog` dla ustawień
 - ✅ **Tooltips**: Implementowane w szczegółach ścieżki i przyciskach
 
 #### **Uwagi dotyczące UI:**
@@ -120,13 +121,15 @@
 - ✅ **Progress bar nie działał**: Brak aktualizacji postępu odtwarzania
 - ✅ **Opóźnienia w odtwarzaniu**: `PlayerMode.lowLatency` powodował timeouty
 - ✅ **Jednoczesne odtwarzanie**: Naprawione przez konfigurację `AudioContext`
-- ✅ **Aktualizacja bibliotek**: `audioplayers` 6.5.0 + 38 innych zależności
+- ✅ **Aktualizacja bibliotek**: `audioplayers` 6.5.0 +
+  38 innych zależności
 
 ### **Rozwiązanie Techniczne**
 
 - **Usunięto `PlayerMode.lowLatency`** - blokował `getDuration()`
 - **Użyto `PlayerMode.mediaPlayer`** - pozwala na prawidłowe odczytanie metadanych
-- **Zachowano `AudioContext`** - z `mixWithOthers` i `audioFocus: none` dla multi-track
+- **Zachowano `AudioContext`** - z `mixWithOthers` i `audioFocus: none`
+  dla multi-track
 - **Uproszczono `seek()` operacje** - usunięto timeouty powodujące opóźnienia
 
 ## **Uwagi i Ustalenia**
@@ -143,13 +146,16 @@
 - **Brak współpracy online** – wszystkie funkcje lokalne
 - **MIDI nie jest potrzebne** – skupienie na audio processing
 - **Wydajność jest krytyczna** ✅ – problemy z zacinaniem zostały naprawione
-- **Stabilność audio** ✅ – przywrócono `audioplayers` i naprawiono problemy z `duration`
+- **Stabilność audio** ✅ – przywrócono `audioplayers` i naprawiono problemy
+  z `duration`
 - **Progress bar działa** ✅ – poprawnie pokazuje postęp po imporcie plików
-- **Multi-track playback** ✅ – jednoczesne odtwarzanie wielu ścieżek działa stabilnie
+- **Multi-track playback** ✅ – jednoczesne odtwarzanie wielu ścieżek
+  działa stabilnie
 
 ### **Następne Kroki:**
 
 1. **Eksport/Import** – kluczowa funkcja dla użytkowników profesjonalnych
-2. **System licencji** – umożliwia rozwój aplikacji przy zachowaniu podstawowych funkcji bezpłatnych
+2. **System licencji** – umożliwia rozwój aplikacji przy zachowaniu
+   podstawowych funkcji bezpłatnych
 3. **Efekty audio** – implementacja w przyszłości z lepszą biblioteką audio
 4. **Dalsze ulepszenia UI** – gdy podstawowe funkcje będą gotowe
