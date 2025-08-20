@@ -130,22 +130,30 @@ jobs:
           name: modified-pubspec
           path: ./
           
-      # Commit version update
-      - name: "🏷️ Commit version update"
+      # Git configuration
+      - name: "⚙️ Configure Git"
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
+          
+      # Commit version update
+      - name: "🏷️ Commit version update"
+        run: |
           git add pubspec.yaml
           git commit -m "chore: increment version to ${{ needs.build.outputs.version }} [skip ci]" || echo "No changes to commit"
+          
+      # Push version update to remote
+      - name: "📤 Push version update"
+        run: |
+          git push origin master
+          echo "✅ Version update pushed to remote successfully"
           
       # Create and push tag
       - name: "🏷️ Create and push tag"
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
           git tag "${{ needs.build.outputs.tag_name }}"
           git push origin "${{ needs.build.outputs.tag_name }}"
-          echo "Created and pushed tag ${{ needs.build.outputs.tag_name }}"
+          echo "✅ Tag ${{ needs.build.outputs.tag_name }} created and pushed successfully"
 
   # STEP 4: Create GitHub Release
   release:
