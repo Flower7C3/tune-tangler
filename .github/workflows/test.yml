@@ -26,4 +26,6 @@ jobs:
           flutter_channel: ${{ env.FLUTTER_CHANNEL }}
           with_dependencies: true
           with_localization: false
-          with_test: true
+
+      - name: "🔧 Run tests"
+        uses: ./.github/actions/flutter-test

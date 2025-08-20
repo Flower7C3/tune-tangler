@@ -30,8 +30,10 @@ jobs:
           flutter_channel: ${{ env.FLUTTER_CHANNEL }}
           with_dependencies: true
           with_localization: false
-          with_test: true
 
+      - name: "🔧 Run tests"
+        uses: ./.github/actions/flutter-test
+  
   # STEP 2: Build
   build:
     name: Build
@@ -53,7 +55,6 @@ jobs:
           flutter_channel: ${{ env.FLUTTER_CHANNEL }}
           with_dependencies: true
           with_localization: true
-          with_test: false
 
       - name: "🔧 Setup Java"
         uses: ./.github/actions/setup-java

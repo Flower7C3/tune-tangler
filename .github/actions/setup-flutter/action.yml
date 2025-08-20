@@ -17,10 +17,7 @@ inputs:
     description: 'Generate localization files'
     required: false
     default: 'true'
-  with_test:
-    description: 'Run tests'
-    required: false
-    default: 'true'
+
 
 runs:
   using: 'composite'
@@ -40,31 +37,7 @@ runs:
       run: flutter pub get
       
     - name: "🌐 Generate localization files"
-      if: ${{ inputs.with_localization == 'true' && inputs.with_test == 'true' }}
+      if: ${{ inputs.with_localization == 'true' }}
       shell: bash
       run: flutter gen-l10n
-
-          
-    # Run Flutter analyze
-    - name: "🔍 Analyze code" 
-      if: ${{ inputs.with_test == 'true' }}
-      shell: bash
-      run: flutter analyze
-      
-    # Run Flutter tests
-    - name: "🧪 Run tests"
-      if: ${{ inputs.with_test == 'true' }}
-      shell: bash
-      run: flutter test
-      
-    # Optional: Run integration tests if they exist
-    - name: "🧪 Run integration tests"
-      if: ${{ inputs.with_test == 'true' }}
-      shell: bash
-      run: |
-        if [ -d "integration_test" ]; then
-          flutter test integration_test/
-        else
-          echo "No integration tests found, skipping..."
-        fi
-      continue-on-error: true
+  

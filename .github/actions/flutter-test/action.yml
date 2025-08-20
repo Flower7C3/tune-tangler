@@ -1,0 +1,26 @@
+name: 'Flutter Test'
+description: 'Run Flutter tests for TuneTangler'
+
+runs:
+  using: 'composite'
+  steps:
+    # Run Flutter analyze
+    - name: "🔍 Analyze code" 
+      shell: bash
+      run: flutter analyze
+      
+    # Run Flutter tests
+    - name: "🧪 Run tests"
+      shell: bash
+      run: flutter test
+      
+    # Optional: Run integration tests if they exist
+    - name: "🧪 Run integration tests"
+      shell: bash
+      run: |
+        if [ -d "integration_test" ]; then
+          flutter test integration_test/
+        else
+          echo "No integration tests found, skipping..."
+        fi
+      continue-on-error: true
