@@ -1,0 +1,70 @@
+name: 'Setup Flutter'
+description: 'Setup Flutter environment for TuneTangler'
+inputs:
+  flutter_version:
+    description: 'Flutter version to use'
+    required: false
+    default: '3.35.1'
+  flutter_channel:
+    description: 'Flutter channel to use'
+    required: false
+    default: 'stable'
+  with_dependencies:
+    description: 'Get Flutter dependencies'
+    required: false
+    default: 'true'
+  with_localization:
+    description: 'Generate localization files'
+    required: false
+    default: 'true'
+  with_test:
+    description: 'Run tests'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: "🔧 Checkout code"
+      uses: actions/checkout@v4
+      
+    - name: "🔧 Setup Flutter"
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ inputs.flutter_version }}
+        channel: ${{ inputs.flutter_channel }}
+        
+    - name: "📦 Get dependencies"
+      if: ${{ inputs.with_dependencies == 'true' }}
+      shell: bash
+      run: flutter pub get
+      
+    - name: "🌐 Generate localization files"
+      if: ${{ inputs.with_localization == 'true' && inputs.with_test == 'true' }}
+      shell: bash
+      run: flutter gen-l10n
+
+          
+    # Run Flutter analyze
+    - name: "🔍 Analyze code" 
+      if: ${{ inputs.with_test == 'true' }}
+      shell: bash
+      run: flutter analyze
+      
+    # Run Flutter tests
+    - name: "🧪 Run tests"
+      if: ${{ inputs.with_test == 'true' }}
+      shell: bash
+      run: flutter test
+      
+    # Optional: Run integration tests if they exist
+    - name: "🧪 Run integration tests"
+      if: ${{ inputs.with_test == 'true' }}
+      shell: bash
+      run: |
+        if [ -d "integration_test" ]; then
+          flutter test integration_test/
+        else
+          echo "No integration tests found, skipping..."
+        fi
+      continue-on-error: true

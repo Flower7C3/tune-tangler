@@ -1,0 +1,24 @@
+name: 'Setup Java'
+description: 'Setup Java environment for TuneTangler'
+inputs:
+  java_version:
+    description: 'Java version to use'
+    required: false
+    default: '17'
+  java_distribution:
+    description: 'Java distribution to use'
+    required: false
+    default: 'zulu'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: "🔧 Checkout code"
+      uses: actions/checkout@v4
+        
+    - name: "🔧 Setup Java"
+      uses: actions/setup-java@v4
+      with:
+        distribution: ${{ inputs.java_distribution }}
+        java-version: ${{ inputs.java_version }}
+

@@ -3,8 +3,6 @@ name: Test Workflow
 on:
   pull_request:
     branches: [ master ]
-  push:
-    branches: [ master ]
 
 jobs:
   test:
@@ -21,42 +19,11 @@ jobs:
       - name: "🔧 Checkout code"
         uses: actions/checkout@v4
         
-      # Setup Flutter
       - name: "🔧 Setup Flutter"
-        uses: subosito/flutter-action@v2
+        uses: ./.github/actions/setup-flutter
         with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: ${{ env.FLUTTER_CHANNEL }}
-          
-      # Setup Java (needed for Android tests)
-      - name: "🔧 Setup Java"
-        uses: actions/setup-java@v4
-        with:
-          distribution: ${{ env.JAVA_DISTRIBUTION }}
-          java-version: ${{ env.JAVA_VERSION }}
-          
-      # Get Flutter dependencies
-      - name: "📦 Get dependencies"
-        run: flutter pub get
-        
-      # Run Flutter analyze
-      - name: "🔍 Analyze code"
-        run: flutter analyze
-        
-      # Run Flutter tests
-      - name: "🧪 Run tests"
-        run: flutter test
-        
-      # Generate localization files (to ensure they're valid)
-      - name: "🌐 Generate localization files"
-        run: flutter gen-l10n
-        
-      # Optional: Run integration tests if they exist
-      - name: "🧪 Run integration tests"
-        run: |
-          if [ -d "integration_test" ]; then
-            flutter test integration_test/
-          else
-            echo "No integration tests found, skipping..."
-          fi
-        continue-on-error: true
+          flutter_version: ${{ env.FLUTTER_VERSION }}
+          flutter_channel: ${{ env.FLUTTER_CHANNEL }}
+          with_dependencies: true
+          with_localization: false
+          with_test: true

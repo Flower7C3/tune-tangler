@@ -2,71 +2,59 @@ name: Release Workflow
 
 on:
   workflow_dispatch:  # Only manual trigger - no automatic runs
-    inputs:
-      mock_build:
-        description: 'Use mock build for testing (faster)'
-        required: false
-        default: false
-        type: boolean
 
 permissions:
   contents: write
+    
+# Version variables for dependencies
+env:
+  FLUTTER_VERSION: '3.35.1'
+  FLUTTER_CHANNEL: 'stable'
+  JAVA_VERSION: '17'
+  JAVA_DISTRIBUTION: 'zulu'
 
 jobs:
-  # STEP 1: Version Management and Build
+
+  # STEP 1: Test
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: "🔧 Setup Environment"
+        uses: ./.github/actions/setup-flutter
+        with:
+          flutter_version: ${{ env.FLUTTER_VERSION }}
+          flutter_channel: ${{ env.FLUTTER_CHANNEL }}
+          with_dependencies: true
+          with_localization: false
+          with_test: true
+
+  # STEP 2: Build
   build:
+    name: Build
+    needs: test
     runs-on: ubuntu-latest
     
     outputs:
       version: ${{ steps.version.outputs.version }}
       tag_name: ${{ steps.version.outputs.tag_name }}
-      flutter_version: ${{ env.FLUTTER_VERSION }}
-    
-    # Version variables for dependencies
-    env:
-      FLUTTER_VERSION: '3.35.1'
-      FLUTTER_CHANNEL: 'stable'
-      JAVA_VERSION: '17'
-      JAVA_DISTRIBUTION: 'zulu'
-    
+
     steps:
-      - name: "🔧 Checkout code"
-        uses: actions/checkout@v4
-        
-      # Setup Flutter
-      - name: "🔧 Setup Flutter"
-        if: ${{ !inputs.mock_build }}
-        uses: subosito/flutter-action@v2
+      - name: "🔧 Setup Environment"
+        uses: ./.github/actions/setup-flutter
         with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: ${{ env.FLUTTER_CHANNEL }}
-          
-      # Setup Java
+          flutter_version: ${{ env.FLUTTER_VERSION }}
+          flutter_channel: ${{ env.FLUTTER_CHANNEL }}
+          with_dependencies: true
+          with_localization: true
+          with_test: false
+
       - name: "🔧 Setup Java"
-        if: ${{ !inputs.mock_build }}
-        uses: actions/setup-java@v4
+        uses: ./.github/actions/setup-java
         with:
-          distribution: ${{ env.JAVA_DISTRIBUTION }}
-          java-version: ${{ env.JAVA_VERSION }}
-          
-      # Get Flutter dependencies
-      - name: "📦 Get dependencies"
-        if: ${{ !inputs.mock_build }}
-        run: flutter pub get
-        
-      # WYKONANIE ZADAŃ (sekwencyjnie)
-      - name: "🔍 Analyze code"
-        if: ${{ !inputs.mock_build }}
-        run: flutter analyze
-        
-      - name: "🧪 Run tests"
-        if: ${{ !inputs.mock_build }}
-        run: flutter test
-        
-      - name: "🌐 Generate localization files"
-        if: ${{ !inputs.mock_build }}
-        run: flutter gen-l10n
-        
+          java_version: ${{ env.JAVA_VERSION }}
+          java_distribution: ${{ env.JAVA_DISTRIBUTION }}
+  
       # Version management - BEFORE building
       - name: "🏷️ Increment version"
         id: version
@@ -103,26 +91,7 @@ jobs:
         
       # Build APK with new version
       - name: "🏗️ Build APK"
-        if: ${{ !inputs.mock_build }}
         run: flutter build apk --release
-        
-      # Mock build step for testing (when mock_build is enabled)
-      - name: "🏗️ Mock build step (testing only)"
-        if: ${{ inputs.mock_build }}
-        run: |
-          echo "🚀 Mock build step - simulating APK build for testing purposes"
-          echo "📱 This would normally build the APK, but we're just testing the workflow"
-          echo "⏱️  Simulating build time..."
-          sleep 5
-          echo "✅ Mock build completed successfully!"
-          echo "📦 APK would be generated at: build/app/outputs/flutter-apk/app-release.apk"
-          echo "📊 Build size: ~15-25 MB (estimated)"
-          echo "🔧 Flutter version used: ${{ env.FLUTTER_VERSION }}"
-          echo "☕ Java version used: ${{ env.JAVA_VERSION }}"
-          
-          # Create mock APK file for artifact upload
-          mkdir -p build/app/outputs/flutter-apk/
-          echo "Mock APK for testing - created at $(date)" > build/app/outputs/flutter-apk/app-release.apk
         
       # Upload APK artifact
       - name: "📤 Upload APK artifact"
@@ -138,11 +107,11 @@ jobs:
           name: modified-pubspec
           path: pubspec.yaml
 
-  # STEP 2: Version Control (commit and tag using modified pubspec.yaml)
+  # STEP 3: Version Control
   version-control:
-    needs: build
+    name: Version Control
+    needs: [test, build]
     runs-on: ubuntu-latest
-    
     steps:
       - name: "🔧 Checkout code"
         uses: actions/checkout@v4
@@ -156,7 +125,6 @@ jobs:
           
       # Commit version update
       - name: "🏷️ Commit version update"
-        if: ${{ !inputs.mock_build }}
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
@@ -165,26 +133,17 @@ jobs:
           
       # Create and push tag
       - name: "🏷️ Create and push tag"
-        if: ${{ !inputs.mock_build }}
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git tag "${{ needs.build.outputs.tag_name }}"
           git push origin "${{ needs.build.outputs.tag_name }}"
           echo "Created and pushed tag ${{ needs.build.outputs.tag_name }}"
-      
-      # Mock version-control step for testing (when mock_build is enabled)
-      - name: "🏷️ Mock version-control step (testing only)"
-        if: ${{ inputs.mock_build }}
-        run: |
-          echo "🚀 Mock version-control step - simulating version control for testing purposes"
-          echo "📦 This would normally commit and push the version tag ${{ needs.build.outputs.tag_name }}, but we're just testing the workflow"
-          sleep 5
-          echo "✅ Mock version-control completed successfully!"          
 
-  # STEP 3: Create GitHub Release
+  # STEP 4: Create GitHub Release
   create-release:
-    needs: [build, version-control]
+    name: Create Release
+    needs: [test, build, version-control]
     runs-on: ubuntu-latest
     
     steps:
@@ -197,7 +156,6 @@ jobs:
           
       # Create GitHub Release
       - name: "🚀 Create GitHub Release"
-        if: ${{ !inputs.mock_build }}
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ needs.build.outputs.tag_name }}
@@ -206,7 +164,7 @@ jobs:
             ## Release ${{ needs.build.outputs.version }}
             
             ### 🔧 Build Info
-            - **Flutter Version:** ${{ needs.build.outputs.flutter_version }}
+            - **Flutter Version:** ${{ env.FLUTTER_VERSION }}
             - **Build Number:** ${{ github.run_number }}
             - **Commit SHA:** ${{ github.sha }}
 
@@ -216,23 +174,3 @@ jobs:
           files: app-release.apk
           draft: false
           prerelease: false
-
-      # Mock create-release step for testing (when mock_build is enabled)
-      - name: "🚀 Mock create-release step (testing only)"
-        if: ${{ inputs.mock_build }}
-        run: |
-          echo "🚀 Mock create-release step - simulating GitHub release for testing purposes"
-          echo "📦 This would normally create a GitHub release ${{ needs.build.outputs.version }}, but we're just testing the workflow"
-          echo ""
-            
-          echo "### 🔧 Build Info"
-          echo " - **Flutter Version:** ${{ needs.build.outputs.flutter_version }}"
-          echo " - **Build Number:** ${{ github.run_number }}"
-          echo " - **Commit SHA:** ${{ github.sha }}"
-          echo ""
-
-          echo "### 🔄 Recent Changes"
-          echo " - **Latest commit:** ${{ github.sha }}"
-          echo " - **Workflow run:** [${{ github.repository }}/actions/runs/${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
-
-          echo "✅ Mock create-release completed successfully!"
