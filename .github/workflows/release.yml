@@ -2,80 +2,76 @@ name: Release Workflow
 
 on:
   workflow_dispatch:  # Only manual trigger - no automatic runs
+    inputs:
+      mock_build:
+        description: 'Use mock build for testing (faster)'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
 
 jobs:
-  # STEP 1: Build and Release (Matrix Strategy)
-  build-and-release:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        setup: [{flutter-version: '3.35.1', java-version: '17'}]
-        task: ['analyze', 'test', 'localization', 'build']
-        include:
-          # Matrix zadań - setup i os są automatycznie łączone
-          - task: analyze
-            step_name: "Analyze code"
-            command: flutter analyze
-          - task: test
-            step_name: "Run tests"
-            command: flutter test
-          - task: localization
-            step_name: "Generate localization files"
-            command: flutter gen-l10n
-          - task: build
-            step_name: "Build APK"
-            command: flutter build apk --release
+  # STEP 1: Version Management and Build
+  build:
+    runs-on: ubuntu-latest
+    
+    # Version variables for dependencies
+    env:
+      FLUTTER_VERSION: '3.35.1'
+      FLUTTER_CHANNEL: 'stable'
+      JAVA_VERSION: '17'
+      JAVA_DISTRIBUTION: 'zulu'
+    
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      version_only: ${{ steps.version.outputs.version_only }}
+      build_num: ${{ steps.version.outputs.build_num }}
     
     steps:
       - name: "🔧 Checkout code"
         uses: actions/checkout@v4
         
-      # Setup Flutter (z matrix)
-      - name: "🔧 Setup Flutter ${{ matrix.setup.flutter-version }}"
+      # Setup Flutter
+      - name: "🔧 Setup Flutter"
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ matrix.setup.flutter-version }}
-          channel: 'stable'
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: ${{ env.FLUTTER_CHANNEL }}
           
-      # Setup Java (z matrix)
-      - name: "🔧 Setup Java ${{ matrix.setup.java-version }}"
+      # Setup Java
+      - name: "🔧 Setup Java"
         uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
-          java-version: ${{ matrix.setup.java-version }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          java-version: ${{ env.JAVA_VERSION }}
           cache: 'gradle'
           
       # Cache dependencies
-      - name: " Cache dependencies"
+      - name: "📦 Cache dependencies"
         uses: actions/cache@v4
         with:
           path: |
             ~/.pub-cache
             ~/.gradle/caches
-          key: ${{ matrix.os }}-flutter-${{ matrix.setup.flutter-version }}-java-${{ matrix.setup.java-version }}-${{ hashFiles('**/pubspec.lock') }}
+          key: ubuntu-latest-flutter-${{ env.FLUTTER_VERSION }}-java-${{ env.JAVA_VERSION }}-${{ hashFiles('**/pubspec.lock') }}
           
-      - name: " Get dependencies"
+      - name: "📦 Get dependencies"
         run: flutter pub get
         
-      # Wykonanie zadania (z matrix)
-      - name: " ${{ matrix.step_name }}"
-        run: ${{ matrix.command }}
+      # WYKONANIE ZADAŃ (sekwencyjnie)
+      - name: "🔍 Analyze code"
+        run: flutter analyze
         
-      # Upload APK artifact (tylko dla build)
-      - name: " Upload APK artifact"
-        if: matrix.task == 'build'
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-release
-          path: build/app/outputs/flutter-apk/app-release.apk
-          
-      # Version management (tylko dla build)
+      - name: "🧪 Run tests"
+        run: flutter test
+        
+      - name: "🌐 Generate localization files"
+        run: flutter gen-l10n
+        
+      # Version management - BEFORE building
       - name: "🏷️ Increment version"
-        if: matrix.task == 'build'
         id: version
         run: |
           VERSION=$(grep '^version:' pubspec.yaml | sed 's/.*version: //')
@@ -102,38 +98,87 @@ jobs:
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "version_only=$NEW_VERSION_ONLY" >> $GITHUB_OUTPUT
           echo "build_num=$NEW_BUILD_NUM" >> $GITHUB_OUTPUT
+        
+      # Build APK with new version
+      - name: "🏗️ Build APK"
+        if: ${{ !inputs.mock_build }}
+        run: flutter build apk --release
+        
+      # Mock build step for testing (when mock_build is enabled)
+      - name: "🏗️ Mock build step (testing only)"
+        if: ${{ inputs.mock_build }}
+        run: |
+          echo "🚀 Mock build step - simulating APK build for testing purposes"
+          echo "📱 This would normally build the APK, but we're just testing the workflow"
+          echo "⏱️  Simulating build time..."
+          sleep 5
+          echo "✅ Mock build completed successfully!"
+          echo "📦 APK would be generated at: build/app/outputs/flutter-apk/app-release.apk"
+          echo "📊 Build size: ~15-25 MB (estimated)"
+          echo "🔧 Flutter version used: ${{ env.FLUTTER_VERSION }}"
+          echo "☕ Java version used: ${{ env.JAVA_VERSION }}"
           
-      # Commit version (tylko dla build)
+          # Create mock APK file for artifact upload
+          mkdir -p build/app/outputs/flutter-apk/
+          echo "Mock APK for testing - created at $(date)" > build/app/outputs/flutter-apk/app-release.apk
+        
+      # Upload APK artifact
+      - name: "📤 Upload APK artifact"
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+  # STEP 2: Version Commit and Tag (after artifacts are uploaded)
+  version-control:
+    needs: build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: "🔧 Checkout code"
+        uses: actions/checkout@v4
+        
+      # Commit version update
       - name: "🏷️ Commit version update"
-        if: matrix.task == 'build'
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add pubspec.yaml
-          git commit -m "chore: increment version to ${{ steps.version.outputs.version }} [skip ci]" || echo "No changes to commit"
+          git commit -m "chore: increment version to ${{ needs.build.outputs.version }} [skip ci]" || echo "No changes to commit"
           
-      # Create and push tag (tylko dla build)
+      # Create and push tag
       - name: "🏷️ Create and push tag"
-        if: matrix.task == 'build'
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git tag "v${{ steps.version.outputs.version_only }}"
-          git push origin "v${{ steps.version.outputs.version_only }}"
-          echo "Created and pushed tag v${{ steps.version.outputs.version_only }}"
+          git tag "v${{ needs.build.outputs.version_only }}"
+          git push origin "v${{ needs.build.outputs.version_only }}"
+          echo "Created and pushed tag v${{ needs.build.outputs.version_only }}"
+
+  # STEP 3: Create GitHub Release
+  create-release:
+    needs: [build, version-control]
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Download the APK artifact
+      - name: "📥 Download APK artifact"
+        uses: actions/download-artifact@v4
+        with:
+          name: app-release
+          path: ./
           
-      # Create GitHub Release (tylko dla build)
+      # Create GitHub Release
       - name: "🚀 Create GitHub Release"
-        if: matrix.task == 'build'
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v${{ steps.version.outputs.version_only }}
-          name: Release ${{ steps.version.outputs.version }}
+          tag_name: v${{ needs.build.outputs.version_only }}
+          name: Release ${{ needs.build.outputs.version }}
           body: |
-            ## Release ${{ steps.version.outputs.version }}
+            ## Release ${{ needs.build.outputs.version }}
             
             ### 🔧 Build Info
-            - **Flutter Version:** ${{ matrix.setup.flutter-version }}
+            - **Flutter Version:** 3.35.1
             - **Build Number:** ${{ github.run_number }}
             - **Commit SHA:** ${{ github.sha }}
             
@@ -146,6 +191,6 @@ jobs:
             ### 🔄 Recent Changes
             - **Latest commit:** ${{ github.sha }}
             - **Workflow run:** [${{ github.repository }}/actions/runs/${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
-          files: build/app/outputs/flutter-apk/app-release.apk
+          files: app-release.apk
           draft: false
           prerelease: false

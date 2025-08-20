@@ -1,0 +1,72 @@
+name: Test Workflow
+
+on:
+  pull_request:
+    branches: [ master ]
+  push:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    # Version variables for dependencies
+    env:
+      FLUTTER_VERSION: '3.35.1'
+      FLUTTER_CHANNEL: 'stable'
+      JAVA_VERSION: '17'
+      JAVA_DISTRIBUTION: 'zulu'
+    
+    steps:
+      - name: "🔧 Checkout code"
+        uses: actions/checkout@v4
+        
+      # Setup Flutter
+      - name: "🔧 Setup Flutter"
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          
+      # Setup Java (needed for Android tests)
+      - name: "🔧 Setup Java"
+        uses: actions/setup-java@v4
+        with:
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
+          
+      # Cache dependencies for faster builds
+      - name: "📦 Cache dependencies"
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            ~/.gradle/caches
+          key: test-ubuntu-latest-flutter-${{ env.FLUTTER_VERSION }}-java-${{ env.JAVA_VERSION }}-${{ hashFiles('**/pubspec.lock') }}
+          
+      # Get Flutter dependencies
+      - name: "📦 Get dependencies"
+        run: flutter pub get
+        
+      # Run Flutter analyze
+      - name: "🔍 Analyze code"
+        run: flutter analyze
+        
+      # Run Flutter tests
+      - name: "🧪 Run tests"
+        run: flutter test
+        
+      # Generate localization files (to ensure they're valid)
+      - name: "🌐 Generate localization files"
+        run: flutter gen-l10n
+        
+      # Optional: Run integration tests if they exist
+      - name: "🧪 Run integration tests"
+        run: |
+          if [ -d "integration_test" ]; then
+            flutter test integration_test/
+          else
+            echo "No integration tests found, skipping..."
+          fi
+        continue-on-error: true
