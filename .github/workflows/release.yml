@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        setup: [{flutter-version: 'flutter-3.35.1', java-version: 'java-17'}]
+        setup: [{flutter-version: '3.35.1', java-version: '17'}]
         task: ['analyze', 'test', 'localization', 'build']
         include:
           # Matrix zadań - setup i os są automatycznie łączone
@@ -56,7 +56,7 @@ jobs:
           path: |
             ~/.pub-cache
             ~/.gradle/caches
-          key: ${{ matrix.os }}-${{ matrix.setup.flutter-version }}-${{ matrix.setup.java-version }}-${{ hashFiles('**/pubspec.lock') }}
+          key: ${{ matrix.os }}-flutter-${{ matrix.setup.flutter-version }}-java-${{ matrix.setup.java-version }}-${{ hashFiles('**/pubspec.lock') }}
           
       - name: " Get dependencies"
         run: flutter pub get
