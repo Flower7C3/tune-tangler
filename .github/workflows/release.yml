@@ -1,11 +1,12 @@
-name: Release Workflow
+name: Build & Release Workflow
 
 on:
   workflow_dispatch:  # Only manual trigger - no automatic runs
 
 permissions:
   contents: write
-    
+  pull-requests: write
+
 # Version variables for dependencies
 env:
   FLUTTER_VERSION: '3.35.1'
@@ -22,8 +23,11 @@ jobs:
     steps:
       - name: "🔧 Checkout code"
         uses: actions/checkout@v4
-        
-      - name: "🔧 Setup Environment"
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: "📲 Setup Flutter"
         uses: ./.github/actions/setup-flutter
         with:
           flutter_version: ${{ env.FLUTTER_VERSION }}
@@ -31,13 +35,13 @@ jobs:
           with_dependencies: true
           with_localization: false
 
-      - name: "🔧 Run tests"
+      - name: "🧪 Run tests"
         uses: ./.github/actions/flutter-test
   
   # STEP 2: Build
   build:
     name: Build
-    needs: test
+    needs: [ test ]
     runs-on: ubuntu-latest
     
     outputs:
@@ -47,8 +51,11 @@ jobs:
     steps:
       - name: "🔧 Checkout code"
         uses: actions/checkout@v4
-        
-      - name: "🔧 Setup Environment"
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: "📲 Setup Flutter"
         uses: ./.github/actions/setup-flutter
         with:
           flutter_version: ${{ env.FLUTTER_VERSION }}
@@ -56,13 +63,12 @@ jobs:
           with_dependencies: true
           with_localization: true
 
-      - name: "🔧 Setup Java"
+      - name: "☕️ Setup Java"
         uses: ./.github/actions/setup-java
         with:
           java_version: ${{ env.JAVA_VERSION }}
           java_distribution: ${{ env.JAVA_DISTRIBUTION }}
   
-      # Version management - BEFORE building
       - name: "🏷️ Increment version"
         id: version
         run: |
@@ -86,21 +92,20 @@ jobs:
           NEW_SEMANTIC_VERSION="$NEW_MAJOR.$NEW_MINOR.$NEW_PATCH"
           NEW_VERSION="$NEW_SEMANTIC_VERSION+$NEW_BUILD"
           
-          # Output new version
           echo "New version: $NEW_VERSION"
-
-          # Update pubspec.yaml
-          sed -i "s/^version: .*/version: $NEW_VERSION/" pubspec.yaml
-          
+          echo "Tag name: $TAG_NAME"
           # Output new version
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "tag_name=v$NEW_SEMANTIC_VERSION" >> $GITHUB_OUTPUT
+
+      - name: "📝 Update pubspec.yaml"
+        run: |
+          sed -i "s/^version: .*/version: $NEW_VERSION/" pubspec.yaml
           
-      # Build APK with new version
+
       - name: "🏗️ Build APK"
         run: flutter build apk --release
         
-      # Upload APK artifact
       - name: "📤 Upload APK artifact"
         uses: actions/upload-artifact@v4
         with:
@@ -108,7 +113,6 @@ jobs:
           path: build/app/outputs/flutter-apk/app-release.apk
           retention-days: 1
           
-      # Upload modified pubspec.yaml for version-control job
       - name: "📤 Upload modified pubspec.yaml"
         uses: actions/upload-artifact@v4
         with:
@@ -120,30 +124,30 @@ jobs:
     name: Version Control
     needs: [test, build]
     runs-on: ubuntu-latest
-    
+    permissions:
+      contents: write
     outputs:
-      commits: ${{ steps.commits.outputs.commits }}
-    
+      commits: ${{ steps.collect_commits.outputs.commits }}
     steps:
       - name: "🔧 Checkout code"
         uses: actions/checkout@v4
-        
-      # Download modified pubspec.yaml
-      - name: "📥 Download modified pubspec.yaml"
-        uses: actions/download-artifact@v4
         with:
-          name: modified-pubspec
-          path: ./
-          
-      # Git configuration
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
       - name: "⚙️ Configure Git"
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           
-      # Collect commits since last tag (BEFORE committing new version)
+      - name: "📥 Download modified pubspec.yaml"
+        uses: actions/download-artifact@v4
+        with:
+          name: modified-pubspec
+          path: ./
+
       - name: "📝 Collect commits since last tag"
-        id: commits
+        id: collect_commits
         run: |
           # Get the last tag
           LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
@@ -154,35 +158,35 @@ jobs:
             git log --oneline --no-merges ${LAST_TAG}..HEAD | sed 's/^/- /' > commits.txt
             echo "commits<<EOF" >> $GITHUB_OUTPUT
             cat commits.txt >> $GITHUB_OUTPUT
-            echo "EOF"
+            echo "EOF" >> $GITHUB_OUTPUT
             echo "✅ Collected commits from $LAST_TAG to HEAD"
+            rm -f commits.txt
           else
             echo "No previous tags found, getting all commits"
             # Get all commits if no previous tags
             git log --oneline --no-merges | sed 's/^/- /' > commits.txt
             echo "commits<<EOF" >> $GITHUB_OUTPUT
             cat commits.txt >> $GITHUB_OUTPUT
-            echo "EOF"
+            echo "EOF" >> $GITHUB_OUTPUT
             echo "✅ Collected all commits"
+            rm -f commits.txt
           fi
           
-      # Commit version update
-      - name: "🏷️ Commit version update"
+      - name: "💾 Commit version update"
         run: |
           git add pubspec.yaml
           git commit -m "chore: increment version to ${{ needs.build.outputs.version }} [skip ci]" || echo "No changes to commit"
           
-      # Push version update to remote
-      - name: "📤 Push version update"
+      - name: "🚀 Push version update"
         run: |
-          git push origin master
+          git pull origin main --no-rebase -n
+          git push --force-with-lease origin main
           echo "✅ Version update pushed to remote successfully"
-          
-      # Create and push tag
+
       - name: "🏷️ Create and push tag"
         run: |
           git tag "${{ needs.build.outputs.tag_name }}"
-          git push origin "${{ needs.build.outputs.tag_name }}"
+          git push --force-with-lease origin "${{ needs.build.outputs.tag_name }}"
           echo "✅ Tag ${{ needs.build.outputs.tag_name }} created and pushed successfully"
 
   # STEP 4: Create GitHub Release
@@ -192,33 +196,53 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      # Download the APK artifact
-      - name: "📥 Download APK artifact"
+      - name: "🔧 Checkout code"
+        uses: actions/checkout@v4
+
+      - name: "📥 Download build artifacts"
         uses: actions/download-artifact@v4
         with:
           name: app-release
           path: ./
           
-      # Rename APK for release
       - name: "🏷️ Rename APK for release"
         run: |
           mv app-release.apk "tune-tangler-${{ needs.build.outputs.version }}.apk"
           echo "✅ APK renamed to: tune-tangler-${{ needs.build.outputs.version }}.apk"
+
+      - name: "📝 Generate release body from template"
+        id: generate_release_body
+        run: |
+          # Use awk for better separator handling
+          awk -v repo="${{ github.repository }}" \
+              -v run_id="${{ github.run_id }}" \
+              -v run_number="${{ github.run_number }}" \
+              -v proj_name="$(echo "${{ github.repository }}" | sed 's/.*\///' | sed 's/-/ /g' | sed 's/\b\w/\U&/g')" \
+              -v version="${{ needs.build.outputs.version }}" \
+              '{gsub(/{{ repository }}/, repo); 
+                gsub(/{{ run_id }}/, run_id); 
+                gsub(/{{ run_number }}/, run_number); 
+                gsub(/{{ project_name }}/, proj_name); 
+                gsub(/{{ version }}/, version); 
+                gsub(/{{ commits }}/, ""); 
+                print}' .github/templates/release.md > RELEASE_NOTE.md
           
-      # Create GitHub Release
+          # Check if template contained {{ commits }} and handle it
+          if grep -q "{{ commits }}" .github/templates/release.md; then
+            echo "📝 Template contains {{ commits }} placeholder - adding commits at the end"
+            echo "${{ needs.version-control.outputs.commits }}" >> RELEASE_NOTE.md
+          else
+            echo "📝 Template does not contain {{ commits }} placeholder - keeping as is"
+          fi
+          
+          echo "✅ Release body generated from template"
+
       - name: "🚀 Create GitHub Release"
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ needs.build.outputs.tag_name }}
-          name: Release ${{ needs.build.outputs.version }}
-          body: |          
-            ### 🔧 Build Info
-            - **Flutter Version:** ${{ env.FLUTTER_VERSION }}
-            - **Java Version:** ${{ env.JAVA_VERSION }}/${{ env.JAVA_DISTRIBUTION }}
-            - **Workflow run:** [${{ github.run_number }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-            
-            ### 📝 Changes since last release
-            ${{ needs.version-control.outputs.commits }}            
+          name: Release ${{ needs.build.outputs.tag_name }}
+          body_path: RELEASE_NOTE.md
           files: tune-tangler-${{ needs.build.outputs.version }}.apk
           draft: false
           prerelease: false
