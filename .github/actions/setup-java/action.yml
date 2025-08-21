@@ -21,17 +21,8 @@ runs:
       with:
         distribution: ${{ inputs.java_distribution }}
         java-version: ${{ inputs.java_version }}
-
-    # Cache Gradle dependencies for faster builds
-    - name: "📦 Cache Gradle dependencies"
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-          ~/.gradle/daemon
-        key: gradle-${{ runner.os }}-${{ inputs.java_version }}-${{ inputs.java_distribution }}-${{ hashFiles('**/gradle-wrapper.properties') }}
-        restore-keys: |
-          gradle-${{ runner.os }}-${{ inputs.java_version }}-${{ inputs.java_distribution }}-
-          gradle-${{ runner.os }}-${{ inputs.java_version }}-
-          gradle-${{ runner.os }}-
+        cache: 'gradle'
+        cache-dependency-path: |
+          **/gradle-wrapper.properties
+          **/build.gradle
+          **/build.gradle.kts

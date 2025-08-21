@@ -30,8 +30,8 @@ runs:
       with:
         flutter-version: ${{ inputs.flutter_version }}
         channel: ${{ inputs.flutter_channel }}
+        cache: true
         cache-key: flutter-${{ runner.os }}-${{ inputs.flutter_version }}-${{ inputs.flutter_channel }}
-        cache-version: ${{ inputs.flutter_version }}
         
     - name: "📦 Get dependencies"
       if: ${{ inputs.with_dependencies == 'true' }}
