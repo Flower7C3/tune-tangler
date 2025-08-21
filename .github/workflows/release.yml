@@ -68,7 +68,29 @@ jobs:
         with:
           java_version: ${{ env.JAVA_VERSION }}
           java_distribution: ${{ env.JAVA_DISTRIBUTION }}
-  
+
+      # Cache Gradle dependencies for faster builds
+      - name: "📦 Cache Gradle dependencies"
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      # Cache Flutter dependencies
+      - name: "📦 Cache Flutter dependencies"
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            .dart_tool
+          key: flutter-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            flutter-${{ runner.os }}-
+
       - name: "🏷️ Increment version"
         id: version
         run: |
@@ -102,9 +124,12 @@ jobs:
         run: |
           sed -i "s/^version: .*/version: $NEW_VERSION/" pubspec.yaml
           
-
+      # Build APK with optimizations
       - name: "🏗️ Build APK"
-        run: flutter build apk --release
+        run: |
+          # Enable Gradle daemon for faster builds
+          export GRADLE_OPTS="-Dorg.gradle.daemon=true -Dorg.gradle.parallel=true -Dorg.gradle.jvmargs=-Xmx4g"
+          flutter build apk --release --dart-define=FLUTTER_BUILD_NUMBER=$NEW_BUILD
         
       - name: "📤 Upload APK artifact"
         uses: actions/upload-artifact@v4
