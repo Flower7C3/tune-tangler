@@ -30,6 +30,8 @@ runs:
       with:
         flutter-version: ${{ inputs.flutter_version }}
         channel: ${{ inputs.flutter_channel }}
+        cache-key: flutter-${{ runner.os }}-${{ inputs.flutter_version }}-${{ inputs.flutter_channel }}
+        cache-version: ${{ inputs.flutter_version }}
         
     - name: "📦 Get dependencies"
       if: ${{ inputs.with_dependencies == 'true' }}
@@ -40,4 +42,17 @@ runs:
       if: ${{ inputs.with_localization == 'true' }}
       shell: bash
       run: flutter gen-l10n
-  
+
+    # Cache Flutter dependencies
+    - name: "📦 Cache Flutter dependencies"
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.pub-cache
+          .dart_tool
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: flutter-${{ runner.os }}-${{ inputs.flutter_version }}-${{ hashFiles('**/pubspec.lock') }}
+        restore-keys: |
+          flutter-${{ runner.os }}-${{ inputs.flutter_version }}-
+          flutter-${{ runner.os }}-

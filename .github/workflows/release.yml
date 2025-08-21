@@ -69,28 +69,6 @@ jobs:
           java_version: ${{ env.JAVA_VERSION }}
           java_distribution: ${{ env.JAVA_DISTRIBUTION }}
 
-      # Cache Gradle dependencies for faster builds
-      - name: "📦 Cache Gradle dependencies"
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/gradle-wrapper.properties') }}
-          restore-keys: |
-            gradle-${{ runner.os }}-
-
-      # Cache Flutter dependencies
-      - name: "📦 Cache Flutter dependencies"
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.pub-cache
-            .dart_tool
-          key: flutter-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
-          restore-keys: |
-            flutter-${{ runner.os }}-
-
       - name: "🏷️ Increment version"
         id: version
         run: |
@@ -113,12 +91,14 @@ jobs:
           # Create new version
           NEW_SEMANTIC_VERSION="$NEW_MAJOR.$NEW_MINOR.$NEW_PATCH"
           NEW_VERSION="$NEW_SEMANTIC_VERSION+$NEW_BUILD"
-          
+          TAG_NAME="v$NEW_SEMANTIC_VERSION"
+
           echo "New version: $NEW_VERSION"
           echo "Tag name: $TAG_NAME"
+
           # Output new version
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
-          echo "tag_name=v$NEW_SEMANTIC_VERSION" >> $GITHUB_OUTPUT
+          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
 
       - name: "📝 Update pubspec.yaml"
         run: |
