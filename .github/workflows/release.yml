@@ -224,12 +224,18 @@ jobs:
               -v run_number="${{ github.run_number }}" \
               -v proj_name="$(echo "${{ github.repository }}" | sed 's/.*\///' | sed 's/-/ /g' | sed 's/\b\w/\U&/g')" \
               -v version="${{ needs.build.outputs.version }}" \
+              -v flutter_version="${{ env.FLUTTER_VERSION }}" \
+              -v java_version="${{ env.JAVA_VERSION }}" \
+              -v java_distribution="${{ env.JAVA_DISTRIBUTION }}" \
               '{gsub(/{{ repository }}/, repo); 
                 gsub(/{{ run_id }}/, run_id); 
                 gsub(/{{ run_number }}/, run_number); 
                 gsub(/{{ project_name }}/, proj_name); 
                 gsub(/{{ version }}/, version); 
-                gsub(/{{ commits }}/, ""); 
+                gsub(/{{ version }}/, version); 
+                gsub(/{{ FLUTTER_VERSION }}/, flutter_version); 
+                gsub(/{{ JAVA_VERSION }}/, java_version); 
+                gsub(/{{ JAVA_DISTRIBUTION }}/, java_distribution); 
                 print}' .github/templates/release.md > RELEASE_NOTE.md
           
           # Check if template contained {{ commits }} and handle it
