@@ -69,16 +69,21 @@ class TrackManager {
               valueListenable: track.state,
               builder: (context, state, child) => AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
-                child: ElevatedButton(
-                  onPressed: () => _trackDetailsManager.runClickAction(track),
-                  onLongPress: () => _trackDetailsManager.openModal(track),
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.all(UIHelper.gridGap),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(UIHelper.gridGap * 2)),
-                    backgroundColor: track.stateBackgroundColor(context),
-                    foregroundColor: track.stateForegroundColor(context),
+                child: GestureDetector(
+                  onSecondaryTapDown: (TapDownDetails details) {
+                    _trackDetailsManager.openModal(track);
+                  },
+                  child: ElevatedButton(
+                    onPressed: () => _trackDetailsManager.runClickAction(track),
+                    onLongPress: () => _trackDetailsManager.openModal(track),
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.all(UIHelper.gridGap),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(UIHelper.gridGap * 2)),
+                      backgroundColor: track.stateBackgroundColor(context),
+                      foregroundColor: track.stateForegroundColor(context),
+                    ),
+                    child: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: _buildTrackButton(track)),
                   ),
-                  child: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: _buildTrackButton(track)),
                 ),
               ))));
 
