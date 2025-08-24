@@ -39,7 +39,7 @@ help: ## Show this help
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | grep -E '##BUILD## ' | awk 'BEGIN {FS = ":.*?##.*?## "}; {printf "$(@COLOR_CYAN)%-25s$(@FORMAT_RESET) %s\n", $$1, $$2}'
 	@echo ""
 	@echo "$(@FORMAT_BOLD)$(@COLOR_BLUE)$(@ICON_DEVICE) Device Management$(@FORMAT_RESET)"
-	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | grep -E '##DEVICE## ' | awk 'BEGIN {FS = ":.*?##.*?## "}; {printf "$(@COLOR_CYAN)%-25s$(@FORMAT_RESET) %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z0-9_-%]+.*:.*?## .*$$' $(MAKEFILE_LIST) | grep -E '##DEVICE## ' | awk 'BEGIN {FS = ":.*?##.*?## "}; {printf "$(@COLOR_CYAN)%-25s$(@FORMAT_RESET) %s\n", $$1, $$2}'
 	@echo ""
 	@echo "$(@FORMAT_BOLD)$(@COLOR_BLUE)$(@ICON_INFO) Maintenance$(@FORMAT_RESET)"
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | grep -E '##MAINTENANCE## ' | awk 'BEGIN {FS = ":.*?##.*?## "}; {printf "$(@COLOR_CYAN)%-25s$(@FORMAT_RESET) %s\n", $$1, $$2}'
@@ -159,13 +159,31 @@ full-build: clean pub-get analyze build-apk ##BUILD## All-in-one: clean, get dep
 
 .PHONY: list-devices
 list-devices: ##DEVICE## Show available devices
-	@echo "$(@FORMAT_BOLD)$(@ICON_DEVICE)$(@ICON_INFO) Available devices:$(@FORMAT_RESET)"
+	@echo "$(@FORMAT_BOLD)$(@COLOR_GREEN)$(@ICON_DEVICE)$(@ICON_INFO) Available devices:$(@FORMAT_RESET)$(@COLOR_GREEN)"
 	@flutter devices
 
 .PHONY: list-emulators
 list-emulators: ##DEVICE## Show available emulators
 	@echo "$(@FORMAT_BOLD)$(@ICON_EMULATOR)$(@ICON_INFO) Available emulators:$(@FORMAT_RESET)"
-	@flutter emulators
+	@flutter emulators | grep -E '^[a-zA-Z0-9_-]+[[:space:]]+•' | grep -v '^Id'
+	@echo ""
+	@echo "$(@COLOR_CYAN)$(@ICON_INFO) To start specific emulator, use: $(@COLOR_BLUE)make start-emulator-<emulator_id>$(@COLOR_CYAN), example: $(@COLOR_BLUE)make start-emulator-Medium_Phone_API_34$(@FORMAT_RESET)"
+	@echo "$(@COLOR_CYAN)$(@ICON_INFO) To run app on specific emulator, use: $(@COLOR_BLUE)make run-emulator-<emulator_id>$(@COLOR_CYAN), example: $(@COLOR_BLUE)make run-emulator-Medium_Phone_API_34$(@FORMAT_RESET)"
+
+.PHONY: run-emulator-%
+run-emulator-%: ##DEVICE## Run app on specific emulator (use: make run-emulator-<emulator_id>)
+	@echo "$(@FORMAT_BOLD)$(@COLOR_GREEN)$(@ICON_EMULATOR)$(@ICON_INFO) Starting emulator $* and running app...$(@FORMAT_RESET)"
+	@echo "$(@COLOR_CYAN)$(@ICON_INFO) Launching emulator: $*$(@FORMAT_RESET)"
+	@flutter emulators --launch $*
+	@echo "$(@COLOR_GREEN)$(@ICON_CHECK) Emulator $* started! Running app...$(@FORMAT_RESET)"
+	@make run-debug
+
+.PHONY: start-emulator-%
+start-emulator-%: ##DEVICE## Start specific emulator without running app (use: make start-emulator-<emulator_id>)
+	@echo "$(@FORMAT_BOLD)$(@COLOR_GREEN)$(@ICON_EMULATOR)$(@ICON_INFO) Starting emulator $*...$(@FORMAT_RESET)"
+	@echo "$(@COLOR_CYAN)$(@ICON_INFO) Launching emulator: $*$(@FORMAT_RESET)"
+	@flutter emulators --launch $*
+	@echo "$(@COLOR_GREEN)$(@ICON_CHECK) Emulator $* started!$(@FORMAT_RESET)"
 
 # =============================================================================
 # MAINTENANCE
