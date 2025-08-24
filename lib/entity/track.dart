@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path_provider;
+import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 import 'package:tune_tangler/config/app_global_config.dart';
 
@@ -43,7 +43,8 @@ class TrackId {
 
   List<int> toList() => [_rowIndex, _colIndex];
 
-  String get keyboardKey => AppKeyboardKeyMap.trackKeyboardKeyName(TrackRow.name(_rowIndex), _colIndex);
+  String get keyboardKey => AppKeyboardKeyMap.trackKeyboardKeyName(
+      TrackRow.name(_rowIndex), _colIndex);
 }
 
 class Track {
@@ -62,7 +63,8 @@ class Track {
       iOS: AudioContextIOS(
         category: AVAudioSessionCategory.playback,
         options: {
-          AVAudioSessionOptions.mixWithOthers, // Kluczowe dla jednoczesnego odtwarzania
+          AVAudioSessionOptions.mixWithOthers,
+          // Kluczowe dla jednoczesnego odtwarzania
         },
       ),
       android: AudioContextAndroid(
@@ -70,7 +72,8 @@ class Track {
         stayAwake: true,
         contentType: AndroidContentType.music,
         usageType: AndroidUsageType.media,
-        audioFocus: AndroidAudioFocus.none, // Kluczowe - nie przejmuj audio focus
+        audioFocus:
+            AndroidAudioFocus.none, // Kluczowe - nie przejmuj audio focus
       ),
     ));
   }
@@ -89,14 +92,15 @@ class Track {
   StreamSubscription? playerCompleteSubscription;
 
   StreamSubscription? playerStateChangeSubscription;
-  
+
   // Throttling mechanism for performance
   Timer? _throttleTimer;
   Duration? _lastPositionUpdate;
   Duration? _lastDurationUpdate;
   PlayerState? _lastPlayerStateUpdate;
-  
-  static const Duration _throttleInterval = Duration(milliseconds: 16); // 60 FPS
+
+  static const Duration _throttleInterval =
+      Duration(milliseconds: 16); // 60 FPS
 
   void setStreamsInitialized() {
     durationSubscription = player.onDurationChanged.listen((Duration value) {
@@ -107,7 +111,8 @@ class Track {
       _throttledPositionUpdate(position);
     });
 
-    playerStateChangeSubscription = player.onPlayerStateChanged.listen((PlayerState state) {
+    playerStateChangeSubscription =
+        player.onPlayerStateChanged.listen((PlayerState state) {
       _throttledPlayerStateUpdate(state);
     });
 
@@ -117,14 +122,15 @@ class Track {
 
     _streamsInitialized = true;
   }
-  
+
   void _throttledPositionUpdate(Duration position) {
     final now = Duration(milliseconds: DateTime.now().millisecondsSinceEpoch);
-    
-    if (_lastPositionUpdate == null || 
-        now.inMilliseconds - _lastPositionUpdate!.inMilliseconds >= _throttleInterval.inMilliseconds) {
+
+    if (_lastPositionUpdate == null ||
+        now.inMilliseconds - _lastPositionUpdate!.inMilliseconds >=
+            _throttleInterval.inMilliseconds) {
       _lastPositionUpdate = now;
-      
+
       if (position >= playbackEndAtPosition.value) {
         if (isPlaybackReleaseModeSingle(playbackReleaseMode.value)) {
           stopPlaying();
@@ -135,22 +141,27 @@ class Track {
       setPosition(position);
     }
   }
-  
+
   void _throttledDurationUpdate(Duration value) {
     final now = Duration(milliseconds: DateTime.now().millisecondsSinceEpoch);
-    
-    if (_lastDurationUpdate == null || 
-        now.inMilliseconds - _lastDurationUpdate!.inMilliseconds >= _throttleInterval.inMilliseconds) {
+
+    if (_lastDurationUpdate == null ||
+        now.inMilliseconds - _lastDurationUpdate!.inMilliseconds >=
+            _throttleInterval.inMilliseconds) {
       _lastDurationUpdate = now;
       setDuration(value);
     }
   }
-  
+
   void _throttledPlayerStateUpdate(PlayerState state) {
     final now = Duration(milliseconds: DateTime.now().millisecondsSinceEpoch);
-    
-    if (_lastPlayerStateUpdate == null || 
-        now.inMilliseconds - (_lastPlayerStateUpdate == null ? 0 : _lastPlayerStateUpdate!.index * 16) >= _throttleInterval.inMilliseconds) {
+
+    if (_lastPlayerStateUpdate == null ||
+        now.inMilliseconds -
+                (_lastPlayerStateUpdate == null
+                    ? 0
+                    : _lastPlayerStateUpdate!.index * 16) >=
+            _throttleInterval.inMilliseconds) {
       _lastPlayerStateUpdate = state;
       setPlayerState(state);
     }
@@ -159,12 +170,12 @@ class Track {
   void dispose() {
     _throttleTimer?.cancel();
     _throttleTimer = null;
-    
+
     durationSubscription?.cancel();
     positionSubscription?.cancel();
     playerCompleteSubscription?.cancel();
     playerStateChangeSubscription?.cancel();
-    
+
     player.dispose().then((status) {
       // Cleanup completed
     });
@@ -216,25 +227,36 @@ class Track {
   }
 
   void _updateProgress() {
-    progress.value = (durationAfterCut.value.inMilliseconds == 0) ? 0 : positionAfterCut.value.inMilliseconds / durationAfterCut.value.inMilliseconds;
+    progress.value = (durationAfterCut.value.inMilliseconds == 0)
+        ? 0
+        : positionAfterCut.value.inMilliseconds /
+            durationAfterCut.value.inMilliseconds;
   }
 
   void _updatePositionCut() {
-    positionAfterCut.value = Duration(milliseconds: position.value.inMilliseconds - playbackStartAtPosition.value.inMilliseconds);
+    positionAfterCut.value = Duration(
+        milliseconds: position.value.inMilliseconds -
+            playbackStartAtPosition.value.inMilliseconds);
     _updateProgress();
   }
 
   void _updateDurationCut() {
-    durationAfterCut.value = Duration(milliseconds: playbackEndAtPosition.value.inMilliseconds - playbackStartAtPosition.value.inMilliseconds);
+    durationAfterCut.value = Duration(
+        milliseconds: playbackEndAtPosition.value.inMilliseconds -
+            playbackStartAtPosition.value.inMilliseconds);
     _updateProgress();
   }
 
   ///*************************************************************************************************************************************************
   /// POSITION START AT
 
-  IconData? get playbackStartAtPositionIcon => (playbackStartAtPosition.value.inMilliseconds > 0) ? AppIcon.trackPlaybackStartAtPosition : null;
+  IconData? get playbackStartAtPositionIcon =>
+      (playbackStartAtPosition.value.inMilliseconds > 0)
+          ? AppIcon.trackPlaybackStartAtPosition
+          : null;
 
-  final ValueNotifier<Duration> playbackStartAtPosition = ValueNotifier(Duration());
+  final ValueNotifier<Duration> playbackStartAtPosition =
+      ValueNotifier(Duration());
 
   void resetPlaybackStartAtPosition() => setPlaybackStartAtPosition(Duration());
 
@@ -265,9 +287,13 @@ class Track {
   /// POSITION END AT
 
   IconData? get playbackEndAtPositionIcon =>
-      (playbackEndAtPosition.value.inMilliseconds != duration.value.inMilliseconds) ? AppIcon.trackPlaybackEndAtPosition : null;
+      (playbackEndAtPosition.value.inMilliseconds !=
+              duration.value.inMilliseconds)
+          ? AppIcon.trackPlaybackEndAtPosition
+          : null;
 
-  final ValueNotifier<Duration> playbackEndAtPosition = ValueNotifier(Duration());
+  final ValueNotifier<Duration> playbackEndAtPosition =
+      ValueNotifier(Duration());
 
   void resetPlaybackEndAtPosition() => setPlaybackEndAtPosition(duration.value);
 
@@ -307,8 +333,11 @@ class Track {
 
   void startPlaying() {
     String? p = path;
-    if (p != null && (state.value == TrackState.idle || state.value == TrackState.paused)) {
-      player.seek(playbackStartAtPosition.value).then((status) => player.resume());
+    if (p != null &&
+        (state.value == TrackState.idle || state.value == TrackState.paused)) {
+      player
+          .seek(playbackStartAtPosition.value)
+          .then((status) => player.resume());
     }
   }
 
@@ -326,7 +355,9 @@ class Track {
 
   void stopPlaying() {
     if (path != null) {
-      player.stop().then((status) => player.seek(playbackStartAtPosition.value));
+      player
+          .stop()
+          .then((status) => player.seek(playbackStartAtPosition.value));
     }
   }
 
@@ -337,7 +368,11 @@ class Track {
 
   String? get path => _path;
 
-  void setPath(String? newPath, {Duration? playbackStartAtPosition, Duration? playbackEndAtPosition}) {
+  void setPath(String? newPath,
+      {Duration? playbackStartAtPosition,
+      Duration? playbackEndAtPosition,
+      bool preserveDuration = false,
+      bool preservePlaybackPositions = false}) {
     if (newPath == null) {
       if (path != null && File(path!).existsSync()) {
         File(path!).delete();
@@ -359,10 +394,18 @@ class Track {
     _path = newPath;
     player.setSourceDeviceFile(newPath).then((value) async {
       Duration trackDuration = await player.getDuration() ?? Duration();
-      setDuration(trackDuration);
-      setPosition(Duration());
-      setPlaybackStartAtPosition(playbackStartAtPosition ?? Duration());
-      setPlaybackEndAtPosition(playbackEndAtPosition ?? trackDuration);
+      if (!preserveDuration) {
+        setDuration(trackDuration);
+      }
+      if (!preservePlaybackPositions) {
+        setPosition(Duration());
+        setPlaybackStartAtPosition(playbackStartAtPosition ?? Duration());
+        setPlaybackEndAtPosition(playbackEndAtPosition ?? trackDuration);
+      } else {
+        // Gdy preservePlaybackPositions=true, ustaw pozycję na Duration()
+        // Pozycje odtwarzania będą ustawione po wywołaniu setPath
+        setPosition(Duration());
+      }
       setRecorderState(RecorderState.ready);
     }).onError((error, stack) {
       debugPrint('Error in setPath: $error');
@@ -434,14 +477,16 @@ class Track {
     updateState();
   }
 
-  final ValueNotifier<RecorderState> recorderState = ValueNotifier(RecorderState.empty);
+  final ValueNotifier<RecorderState> recorderState =
+      ValueNotifier(RecorderState.empty);
 
   void setRecorderState(RecorderState state) {
     recorderState.value = state;
     updateState();
   }
 
-  final ValueNotifier<TrackState> state = ValueNotifier(AppGlobalConfig.trackState.defaultValue);
+  final ValueNotifier<TrackState> state =
+      ValueNotifier(AppGlobalConfig.trackState.defaultValue);
 
   void updateState() {
     state.value = switch (recorderState.value) {
@@ -459,18 +504,22 @@ class Track {
   IconData get stateIcon => AppGlobalConfig.trackState.icon(state.value);
 
   Color stateForegroundColor(BuildContext context) =>
-      AppGlobalConfig.trackState.color(state.value, context: context, domain: ConfigItemPropertyDomain.foregroundColor);
+      AppGlobalConfig.trackState.color(state.value,
+          context: context, domain: ConfigItemPropertyDomain.foregroundColor);
 
   Color stateBackgroundColor(BuildContext context) =>
-      AppGlobalConfig.trackState.color(state.value, context: context, domain: ConfigItemPropertyDomain.backgroundColor);
+      AppGlobalConfig.trackState.color(state.value,
+          context: context, domain: ConfigItemPropertyDomain.backgroundColor);
 
   Color stateProgressColor(BuildContext context) =>
-      AppGlobalConfig.trackState.color(state.value, context: context, domain: ConfigItemPropertyDomain.progressColor);
+      AppGlobalConfig.trackState.color(state.value,
+          context: context, domain: ConfigItemPropertyDomain.progressColor);
 
   ///*************************************************************************************************************************************************
   /// PLAYBACK VOLUME
 
-  final ValueNotifier<double> playbackVolume = ValueNotifier(AppGlobalConfig.trackPlaybackVolume.defaultValue);
+  final ValueNotifier<double> playbackVolume =
+      ValueNotifier(AppGlobalConfig.trackPlaybackVolume.defaultValue);
 
   void setPlaybackVolume(double value) {
     player.setVolume(value);
@@ -492,7 +541,8 @@ class Track {
   ///*************************************************************************************************************************************************
   /// PLAYBACK BALANCE
 
-  final ValueNotifier<double> playbackBalance = ValueNotifier(AppGlobalConfig.trackPlaybackBalance.defaultValue);
+  final ValueNotifier<double> playbackBalance =
+      ValueNotifier(AppGlobalConfig.trackPlaybackBalance.defaultValue);
 
   void setPlaybackBalance(double value) {
     player.setBalance(value);
@@ -502,9 +552,11 @@ class Track {
   ///*************************************************************************************************************************************************
   /// PLAYBACK MODE
 
-  final ValueNotifier<ReleaseMode> playbackReleaseMode = ValueNotifier(AppGlobalConfig.trackPlaybackReleaseMode.defaultValue);
+  final ValueNotifier<ReleaseMode> playbackReleaseMode =
+      ValueNotifier(AppGlobalConfig.trackPlaybackReleaseMode.defaultValue);
 
-  static bool isPlaybackReleaseModeSingle(ReleaseMode mode) => mode == ReleaseMode.stop;
+  static bool isPlaybackReleaseModeSingle(ReleaseMode mode) =>
+      mode == ReleaseMode.stop;
 
   void setPlaybackReleaseMode(ReleaseMode value) {
     player.setReleaseMode(value);
@@ -512,13 +564,17 @@ class Track {
   }
 
   void togglePlaybackMode() {
-    setPlaybackReleaseMode(isPlaybackReleaseModeSingle(playbackReleaseMode.value) ? ReleaseMode.loop : ReleaseMode.stop);
+    setPlaybackReleaseMode(
+        isPlaybackReleaseModeSingle(playbackReleaseMode.value)
+            ? ReleaseMode.loop
+            : ReleaseMode.stop);
   }
 
   ///*************************************************************************************************************************************************
   /// PLAYBACK SPEED
 
-  final ValueNotifier<double> playbackSpeed = ValueNotifier(AppGlobalConfig.trackPlaybackSpeed.defaultValue);
+  final ValueNotifier<double> playbackSpeed =
+      ValueNotifier(AppGlobalConfig.trackPlaybackSpeed.defaultValue);
 
   void setPlaybackSpeed(double value) {
     player.setPlaybackRate(value);
@@ -548,10 +604,7 @@ class Track {
     setPlaybackVolume(track.playbackVolume.value);
     setPlaybackBalance(track.playbackBalance.value);
     setPlaybackSpeed(track.playbackSpeed.value);
-    setPlaybackStartAtPosition(track.playbackStartAtPosition.value);
-    setPlaybackEndAtPosition(track.playbackEndAtPosition.value);
     setDuration(track.duration.value);
-    setPosition(Duration());
 
     try {
       if (track.path == null) {
@@ -562,10 +615,13 @@ class Track {
         throw Exception();
       }
       Directory appDir = await getApplicationDocumentsDirectory();
-      String newFileName = path_provider.basename(track.path!).replaceFirst(RegExp(r'^[^.]+'), id.toString());
+      String newFileName = path_provider
+          .basename(track.path!)
+          .replaceFirst(RegExp(r'^[^.]+'), id.toString());
       String newFilePath = "${appDir.path}/$newFileName";
       File newFile = oldFile.renameSync(newFilePath);
-      setPath(newFile.path);
+      setPath(newFile.path,
+          preserveDuration: true, preservePlaybackPositions: true);
     } catch (e) {
       _path = null;
       setRecorderState(RecorderState.empty);
@@ -576,23 +632,42 @@ class Track {
     setAudioEncoder(track.audioEncoder);
     setSampleRate(track.sampleRate);
     setBitRate(track.bitRate);
+
+    // Ustaw pozycje odtwarzania po przeniesieniu ścieżki
+    setPlaybackStartAtPosition(track.playbackStartAtPosition.value);
+    setPlaybackEndAtPosition(track.playbackEndAtPosition.value);
+
+    // Ustaw pozycję po przeniesieniu ścieżki
+    setPosition(track.position.value);
+
+    // Aktualizuj progress po ustawieniu wszystkich wartości
+    _updateProgress();
   }
 
   static Track fromMap(Map data) {
     TrackId trackId = data[TrackAdapterKey.trackId];
     Track track = Track(trackId);
     track.setName(data[TrackAdapterKey.name]);
-    track.setPlaybackReleaseMode(ReleaseMode.values[data[TrackAdapterKey.playbackReleaseMode]]);
-    track.setPlaybackVolume(data[TrackAdapterKey.playbackVolume] ?? AppGlobalConfig.trackPlaybackVolume.defaultValue);
-    track.setPlaybackBalance(data[TrackAdapterKey.playbackBalance] ?? AppGlobalConfig.trackPlaybackBalance.defaultValue);
-    track.setPlaybackSpeed(data[TrackAdapterKey.playbackSpeed] ?? AppGlobalConfig.trackPlaybackSpeed.defaultValue);
+    track.setPlaybackReleaseMode(
+        ReleaseMode.values[data[TrackAdapterKey.playbackReleaseMode]]);
+    track.setPlaybackVolume(data[TrackAdapterKey.playbackVolume] ??
+        AppGlobalConfig.trackPlaybackVolume.defaultValue);
+    track.setPlaybackBalance(data[TrackAdapterKey.playbackBalance] ??
+        AppGlobalConfig.trackPlaybackBalance.defaultValue);
+    track.setPlaybackSpeed(data[TrackAdapterKey.playbackSpeed] ??
+        AppGlobalConfig.trackPlaybackSpeed.defaultValue);
     track.setKeyboardKey(data[TrackAdapterKey.keyboardKey] ?? '');
-    track.setAudioSource(data[TrackAdapterKey.audioSource] != null ? TrackAudioSource.values[data[TrackAdapterKey.audioSource]] : null);
-    track.setAudioEncoder(data[TrackAdapterKey.audioEncoder] != null ? AudioEncoder.values[data[TrackAdapterKey.audioEncoder]] : null);
+    track.setAudioSource(data[TrackAdapterKey.audioSource] != null
+        ? TrackAudioSource.values[data[TrackAdapterKey.audioSource]]
+        : null);
+    track.setAudioEncoder(data[TrackAdapterKey.audioEncoder] != null
+        ? AudioEncoder.values[data[TrackAdapterKey.audioEncoder]]
+        : null);
     track.setSampleRate(data[TrackAdapterKey.sampleRate]);
     track.setBitRate(data[TrackAdapterKey.bitRate]);
     track.setPath(data[TrackAdapterKey.path],
-        playbackStartAtPosition: data[TrackAdapterKey.playbackStartAtPosition], playbackEndAtPosition: data[TrackAdapterKey.playbackEndAtPosition]);
+        playbackStartAtPosition: data[TrackAdapterKey.playbackStartAtPosition],
+        playbackEndAtPosition: data[TrackAdapterKey.playbackEndAtPosition]);
     track.updateState();
     return track;
   }
