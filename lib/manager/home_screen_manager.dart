@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:tune_tangler/wrapper/app.dart';
 import 'package:tune_tangler/src/lazy_loading_manager.dart';
-
+import 'package:tune_tangler/wrapper/app.dart';
 
 import '../config/app_config_fields.dart';
 import '../manager/drawer_manager.dart';
@@ -53,26 +52,37 @@ class HomeScreenManager {
 
   Widget get drawer => _drawerManager.build;
 
-  Widget get body => Focus(focusNode: _appWrapper.focusNode, autofocus: true, onKeyEvent: keyEvent, child: tracksList);
+  Widget get body => Focus(
+      focusNode: _appWrapper.focusNode,
+      autofocus: true,
+      onKeyEvent: keyEvent,
+      child: tracksList);
 
   Widget get bottomNavigationBar => _navigationBarManager.buildFooter;
 
-  Widget get tracksList => ListView.builder(
+  Widget get tracksList {
+    final rowsAmount =
+        _appWrapper.settings.getConfig(AppConfigFieldKey.gridRowsAmount);
+    final colsAmount =
+        _appWrapper.settings.getConfig(AppConfigFieldKey.gridColsAmount);
+
+    return ListView.builder(
       controller: PageController(viewportFraction: 0.85),
-      itemCount: _appWrapper.settings.getConfig(AppConfigFieldKey.gridRowsAmount),
+      itemCount: rowsAmount,
       itemBuilder: (context, rowIndex) => _lazyLoadingManager.lazyLoadWidget(
-        key: 'row_$rowIndex',
-        builder: () => RepaintBoundary(
-          child: Row(children: [
-            _rowMenuManager.buildRowButtons(rowIndex),
-            _trackManager.buildRowTracks(rowIndex),
-          ]),
-        ),
+        key: 'row_${rowIndex}_rows${rowsAmount}_cols$colsAmount',
+        builder: () => Row(children: [
+          _rowMenuManager.buildRowButtons(rowIndex),
+          _trackManager.buildRowTracks(rowIndex, colsAmount),
+        ]),
         placeholder: const SizedBox(height: 100),
-      ));
+      ),
+    );
+  }
 
   KeyEventResult keyEvent(FocusNode node, KeyEvent event) {
     _trackManager.onKeyEvent(event);
+
     return KeyEventResult.handled;
   }
 }

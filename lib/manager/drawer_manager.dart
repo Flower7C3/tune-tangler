@@ -306,7 +306,6 @@ class DrawerManager {
           successAction: (double value, String formattedValue) {
             _settings.setConfig(AppConfigFieldKey.gridRowsAmount, value.toInt());
             _trackRepository.resetTracksCollection();
-            setDrawerState(() {}); // Add state refresh
             return _trans.gridRowsAmountSuccess(formattedValue);
           },
           configCollection: AppGlobalConfig.gridRows,
@@ -325,7 +324,6 @@ class DrawerManager {
           successAction: (double value, String formattedValue) {
             _settings.setConfig(AppConfigFieldKey.gridColsAmount, value.toInt());
             _trackRepository.resetTracksCollection();
-            setDrawerState(() {}); // Add state refresh
             return _trans.gridColsAmountSuccess(formattedValue);
           },
           configCollection: AppGlobalConfig.gridCols,
