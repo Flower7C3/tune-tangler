@@ -610,127 +610,166 @@ class TrackDetailsManager {
           color: Theme.of(_context).colorScheme.surfaceContainer,
           padding: EdgeInsets.all(
               Theme.of(_context).textTheme.titleSmall!.fontSize!),
-          child: ValueListenableBuilder(
-            valueListenable: CombinedNotifier([
-              track.recorderState,
-              track.state,
-              track.playbackReleaseMode,
-              track.progress,
-            ]),
-            builder: (context, recorderState, child) =>
-                _uiHelper.trackDetailsLine(
-              [
-                if (track.recorderState.value != RecorderState.processing)
-                  _uiHelper.mediaPlayerButton(
-                    AppIcon.trackRecordingShare,
-                    _trans.trackRecordingShare(track.name.value),
-                    onPressed:
-                        (track.recorderState.value == RecorderState.ready)
-                            ? () => _share(track)
+          child: FocusTraversalGroup(
+            policy: OrderedTraversalPolicy(),
+            child: ValueListenableBuilder(
+              valueListenable: CombinedNotifier([
+                track.recorderState,
+                track.state,
+                track.playbackReleaseMode,
+                track.progress,
+              ]),
+              builder: (context, recorderState, child) =>
+                  _uiHelper.trackDetailsLine(
+                [
+                  if (track.recorderState.value != RecorderState.processing)
+                    FocusTraversalOrder(
+                      order: NumericFocusOrder(-2),
+                      child: _uiHelper.mediaPlayerButton(
+                        AppIcon.trackRecordingShare,
+                        _trans.trackRecordingShare(track.name.value),
+                        onPressed:
+                            (track.recorderState.value == RecorderState.ready)
+                                ? () => _share(track)
+                                : null,
+                      ),
+                    ),
+                  if (track.recorderState.value != RecorderState.processing)
+                    FocusTraversalOrder(
+                      order: NumericFocusOrder(-1),
+                      child: _uiHelper.mediaPlayerButton(
+                        AppGlobalConfig.trackPlaybackReleaseMode
+                            .icon(track.playbackReleaseMode.value),
+                        _trans.trackPlaybackModeToggle(track.name.value),
+                        onPressed: (track.state.value != TrackState.recording)
+                            ? () => _trackRepository.togglePlaybackMode(track)
                             : null,
-                  ),
-                if (track.recorderState.value != RecorderState.processing)
-                  _uiHelper.mediaPlayerButton(
-                    AppGlobalConfig.trackPlaybackReleaseMode
-                        .icon(track.playbackReleaseMode.value),
-                    _trans.trackPlaybackModeToggle(track.name.value),
-                    onPressed: (track.state.value != TrackState.recording)
-                        ? () => _trackRepository.togglePlaybackMode(track)
-                        : null,
-                  ),
-                if (track.recorderState.value == RecorderState.empty)
-                  _uiHelper.mediaPlayerButton(
-                    AppIcon.trackRecordingStart,
-                    _trans.trackRecordingStart(track.name.value),
-                    iconSize:
-                        Theme.of(_context).textTheme.displayLarge!.fontSize,
-                    onPressed: () => _recordingManager.startRecording(track),
-                  ),
-                if (track.recorderState.value == RecorderState.recording)
-                  _uiHelper.mediaPlayerButton(
-                    AppIcon.trackRecordingStop,
-                    _trans.trackRecordingStop(track.name.value),
-                    iconSize:
-                        Theme.of(_context).textTheme.displayLarge!.fontSize,
-                    onPressed: () =>
-                        _recordingManager.stopAndSaveRecording(track),
-                    borderStyle: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(
-                            Radius.circular(UIHelper.gridGap * 3))),
-                  ),
-                if (track.recorderState.value == RecorderState.recording)
-                  _uiHelper.mediaPlayerButton(
-                    AppIcon.trackRecordingCancel,
-                    _trans.trackRecordingCancel(track.name.value),
-                    onPressed: () => _recordingManager.cancelRecording(track),
-                  ),
-                if (track.recorderState.value == RecorderState.empty)
-                  _uiHelper.mediaPlayerButton(
-                    AppIcon.trackRecordingImport,
-                    _trans.trackRecordingImport(track.name.value),
-                    onPressed: () async =>
-                        _recordingManager.importRecording(track),
-                  ),
-                if (track.recorderState.value == RecorderState.processing)
-                  _uiHelper.mediaPlayerButton(
-                    Symbols.hourglass_rounded,
-                    _trans.trackRecordingStop(track.name.value),
-                    iconSize:
-                        Theme.of(_context).textTheme.displayLarge!.fontSize,
-                    onPressed: null,
-                  ),
-                if (track.state.value == TrackState.idle)
-                  _uiHelper.mediaPlayerButton(
-                    AppIcon.trackPlayingStart,
-                    _trans.trackPlayingStart(track.name.value),
-                    onPressed: () => track.startPlaying(),
-                    iconSize:
-                        Theme.of(_context).textTheme.displayLarge!.fontSize,
-                  ),
-                if (track.state.value == TrackState.playing)
-                  _uiHelper.mediaPlayerButton(
-                    AppIcon.trackPlayingPause,
-                    _trans.trackPlayingPause(track.name.value),
-                    onPressed: () => track.pausePlaying(),
-                    iconSize:
-                        Theme.of(_context).textTheme.displayLarge!.fontSize,
-                    borderStyle: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(
-                            Radius.circular(UIHelper.gridGap * 3))),
-                  ),
-                if (track.state.value == TrackState.paused)
-                  _uiHelper.mediaPlayerButton(
-                    AppIcon.trackPlayingResume,
-                    _trans.trackPlayingResume(track.name.value),
-                    onPressed: () => track.resumePlaying(),
-                    iconSize:
-                        Theme.of(_context).textTheme.displayLarge!.fontSize,
-                    borderStyle: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(
-                            Radius.circular(UIHelper.gridGap * 6))),
-                  ),
-                if (track.recorderState.value == RecorderState.ready)
-                  _uiHelper.mediaPlayerButton(
-                    AppIcon.trackPlayingStop,
-                    _trans.trackPlayingStop(track.name.value),
-                    onPressed: (track.state.value == TrackState.playing ||
-                            track.state.value == TrackState.paused ||
-                            track.progress.value > 0)
-                        ? () => track.stopPlaying()
-                        : null,
-                  ),
-                if (track.recorderState.value != RecorderState.processing)
-                  PopupMenuButton<TrackMenuItem>(
-                    style: _uiHelper.circledButtonStyle(),
-                    icon: Icon(AppIcon.moreMenu),
-                    itemBuilder: (BuildContext context) =>
-                        _trackMenuItems(track, track.state.value),
-                    enabled: (track.state.value != TrackState.recording &&
-                        track.state.value != TrackState.processing),
-                    onSelected: (TrackMenuItem selection) =>
-                        _trackMenuItemSelected(track, selection),
-                  ),
-              ],
+                      ),
+                    ),
+                  if (track.recorderState.value == RecorderState.empty)
+                    FocusTraversalOrder(
+                      order: NumericFocusOrder(1),
+                      child: _uiHelper.mediaPlayerButton(
+                        AppIcon.trackRecordingStart,
+                        _trans.trackRecordingStart(track.name.value),
+                        iconSize:
+                            Theme.of(_context).textTheme.displayLarge!.fontSize,
+                        onPressed: () => _recordingManager.startRecording(track),
+                      ),
+                    ),
+                  if (track.recorderState.value == RecorderState.recording)
+                    FocusTraversalOrder(
+                      order: NumericFocusOrder(1),
+                      child: _uiHelper.mediaPlayerButton(
+                        AppIcon.trackRecordingStop,
+                        _trans.trackRecordingStop(track.name.value),
+                        iconSize:
+                            Theme.of(_context).textTheme.displayLarge!.fontSize,
+                        onPressed: () =>
+                            _recordingManager.stopAndSaveRecording(track),
+                        borderStyle: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(
+                                Radius.circular(UIHelper.gridGap * 3))),
+                      ),
+                    ),
+                  if (track.recorderState.value == RecorderState.recording)
+                    FocusTraversalOrder(
+                      order: NumericFocusOrder(2),
+                      child: _uiHelper.mediaPlayerButton(
+                        AppIcon.trackRecordingCancel,
+                        _trans.trackRecordingCancel(track.name.value),
+                        onPressed: () => _recordingManager.cancelRecording(track),
+                      ),
+                    ),
+                  if (track.recorderState.value == RecorderState.empty)
+                    FocusTraversalOrder(
+                      order: NumericFocusOrder(3),
+                      child: _uiHelper.mediaPlayerButton(
+                        AppIcon.trackRecordingImport,
+                        _trans.trackRecordingImport(track.name.value),
+                        onPressed: () async =>
+                            _recordingManager.importRecording(track),
+                      ),
+                    ),
+                  if (track.recorderState.value == RecorderState.processing)
+                    FocusTraversalOrder(
+                      order: NumericFocusOrder(4),
+                      child: _uiHelper.mediaPlayerButton(
+                        Symbols.hourglass_rounded,
+                        _trans.trackRecordingStop(track.name.value),
+                        iconSize:
+                            Theme.of(_context).textTheme.displayLarge!.fontSize,
+                        onPressed: null,
+                      ),
+                    ),
+                  if (track.state.value == TrackState.idle)
+                    FocusTraversalOrder(
+                      order: NumericFocusOrder(1),
+                      child: _uiHelper.mediaPlayerButton(
+                        AppIcon.trackPlayingStart,
+                        _trans.trackPlayingStart(track.name.value),
+                        onPressed: () => track.startPlaying(),
+                        iconSize:
+                            Theme.of(_context).textTheme.displayLarge!.fontSize,
+                      ),
+                    ),
+                  if (track.state.value == TrackState.playing)
+                    FocusTraversalOrder(
+                      order: NumericFocusOrder(1),
+                      child: _uiHelper.mediaPlayerButton(
+                        AppIcon.trackPlayingPause,
+                        _trans.trackPlayingPause(track.name.value),
+                        onPressed: () => track.pausePlaying(),
+                        iconSize:
+                            Theme.of(_context).textTheme.displayLarge!.fontSize,
+                        borderStyle: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(
+                                Radius.circular(UIHelper.gridGap * 3))),
+                      ),
+                    ),
+                  if (track.state.value == TrackState.paused)
+                    FocusTraversalOrder(
+                      order: NumericFocusOrder(1),
+                      child: _uiHelper.mediaPlayerButton(
+                        AppIcon.trackPlayingResume,
+                        _trans.trackPlayingResume(track.name.value),
+                        onPressed: () => track.resumePlaying(),
+                        iconSize:
+                            Theme.of(_context).textTheme.displayLarge!.fontSize,
+                        borderStyle: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(
+                                Radius.circular(UIHelper.gridGap * 6))),
+                      ),
+                    ),
+                  if (track.recorderState.value == RecorderState.ready)
+                    FocusTraversalOrder(
+                      order: NumericFocusOrder(1),
+                      child: _uiHelper.mediaPlayerButton(
+                        AppIcon.trackPlayingStop,
+                        _trans.trackPlayingStop(track.name.value),
+                        onPressed: (track.state.value == TrackState.playing ||
+                                track.state.value == TrackState.paused ||
+                                track.progress.value > 0)
+                            ? () => track.stopPlaying()
+                            : null,
+                      ),
+                    ),
+                  if (track.recorderState.value != RecorderState.processing)
+                    FocusTraversalOrder(
+                      order: NumericFocusOrder(7),
+                      child: PopupMenuButton<TrackMenuItem>(
+                        style: _uiHelper.circledButtonStyle(),
+                        icon: Icon(AppIcon.moreMenu),
+                        itemBuilder: (BuildContext context) =>
+                            _trackMenuItems(track, track.state.value),
+                        enabled: (track.state.value != TrackState.recording &&
+                            track.state.value != TrackState.processing),
+                        onSelected: (TrackMenuItem selection) =>
+                            _trackMenuItemSelected(track, selection),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         ),
