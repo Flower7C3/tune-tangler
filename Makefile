@@ -27,7 +27,7 @@
 
 .PHONY: help
 help: ## Show this help
-	@echo "$(@FORMAT_BOLD)$(@COLOR_CYAN)TuneTangler - Available Commands$(@RESET)"
+	@echo "$(@FORMAT_BOLD)$(@COLOR_CYAN)TuneTangler - Available Commands$(@FORMAT_RESET)"
 	@echo ""
 	@echo "$(@FORMAT_BOLD)$(@COLOR_BLUE)$(@ICON_ROCKET) Development Setup$(@FORMAT_RESET)"
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | grep -E '##SETUP## ' | awk 'BEGIN {FS = ":.*?##.*?## "}; {printf "$(@COLOR_CYAN)%-25s$(@FORMAT_RESET) %s\n", $$1, $$2}'
@@ -69,7 +69,7 @@ quick-start: dev-setup list-devices ##SETUP## Setup development environment and 
 # =============================================================================
 
 .PHONY: analyze
-analyze: ##QA## Analyze code quality
+analyze: ##QA## Run code analysis
 	@echo "$(@FORMAT_BOLD)$(@COLOR_BLUE)$(@ICON_INFO) Running code analysis...$(@FORMAT_RESET)"
 	@flutter analyze
 
@@ -97,55 +97,117 @@ run: run-debug ##BUILD## Run app (debug) - alias
 
 .PHONY: run-debug
 run-debug: ##BUILD## Run app (debug)
-	@echo "$(@FORMAT_BOLD)$(@ICON_ROCKET)$(@ICON_INFO) Running app (debug)...$(@FORMAT_RESET)"
+	@echo "$(@FORMAT_BOLD)$(@ICON_ROCKET) Running app (debug)...$(@FORMAT_RESET)"
 	@flutter run --debug
 
 .PHONY: run-release
 run-release: ##BUILD## Run app (release)
-	@echo "$(@FORMAT_BOLD)$(@ICON_ROCKET)$(@ICON_INFO) Running app (release)...$(@FORMAT_RESET)"
+	@echo "$(@FORMAT_BOLD)$(@ICON_ROCKET) Running app (release)...$(@FORMAT_RESET)"
 	@flutter run --release
 
 .PHONY: increment-build-version
 increment-build-version: ##BUILD## Increment build version
-	@echo "$(@FORMAT_BOLD)$(@ICON_BUILD)$(@ICON_INFO) Increment build version...$(@FORMAT_RESET)"
+	@echo "$(@FORMAT_BOLD)$(@ICON_BUILD) Increment build version...$(@FORMAT_RESET)"
 	@./scripts/increment_build.sh
 
 .PHONY: build-apk
-build-apk: build-apk-debug ##BUILD## Build APK (debug) - alias
+build-apk: ##BUILD## Build APK with argument (debug/release) or interactive selection
+	@echo "$(@FORMAT_BOLD)$(@ICON_BUILD) APK Build$(@FORMAT_RESET)"
+	@echo ""
+	@bash -c 'if [ -n "$(filter debug release,$(MAKECMDGOALS))" ]; then \
+		BUILD_TYPE="$(filter debug release,$(MAKECMDGOALS))"; \
+		echo -e "$(@COLOR_BLUE)$(@ICON_INFO) Build type specified: $$BUILD_TYPE$(@FORMAT_RESET)"; \
+	else \
+		echo -e "$(@COLOR_CYAN)$(@ICON_INFO) Select build type:$(@FORMAT_RESET)"; \
+		select BUILD_TYPE in "debug" "release"; do \
+			if [ -n "$$BUILD_TYPE" ]; then \
+				echo -e "$(@COLOR_BLUE)$(@ICON_INFO) Selected: $$BUILD_TYPE$(@FORMAT_RESET)"; \
+				break; \
+			else \
+				echo -e "$(@COLOR_RED)$(@ICON_ERROR) Invalid selection. Please choose 1 or 2.$(@FORMAT_RESET)"; \
+			fi; \
+		done; \
+	fi; \
+	echo ""; \
+	echo -e "$(@COLOR_BLUE)$(@ICON_INFO) Building $$BUILD_TYPE APK...$(@FORMAT_RESET)"; \
+	make build-apk-$$BUILD_TYPE; \
+	echo ""; \
+	echo -e "$(@FORMAT_BOLD)$(@COLOR_GREEN)$(@ICON_CHECK) $$BUILD_TYPE APK built successfully!$(@FORMAT_RESET)"'
 
 .PHONY: build-apk-debug
-build-apk-debug: increment-build-version ##BUILD## Build APK (debug with build version incrementation)
-	@echo "$(@FORMAT_BOLD)$(@ICON_BUILD)$(@ICON_INFO) Building APK (debug)...$(@FORMAT_RESET)"
-	@flutter build apk --debug
+build-apk-debug: increment-build-version ##BUILD## Build APK (debug)
+	@make build-apk debug
 
 .PHONY: build-apk-release
-build-apk-release: increment-build-version ##BUILD## Build APK (release, with build version incrementation)
-	@echo "$(@FORMAT_BOLD)$(@ICON_BUILD)$(@ICON_INFO) Building APK (release)...$(@FORMAT_RESET)"
-	@flutter build apk --release
+build-apk-release: increment-build-version ##BUILD## Build APK (release)
+	@make build-apk release
 
 #.PHONY: build-ios
 #build-ios: ##BUILD## Build iOS (debug)
-#	@echo "$(@FORMAT_BOLD)$(@ICON_BUILD)$(@ICON_INFO) Building iOS (debug)...$(@FORMAT_RESET)"
+#	@echo "$(@FORMAT_BOLD)$(@ICON_BUILD) Building iOS (debug)...$(@FORMAT_RESET)"
 #	@flutter build ios --debug
 
 .PHONY: install-apk
-install-apk: install-apk-debug ##BUILD## Build and install APK (debug) - alias
+install-apk: ##BUILD## Build and install APK with argument (debug/release) or interactive selection
+	@echo "$(@FORMAT_BOLD)$(@ICON_BUILD) APK Installation$(@FORMAT_RESET)"
+	@echo ""
+	@DEVICES=($$(adb devices | grep -E "^[^[:space:]]+[[:space:]]+device" | awk "{print \$$1}")); \
+	if [ $${#DEVICES[@]} -eq 0 ]; then \
+		echo "$(@COLOR_RED)$(@ICON_ERROR) No devices found!$(@FORMAT_RESET)"; \
+		exit 1; \
+	elif [ $${#DEVICES[@]} -eq 1 ]; then \
+		echo "$(@COLOR_BLUE)$(@ICON_INFO) Only one device found, installing on $${DEVICES[0]}...$(@FORMAT_RESET)"; \
+		DEVICE=$${DEVICES[0]}; \
+	else \
+		echo "$(@COLOR_CYAN)$(@ICON_INFO) Select device to install on:$(@FORMAT_RESET)"; \
+		select DEVICE in "$${DEVICES[@]}"; do \
+			if [ -n "$$DEVICE" ]; then \
+				echo "$(@COLOR_BLUE)$(@ICON_INFO) Selected: $$DEVICE$(@FORMAT_RESET)"; \
+				break; \
+			else \
+				echo "$(@COLOR_RED)$(@ICON_ERROR) Invalid selection. Please choose a number.$(@FORMAT_RESET)"; \
+			fi; \
+		done; \
+	fi; \
+	echo ""; \
+	if [ -n "$(filter debug release,$(MAKECMDGOALS))" ]; then \
+		BUILD_TYPE="$(filter debug release,$(MAKECMDGOALS))"; \
+		echo "$(@COLOR_BLUE)$(@ICON_INFO) Build type specified: $$BUILD_TYPE$(@FORMAT_RESET)"; \
+	else \
+		echo "$(@COLOR_CYAN)$(@ICON_INFO) Select build type:$(@FORMAT_RESET)"; \
+		select BUILD_TYPE in "debug" "release"; do \
+			if [ -n "$$BUILD_TYPE" ]; then \
+				echo "$(@COLOR_BLUE)$(@ICON_INFO) Selected: $$BUILD_TYPE$(@FORMAT_RESET)"; \
+				break; \
+			else \
+				echo "$(@COLOR_RED)$(@ICON_ERROR) Invalid selection. Please choose 1 or 2.$(@FORMAT_RESET)"; \
+			fi; \
+		done; \
+	fi; \
+	echo ""; \
+	echo "$(@COLOR_BLUE)$(@ICON_INFO) Building $$BUILD_TYPE APK...$(@FORMAT_RESET)"; \
+	make build-apk-$$BUILD_TYPE; \
+	echo ""; \
+	echo "$(@COLOR_BLUE)$(@ICON_INFO) Installing $$BUILD_TYPE APK on $$DEVICE...$(@FORMAT_RESET)"; \
+	if [ "$$BUILD_TYPE" = "debug" ]; then \
+		adb -s $$DEVICE install build/app/outputs/flutter-apk/app-debug.apk; \
+	else \
+		adb -s $$DEVICE install build/app/outputs/flutter-apk/app-release.apk; \
+	fi; \
+	echo ""; \
+	echo "$(@FORMAT_BOLD)$(@COLOR_GREEN)$(@ICON_CHECK) $$BUILD_TYPE APK installed on $$DEVICE!$(@FORMAT_RESET)"
 
 .PHONY: install-apk-debug
-install-apk-debug: build-apk-debug ##BUILD## Build and install APK (debug)
-	@echo "$(@FORMAT_BOLD)$(@ICON_BUILD)$(@ICON_INFO) Installing APK (debug)...$(@FORMAT_RESET)"
-	adb install build/app/outputs/flutter-apk/app-debug.apk
-	@echo "$(@FORMAT_BOLD)$(@COLOR_GREEN)$(@ICON_CHECK) Application installed!$(@FORMAT_RESET)"
-
+install-apk-debug: ##BUILD## Build and install APK (debug)
+	@make install-apk debug
+	
 .PHONY: install-apk-release
-install-apk-release: build-apk-release ##BUILD## Build and install APK (release)
-	@echo "$(@FORMAT_BOLD)$(@ICON_BUILD)$(@ICON_INFO) Installing APK (release)...$(@FORMAT_RESET)"
-	adb install build/app/outputs/flutter-apk/app-release.apk
-	@echo "$(@FORMAT_BOLD)$(@COLOR_GREEN)$(@ICON_CHECK) Application installed!$(@FORMAT_RESET)"
+install-apk-release: ##BUILD## Build and install APK (release)
+	@make install-apk release
 
 .PHONY: clean
 clean: ##BUILD## Clean build and cache
-	@echo "$(@FORMAT_BOLD)$(@ICON_CLEAN)$(@ICON_INFO) Cleaning build and cache...$(@FORMAT_RESET)"
+	@echo "$(@FORMAT_BOLD)$(@ICON_CLEAN) Cleaning build and cache...$(@FORMAT_RESET)"
 	@flutter clean
 	@make pub-get
 
@@ -159,31 +221,71 @@ full-build: clean pub-get analyze build-apk ##BUILD## All-in-one: clean, get dep
 
 .PHONY: list-devices
 list-devices: ##DEVICE## Show available devices
-	@echo "$(@FORMAT_BOLD)$(@COLOR_GREEN)$(@ICON_DEVICE)$(@ICON_INFO) Available devices:$(@FORMAT_RESET)$(@COLOR_GREEN)"
-	@flutter devices
+	@echo "$(@FORMAT_BOLD)$(@COLOR_GREEN)$(@ICON_DEVICE) Available devices:$(@FORMAT_RESET)"
+	@bash -c 'flutter devices | grep -E "^[[:space:]]+[^[:space:]]+.*\\([a-z]+\\)[[:space:]]*•" | sed "s/^[[:space:]]*//"'
 
 .PHONY: list-emulators
 list-emulators: ##DEVICE## Show available emulators
-	@echo "$(@FORMAT_BOLD)$(@ICON_EMULATOR)$(@ICON_INFO) Available emulators:$(@FORMAT_RESET)"
-	@flutter emulators | grep -E '^[a-zA-Z0-9_-]+[[:space:]]+•' | grep -v '^Id'
+	@echo "$(@FORMAT_BOLD)$(@COLOR_GREEN)$(@ICON_EMULATOR) Available emulators:$(@FORMAT_RESET)"
+	@bash -c 'flutter emulators | grep -E "^[a-zA-Z0-9_-]+[[:space:]]+•" | grep -v "^Id"'
 	@echo ""
-	@echo "$(@COLOR_CYAN)$(@ICON_INFO) To start specific emulator, use: $(@COLOR_BLUE)make start-emulator-<emulator_id>$(@COLOR_CYAN), example: $(@COLOR_BLUE)make start-emulator-Medium_Phone_API_34$(@FORMAT_RESET)"
-	@echo "$(@COLOR_CYAN)$(@ICON_INFO) To run app on specific emulator, use: $(@COLOR_BLUE)make run-emulator-<emulator_id>$(@COLOR_CYAN), example: $(@COLOR_BLUE)make run-emulator-Medium_Phone_API_34$(@FORMAT_RESET)"
+	@echo "$(@COLOR_CYAN)$(@ICON_INFO) Use make start-emulator to start emulator with selection$(@FORMAT_RESET)"
+	@echo "$(@COLOR_CYAN)$(@ICON_INFO) Use make run-emulator to run app on emulator with selection$(@FORMAT_RESET)"
 
-.PHONY: run-emulator-%
-run-emulator-%: ##DEVICE## Run app on specific emulator (use: make run-emulator-<emulator_id>)
-	@echo "$(@FORMAT_BOLD)$(@COLOR_GREEN)$(@ICON_EMULATOR)$(@ICON_INFO) Starting emulator $* and running app...$(@FORMAT_RESET)"
-	@echo "$(@COLOR_CYAN)$(@ICON_INFO) Launching emulator: $*$(@FORMAT_RESET)"
-	@flutter emulators --launch $*
-	@echo "$(@COLOR_GREEN)$(@ICON_CHECK) Emulator $* started! Running app...$(@FORMAT_RESET)"
-	@make run-debug
+.PHONY: start-emulator
+start-emulator: ##DEVICE## Start emulator with interactive selection
+	@echo "$(@FORMAT_BOLD)$(@COLOR_GREEN)$(@ICON_EMULATOR) Emulator Selection$(@FORMAT_RESET)"
+	@echo ""
+	@bash -c 'EMULATORS=($$(flutter emulators | grep -E "^[a-zA-Z0-9_-]+[[:space:]]+•" | grep -v "^Id" | awk "{print \$$1}")); \
+	if [ $${#EMULATORS[@]} -eq 0 ]; then \
+		echo -e "$(@COLOR_RED)$(@ICON_ERROR) No emulators found!$(@FORMAT_RESET)"; \
+		exit 1; \
+	elif [ $${#EMULATORS[@]} -eq 1 ]; then \
+		echo -e "$(@COLOR_BLUE)$(@ICON_INFO) Only one emulator found, starting $${EMULATORS[0]}...$(@FORMAT_RESET)"; \
+		EMULATOR=$${EMULATORS[0]}; \
+	else \
+		echo -e "$(@COLOR_CYAN)$(@ICON_INFO) Select emulator to start:$(@FORMAT_RESET)"; \
+		select EMULATOR in "$${EMULATORS[@]}"; do \
+			if [ -n "$$EMULATOR" ]; then \
+				echo -e "$(@COLOR_BLUE)$(@ICON_INFO) Selected: $$EMULATOR$(@FORMAT_RESET)"; \
+				break; \
+			else \
+				echo -e "$(@COLOR_RED)$(@ICON_ERROR) Invalid selection. Please choose a number.$(@FORMAT_RESET)"; \
+			fi; \
+		done; \
+	fi; \
+	echo ""; \
+	echo -e "$(@COLOR_BLUE)$(@ICON_INFO) Starting emulator $$EMULATOR...$(@FORMAT_RESET)"; \
+	flutter emulators --launch $$EMULATOR; \
+	echo -e "$(@COLOR_GREEN)$(@ICON_CHECK) Emulator $$EMULATOR started!$(@FORMAT_RESET)"'
 
-.PHONY: start-emulator-%
-start-emulator-%: ##DEVICE## Start specific emulator without running app (use: make start-emulator-<emulator_id>)
-	@echo "$(@FORMAT_BOLD)$(@COLOR_GREEN)$(@ICON_EMULATOR)$(@ICON_INFO) Starting emulator $*...$(@FORMAT_RESET)"
-	@echo "$(@COLOR_CYAN)$(@ICON_INFO) Launching emulator: $*$(@FORMAT_RESET)"
-	@flutter emulators --launch $*
-	@echo "$(@COLOR_GREEN)$(@ICON_CHECK) Emulator $* started!$(@FORMAT_RESET)"
+.PHONY: run-emulator
+run-emulator: ##DEVICE## Run app on emulator with interactive selection
+	@echo "$(@FORMAT_BOLD)$(@COLOR_GREEN)$(@ICON_EMULATOR) Emulator Selection for App$(@FORMAT_RESET)"
+	@echo ""
+	@bash -c 'EMULATORS=($$(flutter emulators | grep -E "^[a-zA-Z0-9_-]+[[:space:]]+•" | grep -v "^Id" | awk "{print \$$1}")); \
+	if [ $${#EMULATORS[@]} -eq 0 ]; then \
+		echo -e "$(@COLOR_RED)$(@ICON_ERROR) No emulators found!$(@FORMAT_RESET)"; \
+		exit 1; \
+	elif [ $${#EMULATORS[@]} -eq 1 ]; then \
+		echo -e "$(@COLOR_BLUE)$(@ICON_INFO) Only one emulator found, starting $${EMULATORS[0]} and running app...$(@FORMAT_RESET)"; \
+		EMULATOR=$${EMULATORS[0]}; \
+	else \
+		echo -e "$(@COLOR_CYAN)$(@ICON_INFO) Select emulator to run app on:$(@FORMAT_RESET)"; \
+		select EMULATOR in "$${EMULATORS[@]}"; do \
+			if [ -n "$$EMULATOR" ]; then \
+				echo -e "$(@COLOR_BLUE)$(@ICON_INFO) Selected: $$EMULATOR$(@FORMAT_RESET)"; \
+				break; \
+			else \
+				echo -e "$(@COLOR_RED)$(@ICON_ERROR) Invalid selection. Please choose a number.$(@FORMAT_RESET)"; \
+			fi; \
+		done; \
+	fi; \
+	echo ""; \
+	echo -e "$(@COLOR_BLUE)$(@ICON_INFO) Starting emulator $$EMULATOR and running app...$(@FORMAT_RESET)"; \
+	flutter emulators --launch $$EMULATOR; \
+	echo -e "$(@COLOR_GREEN)$(@ICON_CHECK) Emulator $$EMULATOR started! Running app...$(@FORMAT_RESET)"; \
+	make run-debug'
 
 # =============================================================================
 # MAINTENANCE
@@ -201,17 +303,17 @@ pub-get: ##MAINTENANCE## Get dependencies
 
 .PHONY: pub-outdated
 pub-outdated: ##MAINTENANCE## Check outdated packages
-	@echo "$(@FORMAT_BOLD)$(@COLOR_WARN)$(@ICON_INFO) Checking for outdated packages...$(@FORMAT_RESET)"
+	@echo "$(@FORMAT_BOLD)$(@COLOR_YELLOW)$(@ICON_INFO) Checking for outdated packages...$(@FORMAT_RESET)"
 	@flutter pub outdated
 
 .PHONY: pub-upgrade
 pub-upgrade: ##MAINTENANCE## Upgrade dependencies
-	@echo "$(@FORMAT_BOLD)$(@ICON_UPGRADE)$(@ICON_INFO) Upgrading dependencies...$(@FORMAT_RESET)"
+	@echo "$(@FORMAT_BOLD)$(@ICON_UPGRADE) Upgrading dependencies...$(@FORMAT_RESET)"
 	@flutter pub upgrade
 
 .PHONY: sdk-upgrade
 sdk-upgrade: ##MAINTENANCE## Upgrade Flutter SDK
-	@echo "$(@FORMAT_BOLD)$(@ICON_UPGRADE)$(@ICON_INFO) Upgrading Flutter SDK...$(@FORMAT_RESET)"
+	@echo "$(@FORMAT_BOLD)$(@ICON_UPGRADE) Upgrading Flutter SDK...$(@FORMAT_RESET)"
 	@flutter upgrade
 
 # =============================================================================
@@ -240,12 +342,12 @@ create-tag: ##UTILITIES## Create and push version tag
 	@echo "$(@FORMAT_BOLD)$(@COLOR_BLUE)$(@ICON_INFO) Creating version tag...$(@FORMAT_RESET)"
 	@if [ -f pubspec.yaml ]; then \
 		VERSION=$$(grep '^version:' pubspec.yaml | sed 's/.*version: //' | sed 's/+.*//'); \
-		echo "$(@COLOR_CYAN)Creating tag v$$VERSION...$(@FORMAT_RESET)"; \
+		echo -e "$(@COLOR_CYAN)Creating tag v$$VERSION...$(@FORMAT_RESET)"; \
 		git tag "v$$VERSION"; \
 		git push origin "v$$VERSION"; \
-		echo "$(@COLOR_GREEN)$(@ICON_CHECK) Tag v$$VERSION created and pushed"; \
+		echo -e "$(@COLOR_GREEN)$(@ICON_CHECK) Tag v$$VERSION created and pushed"; \
 	else \
-		echo "$(@COLOR_RED)$(@ICON_ERROR) pubspec.yaml not found!$(@FORMAT_RESET)"; \
+		echo -e "$(@COLOR_RED)$(@ICON_ERROR) pubspec.yaml not found!$(@FORMAT_RESET)"; \
 		exit 1; \
 	fi
 
