@@ -232,7 +232,7 @@ jobs:
                 gsub(/{{ run_number }}/, run_number); 
                 gsub(/{{ project_name }}/, proj_name); 
                 gsub(/{{ version }}/, version); 
-                gsub(/{{ version }}/, version); 
+                gsub(/{{ commits }}/, ""); 
                 gsub(/{{ FLUTTER_VERSION }}/, flutter_version); 
                 gsub(/{{ JAVA_VERSION }}/, java_version); 
                 gsub(/{{ JAVA_DISTRIBUTION }}/, java_distribution); 
