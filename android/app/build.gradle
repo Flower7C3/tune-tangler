@@ -23,9 +23,9 @@ android {
     signingConfigs {
         release {
             storeFile file("tune-tangler-release-key.jks")
-            storePassword getLocalProperty('KEYSTORE_PASSWORD')
-            keyAlias getLocalProperty('KEY_ALIAS')
-            keyPassword getLocalProperty('KEY_PASSWORD')
+            storePassword System.getenv('KEYSTORE_PASSWORD')
+            keyAlias System.getenv('KEY_ALIAS')
+            keyPassword System.getenv('KEY_PASSWORD')
         }
     }
 
@@ -55,17 +55,6 @@ android {
 
 flutter {
     source = "../.."
-}
-
-// Helper function to read properties from local.properties
-def getLocalProperty(String propertyName) {
-    def localProperties = new Properties()
-    def localPropertiesFile = rootProject.file("local.properties")
-    if (localPropertiesFile.exists()) {
-        localProperties.load(new FileInputStream(localPropertiesFile))
-        return localProperties.getProperty(propertyName)
-    }
-    return null
 }
 
 dependencies {

@@ -14,10 +14,10 @@ Ten katalog zawiera automatyczne workflowy GitHub Actions dla projektu TuneTangl
 - ✅ Weryfikuje kod (analyze, testy)
 - ✅ Generuje pliki lokalizacji
 - ✅ Automatycznie zwiększa patch version i build number (przy push na master)
-- ✅ Buduje APK release
+- ✅ Buduje App Bundle (.aab) release
 - ✅ Automatycznie tworzy tag wersji (przy push na master)
-- ✅ Tworzy GitHub Release z APK
-- ✅ Uploaduje APK release jako artifact
+- ✅ Tworzy GitHub Release z App Bundle
+- ✅ Uploaduje App Bundle release jako artifact
 
 ## Jak używać
 
@@ -25,7 +25,7 @@ Ten katalog zawiera automatyczne workflowy GitHub Actions dla projektu TuneTangl
 
 1. Zmergeuj zmiany do `master` branch
 2. Workflow automatycznie utworzy tag (np. `v1.1.4`)
-3. Workflow automatycznie utworzy release z APK
+3. Workflow automatycznie utworzy release z App Bundle
 
 ### Manualne Release
 
@@ -53,8 +53,9 @@ Workflowy używają cache dla:
 
 ## Artifacts
 
-- **CI:** APK debug (retention: 7 dni)
-- **Release:** APK release (retention: bez limitu)
+- **App Bundle Release:** App Bundle (.aab) (retention: 1 dzień)
+- **Modified pubspec.yaml:** Plik konfiguracyjny (retention: domyślny)
+- **Test Workflow:** Brak artifacts (tylko testy)
 
 ## Troubleshooting
 
