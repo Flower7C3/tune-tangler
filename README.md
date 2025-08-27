@@ -2,94 +2,56 @@
 
 Yet another music looper app
 
-## Przygotowanie środowiska developerskiego
+## 📱 O Projekcie
 
-### 1. Instalacja Flutter
+TuneTangler to aplikacja do tworzenia pętli muzycznych, napisana w Flutter z
+obsługą Android i iOS.
 
-- **Pobierz Flutter SDK:**
-  - Przejdź na stronę [Flutter Downloads](https://docs.flutter.dev/get-started/install)
-    i pobierz najnowszą stabilną wersję odpowiednią dla Twojego systemu
-    operacyjnego.
+## 🚀 Szybki Start
 
-- **Instalacja:**
-  - Rozpakuj pobrany plik do wybranej lokalizacji na swoim komputerze.
-  - Dodaj ścieżkę do katalogu `bin` Fluttera do zmiennej środowiskowej `PATH`.
+### Wymagania
 
-- **Weryfikacja instalacji:**
-  - Otwórz terminal i uruchom:
+- Flutter 3.35.1+
+- Android Studio / Xcode
+- Java 17 (dla Android)
 
-      ```bash
-      flutter doctor
-      ```
+### Instalacja
 
-  - To polecenie sprawdzi, czy wszystkie niezbędne komponenty są zainstalowane
-    i skonfigurowane poprawnie.
+```bash
+git clone <repository-url>
+cd TuneTangler
+flutter pub get
+flutter run
+```
 
-### 2. Instalacja Android Studio
+## 📚 Dokumentacja
 
-- **Pobierz i zainstaluj Android Studio:**
-  - Pobierz najnowszą wersję z [oficjalnej strony](https://developer.android.com/studio).
-  - Zainstaluj program, postępując zgodnie z instrukcjami instalatora.
+- **[Instalacja i Konfiguracja](docs/INSTALLATION.md)** - szczegółowy przewodnik
+  instalacji
+- **[Release Signing](docs/RELEASE_SIGNING.md)** - konfiguracja podpisywania
+  aplikacji
+- **[Assistant Rules](docs/ASSISTANT_RULES.md)** - reguły dla asystenta AI
 
-- **Konfiguracja:**
-  - Uruchom Android Studio i przejdź przez kreator konfiguracji,
-    akceptując domyślne ustawienia.
-  - Zainstaluj wymagane komponenty, takie jak Android SDK,
-    Platform-Tools i Build-Tools.
+## 🛠️ Development
 
-### 3. Konfiguracja emulatora Androida
+### Makefile
 
-- **Tworzenie nowego urządzenia wirtualnego (AVD):**
-  - W Android Studio przejdź do `Tools` > `AVD Manager`.
-  - Kliknij `Create Virtual Device` i wybierz preferowane urządzenie.
-  - Wybierz wersję systemu Android i zakończ proces tworzenia emulatora.
+Pełna lista komend dostępna po uruchomieniu:
 
-- **Uruchamianie emulatora:**
-  - W `AVD Manager` kliknij ikonę `Start` obok utworzonego urządzenia,
-    aby uruchomić emulator.
+```bash
+make help
+```
 
-### 4. Przygotowanie projektu
+### Workflow
 
-- **Pobranie zależności:**
+Projekt używa GitHub Actions do automatycznego build i release:
 
-  ```bash
-  flutter pub get
-  ```
+- **Test** → **Build** → **Version Control** → **Release**
 
-- **Weryfikacja konfiguracji:**
+## 📄 Licencja
 
-  ```bash
-  flutter doctor
-  flutter analyze
-  ```
+[Tu dodaj informacje o licencji]
 
-### 5. Uruchamianie aplikacji na emulatorze
+## 🤝 Contributing
 
-- **Sprawdź dostępne urządzenia:**
-
-  ```bash
-  flutter devices
-  ```
-
-- **Uruchomienie aplikacji:**
-  - Upewnij się, że emulator jest uruchomiony.
-  - W terminalu, w katalogu głównym projektu, uruchom:
-
-      ```bash
-      flutter run
-      ```
-
-  - Aplikacja zostanie skompilowana i uruchomiona na emulatorze.
-
-- **Hot Reload:**
-  - Podczas działania aplikacji w trybie debug, możesz użyć klawisza `r` w terminalu,
-    aby zastosować zmiany na żywo bez pełnego restartowania aplikacji.
-
-**Uwaga:** W przypadku problemów z konfiguracją lub uruchamianiem,
-sprawdź oficjalną dokumentację [Flutter](https://docs.flutter.dev/) lub
-[Android Studio](https://developer.android.com/studio/intro).
-
-## Makefile
-
-Build & install APK via ADB: `make install-apk-release`.
-Pełna lista komend dostępna po uruchomieniu `make help`.
+[Tu dodaj informacje o contributingu]

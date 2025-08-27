@@ -85,7 +85,7 @@ jobs:
           cat > android/local.properties << EOF
           # Keystore properties for CI/CD build
           KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS=${{ secrets.KEY_ALIAS }}
+          KEY_ALIAS=${{ vars.KEY_ALIAS }}
           KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}
           EOF
           echo "✅ Local properties created with keystore credentials"

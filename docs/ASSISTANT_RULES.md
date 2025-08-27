@@ -1,0 +1,119 @@
+# Assistant Rules for TuneTangler Project
+
+## 🚨 **CRITICAL RULES - NEVER BREAK**
+
+### 1. **Git Operations - NEVER DO WITHOUT EXPLICIT PERMISSION**
+
+- ❌ **NEVER** commit changes without explicit user permission
+- ❌ **NEVER** push to remote without explicit user permission  
+- ❌ **NEVER** create tags without explicit user permission
+- ❌ **NEVER** force push or reset without explicit user permission
+- ❌ **NEVER** amend commits that have been pushed to origin
+- ✅ **ALWAYS** ask before making any git operations
+- ✅ **ALWAYS** show git status before suggesting changes
+
+### 2. **Code Changes - GRADUAL AND SAFE**
+
+- ✅ **ALWAYS** make small, incremental changes
+- ✅ **ALWAYS** ask before making multiple file changes
+- ✅ **ALWAYS** explain what each change does
+- ✅ **ALWAYS** test changes before suggesting commit
+- ❌ **NEVER** make large refactoring without explicit permission
+- ❌ **NEVER** change multiple files simultaneously without approval
+
+### 3. **Project-Specific Rules**
+
+- ✅ **ALWAYS** use `console_utils.py` to format output (if available)
+- ✅ **ALWAYS** follow Conventional Commits format
+- ✅ **ALWAYS** respect the CI workflow sequence: test → build →
+  version-control → release
+- ✅ **ALWAYS** avoid hardcoding static Flutter version numbers
+- ✅ **NEVER** send or release versions before building
+- ✅ **ALWAYS** place translation files in `l10n` directory
+- ✅ **ALWAYS** use 'master' branch (not 'main')
+
+## 🔧 **WORKFLOW RULES**
+
+### 4. **When User Asks for Changes**
+
+1. **Analyze** the current state
+2. **Propose** specific, small changes
+3. **Wait** for user approval
+4. **Implement** only approved changes
+5. **Verify** changes work correctly
+6. **Ask** before committing
+
+### 5. **When User Asks for Git Operations**
+
+1. **Show** current git status first
+2. **Explain** what will happen
+3. **Wait** for explicit permission
+4. **Execute** only after approval
+5. **Confirm** operation completed
+
+### 6. **When User Asks for Code Review**
+
+1. **Read** the relevant files
+2. **Identify** potential issues
+3. **Suggest** specific improvements
+4. **Wait** for user decision
+5. **Implement** only if approved
+
+## 📝 **COMMUNICATION RULES**
+
+### 7. **Response Style**
+
+- ✅ **Keep responses concise** (user prefers shorter, less verbose responses)
+- ✅ **Use clear, actionable language**
+- ✅ **Explain technical concepts simply**
+- ✅ **Provide step-by-step instructions when needed**
+- ✅ **Use emojis and formatting for clarity**
+
+### 8. **Error Handling**
+
+- ✅ **Always explain what went wrong**
+- ✅ **Provide specific solutions**
+- ✅ **Suggest alternatives when possible**
+- ✅ **Never hide or ignore errors**
+
+## 🎯 **PROJECT KNOWLEDGE**
+
+### 9. **Remember These Key Points**
+
+- **Flutter project** with Android/iOS support
+- **Uses keystore** for app signing
+- **GitHub Actions workflow** for CI/CD
+- **Makefile** for development commands
+- **Documentation** in `docs/` directory
+- **Version management** through workflow
+
+### 10. **File Structure Awareness**
+
+- **`.github/workflows/`** - CI/CD workflows
+- **`android/`** - Android-specific configuration
+- **`docs/`** - Project documentation
+- **`scripts/`** - Utility scripts
+- **`Makefile`** - Development commands
+
+## 🚫 **WHAT I WILL NEVER DO**
+
+- ❌ **NEVER** make assumptions about user intentions
+- ❌ **NEVER** execute commands without explicit permission
+- ❌ **NEVER** ignore project-specific rules
+- ❌ **NEVER** make changes that could break the build
+- ❌ **NEVER** suggest unsafe git operations
+- ❌ **NEVER** ignore error messages or warnings
+
+## ✅ **WHAT I WILL ALWAYS DO**
+
+- ✅ **ALWAYS** follow these rules strictly
+- ✅ **ALWAYS** ask for permission before making changes
+- ✅ **ALWAYS** explain what I'm doing and why
+- ✅ **ALWAYS** respect the project's existing structure
+- ✅ **ALWAYS** prioritize safety and stability
+- ✅ **ALWAYS** provide clear, actionable feedback
+
+---
+
+**These rules ensure safe, controlled, and user-approved development.**
+**I will follow them strictly in all interactions with this project.**

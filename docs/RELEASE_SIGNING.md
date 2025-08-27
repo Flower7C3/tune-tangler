@@ -1,10 +1,12 @@
 # Release Signing Configuration
 
-This document explains how to configure release signing for TuneTangler to ensure consistent app signatures across builds.
+This document explains how to configure release signing for TuneTangler to
+ensure consistent app signatures across builds.
 
 ## Problem
 
-Without proper signing configuration, each build machine generates its own debug keystore, causing:
+Without proper signing configuration, each build machine generates its own
+debug keystore, causing:
 
 - **Signature mismatch errors** during app updates
 - **Data loss** when users try to update the app
@@ -12,7 +14,8 @@ Without proper signing configuration, each build machine generates its own debug
 
 ## Solution
 
-Use a consistent keystore stored as GitHub secrets for all CI/CD builds. **We now use app bundle (.aab) instead of APK for better signing support.**
+Use a consistent keystore stored as GitHub secrets for all CI/CD builds.
+**We now use app bundle (.aab) instead of APK for better signing support.**
 
 ## Setup Steps
 
@@ -55,7 +58,8 @@ Add these secrets to your GitHub repository:
 | `KEY_ALIAS` | `tune-tangler-key` |
 | `KEY_PASSWORD` | `TuneTangler2024!Key` |
 
-**Note**: The workflow generates `gradle.properties` with these credentials during build, so they're not stored in the repository.
+**Note**: The workflow generates `gradle.properties` with these credentials
+during build, so they're not stored in the repository.
 
 ### 3. Verify Configuration
 
