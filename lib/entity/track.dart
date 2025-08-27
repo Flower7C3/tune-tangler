@@ -130,13 +130,15 @@ class Track {
         now.inMilliseconds - _lastPositionUpdate!.inMilliseconds >=
             _throttleInterval.inMilliseconds) {
       _lastPositionUpdate = now;
-
+      
       if (position >= playbackEndAtPosition.value) {
         if (isPlaybackReleaseModeSingle(playbackReleaseMode.value)) {
           stopPlaying();
+        } else {
+          setPosition(playbackStartAtPosition.value);
+          player.seek(playbackStartAtPosition.value);
         }
-        position = playbackStartAtPosition.value;
-        player.seek(position);
+        return; // ✅ Nie ustawiaj pozycji ponownie
       }
       setPosition(position);
     }
@@ -355,9 +357,9 @@ class Track {
 
   void stopPlaying() {
     if (path != null) {
-      player
-          .stop()
-          .then((status) => player.seek(playbackStartAtPosition.value));
+      player.stop().then((status) {
+        setPosition(playbackStartAtPosition.value); // Ustaw pozycję po zatrzymaniu
+      });
     }
   }
 
