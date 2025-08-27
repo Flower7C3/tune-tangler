@@ -43,6 +43,10 @@ jobs:
     name: Build
     needs: [ test ]
     runs-on: ubuntu-latest
+    env:
+      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
     
     outputs:
       version: ${{ steps.version.outputs.version }}
@@ -68,6 +72,23 @@ jobs:
         with:
           java_version: ${{ env.JAVA_VERSION }}
           java_distribution: ${{ env.JAVA_DISTRIBUTION }}
+
+      - name: "🔐 Setup Keystore"
+        run: |
+          # Create keystore from base64 encoded secret
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/tune-tangler-release-key.jks
+          echo "✅ Keystore created from secret"
+
+      - name: "🔑 Setup Keystore Credentials"
+        run: |
+          # Create local.properties with keystore credentials
+          cat > android/local.properties << EOF
+          # Keystore properties for CI/CD build
+          KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS=${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}
+          EOF
+          echo "✅ Local properties created with keystore credentials"
 
       - name: "🏷️ Increment version"
         id: version
@@ -104,18 +125,44 @@ jobs:
         run: |
           sed -i "s/^version: .*/version: ${{ steps.version.outputs.version }}/" pubspec.yaml
           
-      # Build APK with optimizations
-      - name: "🏗️ Build APK"
+      # Build app bundle with optimizations
+      - name: "🏗️ Build App Bundle"
         run: |
           # Enable Gradle daemon for faster builds
           export GRADLE_OPTS="-Dorg.gradle.daemon=true -Dorg.gradle.parallel=true -Dorg.gradle.jvmargs=-Xmx4g"
-          flutter build apk --release --dart-define=FLUTTER_BUILD_NUMBER=$NEW_BUILD
-        
-      - name: "📤 Upload APK artifact"
+          flutter build appbundle --release --dart-define=FLUTTER_BUILD_NUMBER=$NEW_BUILD
+
+      # Verify app bundle signature
+      - name: "🔐 Verify build"
+        run: |
+          # Verify app bundle signature
+          echo "🔍 Verifying app bundle signature..."
+          
+          # Check if app bundle exists
+          if [ ! -f "build/app/outputs/bundle/release/app-release.aab" ]; then
+            echo "❌ App bundle not found!"
+            exit 1
+          fi
+          
+          # Verify signature with jarsigner
+          jarsigner -verify -verbose -certs build/app/outputs/bundle/release/app-release.aab
+          
+          if [ $? -eq 0 ]; then
+            echo "✅ App bundle signature verified successfully!"
+          else
+            echo "❌ App bundle signature verification failed!"
+            exit 1
+          fi
+          
+          echo "📱 App bundle size: $(du -h build/app/outputs/bundle/release/app-release.aab | cut -f1)"
+          echo "🔐 Build verification completed successfully!"
+
+      # Upload app bundle artifact
+      - name: "📤 Upload app bundle artifact"
         uses: actions/upload-artifact@v4
         with:
-          name: app-release
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: app-release-bundle
+          path: build/app/outputs/bundle/release/app-release.aab
           retention-days: 1
           
       - name: "📤 Upload modified pubspec.yaml"
@@ -207,13 +254,13 @@ jobs:
       - name: "📥 Download build artifacts"
         uses: actions/download-artifact@v4
         with:
-          name: app-release
+          name: app-release-bundle
           path: ./
           
-      - name: "🏷️ Rename APK for release"
+      - name: "🏷️ Rename app bundle for release"
         run: |
-          mv app-release.apk "tune-tangler-${{ needs.build.outputs.version }}.apk"
-          echo "✅ APK renamed to: tune-tangler-${{ needs.build.outputs.version }}.apk"
+          mv app-release.aab "tune-tangler-${{ needs.build.outputs.version }}.aab"
+          echo "✅ App bundle renamed to: tune-tangler-${{ needs.build.outputs.version }}.aab"
 
       - name: "📝 Generate release body from template"
         id: generate_release_body
@@ -254,6 +301,6 @@ jobs:
           tag_name: ${{ needs.build.outputs.tag_name }}
           name: Release ${{ needs.build.outputs.tag_name }}
           body_path: RELEASE_NOTE.md
-          files: tune-tangler-${{ needs.build.outputs.version }}.apk
+          files: tune-tangler-${{ needs.build.outputs.version }}.aab
           draft: false
           prerelease: false

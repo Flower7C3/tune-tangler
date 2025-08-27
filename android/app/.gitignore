@@ -1,0 +1,18 @@
+# Keystore files
+*.jks
+*.keystore
+*.p12
+*.pfx
+
+# Generated files
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Gradle files
+.gradle/
+build/
+
+# Local configuration file
+local.properties

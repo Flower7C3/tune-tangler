@@ -12,6 +12,10 @@
 .swiftpm/
 migrate_working_dir/
 
+# Android keystore credentials
+android/gradle.properties
+android/local.properties
+
 # IntelliJ related
 *.iml
 *.ipr
