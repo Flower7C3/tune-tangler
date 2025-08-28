@@ -11,60 +11,30 @@ jobs:
     name: Test Gradle Secrets
     runs-on: ubuntu-latest
     
-    env:
-      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-      KEY_ALIAS: ${{ vars.KEY_ALIAS }}
-      KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-    
     steps:
       - name: "🔧 Checkout code"
         uses: actions/checkout@v4
 
-      - name: "📲 Setup Flutter"
-        uses: subosito/flutter-action@v2
+     
+      - name: "🔐 Decode keystore"
+        id: android_keystore
+        uses: timheuer/base64-to-file@v1.0.3
         with:
-          flutter-version: '3.35.1'
-          channel: 'stable'
-          cache: true
-
-      - name: "📦 Get dependencies"
-        run: flutter pub get
-
-      - name: "🔐 Setup Keystore"
+          fileName: tune-tangler-release-key.jks
+          encodedString: ${{ secrets.KEYSTORE_BASE64 }}
+    
+      - name: "🔐 Create key.properties"
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/tune-tangler-release-key.jks
-          echo "✅ Keystore created from secret"
+          echo "storeFile=${{ steps.android_keystore.outputs.filePath }}" > android/key.properties
+          echo "storePassword=$KEYSTORE_PASSWORD" >> android/key.properties
+          echo "keyPassword=$KEY_PASSWORD" >> android/key.properties
+          echo "keyAlias=$KEY_ALIAS" >> android/key.properties
 
-      - name: "🧪 Test Flutter Environment Variables"
+      - name: "🧪 Test key.properties"
         run: |
-          echo "=== Testing Environment Variables ==="
-          echo "KEYSTORE_PASSWORD: $KEYSTORE_PASSWORD"
-          echo "KEY_ALIAS: $KEY_ALIAS"
-          echo "KEY_PASSWORD: $KEY_PASSWORD"
-          
-          echo "=== Testing Flutter Doctor ==="
-          flutter doctor -v
-          
-          echo "=== Testing Gradle Properties ==="
-          if [ -f "android/gradle.properties" ]; then
-            echo "✅ gradle.properties exists"
-            cat android/gradle.properties
-          else
-            echo "❌ gradle.properties not found"
-          fi
-          
-          echo "=== Testing Keystore File ==="
-          if [ -f "android/app/tune-tangler-release-key.jks" ]; then
-            echo "✅ Keystore file exists"
-            ls -la android/app/tune-tangler-release-key.jks
-          else
-            echo "❌ Keystore file not found"
-          fi
-          
-          echo "=== Testing Flutter Configuration ==="
-          echo "Current working directory: $(pwd)"
-          echo "Flutter version: $(flutter --version)"
-          echo "Dart version: $(dart --version)"
-          
-          echo "=== Testing Environment Variables in Shell ==="
-          env | grep -E "(KEYSTORE|KEY_ALIAS)" || echo "No keystore environment variables found"
+          cat android/key.properties
+          ls -la ${{ steps.android_keystore.outputs.filePath }}
