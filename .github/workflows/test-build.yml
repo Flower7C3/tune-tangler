@@ -1,0 +1,55 @@
+name: Test Gradle Secrets
+
+on:
+  workflow_dispatch:  # Manual trigger only
+
+permissions:
+  contents: read
+
+jobs:
+  test-gradle-secrets:
+    name: Test Gradle Secrets
+    runs-on: ubuntu-latest
+    
+    env:
+      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+    
+    steps:
+      - name: "🔧 Checkout code"
+        uses: actions/checkout@v4
+
+      - name: "☕️ Setup Java"
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: "🔐 Setup Keystore"
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/tune-tangler-release-key.jks
+          echo "✅ Keystore created from secret"
+
+      - name: "🔍 Debug gradle.properties"
+        run: |
+          echo "=== Gradle Properties Content ==="
+          cat android/gradle.properties
+          echo "=== Environment Variables ==="
+          echo "KEYSTORE_PASSWORD: $KEYSTORE_PASSWORD"
+          echo "KEY_ALIAS: $KEY_ALIAS"
+          echo "KEY_PASSWORD: $KEY_PASSWORD"
+
+      - name: "🧪 Test Gradle Properties"
+        run: |
+          cd android
+          # Set environment variables for Gradle
+          export KEYSTORE_PASSWORD="$KEYSTORE_PASSWORD"
+          export KEY_ALIAS="$KEY_ALIAS"
+          export KEY_PASSWORD="$KEY_PASSWORD"
+          
+          echo "=== Testing Gradle Environment Variables ==="
+          ./gradlew properties | grep -E "(KEYSTORE_PASSWORD|KEY_ALIAS|KEY_PASSWORD)" || echo "No keystore properties found in Gradle"
+          
+          echo "=== Testing Direct Environment Variable Access ==="
+          ./gradlew -PKEYSTORE_PASSWORD="$KEYSTORE_PASSWORD" -PKEY_ALIAS="$KEY_ALIAS" -PKEY_PASSWORD="$KEY_PASSWORD" properties | grep -E "(KEYSTORE_PASSWORD|KEY_ALIAS|KEY_PASSWORD)" || echo "No keystore properties found with -P flags"
