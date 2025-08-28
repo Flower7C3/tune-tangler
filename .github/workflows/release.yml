@@ -225,10 +225,10 @@ jobs:
           
       - name: "🏷️ Rename app bundle for release"
         run: |
-          mv app-arm64-v8a-release.apk "tune-tangler-${{ needs.build.outputs.version }}-arm64-v8a.apk"
-          mv app-armeabi-v7a-release.apk "tune-tangler-${{ needs.build.outputs.version }}-armeabi-v7a.apk"
-          mv app-x86_64-release.apk "tune-tangler-${{ needs.build.outputs.version }}-x86_64.apk"
-          mv app-release.aab "tune-tangler-${{ needs.build.outputs.version }}.aab"
+          mv flutter-apk/app-arm64-v8a-release.apk "tune-tangler-${{ needs.build.outputs.version }}-arm64-v8a.apk"
+          mv flutter-apk/app-armeabi-v7a-release.apk "tune-tangler-${{ needs.build.outputs.version }}-armeabi-v7a.apk"
+          mv flutter-apk/app-x86_64-release.apk "tune-tangler-${{ needs.build.outputs.version }}-x86_64.apk"
+          mv bundle/release/app-release.aab "tune-tangler-${{ needs.build.outputs.version }}.aab"
           echo "✅ App bundle renamed to: tune-tangler-${{ needs.build.outputs.version }}.aab"
 
       - name: "📝 Generate release body from template"
