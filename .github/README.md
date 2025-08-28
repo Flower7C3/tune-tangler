@@ -19,7 +19,29 @@ Ten katalog zawiera automatyczne workflowy GitHub Actions dla projektu TuneTangl
 - ✅ Tworzy GitHub Release z App Bundle
 - ✅ Uploaduje App Bundle release jako artifact
 
+### 2. Release + Auto Tag (Integrated)
+
+**Plik:** `release.yml`
+**Uruchamiany:** Przy push na branch `master` lub tagów wersji
+
+**Co robi:**
+
+- ✅ Weryfikuje kod (analyze, testy)
+- ✅ Generuje pliki lokalizacji
+- ✅ Automatycznie zwiększa patch version i build number (przy push na master)
+- ✅ Buduje App Bundle (.aab) release
+- ✅ Automatycznie tworzy tag wersji (przy push na master)
+- ✅ Tworzy GitHub Release z App Bundle
+- ✅ Uploaduje App Bundle release jako artifact
+
 ## Jak używać
+
+### Testowanie Build Process
+
+1. **Idź do Actions** w repozytorium GitHub
+2. **Wybierz "Test Build Workflow"**
+3. **Kliknij "Run workflow"**
+4. **Monitoruj build process** - szczególnie kroki debugowania
 
 ### Automatyczne Release
 
@@ -53,9 +75,9 @@ Workflowy używają cache dla:
 
 ## Artifacts
 
-- **App Bundle Release:** App Bundle (.aab) (retention: 1 dzień)
+- **Test Build:** App Bundle (.aab) (retention: 1 dzień)
+- **Release:** App Bundle (.aab) (retention: 1 dzień)
 - **Modified pubspec.yaml:** Plik konfiguracyjny (retention: domyślny)
-- **Test Workflow:** Brak artifacts (tylko testy)
 
 ## Troubleshooting
 
@@ -70,3 +92,13 @@ Sprawdź czy używasz poprawnej wersji Flutter w workflow.
 ### Błąd "Java not found"
 
 Sprawdź czy używasz poprawnej wersji Java w workflow.
+
+### Problem z keystore
+
+1. Uruchom **Test Build Workflow** aby zdiagnozować problem
+2. Sprawdź czy wszystkie 4 secrets są ustawione:
+   - `KEYSTORE_BASE64`
+   - `KEYSTORE_PASSWORD`
+   - `KEY_ALIAS`
+   - `KEY_PASSWORD`
+3. Sprawdź logi z kroku "Debug gradle.properties"

@@ -13,7 +13,7 @@ jobs:
     
     env:
       KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      KEY_ALIAS: ${{ vars.KEY_ALIAS }}
       KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
     
     steps:
@@ -43,6 +43,9 @@ jobs:
       - name: "🧪 Test Gradle Properties"
         run: |
           cd android
+          # Make gradlew executable
+          chmod +x ./gradlew
+          
           # Set environment variables for Gradle
           export KEYSTORE_PASSWORD="$KEYSTORE_PASSWORD"
           export KEY_ALIAS="$KEY_ALIAS"
