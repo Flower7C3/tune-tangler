@@ -72,11 +72,9 @@ jobs:
       - name: "🔐 Decode keystore"
         id: android_keystore
         uses: timheuer/base64-to-file@v1.0.3
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         with:
-          fileName: upload-keystore.jks
-          encodedString: $KEYSTORE_BASE64
+          fileName: tune-tangler-release-key.jks
+          encodedString: ${{ secrets.KEYSTORE_BASE64 }}
     
       - name: "🔐 Create key.properties"
         env:
@@ -97,10 +95,6 @@ jobs:
           echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
           echo "tag_name=v$CURRENT_VERSION-build-${{ github.run_number }}" >> $GITHUB_OUTPUT
 
-      - name: "📝 Update pubspec.yaml"
-        run: |
-          sed -i "s/^version: .*/version: ${{ steps.version.outputs.version }}/" pubspec.yaml
-          
       # This step builds the APK for your Flutter application in release mode.
       - name: "🏗️ Build APK"
         run: flutter build apk --split-per-abi --build-number=${{ github.run_number }}
