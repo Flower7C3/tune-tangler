@@ -118,6 +118,17 @@ jobs:
       # Build app bundle with optimizations
       - name: "🏗️ Build App Bundle"
         run: |
+          # Export environment variables for Gradle
+          export KEYSTORE_PASSWORD="$KEYSTORE_PASSWORD"
+          export KEY_ALIAS="$KEY_ALIAS"
+          export KEY_PASSWORD="$KEY_PASSWORD"
+          
+          # Debug environment variables
+          echo "=== Debug Environment Variables ==="
+          echo "KEYSTORE_PASSWORD: $KEYSTORE_PASSWORD"
+          echo "KEY_ALIAS: $KEY_ALIAS"
+          echo "KEY_PASSWORD: $KEY_PASSWORD"
+          
           # Enable Gradle daemon for faster builds
           export GRADLE_OPTS="-Dorg.gradle.daemon=true -Dorg.gradle.parallel=true -Dorg.gradle.jvmargs=-Xmx4g"
           flutter build appbundle --release --dart-define=FLUTTER_BUILD_NUMBER=${{ steps.version.outputs.build_number }}
