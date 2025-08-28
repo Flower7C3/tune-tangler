@@ -1,18 +1,18 @@
 # Assistant Rules for TuneTangler Project
 
-## 🚨 **CRITICAL RULES - NEVER BREAK**
+## 🚨 **CRITICAL RULES – NEVER BREAK**
 
-### 1. **Git Operations - NEVER DO WITHOUT EXPLICIT PERMISSION**
+### 1. **Git Operations – NEVER DO WITHOUT EXPLICIT PERMISSION**
 
 - ❌ **NEVER** commit changes without explicit user permission
-- ❌ **NEVER** push to remote without explicit user permission  
+- ❌ **NEVER** push to remote without explicit user permission
 - ❌ **NEVER** create tags without explicit user permission
 - ❌ **NEVER** force push or reset without explicit user permission
 - ❌ **NEVER** amend commits that have been pushed to origin
 - ✅ **ALWAYS** ask before making any git operations
 - ✅ **ALWAYS** show git status before suggesting changes
 
-### 2. **Code Changes - GRADUAL AND SAFE**
+### 2. **Code Changes – GRADUAL AND SAFE**
 
 - ✅ **ALWAYS** make small, incremental changes
 - ✅ **ALWAYS** ask before making multiple file changes
@@ -89,11 +89,11 @@
 
 ### 10. **File Structure Awareness**
 
-- **`.github/workflows/`** - CI/CD workflows
-- **`android/`** - Android-specific configuration
-- **`docs/`** - Project documentation
-- **`scripts/`** - Utility scripts
-- **`Makefile`** - Development commands
+- **`.github/workflows/`** – CI/CD workflows
+- **`android/`** – Android-specific configuration
+- **`docs/`** – Project documentation
+- **`scripts/`** – Utility scripts
+- **`Makefile`** – Development commands
 
 ## 🚫 **WHAT I WILL NEVER DO**
 

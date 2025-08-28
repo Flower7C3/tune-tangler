@@ -17,51 +17,56 @@ debug keystore, causing:
 Use a consistent keystore stored as GitHub secrets for all CI/CD builds.
 **We now use app bundle (.aab) instead of APK for better signing support.**
 
-## Setup Steps
+## One time setup steps
 
-### 1. Generate Keystore (One-time setup)
+### 1. Prepare config
+
+Create [android/key.properties](android/key.properties) file with values:
+
+```properties
+storeFile=tune-tangler-release-key.jks
+storePassword=xxx
+keyAlias=xxx
+keyPassword=xxx
+dName=CN=xx, O=xx, C=PL
+```
+
+> **Important**: Use strong, unique passwords.
+
+
+### 2. Generate Keystore
 
 The keystore has already been generated. If you need to regenerate it:
 
 ```bash
-keytool -genkey -v \
-  -keystore android/app/tune-tangler-release-key.jks \
+keytool \
+  -genkeypair \
+  -keystore '`grep storeFile android/key.properties | cut -d '=' -f2`' \
+  -storepass '`grep storePassword android/key.properties | cut -d '=' -f2`' \
+  -alias '`grep keyAlias android/key.properties | cut -d '=' -f2`' \
+  -keypass '`grep keyPassword android/key.properties | cut -d '=' -f2`' \
   -keyalg RSA \
   -keysize 2048 \
   -validity 10000 \
-  -alias tune-tangler-key \
-  -storepass TuneTangler2024!Release \
-  -keypass TuneTangler2024!Key \
-  -dname "CN=Bartłomiej Kwiatek, OU=Kwiatek.pro, O=Kwiatek.pro, L=, ST=, C="
+  -dname '`grep dName android/key.properties | cut -d '=' -f2-9`'
 ```
 
-**Important**: Use strong, unique passwords:
-
-- **Store password**: `TuneTangler2024!Release` (for keystore access)
-- **Key password**: `TuneTangler2024!Key` (for private key access)
-
-### 2. Prepare GitHub Secrets (One-time setup)
-
-To get the base64 encoded keystore, run this command:
-
-```bash
-base64 -i android/app/tune-tangler-release-key.jks
-```
+### 3. Prepare GitHub Secrets
 
 Add these secrets to your GitHub repository:
 **Settings → Secrets and variables → Actions**
 
-| Secret | Wartość |
-|--------|---------|
-| `KEYSTORE_BASE64` | Base64 encoded keystore file (from command above) |
-| `KEYSTORE_PASSWORD` | `TuneTangler2024!Release` |
-| `KEY_ALIAS` | `tune-tangler-key` |
-| `KEY_PASSWORD` | `TuneTangler2024!Key` |
+| Secret              | Wartość                                                                               |
+|---------------------|---------------------------------------------------------------------------------------|
+| `KEYSTORE_BASE64`   | `base64 -i android/app/tune-tangler-release-key.jks \| pbcopy`                        |
+| `KEYSTORE_PASSWORD` | `grep storePassword android/key.properties \| cut -d '=' -f2 \| tr -d '\n' \| pbcopy` |
+| `KEY_ALIAS`         | `grep keyAlias android/key.properties \| cut -d '=' -f2 \| tr -d '\n' \| pbcopy`      |
+| `KEY_PASSWORD`      | `grep keyPassword android/key.properties \| cut -d '=' -f2 \| tr -d '\n' \| pbcopy`   |
 
-**Note**: The workflow generates `gradle.properties` with these credentials
+**Note**: The workflow generates `key.properties` with these credentials
 during build, so they're not stored in the repository.
 
-### 3. Verify Configuration
+### 4. Verify Configuration
 
 After setting up the secrets, verify that:
 
@@ -69,7 +74,7 @@ After setting up the secrets, verify that:
 2. **GitHub secrets are set**: All 4 secrets are configured
 3. **Workflow can access secrets**: No permission errors
 
-### 4. Build and Test
+### 5. Build and Test
 
 Test the configuration by running the release workflow:
 

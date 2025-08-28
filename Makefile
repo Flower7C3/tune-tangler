@@ -148,6 +148,13 @@ build-apk: ##BUILD## Build APK in debug mode
 	@echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Building $(FORMAT_BOLD)debug$(FORMAT_RESET)$(FORMAT_HIGHLIGHT) APK...$(FORMAT_RESET)"
 	@flutter build apk --debug --build-number=$(date +%s)
 
+.PHONY: build-apk-release
+build-apk-release:
+	@echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Building $(FORMAT_BOLD)release$(FORMAT_RESET)$(FORMAT_HIGHLIGHT) AAB and APK...$(FORMAT_RESET)"; \
+	export GRADLE_OPTS="-Dorg.gradle.daemon=true -Dorg.gradle.parallel=true -Dorg.gradle.jvmargs=-Xmx4g"; \
+	flutter build apk --split-per-abi; \
+  	flutter build appbundle
+
 .PHONY: install-apk
 install-apk: ##BUILD## Build and install APK in debug mode
 	@echo "$(FORMAT_HIGHLIGHT)$(ICON_BUILD) APK Installation$(FORMAT_RESET)"

@@ -2,6 +2,8 @@
 
 Ten katalog zawiera automatyczne workflowy GitHub Actions dla projektu TuneTangler.
 
+- **Test** → **Build** → **Version Control** → **Release**
+
 ## Workflowy
 
 ### 1. Release + Auto Tag (Integrated)
@@ -27,7 +29,7 @@ Ten katalog zawiera automatyczne workflowy GitHub Actions dla projektu TuneTangl
 1. **Idź do Actions** w repozytorium GitHub
 2. **Wybierz "Build & Release Workflow"**
 3. **Kliknij "Run workflow"**
-4. **Monitoruj build process** - workflow automatycznie:
+4. **Monitoruj proces budowania** – workflow automatycznie:
    - Pobierze wersję z `pubspec.yaml`
    - Utworzy tag `v{version}-build-{run_number}`
    - Zbuduje i zweryfikuje aplikację
@@ -38,7 +40,7 @@ Ten katalog zawiera automatyczne workflowy GitHub Actions dla projektu TuneTangl
 1. **Idź do Actions** w repozytorium GitHub
 2. **Wybierz "Test Build Workflow"** (jeśli istnieje)
 3. **Kliknij "Run workflow"**
-4. **Monitoruj build process** - szczególnie kroki debugowania
+4. **Monitoruj proces budowania** – szczególnie kroki debugowania
 
 ### Pominięcie Workflow
 

@@ -33,9 +33,9 @@
 
 #### **Uwagi dotyczące UI:**
 
-- ❌ **Vibrace/Haptic feedback** - mogłyby się nagrywać na ścieżkę audio
-- ❌ **Dodatkowe gesty** - część już jest (swipe do poruszania ścieżek), reszta zbędna
-- ❌ **Pinch-to-zoom** - niepotrzebne w kontekście aplikacji
+- ❌ **Vibrace/Haptic feedback** – mogłyby się nagrywać na ścieżkę audio
+- ❌ **Dodatkowe gesty** – część już jest (swipe do poruszania ścieżek), reszta zbędna
+- ❌ **Pinch-to-zoom** – niepotrzebne w kontekście aplikacji
 
 ### **3. Eksport i Import (Wysoki Priorytet – W TRAKCIE ROZWOJU)**
 
@@ -126,11 +126,11 @@
 
 ### **Rozwiązanie Techniczne**
 
-- **Usunięto `PlayerMode.lowLatency`** - blokował `getDuration()`
-- **Użyto `PlayerMode.mediaPlayer`** - pozwala na prawidłowe odczytanie metadanych
-- **Zachowano `AudioContext`** - z `mixWithOthers` i `audioFocus: none`
+- **Usunięto `PlayerMode.lowLatency`** – blokował `getDuration()`
+- **Użyto `PlayerMode.mediaPlayer`** – pozwala na prawidłowe odczytanie metadanych
+- **Zachowano `AudioContext`** – z `mixWithOthers` i `audioFocus: none`
   dla multi-track
-- **Uproszczono `seek()` operacje** - usunięto timeouty powodujące opóźnienia
+- **Uproszczono `seek()` operacje** – usunięto timeouty powodujące opóźnienia
 
 ## **Uwagi i Ustalenia**
 

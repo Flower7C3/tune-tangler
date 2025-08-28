@@ -25,10 +25,10 @@ chmod +x .git/hooks/pre-commit
 
 ## 🚀 Jak to działa
 
-1. **Przed każdym commit** - hook sprawdza czy `pubspec.yaml` jest już zmodyfikowany
-2. **Jeśli NIE** - zwiększa patch version (np. 1.2.1 → 1.2.2)
-3. **Jeśli TAK** - pomija (nie duplikuje zmian)
-4. **Automatycznie stage** - zaktualizowany `pubspec.yaml`
+1. **Przed każdym commit** – hook sprawdza czy `pubspec.yaml` jest już zmodyfikowany
+2. **Jeśli NIE** – zwiększa patch version (np. 1.2.1 → 1.2.2)
+3. **Jeśli TAK** – pomija (nie duplikuje zmian)
+4. **Automatycznie stage** – zaktualizowany `pubspec.yaml`
 
 ## 📊 Przykłady
 
@@ -81,10 +81,10 @@ file .git/hooks/pre-commit
 
 ## ⚠️ Uwagi
 
-- **Hook działa lokalnie** - każdy developer musi go zainstalować
-- **Nie commitować** - hook jest w `.gitignore`
-- **Backup** - hook tworzy `.bak` plik (automatycznie usuwany)
-- **Git add** - hook automatycznie stage'uje zmiany
+- **Hook działa lokalnie** – każdy developer musi go zainstalować
+- **Nie commitować** – hook jest w `.gitignore`
+- **Backup** – hook tworzy `.bak` plik (automatycznie usuwany)
+- **Git add** – hook automatycznie stage'uje zmiany
 
 ## 🐛 Troubleshooting
 
