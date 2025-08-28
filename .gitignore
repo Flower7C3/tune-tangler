@@ -16,6 +16,9 @@ migrate_working_dir/
 android/gradle.properties
 android/local.properties
 
+# Git hooks (local only)
+.git/hooks/
+
 # IntelliJ related
 *.iml
 *.ipr

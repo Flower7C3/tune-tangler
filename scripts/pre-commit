@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# Pre-commit hook to automatically increment minor version
+# This hook runs before each commit and updates the version in pubspec.yaml
+
+echo "🔄 Pre-commit hook: Checking for version increment..."
+
+# Check if pubspec.yaml has been modified
+if git diff --cached --name-only | grep -q "pubspec.yaml"; then
+    echo "📝 pubspec.yaml is staged - skipping version increment"
+    exit 0
+fi
+
+# Get current version from pubspec.yaml
+CURRENT_VERSION=$(grep '^version:' pubspec.yaml | sed 's/.*version: //')
+echo "📋 Current version: $CURRENT_VERSION"
+
+# Split version into major.minor.patch
+CURRENT_SEMANTIC_VERSION=$(echo $CURRENT_VERSION | sed 's/+.*//')
+CURRENT_MAJOR=$(echo $CURRENT_SEMANTIC_VERSION | cut -d. -f1)
+CURRENT_MINOR=$(echo $CURRENT_SEMANTIC_VERSION | cut -d. -f2)
+CURRENT_PATCH=$(echo $CURRENT_SEMANTIC_VERSION | cut -d. -f3)
+
+# Increment patch version, keep minor unchanged
+NEW_MAJOR=$CURRENT_MAJOR
+NEW_MINOR=$CURRENT_MINOR
+NEW_PATCH=$((CURRENT_PATCH + 1))
+
+# Create new version
+NEW_SEMANTIC_VERSION="$NEW_MAJOR.$NEW_MINOR.$NEW_PATCH"
+NEW_VERSION="$NEW_SEMANTIC_VERSION"
+
+echo "🆕 New version: $NEW_VERSION"
+
+# Update pubspec.yaml with new version
+sed -i.bak "s/^version: .*/version: $NEW_VERSION/" pubspec.yaml
+
+# Remove backup file
+rm pubspec.yaml.bak
+
+# Stage the updated pubspec.yaml
+git add pubspec.yaml
+
+echo "✅ Version incremented to $NEW_VERSION and staged for commit"
+echo "💡 Commit message will include: version $NEW_VERSION"

@@ -53,9 +53,3 @@ Projekt używa GitHub Actions do automatycznego build i release:
 ## 📄 Licencja
 
 [Tu dodaj informacje o licencji]
-
-## 🤝 Contributing
-
-[Tu dodaj informacje o contributingu]
-# Test comment
-# Test patch increment

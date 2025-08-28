@@ -43,10 +43,6 @@ jobs:
     name: Build
     needs: [ test ]
     runs-on: ubuntu-latest
-    env:
-      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-      KEY_ALIAS: ${{ vars.KEY_ALIAS }}
-      KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
     
     outputs:
       version: ${{ steps.version.outputs.version }}
@@ -73,65 +69,47 @@ jobs:
           java_version: ${{ env.JAVA_VERSION }}
           java_distribution: ${{ env.JAVA_DISTRIBUTION }}
 
-      - name: "🔐 Setup Keystore"
+      - name: "🔐 Decode keystore"
+        id: android_keystore
+        uses: timheuer/base64-to-file@v1.0.3
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        with:
+          fileName: upload-keystore.jks
+          encodedString: $KEYSTORE_BASE64
+    
+      - name: "🔐 Create key.properties"
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          # Create keystore from base64 encoded secret
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/tune-tangler-release-key.jks
-          echo "✅ Keystore created from secret"
+          echo "storeFile=${{ steps.android_keystore.outputs.filePath }}" > android/key.properties
+          echo "storePassword=$KEYSTORE_PASSWORD" >> android/key.properties
+          echo "keyPassword=$KEY_PASSWORD" >> android/key.properties
+          echo "keyAlias=$KEY_ALIAS" >> android/key.properties
 
-      - name: "🏷️ Increment version"
+      - name: "🏷️ Get a version and tag name"
         id: version
         run: |
           CURRENT_VERSION=$(grep '^version:' pubspec.yaml | sed 's/.*version: //')
           echo "Current version: $CURRENT_VERSION"
-
-          # Split version into major.minor.patch
-          CURRENT_SEMANTIC_VERSION=$(echo $CURRENT_VERSION | sed 's/+.*//')
-          CURRENT_MAJOR=$(echo $CURRENT_SEMANTIC_VERSION | cut -d. -f1)
-          CURRENT_MINOR=$(echo $CURRENT_SEMANTIC_VERSION | cut -d. -f2)
-          CURRENT_PATCH=$(echo $CURRENT_SEMANTIC_VERSION | cut -d. -f3)
-          CURRENT_BUILD=$(echo $CURRENT_VERSION | sed 's/.*+//')          
-          
-          # Increment both patch and build
-          NEW_MAJOR=$CURRENT_MAJOR
-          NEW_MINOR=$CURRENT_MINOR
-          NEW_PATCH=$((CURRENT_PATCH + 1))
-          NEW_BUILD=$((CURRENT_BUILD + 1))
-
-          # Create new version
-          NEW_SEMANTIC_VERSION="$NEW_MAJOR.$NEW_MINOR.$NEW_PATCH"
-          NEW_VERSION="$NEW_SEMANTIC_VERSION+$NEW_BUILD"
-          TAG_NAME="v$NEW_SEMANTIC_VERSION"
-
-          echo "New version: $NEW_VERSION"
-          echo "Tag name: $TAG_NAME"
-
-          # Output new version
-          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
-          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
-          echo "build_number=$NEW_BUILD" >> $GITHUB_OUTPUT
+          echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "tag_name=v$CURRENT_VERSION-build-${{ github.run_number }}" >> $GITHUB_OUTPUT
 
       - name: "📝 Update pubspec.yaml"
         run: |
           sed -i "s/^version: .*/version: ${{ steps.version.outputs.version }}/" pubspec.yaml
           
-      # Build app bundle with optimizations
+      # This step builds the APK for your Flutter application in release mode.
+      - name: "🏗️ Build APK"
+        run: flutter build apk --split-per-abi --build-number=${{ github.run_number }}
+
+      # This step builds the Android App Bundle (AAB) for your Flutter application
       - name: "🏗️ Build App Bundle"
         run: |
-          # Export environment variables for Gradle
-          export KEYSTORE_PASSWORD="$KEYSTORE_PASSWORD"
-          export KEY_ALIAS="$KEY_ALIAS"
-          export KEY_PASSWORD="$KEY_PASSWORD"
-          
-          # Debug environment variables
-          echo "=== Debug Environment Variables ==="
-          echo "KEYSTORE_PASSWORD: $KEYSTORE_PASSWORD"
-          echo "KEY_ALIAS: $KEY_ALIAS"
-          echo "KEY_PASSWORD: $KEY_PASSWORD"
-          
-          # Enable Gradle daemon for faster builds
           export GRADLE_OPTS="-Dorg.gradle.daemon=true -Dorg.gradle.parallel=true -Dorg.gradle.jvmargs=-Xmx4g"
-          flutter build appbundle --release --dart-define=FLUTTER_BUILD_NUMBER=${{ steps.version.outputs.build_number }}
+          flutter build appbundle --build-number=${{ github.run_number }}
 
       # Verify app bundle signature
       - name: "🔐 Verify build"
@@ -163,7 +141,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-release-bundle
-          path: build/app/outputs/bundle/release/app-release.aab
+          path: |
+            build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+            build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+            build/app/outputs/flutter-apk/app-x86_64-release.apk
+            build/app/outputs/bundle/release/app-release.aab
           retention-days: 1
           
       - name: "📤 Upload modified pubspec.yaml"
@@ -224,17 +206,6 @@ jobs:
             echo "✅ Collected all commits"
             rm -f commits.txt
           fi
-          
-      - name: "💾 Commit version update"
-        run: |
-          git add pubspec.yaml
-          git commit -m "chore: increment version to ${{ needs.build.outputs.version }} [skip ci]" || echo "No changes to commit"
-          
-      - name: "🚀 Push version update"
-        run: |
-          git pull origin main --no-rebase -n
-          git push --force-with-lease origin main
-          echo "✅ Version update pushed to remote successfully"
 
       - name: "🏷️ Create and push tag"
         run: |
@@ -260,6 +231,9 @@ jobs:
           
       - name: "🏷️ Rename app bundle for release"
         run: |
+          mv app-arm64-v8a-release.apk "tune-tangler-${{ needs.build.outputs.version }}-arm64-v8a.apk"
+          mv app-armeabi-v7a-release.apk "tune-tangler-${{ needs.build.outputs.version }}-armeabi-v7a.apk"
+          mv app-x86_64-release.apk "tune-tangler-${{ needs.build.outputs.version }}-x86_64.apk"
           mv app-release.aab "tune-tangler-${{ needs.build.outputs.version }}.aab"
           echo "✅ App bundle renamed to: tune-tangler-${{ needs.build.outputs.version }}.aab"
 
@@ -302,6 +276,10 @@ jobs:
           tag_name: ${{ needs.build.outputs.tag_name }}
           name: Release ${{ needs.build.outputs.tag_name }}
           body_path: RELEASE_NOTE.md
-          files: tune-tangler-${{ needs.build.outputs.version }}.aab
+          files: |
+            tune-tangler-${{ needs.build.outputs.version }}-arm64-v8a.apk
+            tune-tangler-${{ needs.build.outputs.version }}-armeabi-v7a.apk
+            tune-tangler-${{ needs.build.outputs.version }}-x86_64.apk
+            tune-tangler-${{ needs.build.outputs.version }}.aab
           draft: false
           prerelease: false

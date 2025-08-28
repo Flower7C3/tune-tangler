@@ -141,12 +141,12 @@ lint: ##QA## Check code style
 .PHONY: run
 run: ##BUILD## Run app in debug mode
 	@echo "$(FORMAT_HIGHLIGHT)$(ICON_ROCKET) Running app in $(FORMAT_BOLD)debug$(FORMAT_RESET)$(FORMAT_HIGHLIGHT) build type...$(FORMAT_RESET)"
-	@flutter run --debug --dart-define=APP_VERSION_NAME=1.x.dev+$(date +%s)
+	@flutter run --debug --build-number=$(date +%s)
 
 .PHONY: build-apk
 build-apk: ##BUILD## Build APK in debug mode
 	@echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Building $(FORMAT_BOLD)debug$(FORMAT_RESET)$(FORMAT_HIGHLIGHT) APK...$(FORMAT_RESET)"
-	@flutter build apk --debug --dart-define=APP_VERSION_NAME=1.x.dev+$(date +%s)
+	@flutter build apk --debug --build-number=$(date +%s)
 
 .PHONY: install-apk
 install-apk: ##BUILD## Build and install APK in debug mode
@@ -249,24 +249,24 @@ gen-splash: ##UTILITIES## Generate splash screen
 
 # Git hook commands removed - version incrementing now handled by GitHub workflow
 
-.PHONY: create-tag
-create-tag: ##UTILITIES## Create and push version tag
-	@echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Creating version tag...$(FORMAT_RESET)"
-	@if [ -f pubspec.yaml ]; then \
-		VERSION=$$(grep '^version:' pubspec.yaml | sed 's/.*version: //' | sed 's/+.*//'); \
-		echo "$(COLOR_CYAN)$(ICON_INFO) Creating tag v$$VERSION...$(FORMAT_RESET)"; \
-		git tag "v$$VERSION"; \
-		git push origin "v$$VERSION"; \
-		echo "$(COLOR_GREEN)$(ICON_CHECK) Tag $(FORMAT_BOLD)v$$VERSION$(FORMAT_RESET)$(COLOR_GREEN) created and pushed"; \
-	else \
-		echo "$(COLOR_RED)$(ICON_ERROR) pubspec.yaml not found!$(FORMAT_RESET)"; \
-		exit 1; \
-	fi
+# .PHONY: create-tag
+# create-tag: ##UTILITIES## Create and push version tag
+# 	@echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Creating version tag...$(FORMAT_RESET)"
+# 	@if [ -f pubspec.yaml ]; then \
+# 		VERSION=$$(grep '^version:' pubspec.yaml | sed 's/.*version: //' | sed 's/+.*//'); \
+# 		echo "$(COLOR_CYAN)$(ICON_INFO) Creating tag v$$VERSION...$(FORMAT_RESET)"; \
+# 		git tag "v$$VERSION"; \
+# 		git push origin "v$$VERSION"; \
+# 		echo "$(COLOR_GREEN)$(ICON_CHECK) Tag $(FORMAT_BOLD)v$$VERSION$(FORMAT_RESET)$(COLOR_GREEN) created and pushed"; \
+# 	else \
+# 		echo "$(COLOR_RED)$(ICON_ERROR) pubspec.yaml not found!$(FORMAT_RESET)"; \
+# 		exit 1; \
+# 	fi
 
-.PHONY: list-tags
-list-tags: ##UTILITIES## List all version tags
-	@echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Available version tags:$(FORMAT_RESET)"
-	@git tag --sort=-version:refname | head -10
+# .PHONY: list-tags
+# list-tags: ##UTILITIES## List all version tags
+# 	@echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Available version tags:$(FORMAT_RESET)"
+# 	@git tag --sort=-version:refname | head -10
 
 #.PHONY: rename
 #rename: ## Change name
