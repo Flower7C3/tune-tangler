@@ -58,3 +58,4 @@ Projekt używa GitHub Actions do automatycznego build i release:
 
 [Tu dodaj informacje o contributingu]
 # Test comment
+# Test patch increment
