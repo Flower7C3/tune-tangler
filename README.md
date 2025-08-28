@@ -2,6 +2,8 @@
 
 Yet another music looper app
 
+![Latest build](https://github.com/Flower7C3/tune-tangler/actions/workflows/release.yml/badge.svg)
+
 ## 📱 O Projekcie
 
 TuneTangler to aplikacja do tworzenia pętli muzycznych, napisana w Flutter z
@@ -55,3 +57,4 @@ Projekt używa GitHub Actions do automatycznego build i release:
 ## 🤝 Contributing
 
 [Tu dodaj informacje o contributingu]
+# Test comment
