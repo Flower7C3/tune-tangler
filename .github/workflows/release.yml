@@ -223,9 +223,6 @@ jobs:
           name: app-release-bundle
           path: ./
           
-      - name: "DEBUG"
-        run: ls -la
-
       - name: "🏷️ Rename app bundle for release"
         run: |
           mv flutter-apk/app-arm64-v8a-release.apk "tune-tangler-${{ needs.build.outputs.version }}-arm64-v8a.apk"
