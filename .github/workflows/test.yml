@@ -4,22 +4,22 @@ on:
   pull_request:
     branches: [ master ]
 
+# Version variables for dependencies
+env:
+  FLUTTER_VERSION: '3.35.1'
+  FLUTTER_CHANNEL: 'stable'
+  JAVA_VERSION: '17'
+  JAVA_DISTRIBUTION: 'zulu'
+
 jobs:
   test:
+    name: Test
     runs-on: ubuntu-latest
-    
-    # Version variables for dependencies
-    env:
-      FLUTTER_VERSION: '3.35.1'
-      FLUTTER_CHANNEL: 'stable'
-      JAVA_VERSION: '17'
-      JAVA_DISTRIBUTION: 'zulu'
-    
     steps:
       - name: "🔧 Checkout code"
         uses: actions/checkout@v4
-        
-      - name: "🔧 Setup Flutter"
+
+      - name: "📲 Setup Flutter"
         uses: ./.github/actions/setup-flutter
         with:
           flutter_version: ${{ env.FLUTTER_VERSION }}
@@ -27,5 +27,5 @@ jobs:
           with_dependencies: true
           with_localization: false
 
-      - name: "🔧 Run tests"
+      - name: "🧪 Run tests"
         uses: ./.github/actions/flutter-test
