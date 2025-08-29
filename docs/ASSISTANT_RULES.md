@@ -1,5 +1,24 @@
 # 🤖 Assistant Rules for TuneTangler Project
 
+## 📋 Spis Treści
+
+- [🚨 CRITICAL RULES – NEVER BREAK](#-critical-rules--never-break)
+  - [1️⃣ Git Operations – NEVER DO WITHOUT EXPLICIT PERMISSION](#-git-operations--never-do-without-explicit-permission)
+  - [2️⃣ Code Changes – GRADUAL AND SAFE](#-code-changes--gradual-and-safe)
+  - [3️⃣ Project-Specific Rules](#-project-specific-rules)
+- [🔧 WORKFLOW RULES](#-workflow-rules)
+  - [4️⃣ When User Asks for Changes](#-when-user-asks-for-changes)
+  - [5️⃣ When User Asks for Git Operations](#-when-user-asks-for-git-operations)
+  - [6️⃣ When User Asks for Code Review](#-when-user-asks-for-code-review)
+- [📝 COMMUNICATION RULES](#-communication-rules)
+  - [7️⃣ Response Style](#-response-style)
+  - [8️⃣ Error Handling](#-error-handling)
+- [🎯 PROJECT KNOWLEDGE](#-project-knowledge)
+  - [9️⃣ Remember These Key Points](#-remember-these-key-points)
+  - [🔟 File Structure Awareness](#-file-structure-awareness)
+- [🚫 WHAT I WILL NEVER DO](#-what-i-will-never-do)
+- [📚 Dodatkowe Zasoby](#-dodatkowe-zasoby)
+
 ## 🚨 **CRITICAL RULES – NEVER BREAK**
 
 ### 1️⃣ **Git Operations – NEVER DO WITHOUT EXPLICIT PERMISSION**
@@ -98,3 +117,14 @@
 ## 🚫 **WHAT I WILL NEVER DO**
 
 - ❌ **NEVER** make assumptions about user intentions
+- ❌ **NEVER** execute commands without explicit permission
+- ❌ **NEVER** ignore project-specific rules
+- ❌ **NEVER** make changes that could break the build
+- ❌ **NEVER** suggest unsafe git operations
+- ❌ **NEVER** ignore error messages or warnings
+
+## 📚 **Dodatkowe Zasoby**
+
+- **[Conventional Commits](https://www.conventionalcommits.org/)** – Format commitów
+- **[Git Best Practices](https://git-scm.com/book/en/v2)** – Oficjalna dokumentacja Git
+- **[Flutter Development](https://docs.flutter.dev/development)** – Oficjalna dokumentacja Flutter

@@ -2,6 +2,37 @@
 
 > Przewodnik po git hooks w TuneTangler
 
+## 📋 Spis Treści
+
+- [🎯 Co to są Git Hooks](#️-co-to-są-git-hooks)
+- [🔄 Pre-commit Hook](#️-pre-commit-hook)
+  - [📋 Opis](#️-opis)
+  - [🎯 Cel](#️-cel)
+- [⚙️ Instalacja](#️-instalacja)
+  - [🗑️ Usunięcie](#️-usunięcie)
+- [🚀 Jak to działa](#️-jak-to-działa)
+  - [📝 Proces](#️-proces)
+  - [🔄 Flow](#️-flow)
+- [📊 Przykłady](#️-przykłady)
+  - [🔄 Przed commitem](#️-przed-commitem)
+  - [📝 Po commicie](#️-po-commicie)
+  - [🎯 Różne scenariusze](#️-różne-scenariusze)
+- [🔍 Sprawdzenie statusu](#️-sprawdzenie-statusu)
+  - [✅ Czy hook jest aktywny](#️-czy-hook-jest-aktywny)
+  - [🔍 Test hooka](#️-test-hooka)
+- [⚠️ Uwagi](#️-uwagi)
+  - [🔒 Bezpieczeństwo](#️-bezpieczeństwo)
+  - [📱 Zachowanie](#️-zachowanie)
+  - [🚫 Ograniczenia](#️-ograniczenia)
+- [🚨Jeśli coś nie działa](#️jeśli-coś-nie-działa)
+  - [❌ Hook nie działa](#️-hook-nie-działa)
+  - [❌ Błąd sed](#️-błąd-sed)
+  - [❌ Konflikt wersji](#️-konflikt-wersji)
+  - [❌ Hook pominięty](#️-hook-pominięty)
+  - [🔍 Debugging](#️-debugging)
+- [📚 Dodatkowe Zasoby](#️-dodatkowe-zasoby)
+- [🆘 Potrzebujesz Pomocy?](#️-potrzebujesz-pomocy)
+
 ## 🎯 Co to są Git Hooks
 
 Git hooks to skrypty, które automatycznie uruchamiają się w określonych momentach w git workflow:
@@ -102,33 +133,6 @@ git commit --no-verify -m "wip: work in progress"
 - Version: 1.2.2 (bez zmian)
 - Hook pominięty
 
-## ⚙️ Konfiguracja
-
-### 🔧 Modyfikacja logiki
-
-Edytuj `.git/hooks/pre-commit`:
-
-```bash
-# Patch increment (domyślnie)
-NEW_PATCH=$((CURRENT_PATCH + 1))
-
-# Minor increment
-NEW_MINOR=$((CURRENT_MINOR + 1))
-
-# Major increment  
-NEW_MAJOR=$((CURRENT_MAJOR + 1))
-```
-
-### 🎯 Własne reguły
-
-```bash
-# Możesz dodać własne sprawdzenia:
-# - Formatowanie kodu
-# - Testy
-# - Linting
-# - Sprawdzanie commit message
-```
-
 ## 🔍 Sprawdzenie statusu
 
 ### ✅ Czy hook jest aktywny
@@ -183,68 +187,27 @@ grep '^version:' pubspec.yaml
 
 ### ❌ Hook nie działa
 
-```bash
-chmod +x .git/hooks/pre-commit
-ls -la .git/hooks/
-cat .git/hooks/pre-commit
-make remove-pre-commit-hook
-make install-pre-commit-hook
-```
-
-**Kroki:**
-
-1. Sprawdź uprawnienia
-2. Sprawdź, czy jest w .git/hooks/
-3. Sprawdź zawartość
-4. Reinstalacja przez Makefile
+Sprawdź [Git Hooks Troubleshooting](https://git-scm.com/docs/githooks#_troubleshooting)
 
 ### ❌ Błąd sed
 
-```bash
-brew install gnu-sed
-```
-
-**Lub zmień** `sed -i.bak` na `sed -i ''` w skrypcie
+Sprawdź [sed documentation](https://www.gnu.org/software/sed/manual/) lub użyj alternatywnych narzędzi
 
 ### ❌ Konflikt wersji
 
-```bash
-git checkout -- pubspec.yaml
-git add pubspec.yaml
-git commit
-```
-
-**Ręcznie rozwiąż** w pubspec.yaml
+Sprawdź [Git Conflict Resolution](https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging#_basic_merge_conflicts)
 
 ### ❌ Hook pominięty
 
-```bash
-git log --oneline -1
-ls -la .git/hooks/pre-commit
-```
-
-**Sprawdź:**
-
-- Czy --no-verify nie został użyty
-- Czy hook jest aktywny
+Sprawdź [Git Commit Options](https://git-scm.com/docs/git-commit#Documentation/git-commit.txt---no-verify)
 
 ### 🔍 Debugging
 
-Uruchom hook ręcznie
-
-```bash
-.git/hooks/pre-commit
-```
-
-Sprawdź logi
-
-```bash
-git commit -m "test" 2>&1 | grep "Pre-commit hook"
-```
+Sprawdź [Git Debugging Guide](https://git-scm.com/book/en/v2/Git-Tools-Debugging)
 
 ## 📚 Dodatkowe Zasoby
 
-- **[🔨 Makefile](MAKEFILE.md)** – Komendy do zarządzania hooks
+- **[🔨 Makefile](QUICKSTART.md#makefile)** – Komendy do zarządzania hooks
 - **[📖 Development Guide](../README.md)** – Główny przewodnik
 - **[Git Hooks Documentation](https://git-scm.com/docs/githooks)** – Oficjalna dokumentacja
 - **[Pre-commit Framework](https://pre-commit.com/)** – Zaawansowane git hooks

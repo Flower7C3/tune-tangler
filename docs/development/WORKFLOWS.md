@@ -2,6 +2,30 @@
 
 > Przewodnik po GitHub Actions w TuneTangler
 
+## 📋 Spis Treści
+
+- [🔄 Przegląd](#️-przegląd)
+- [🚀 Workflowy](#️-workflowy)
+  - [1. Release + Auto Tag (Integrated)](#️-1-release--auto-tag-integrated)
+- [📱 Jak używać](#️-jak-używać)
+  - [1. Manualne Release (jedyna opcja)](#️-1-manualne-release-jedyna-opcja)
+  - [2. Testowanie Build Process](#️-2-testowanie-build-process)
+  - [🚫 Pominięcie Workflow](#️-pominięcie-workflow)
+- [⚙️ Wymagania](#️-wymagania)
+- [💾 Cache](#️-cache)
+- [📦 Artifacts](#️-artifacts)
+- [🔐 Keystore Configuration](#️-keystore-configuration)
+- [🔑 Secrets i Variables](#️-secrets-i-variables)
+  - [Secrets (sensitive)](#️-secrets-sensitive)
+  - [Variables (non-sensitive)](#️-variables-non-sensitive)
+- [🚨Jeśli coś nie działa](#️jeśli-coś-nie-działa)
+  - [❌ Błąd "Permission denied"](#️-błąd-permission-denied)
+  - [❌ Błąd "Flutter not found"](#️-błąd-flutter-not-found)
+  - [❌ Błąd "Java not found"](#️-błąd-java-not-found)
+  - [❌ Problem z keystore](#️-problem-z-keystore)
+  - [❌ Błąd "keystore password was incorrect"](#️-błąd-keystore-password-was-incorrect)
+- [📚 Dodatkowe Zasoby](#️-dodatkowe-zasoby)
+
 ## 🔄 Przegląd
 
 Ten katalog zawiera automatyczne workflowy GitHub Actions dla projektu TuneTangler.
@@ -98,33 +122,28 @@ Workflow używa `key.properties` dla podpisywania:
 
 ### ❌ Błąd "Permission denied"
 
-Upewnij się że workflow ma dostęp do `GITHUB_TOKEN` (domyślnie dostępny).
+Sprawdź [GitHub Actions Permissions](https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token)
 
 ### ❌ Błąd "Flutter not found"
 
-Sprawdź, czy używasz poprawnej wersji Flutter w workflow.
+Sprawdź [GitHub Actions Flutter Setup](https://github.com/marketplace/actions/flutter-action)
 
 ### ❌ Błąd "Java not found"
 
-Sprawdź, czy używasz poprawnej wersji Java w workflow.
+Sprawdź [GitHub Actions Java Setup](https://github.com/actions/setup-java)
 
 ### ❌ Problem z keystore
 
-1. Sprawdź, czy wszystkie secrets i variables są ustawione
-2. Sprawdź logi z kroku "Create key.properties"
-3. Sprawdź, czy keystore file został utworzony
-4. Sprawdź, czy `key.properties` zawiera poprawne dane
+Sprawdź [Android App Signing](https://developer.android.com/studio/publish/app-signing)
 
 ### ❌ Błąd "keystore password was incorrect"
 
-1. Sprawdź, czy `KEYSTORE_PASSWORD` i `KEY_PASSWORD` są poprawne
-2. Sprawdź, czy `KEY_ALIAS` jest poprawny
-3. Sprawdź, czy keystore file nie jest uszkodzony
+Sprawdź [GitHub Secrets Management](https://docs.github.com/en/actions/security-guides/encrypted-secrets)
 
 ## 📚 Dodatkowe Zasoby
 
 - **[📖 Development Guide](../../README.md)** – Główny przewodnik
 - **[🔧 Setup](SETUP.md)** – Konfiguracja środowiska
 - **[⚡ Quick Start](QUICKSTART.md)** – Szybkie uruchomienie
-- **[🔨 Makefile](MAKEFILE.md)** – Komendy i narzędzia
+- **[🔨 Makefile](QUICKSTART.md#makefile)** – Komendy i narzędzia
 - **[🎣 Git Hooks](GIT_HOOKS.md)** – Automatyzacja wersjonowania

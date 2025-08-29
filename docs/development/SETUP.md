@@ -2,6 +2,38 @@
 
 > Szczegółowy przewodnik konfiguracji środowiska dla TuneTangler
 
+## 📋 Spis Treści
+
+- [📋 Wymagania](#-wymagania)
+  - [💻 System Operacyjny](#️-system-operacyjny)
+  - [🛠️ Wymagane Narzędzia](#️-wymagane-narzędzia)
+- [🚀 Instalacja Flutter](#-instalacja-flutter)
+  - [📥 Oficjalne Instrukcje](#️-oficjalne-instrukcje)
+  - [⚙️ Po Instalacji](#️-po-instalacji)
+  - [🔍 Weryfikacja Flutter](#️-weryfikacja-flutter)
+- [🤖 Instalacja Android Studio](#️-instalacja-android-studio)
+  - [📥 Oficjalne Instrukcje](#️-oficjalne-instrukcje-1)
+  - [⚙️ Po Instalacji](#️-po-instalacji-1)
+  - [📱 Emulator Android](#️-emulator-android)
+- [🍎 Instalacja Xcode (macOS)](#️-instalacja-xcode-macos)
+  - [📥 Oficjalne Instrukcje](#️-oficjalne-instrukcje-2)
+  - [⚙️ Po Instalacji](#️-po-instalacji-2)
+  - [📱 Simulator iOS](#️-simulator-ios)
+- [⚙️ Konfiguracja](#️-konfiguracja)
+  - [🔑 Licencje Android](#️-licencje-android)
+  - [📱 Urządzenia](#️-urządzenia)
+  - [🎯 Flutter Doctor](#️-flutter-doctor)
+- [🔍 Weryfikacja](#️-weryfikacja)
+  - [✅ Checklist](#️-checklist)
+  - [🧪 Test Instalacji](#️-test-instalacji)
+- [🚨Jeśli coś nie działa](#️jeśli-coś-nie-działa)
+  - [❌ Flutter not found](#️-flutter-not-found)
+  - [❌ Android SDK not found](#️-android-sdk-not-found)
+  - [❌ Java not found](#️-java-not-found)
+  - [❌ Emulator not starting](#️-emulator-not-starting)
+  - [❌ Xcode issues](#️-xcode-issues)
+- [📚 Dodatkowe Zasoby](#️-dodatkowe-zasoby)
+
 ## 📋 Wymagania
 
 ### 💻 System Operacyjny
@@ -171,75 +203,26 @@ flutter run
 
 ### ❌ Flutter not found
 
-```bash
-echo $PATH
-export PATH="$PATH:$HOME/development/flutter/bin"
-source ~/.zshrc
-```
-
-**Sprawdź:**
-
-- PATH
-- Dodaj Flutter do PATH
-- Przeładuj shell (lub `~/.bashrc`)
+Sprawdź [Flutter Installation Guide](https://docs.flutter.dev/get-started/install#update-your-path)
 
 ### ❌ Android SDK not found
 
-```bash
-echo $ANDROID_HOME
-export ANDROID_HOME="$HOME/Library/Android/sdk"
-```
-
-**Sprawdź:**
-
-- `ANDROID_HOME`
-- Ustaw ścieżkę
-- W Android Studio: File → Project Structure → SDK Location
+Sprawdź [Android Studio Setup](https://developer.android.com/studio/intro/studio-config#sdk-location)
 
 ### ❌ Java not found
 
-```bash
-java -version
-```
-
-**Sprawdź:**
-
-- Java
-
-**Zainstaluj Java 17:**
+Sprawdź [Java Installation](https://adoptium.net/) lub użyj:
 
 - macOS: `brew install openjdk@17`
 - Linux: `sudo apt install openjdk-17-jdk`
-- Windows: Pobierz z Oracle
 
 ### ❌ Emulator not starting
 
-```bash
-flutter emulators
-flutter emulators --launch <name> --verbose
-```
-
-**Sprawdź:**
-
-- AVD
-- Logi
-
-**Uruchom z Android Studio:**
-AVD Manager → Start
+Sprawdź [AVD Manager](https://developer.android.com/studio/run/managing-avds) lub uruchom z Android Studio
 
 ### ❌ Xcode issues
 
-```bash
-xcode-select --print-path
-sudo xcode-select --reset
-sudo xcodebuild -license
-```
-
-**Sprawdź:**
-
-- Xcode
-- Zresetuj Xcode
-- Licencję
+Sprawdź [Xcode Troubleshooting](https://developer.apple.com/library/archive/technotes/tn2339/_index.html)
 
 ## 📚 Dodatkowe Zasoby
 

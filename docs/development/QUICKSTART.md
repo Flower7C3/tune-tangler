@@ -2,6 +2,24 @@
 
 > Szybkie uruchomienie projektu TuneTangler w 5 minut
 
+## 📋 Spis Treści
+
+- [🚀 W 5 Kroków](#-w-5-kroków)
+  - [1️⃣ Klonowanie Projektu](#-klonowanie-projektu)
+  - [2️⃣ Setup Środowiska](#-setup-środowiska)
+  - [3️⃣ Sprawdź Urządzenia](#-sprawdź-urządzenia)
+  - [4️⃣ Uruchom Aplikację](#-uruchom-aplikację)
+  - [5️⃣ Gotowe! 🎉](#-gotowe--)
+- [🚨Jeśli coś nie działa](#jeśli-coś-nie-działa)
+  - [❌ Flutter not found](#-flutter-not-found)
+  - [❌ No devices found](#-no-devices-found)
+  - [❌ Dependencies issues](#-dependencies-issues)
+- [📱 Hot Reload](#-hot-reload)
+- [🔄 Codzienny Workflow](#-codzienny-workflow)
+- [🔨 Makefile](#-makefile)
+- [📚 Co Dalej?](#-co-dalej)
+- [🆘 Szybka Pomoc](#-szybka-pomoc)
+
 ## 🚀 W 5 Kroków
 
 ### 1️⃣ Klonowanie Projektu
@@ -57,28 +75,11 @@ Aplikacja powinna się uruchomić na wybranym urządzeniu/emulatorze.
 
 ### ❌ Flutter not found
 
-Sprawdź PATH
-
-```bash
-echo $PATH | grep flutter
-```
-
-Dodaj Flutter do PATH
-
-```bash
-export PATH="$PATH:$HOME/development/flutter/bin"
-source ~/.zshrc
-```
-
-Lub `~/.bashrc`
+Sprawdź [Flutter Installation Guide](https://docs.flutter.dev/get-started/install)
 
 ### ❌ No devices found
 
-```bash
-flutter devices
-flutter emulators --launch <emulator_name>
-adb devices
-```
+Sprawdź [Flutter Device Management](https://docs.flutter.dev/get-started/flutter-for/install-and-setup#device-setup)
 
 ### ❌ Dependencies issues
 
@@ -113,32 +114,14 @@ h - Pokaż pomoc
 
 ## 🔄 Codzienny Workflow
 
-1. Pobierz zmiany
+Użyj [Makefile](QUICKSTART.md#makefile) do codziennych zadań:
 
-     ```bash
-     git pull origin main
-     ```
-
-2. Sprawdź kod
-
-     ```bash
-     make analyze
-     make test
-     ```
-
-3. Uruchom
-
-     ```bash
-     make run
-     ```
-
-4. Commit
-
-     ```bash
-     git add .
-     git commit -m "feat: add new feature"
-     git push origin main
-     ```
+```bash
+make dev-setup    # Setup środowiska
+make analyze      # Analiza kodu
+make test         # Testy
+make run          # Uruchomienie
+```
 
 ## 🔨 Makefile
 

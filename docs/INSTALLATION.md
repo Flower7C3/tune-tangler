@@ -2,6 +2,13 @@
 
 > Aby zainstalować aplikację, musisz wybrać paczkę w odpowiedniej architekturze ABI.
 
+## 📋 Spis Treści
+
+- [🔍 Jak sprawdzić ABI Androida](#️-jak-sprawdzić-abi-androida)
+  - [📱 Metoda 1: Aplikacja z Google Play](#️-metoda-1-aplikacja-z-google-play)
+  - [💻 Metoda 2: Komputer + ADB](#️-metoda-2-komputer--adb)
+- [📚 Dodatkowe Zasoby](#️-dodatkowe-zasoby)
+
 ## 🔍 Jak sprawdzić ABI Androida
 
 Poszukujesz informacji o wersji, np.:
@@ -38,3 +45,9 @@ Poszukujesz informacji o wersji, np.:
     ```sh
     adb shell getprop ro.product.cpu.abi
     ```
+
+## 📚 **Dodatkowe Zasoby**
+
+- **[Android ABI Guide](https://developer.android.com/ndk/guides/abis)** – Oficjalna dokumentacja ABI
+- **[ADB Installation](https://developer.android.com/tools/adb)** – Instalacja ADB
+- **[Device Setup](https://developer.android.com/studio/run/device)** – Konfiguracja urządzenia

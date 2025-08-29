@@ -1,5 +1,16 @@
 # 🗺️ TuneTangler - Plan Rozwoju (Roadmap)
 
+## 📋 Spis Treści
+
+- [🎯 Punkty Rozwoju](#-punkty-rowoju)
+  - [1️⃣ Optymalizacje Wydajności](#-optymalizacje-wydajności)
+  - [2️⃣ Ulepszenia UI](#-ulepszenia-ui)
+  - [3️⃣ Eksport i Import](#-eksport-i-import)
+  - [4️⃣ Efekty Audio](#-efekty-audio)
+  - [5️⃣ System Licencji](#-system-licencji)
+  - [6️⃣ Funkcje Audio](#-funkcje-audio)
+- [📚 Dodatkowe Zasoby](#-dodatkowe-zasoby)
+
 ## 🎯 **Punkty Rozwoju**
 
 ### **1️⃣ Optymalizacje Wydajności (Najwyższy Priorytet – UKOŃCZONE ✅)**
@@ -58,18 +69,16 @@
 ### **4️⃣ Efekty Audio (Odłożone na Później – WYMAGA NOWEJ BIBLIOTEKI)**
 
 - **Podstawowe efekty**:
-
-  - Reverb (pomieszczenie, hala, echo)
-  - Delay/Echo (z kontrolą czasu i feedback)
-  - Compression (dynamika, punch)
-  - EQ (3-5 pasmowe, low/high pass)
+    - Reverb (pomieszczenie, hala, echo)
+    - Delay/Echo (z kontrolą czasu i feedback)
+    - Compression (dynamika, punch)
+    - EQ (3-5 pasmowe, low/high pass)
 
 - **Zaawansowane efekty**:
-
-  - Distortion/Overdrive
-  - Chorus/Flanger
-  - Pitch shift (transpozycja w czasie rzeczywistym)
-  - Time stretching (bez zmiany pitch)
+    - Distortion/Overdrive
+    - Chorus/Flanger
+    - Pitch shift (transpozycja w czasie rzeczywistym)
+    - Time stretching (bez zmiany pitch)
 
 ### **5️⃣ System Licencji (Średni Priorytet)**
 
@@ -100,3 +109,9 @@
 - **Normalization**: Automatyczne wyrównanie głośności
 - **Fade in/out**: Płynne wejścia i wyjścia
 - **Crossfade**: Płynne przejścia między ścieżkami
+
+## 📚 **Dodatkowe Zasoby**
+
+- **[📖 Development Guide](../README.md)** – Główny przewodnik
+- **[Flutter Roadmap](https://github.com/flutter/flutter/wiki/Roadmap)** – Oficjalny plan rozwoju Flutter
+- **[Android Roadmap](https://developer.android.com/about/versions)** – Plan rozwoju Android

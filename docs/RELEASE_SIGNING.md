@@ -3,6 +3,24 @@
 > Ten dokument wyjaśnia, jak skonfigurować podpisywanie release dla TuneTangler, aby
 > zapewnić spójne podpisy aplikacji w różnych buildach.
 
+## 📋 Spis Treści
+
+- [🚨 Problem](#-problem)
+- [✅ Rozwiązanie](#-rozwiązanie)
+- [🔧 Jednorazowe kroki konfiguracji](#-jednorazowe-kroki-konfiguracji)
+  - [1️⃣ Przygotuj konfigurację](#-przygotuj-konfigurację)
+  - [2️⃣ Generuj Keystore](#-generuj-keystore)
+  - [3️⃣ Przygotuj GitHub Secrets](#-przygotuj-github-secrets)
+  - [4️⃣ Zweryfikuj konfigurację](#-zweryfikuj-konfigurację)
+  - [5️⃣ Build i test](#-build-i-test)
+- [🚨Jeśli coś nie działa](#jeśli-coś-nie-działa)
+  - [❌ Błąd "Keystore not found"](#-błąd-keystore-not-found)
+  - [❌ Błąd "Signature verification failed"](#-błąd-signature-verification-failed)
+  - [❌ Build nie powodzi się z błędami podpisywania](#-build-nie-powodzi-się-z-błędami-podpisywania)
+  - [🔁 Regenerowanie Keystore](#-regenerowanie-keystore)
+- [🔒 Uwagi bezpieczeństwa](#-uwagi-bezpieczeństwa)
+- [🎯 Korzyści](#-korzyści)
+
 ## 🚨 Problem
 
 Bez odpowiedniej konfiguracji podpisywania, każda maszyna build generuje własny
@@ -93,29 +111,19 @@ Workflow powinien:
 
 ### ❌ Błąd "Keystore not found"
 
-**Rozwiązanie**
-
-- Upewnij się, że secret `KEYSTORE_BASE64` jest poprawnie ustawiony
-- Sprawdź, czy kodowanie base64 jest kompletne
+Sprawdź [GitHub Secrets Management](https://docs.github.com/en/actions/security-guides/encrypted-secrets)
 
 ### ❌ Błąd "Signature verification failed"
 
-- Zweryfikuj, że wszystkie 4 secrets są poprawnie skonfigurowane
-- Sprawdź, czy hasła keystore pasują
+Sprawdź [Android App Signing](https://developer.android.com/studio/publish/app-signing)
 
 ### ❌ Build nie powodzi się z błędami podpisywania
 
-- Upewnij się, że plik keystore jest poprawny
-- Sprawdź, czy alias i hasła są poprawne
+Sprawdź [Android Build Troubleshooting](https://developer.android.com/studio/build/troubleshoot)
 
 ### 🔁 Regenerowanie Keystore
 
-Jeśli musisz wygenerować keystore ponownie:
-
-1. **Usuń stary keystore**: `rm android/app/tune-tangler-release-key.jks`
-2. **Wygeneruj nowy**: Użyj komendy keytool z kroku 1
-3. **Zaktualizuj GitHub secrets**: Pobierz nowy base64 i zaktualizuj `KEYSTORE_BASE64`
-4. **Przetestuj workflow**: Uruchom release workflow ponownie
+Sprawdź [Android Keystore Management](https://developer.android.com/studio/publish/app-signing#generate-key)
 
 ## 🔒 Uwagi bezpieczeństwa
 
