@@ -279,3 +279,60 @@ gen-splash: ##UTILITIES## Generate splash screen
 #rename: ## Change name
 #	@echo "$(ICON_INFO) Changing app name...$(FORMAT_RESET)"
 #	dart run rename_app:main all="Tune Tangler"
+
+# =============================================================================
+# GIT HOOKS MANAGEMENT
+# =============================================================================
+
+.PHONY: install-pre-commit-hook
+install-pre-commit-hook: ##UTILITIES## Install pre-commit hook for automatic version incrementing
+	@echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Installing pre-commit hook...$(FORMAT_RESET)"
+	@if [ ! -d ".git" ]; then \
+		echo "$(COLOR_RED)$(ICON_ERROR) Error: Not in a git repository$(FORMAT_RESET)"; \
+		echo "   Please run this command from the root of your git repository"; \
+		exit 1; \
+	fi
+	@if [ ! -d ".git/hooks" ]; then \
+		echo "$(COLOR_RED)$(ICON_ERROR) Error: .git/hooks directory not found$(FORMAT_RESET)"; \
+		exit 1; \
+	fi
+	@if [ -f ".git/hooks/pre-commit" ]; then \
+		echo "$(COLOR_YELLOW)$(ICON_WARN) Pre-commit hook already exists, backing up...$(FORMAT_RESET)"; \
+		cp .git/hooks/pre-commit .git/hooks/pre-commit.backup; \
+	fi
+	@if [ -f "scripts/pre-commit" ]; then \
+		cp scripts/pre-commit .git/hooks/pre-commit; \
+		echo "$(COLOR_GREEN)$(ICON_CHECK) Pre-commit hook copied from scripts/$(FORMAT_RESET)"; \
+	elif [ -f ".git/hooks/pre-commit" ]; then \
+		echo "$(COLOR_GREEN)$(ICON_CHECK) Pre-commit hook already in place$(FORMAT_RESET)"; \
+	else \
+		echo "$(COLOR_RED)$(ICON_ERROR) Error: Pre-commit hook not found in scripts/$(FORMAT_RESET)"; \
+		exit 1; \
+	fi
+	@chmod +x .git/hooks/pre-commit
+	@if [ -x ".git/hooks/pre-commit" ]; then \
+		echo "$(COLOR_GREEN)$(ICON_CHECK) Pre-commit hook installed successfully!$(FORMAT_RESET)"; \
+		echo "$(COLOR_CYAN)$(ICON_INFO) Hook will now automatically increment minor version before each commit$(FORMAT_RESET)"; \
+		echo ""; \
+		echo "$(COLOR_YELLOW)$(ICON_INFO) To test:$(FORMAT_RESET)"; \
+		echo "   1. Make some changes to your code"; \
+		echo "   2. git add ."; \
+		echo "   3. git commit -m 'test commit'"; \
+		echo "   4. Check pubspec.yaml for version increment"; \
+		echo ""; \
+		echo "$(COLOR_CYAN)$(ICON_INFO) To disable temporarily: git commit --no-verify$(FORMAT_RESET)"; \
+		echo "$(COLOR_CYAN)$(ICON_INFO) To remove permanently: make remove-pre-commit-hook$(FORMAT_RESET)"; \
+	else \
+		echo "$(COLOR_RED)$(ICON_ERROR) Error: Failed to make pre-commit hook executable$(FORMAT_RESET)"; \
+		exit 1; \
+	fi
+
+.PHONY: remove-pre-commit-hook
+remove-pre-commit-hook: ##UTILITIES## Remove pre-commit hook
+	@echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Removing pre-commit hook...$(FORMAT_RESET)"
+	@if [ -f ".git/hooks/pre-commit" ]; then \
+		rm .git/hooks/pre-commit; \
+		echo "$(COLOR_GREEN)$(ICON_CHECK) Pre-commit hook removed$(FORMAT_RESET)"; \
+	else \
+		echo "$(COLOR_YELLOW)$(ICON_WARN) No pre-commit hook found$(FORMAT_RESET)"; \
+	fi

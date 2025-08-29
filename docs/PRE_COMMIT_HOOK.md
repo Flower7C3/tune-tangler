@@ -2,26 +2,7 @@
 
 ## 📋 Opis
 
-Pre-commit hook automatycznie zwiększa **patch version** w `pubspec.yaml` przed każdym commitem. To zapewnia, że każdy commit ma unikalną wersję.
-
-## 🔧 Instalacja
-
-### Automatyczna (zalecana)
-
-```bash
-# Skrypt automatycznie instaluje hook
-./scripts/install_pre_commit_hook.sh
-```
-
-### Ręczna
-
-```bash
-# Skopiuj hook do .git/hooks/
-cp .git/hooks/pre-commit .git/hooks/pre-commit
-
-# Nadaj uprawnienia wykonywania
-chmod +x .git/hooks/pre-commit
-```
+Pre-commit hook automatycznie zwiększa **patch version** w [pubspec.yaml](../pubspec.yaml) przed każdym commitem. To zapewnia, że każdy commit ma unikalną wersję.
 
 ## 🚀 Jak to działa
 
@@ -29,6 +10,28 @@ chmod +x .git/hooks/pre-commit
 2. **Jeśli NIE** – zwiększa patch version (np. 1.2.1 → 1.2.2)
 3. **Jeśli TAK** – pomija (nie duplikuje zmian)
 4. **Automatycznie stage** – zaktualizowany `pubspec.yaml`
+
+## 🔧 Instalacja
+
+ Makefile automatycznie instaluje hook
+
+```bash
+make install-pre-commit-hook
+```
+
+## ⏼ Wyłączenie hooka
+
+- Tymczasowo
+
+    ```bash
+    git commit --no-verify
+    ```
+
+- Trwale (używając Makefile)
+
+    ```bash
+    make remove-pre-commit-hook
+    ```
 
 ## 📊 Przykłady
 
@@ -49,36 +52,6 @@ git log --oneline -1
 # Output: abc1234 version 1.3.0
 ```
 
-## ⚙️ Konfiguracja
-
-### Wyłączenie hooka
-
-```bash
-# Tymczasowo
-git commit --no-verify
-
-# Trwale
-rm .git/hooks/pre-commit
-```
-
-### Modyfikacja logiki
-
-Edytuj `.git/hooks/pre-commit`:
-
-- **Patch increment** (domyślnie): `NEW_PATCH=$((CURRENT_PATCH + 1))`
-- **Minor increment**: `NEW_MINOR=$((CURRENT_MINOR + 1))`
-- **Major increment**: `NEW_MAJOR=$((CURRENT_MAJOR + 1))`
-
-## 🔍 Sprawdzenie statusu
-
-```bash
-# Sprawdź czy hook jest aktywny
-ls -la .git/hooks/pre-commit
-
-# Sprawdź uprawnienia
-file .git/hooks/pre-commit
-```
-
 ## ⚠️ Uwagi
 
 - **Hook działa lokalnie** – każdy developer musi go zainstalować
@@ -96,6 +69,10 @@ chmod +x .git/hooks/pre-commit
 
 # Sprawdź czy jest w .git/hooks/
 ls -la .git/hooks/
+
+# Lub użyj Makefile do reinstalacji
+make remove-pre-commit-hook
+make install-pre-commit-hook
 ```
 
 ### Błąd sed

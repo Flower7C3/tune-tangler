@@ -98,6 +98,28 @@ Pełna lista komend dostępna po uruchomieniu:
 make help
 ```
 
+### Główne komendy
+
+```bash
+# Setup środowiska
+make dev-setup          # Pełna konfiguracja środowiska
+make quick-start        # Szybki start z listą urządzeń
+
+# Code quality
+make analyze            # Analiza kodu
+make test               # Uruchomienie testów
+make format             # Formatowanie kodu
+
+# Build & Run
+make run                # Uruchomienie aplikacji
+make build-apk          # Budowanie APK
+make install-apk        # Budowanie i instalacja APK
+
+# Git hooks
+make install-pre-commit-hook    # Instalacja pre-commit hooka
+make remove-pre-commit-hook     # Usunięcie pre-commit hooka
+```
+
 **Uwaga:** Do build i install w trybie release użyj GitHub Actions workflow.
 
 ## Troubleshooting
