@@ -4,25 +4,25 @@
 
 ## 📋 Spis Treści
 
-- [🚀 W 5 Kroków](#-w-5-kroków)
-  - [1️⃣ Klonowanie Projektu](#-klonowanie-projektu)
-  - [2️⃣ Setup Środowiska](#-setup-środowiska)
-  - [3️⃣ Sprawdź Urządzenia](#-sprawdź-urządzenia)
-  - [4️⃣ Uruchom Aplikację](#-uruchom-aplikację)
-  - [5️⃣ Gotowe! 🎉](#-gotowe--)
-- [🚨Jeśli coś nie działa](#jeśli-coś-nie-działa)
-  - [❌ Flutter not found](#-flutter-not-found)
-  - [❌ No devices found](#-no-devices-found)
-  - [❌ Dependencies issues](#-dependencies-issues)
-- [📱 Hot Reload](#-hot-reload)
-- [🔄 Codzienny Workflow](#-codzienny-workflow)
-- [🔨 Makefile](#-makefile)
-- [📚 Co Dalej?](#-co-dalej)
-- [🆘 Szybka Pomoc](#-szybka-pomoc)
+- [🚀 W 5 Kroków](#5-steps)
+  - [1️⃣ Klonowanie Projektu](#clone-project)
+  - [2️⃣ Setup Środowiska](#setup-environment)
+  - [3️⃣ Sprawdź Urządzenia](#check-devices)
+  - [4️⃣ Uruchom Aplikację](#run-app)
+  - [5️⃣ Gotowe! 🎉](#ready)
+- [🚨Jeśli coś nie działa](#troubleshooting)
+  - [❌ Flutter not found](#flutter-not-found)
+  - [❌ No devices found](#no-devices-found)
+  - [❌ Dependencies issues](#dependencies-issues)
+- [📱 Hot Reload](#hot-reload)
+- [🔄 Codzienny Workflow](#daily-workflow)
+- [🔨 Makefile](#makefile)
+- [📚 Co Dalej?](#what-next)
+- [🆘 Szybka Pomoc](#quick-help)
 
-## 🚀 W 5 Kroków
+## 🚀 W 5 Kroków <a name="5-steps"></a>
 
-### 1️⃣ Klonowanie Projektu
+### 1️⃣ Klonowanie Projektu <a name="clone-project"></a>
 
 Sklonuj repozytorium i sprawdź branch
 
@@ -34,7 +34,7 @@ git branch
 
 Powinno być: `* main`
 
-### 2️⃣ Setup Środowiska
+### 2️⃣ Setup Środowiska <a name="setup-environment"></a>
 
 Użyj Makefile do szybkiego setupu
 
@@ -47,7 +47,7 @@ make dev-setup
 ✅ Pobierze zależności (flutter pub get)  
 ✅ Zainstaluje pre-commit hook
 
-### 3️⃣ Sprawdź Urządzenia
+### 3️⃣ Sprawdź Urządzenia <a name="check-devices"></a>
 
 Lista dostępnych urządzeń
 
@@ -61,27 +61,27 @@ Lista emulatorów
 make list-emulators
 ```
 
-### 4️⃣ Uruchom Aplikację
+### 4️⃣ Uruchom Aplikację <a name="run-app"></a>
 
 ```bash
 make run
 ```
 
-### 5️⃣ Gotowe! 🎉
+### 5️⃣ Gotowe! 🎉 <a name="ready"></a>
 
 Aplikacja powinna się uruchomić na wybranym urządzeniu/emulatorze.
 
-## 🚨Jeśli coś nie działa
+## 🚨Jeśli coś nie działa <a name="troubleshooting"></a>
 
-### ❌ Flutter not found
+### ❌ Flutter not found <a name="flutter-not-found"></a>
 
 Sprawdź [Flutter Installation Guide](https://docs.flutter.dev/get-started/install)
 
-### ❌ No devices found
+### ❌ No devices found <a name="no-devices-found"></a>
 
 Sprawdź [Flutter Device Management](https://docs.flutter.dev/get-started/flutter-for/install-and-setup#device-setup)
 
-### ❌ Dependencies issues
+### ❌ Dependencies issues <a name="dependencies-issues"></a>
 
 **Wyczyść cache:**
 
@@ -101,7 +101,7 @@ flutter pub get
 flutter doctor
 ```
 
-## 📱 Hot Reload
+## 📱 Hot Reload <a name="hot-reload"></a>
 
 Podczas działania aplikacji:
 
@@ -112,7 +112,7 @@ q - Wyjście
 h - Pokaż pomoc
 ```
 
-## 🔄 Codzienny Workflow
+## 🔄 Codzienny Workflow <a name="daily-workflow"></a>
 
 Użyj [Makefile](QUICKSTART.md#makefile) do codziennych zadań:
 
@@ -123,7 +123,7 @@ make test         # Testy
 make run          # Uruchomienie
 ```
 
-## 🔨 Makefile
+## 🔨 Makefile <a name="makefile"></a>
 
 Główne komendy do codziennej pracy:
 
@@ -149,13 +149,13 @@ make remove-pre-commit-hook     # Usunięcie pre-commit hooka
 
 **Wszystkie komendy:** `make help`
 
-## 📚 Co Dalej?
+## 📚 Co Dalej? <a name="what-next"></a>
 
 - **[🔧 Setup](SETUP.md)** – Szczegółowa konfiguracja
 - **[🎣 Git Hooks](GIT_HOOKS.md)** – Automatyzacja wersjonowania
 - **[🚀 Workflows](WORKFLOWS.md)** – CI/CD i deployment
 
-## 🆘 Szybka Pomoc
+## 🆘 Szybka Pomoc <a name="quick-help"></a>
 
 Sprawdź status
 

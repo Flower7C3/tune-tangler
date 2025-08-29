@@ -2,26 +2,26 @@
 
 ## 📋 Spis Treści
 
-- [🚨 CRITICAL RULES – NEVER BREAK](#-critical-rules--never-break)
-  - [1️⃣ Git Operations – NEVER DO WITHOUT EXPLICIT PERMISSION](#-git-operations--never-do-without-explicit-permission)
-  - [2️⃣ Code Changes – GRADUAL AND SAFE](#-code-changes--gradual-and-safe)
-  - [3️⃣ Project-Specific Rules](#-project-specific-rules)
-- [🔧 WORKFLOW RULES](#-workflow-rules)
-  - [4️⃣ When User Asks for Changes](#-when-user-asks-for-changes)
-  - [5️⃣ When User Asks for Git Operations](#-when-user-asks-for-git-operations)
-  - [6️⃣ When User Asks for Code Review](#-when-user-asks-for-code-review)
-- [📝 COMMUNICATION RULES](#-communication-rules)
-  - [7️⃣ Response Style](#-response-style)
-  - [8️⃣ Error Handling](#-error-handling)
-- [🎯 PROJECT KNOWLEDGE](#-project-knowledge)
-  - [9️⃣ Remember These Key Points](#-remember-these-key-points)
-  - [🔟 File Structure Awareness](#-file-structure-awareness)
-- [🚫 WHAT I WILL NEVER DO](#-what-i-will-never-do)
-- [📚 Dodatkowe Zasoby](#-dodatkowe-zasoby)
+- [🚨 CRITICAL RULES – NEVER BREAK](#critical-rules-never-break)
+  - [1️⃣ Git Operations – NEVER DO WITHOUT EXPLICIT PERMISSION](#git-operations-never-do-without-explicit-permission)
+  - [2️⃣ Code Changes – GRADUAL AND SAFE](#code-changes-gradual-and-safe)
+  - [3️⃣ Project-Specific Rules](#project-specific-rules)
+- [🔧 WORKFLOW RULES](#workflow-rules)
+  - [4️⃣ When User Asks for Changes](#when-user-asks-for-changes)
+  - [5️⃣ When User Asks for Git Operations](#when-user-asks-for-git-operations)
+  - [6️⃣ When User Asks for Code Review](#when-user-asks-for-code-review)
+- [📝 COMMUNICATION RULES](#communication-rules)
+  - [7️⃣ Response Style](#response-style)
+  - [8️⃣ Error Handling](#error-handling)
+- [🎯 PROJECT KNOWLEDGE](#project-knowledge)
+  - [9️⃣ Remember These Key Points](#remember-these-key-points)
+  - [🔟 File Structure Awareness](#file-structure-awareness)
+- [🚫 WHAT I WILL NEVER DO](#what-i-will-never-do)
+- [📚 Dodatkowe Zasoby](#additional-resources)
 
-## 🚨 **CRITICAL RULES – NEVER BREAK**
+## 🚨 **CRITICAL RULES – NEVER BREAK** <a name="critical-rules-never-break"></a>
 
-### 1️⃣ **Git Operations – NEVER DO WITHOUT EXPLICIT PERMISSION**
+### 1️⃣ **Git Operations – NEVER DO WITHOUT EXPLICIT PERMISSION** <a name="git-operations-never-do-without-explicit-permission"></a>
 
 - ❌ **NEVER** commit changes without explicit user permission
 - ❌ **NEVER** push to remote without explicit user permission
@@ -31,7 +31,7 @@
 - ✅ **ALWAYS** ask before making any git operations
 - ✅ **ALWAYS** show git status before suggesting changes
 
-### 2️⃣ **Code Changes – GRADUAL AND SAFE**
+### 2️⃣ **Code Changes – GRADUAL AND SAFE** <a name="code-changes-gradual-and-safe"></a>
 
 - ✅ **ALWAYS** make small, incremental changes
 - ✅ **ALWAYS** ask before making multiple file changes
@@ -40,7 +40,7 @@
 - ❌ **NEVER** make large refactoring without explicit permission
 - ❌ **NEVER** change multiple files simultaneously without approval
 
-### 3️⃣ **Project-Specific Rules**
+### 3️⃣ **Project-Specific Rules** <a name="project-specific-rules"></a>
 
 - ✅ **ALWAYS** use `console_utils.py` to format output (if available)
 - ✅ **ALWAYS** follow Conventional Commits format
@@ -51,9 +51,9 @@
 - ✅ **ALWAYS** place translation files in `l10n` directory
 - ✅ **ALWAYS** use 'master' branch (not 'main')
 
-## 🔧 **WORKFLOW RULES**
+## 🔧 **WORKFLOW RULES** <a name="workflow-rules"></a>
 
-### 4️⃣ **When User Asks for Changes**
+### 4️⃣ **When User Asks for Changes** <a name="when-user-asks-for-changes"></a>
 
 1. **Analyze** the current state
 2. **Propose** specific, small changes
@@ -62,7 +62,7 @@
 5. **Verify** changes work correctly
 6. **Ask** before committing
 
-### 5️⃣ **When User Asks for Git Operations**
+### 5️⃣ **When User Asks for Git Operations** <a name="when-user-asks-for-git-operations"></a>
 
 1. **Show** current git status first
 2. **Explain** what will happen
@@ -70,7 +70,7 @@
 4. **Execute** only after approval
 5. **Confirm** operation completed
 
-### 6️⃣ **When User Asks for Code Review**
+### 6️⃣ **When User Asks for Code Review** <a name="when-user-asks-for-code-review"></a>
 
 1. **Read** the relevant files
 2. **Identify** potential issues

@@ -5,23 +5,23 @@
 
 ## 📋 Spis Treści
 
-- [🚨 Problem](#-problem)
-- [✅ Rozwiązanie](#-rozwiązanie)
-- [🔧 Jednorazowe kroki konfiguracji](#-jednorazowe-kroki-konfiguracji)
-  - [1️⃣ Przygotuj konfigurację](#-przygotuj-konfigurację)
-  - [2️⃣ Generuj Keystore](#-generuj-keystore)
-  - [3️⃣ Przygotuj GitHub Secrets](#-przygotuj-github-secrets)
-  - [4️⃣ Zweryfikuj konfigurację](#-zweryfikuj-konfigurację)
-  - [5️⃣ Build i test](#-build-i-test)
-- [🚨Jeśli coś nie działa](#jeśli-coś-nie-działa)
-  - [❌ Błąd "Keystore not found"](#-błąd-keystore-not-found)
-  - [❌ Błąd "Signature verification failed"](#-błąd-signature-verification-failed)
-  - [❌ Build nie powodzi się z błędami podpisywania](#-build-nie-powodzi-się-z-błędami-podpisywania)
-  - [🔁 Regenerowanie Keystore](#-regenerowanie-keystore)
-- [🔒 Uwagi bezpieczeństwa](#-uwagi-bezpieczeństwa)
-- [🎯 Korzyści](#-korzyści)
+- [🚨 Problem](#problem)
+- [✅ Rozwiązanie](#solution)
+- [🔧 Jednorazowe kroki konfiguracji](#one-time-configuration-steps)
+  - [1️⃣ Przygotuj konfigurację](#prepare-configuration)
+  - [2️⃣ Generuj Keystore](#generate-keystore)
+  - [3️⃣ Przygotuj GitHub Secrets](#prepare-github-secrets)
+  - [4️⃣ Zweryfikuj konfigurację](#verify-configuration)
+  - [5️⃣ Build i test](#build-and-test)
+- [🚨Jeśli coś nie działa](#troubleshooting)
+  - [❌ Błąd "Keystore not found"](#keystore-not-found-error)
+  - [❌ Błąd "Signature verification failed"](#signature-verification-failed-error)
+  - [❌ Build nie powodzi się z błędami podpisywania](#build-fails-with-signing-errors)
+  - [🔁 Regenerowanie Keystore](#regenerating-keystore)
+- [🔒 Uwagi bezpieczeństwa](#security-notes)
+- [🎯 Korzyści](#benefits)
 
-## 🚨 Problem
+## 🚨 Problem <a name="problem"></a>
 
 Bez odpowiedniej konfiguracji podpisywania, każda maszyna build generuje własny
 debug keystore, co powoduje:
@@ -30,14 +30,14 @@ debug keystore, co powoduje:
 - **Utratę danych** gdy użytkownicy próbują zaktualizować aplikację
 - **Błędy instalacji** niezgodnych pakietów
 
-## ✅ Rozwiązanie
+## ✅ Rozwiązanie <a name="solution"></a>
 
 Użyj spójnego keystore przechowywanego jako GitHub secrets dla wszystkich buildów CI/CD.
 **Teraz używamy app bundle (.aab) zamiast APK dla lepszego wsparcia podpisywania.**
 
-## 🔧 Jednorazowe kroki konfiguracji
+## 🔧 Jednorazowe kroki konfiguracji <a name="one-time-configuration-steps"></a>
 
-### 1️⃣ Przygotuj konfigurację
+### 1️⃣ Przygotuj konfigurację <a name="prepare-configuration"></a>
 
 Utwórz plik [android/key.properties](../android/key.properties) z wartościami:
 
@@ -51,7 +51,7 @@ dName=CN=xx, O=xx, C=PL
 
 > **⚠️ Ważne**: Użyj silnych, unikalnych haseł.
 
-### 2️⃣ Generuj Keystore
+### 2️⃣ Generuj Keystore <a name="generate-keystore"></a>
 
 Keystore został już wygenerowany. Jeśli musisz go wygenerować ponownie:
 
@@ -68,7 +68,7 @@ keytool \
   -dname '`grep dName android/key.properties | cut -d '=' -f2-9`'
 ```
 
-### 3️⃣ Przygotuj GitHub Secrets
+### 3️⃣ Przygotuj GitHub Secrets <a name="prepare-github-secrets"></a>
 
 Dodaj te secrets do swojego repozytorium GitHub:
 **Settings → Secrets and variables → Actions**
@@ -83,7 +83,7 @@ Dodaj te secrets do swojego repozytorium GitHub:
 **ℹ️ Uwaga**: Workflow generuje `key.properties` z tymi danymi
 podczas buildu, więc nie są przechowywane w repozytorium.
 
-### 4️⃣ Zweryfikuj konfigurację
+### 4️⃣ Zweryfikuj konfigurację <a name="verify-configuration"></a>
 
 Po ustawieniu secrets, zweryfikuj że:
 
@@ -91,7 +91,7 @@ Po ustawieniu secrets, zweryfikuj że:
 2. **GitHub secrets są ustawione**: Wszystkie 4 secrets są skonfigurowane
 3. **Workflow ma dostęp do secrets**: Brak błędów uprawnień
 
-### 5️⃣ Build i test
+### 5️⃣ Build i test <a name="build-and-test"></a>
 
 Przetestuj konfigurację uruchamiając release workflow:
 
@@ -107,32 +107,32 @@ Workflow powinien:
 - ✅ Zbudować podpisany app bundle
 - ✅ Zweryfikować podpis z `jarsigner`
 
-## 🚨Jeśli coś nie działa
+## 🚨Jeśli coś nie działa <a name="troubleshooting"></a>
 
-### ❌ Błąd "Keystore not found"
+### ❌ Błąd "Keystore not found" <a name="keystore-not-found-error"></a>
 
 Sprawdź [GitHub Secrets Management](https://docs.github.com/en/actions/security-guides/encrypted-secrets)
 
-### ❌ Błąd "Signature verification failed"
+### ❌ Błąd "Signature verification failed" <a name="signature-verification-failed-error"></a>
 
 Sprawdź [Android App Signing](https://developer.android.com/studio/publish/app-signing)
 
-### ❌ Build nie powodzi się z błędami podpisywania
+### ❌ Build nie powodzi się z błędami podpisywania <a name="build-fails-with-signing-errors"></a>
 
 Sprawdź [Android Build Troubleshooting](https://developer.android.com/studio/build/troubleshoot)
 
-### 🔁 Regenerowanie Keystore
+### 🔁 Regenerowanie Keystore <a name="regenerating-keystore"></a>
 
 Sprawdź [Android Keystore Management](https://developer.android.com/studio/publish/app-signing#generate-key)
 
-## 🔒 Uwagi bezpieczeństwa
+## 🔒 Uwagi bezpieczeństwa <a name="security-notes"></a>
 
 - **Nigdy nie commituj plików keystore** do kontroli wersji
 - **Użyj silnych, unikalnych haseł** dla produkcji
 - **Rotuj keystore okresowo** dla bezpieczeństwa
 - **Ogranicz dostęp** do GitHub secrets do zaufanych członków zespołu
 
-## 🎯 Korzyści
+## 🎯 Korzyści <a name="benefits"></a>
 
 Z tą konfiguracją:
 

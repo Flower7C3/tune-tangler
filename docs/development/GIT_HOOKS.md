@@ -4,36 +4,36 @@
 
 ## 📋 Spis Treści
 
-- [🎯 Co to są Git Hooks](#️-co-to-są-git-hooks)
-- [🔄 Pre-commit Hook](#️-pre-commit-hook)
-  - [📋 Opis](#️-opis)
-  - [🎯 Cel](#️-cel)
-- [⚙️ Instalacja](#️-instalacja)
-  - [🗑️ Usunięcie](#️-usunięcie)
-- [🚀 Jak to działa](#️-jak-to-działa)
-  - [📝 Proces](#️-proces)
-  - [🔄 Flow](#️-flow)
-- [📊 Przykłady](#️-przykłady)
-  - [🔄 Przed commitem](#️-przed-commitem)
-  - [📝 Po commicie](#️-po-commicie)
-  - [🎯 Różne scenariusze](#️-różne-scenariusze)
-- [🔍 Sprawdzenie statusu](#️-sprawdzenie-statusu)
-  - [✅ Czy hook jest aktywny](#️-czy-hook-jest-aktywny)
-  - [🔍 Test hooka](#️-test-hooka)
-- [⚠️ Uwagi](#️-uwagi)
-  - [🔒 Bezpieczeństwo](#️-bezpieczeństwo)
-  - [📱 Zachowanie](#️-zachowanie)
-  - [🚫 Ograniczenia](#️-ograniczenia)
-- [🚨Jeśli coś nie działa](#️jeśli-coś-nie-działa)
-  - [❌ Hook nie działa](#️-hook-nie-działa)
-  - [❌ Błąd sed](#️-błąd-sed)
-  - [❌ Konflikt wersji](#️-konflikt-wersji)
-  - [❌ Hook pominięty](#️-hook-pominięty)
-  - [🔍 Debugging](#️-debugging)
-- [📚 Dodatkowe Zasoby](#️-dodatkowe-zasoby)
-- [🆘 Potrzebujesz Pomocy?](#️-potrzebujesz-pomocy)
+- [🎯 Co to są Git Hooks](#what-are-git-hooks)
+- [🔄 Pre-commit Hook](#pre-commit-hook)
+  - [📋 Opis](#description)
+  - [🎯 Cel](#purpose)
+- [⚙️ Instalacja](#installation)
+  - [🗑️ Usunięcie](#removal)
+- [🚀 Jak to działa](#how-it-works)
+  - [📝 Proces](#process)
+  - [🔄 Flow](#flow)
+- [📊 Przykłady](#examples)
+  - [🔄 Przed commitem](#before-commit)
+  - [📝 Po commicie](#after-commit)
+  - [🎯 Różne scenariusze](#different-scenarios)
+- [🔍 Sprawdzenie statusu](#status-check)
+  - [✅ Czy hook jest aktywny](#is-hook-active)
+  - [🔍 Test hooka](#test-hook)
+- [⚠️ Uwagi](#notes)
+  - [🔒 Bezpieczeństwo](#security)
+  - [📱 Zachowanie](#behavior)
+  - [🚫 Ograniczenia](#limitations)
+- [🚨Jeśli coś nie działa](#troubleshooting)
+  - [❌ Hook nie działa](#hook-not-working)
+  - [❌ Błąd sed](#sed-error)
+  - [❌ Konflikt wersji](#version-conflict)
+  - [❌ Hook pominięty](#hook-skipped)
+  - [🔍 Debugging](#debugging)
+- [📚 Dodatkowe Zasoby](#additional-resources)
+- [🆘 Potrzebujesz Pomocy?](#need-help)
 
-## 🎯 Co to są Git Hooks
+## 🎯 Co to są Git Hooks <a name="what-are-git-hooks"></a>
 
 Git hooks to skrypty, które automatycznie uruchamiają się w określonych momentach w git workflow:
 
@@ -42,41 +42,41 @@ Git hooks to skrypty, które automatycznie uruchamiają się w określonych mome
 - **pre-push** – przed push
 - **post-merge** – po merge
 
-## 🔄 Pre-commit Hook
+## 🔄 Pre-commit Hook <a name="pre-commit-hook"></a>
 
-### 📋 Opis
+### 📋 Opis <a name="description"></a>
 
 Pre-commit hook automatycznie zwiększa **patch version** w `pubspec.yaml` przed każdym commitem. To zapewnia, że każdy
 commit ma unikalną wersję.
 
-### 🎯 Cel
+### 🎯 Cel <a name="purpose"></a>
 
 - **Automatyczne wersjonowanie** – nie musisz pamiętać o zwiększaniu wersji
 - **Unikalne wersje** – każdy commit ma inną wersję
 - **Spójność** – wersja zawsze odpowiada commitowi
 
-## ⚙️ Instalacja
+## ⚙️ Instalacja <a name="installation"></a>
 
 ```bash
 make install-pre-commit-hook
 ```
 
-### 🗑️ Usunięcie
+### 🗑️ Usunięcie <a name="removal"></a>
 
 ```bash
 make remove-pre-commit-hook
 ```
 
-## 🚀 Jak to działa
+## 🚀 Jak to działa <a name="how-it-works"></a>
 
-### 📝 Proces
+### 📝 Proces <a name="process"></a>
 
 1. **Przed każdym commit** – hook sprawdza czy `pubspec.yaml` jest już zmodyfikowany
 2. **Jeśli NIE** – zwiększa patch version (np. 1.2.1 → 1.2.2)
 3. **Jeśli TAK** – pomija (nie duplikuje zmian)
 4. **Automatycznie stage** – zaktualizowany `pubspec.yaml`
 
-### 🔄 Flow
+### 🔄 Flow <a name="flow"></a>
 
 ```mermaid
 graph TD
@@ -89,9 +89,9 @@ graph TD
     E --> G
 ```
 
-## 📊 Przykłady
+## 📊 Przykłady <a name="examples"></a>
 
-### 🔄 Przed commitem
+### 🔄 Przed commitem <a name="before-commit"></a>
 
 ```text
 🔄 Pre-commit hook: Checking for version increment...
@@ -101,7 +101,7 @@ graph TD
 💡 Commit message will include: version 1.2.2
 ```
 
-### 📝 Po commicie
+### 📝 Po commicie <a name="after-commit"></a>
 
 ```bash
 git log --oneline -1
@@ -113,7 +113,7 @@ grep '^version:' pubspec.yaml
 - `abc1234 version 1.2.2`
 - `version: 1.2.2+1`
 
-### 🎯 Różne scenariusze
+### 🎯 Różne scenariusze <a name="different-scenarios"></a>
 
 ```bash
 # 1. Pierwszy commit - wersja zostanie zwiększona
@@ -133,9 +133,9 @@ git commit --no-verify -m "wip: work in progress"
 - Version: 1.2.2 (bez zmian)
 - Hook pominięty
 
-## 🔍 Sprawdzenie statusu
+## 🔍 Sprawdzenie statusu <a name="status-check"></a>
 
-### ✅ Czy hook jest aktywny
+### ✅ Czy hook jest aktywny <a name="is-hook-active"></a>
 
 ```bash
 ls -la .git/hooks/pre-commit
@@ -149,7 +149,7 @@ cat .git/hooks/pre-commit
 - Uprawnienia
 - Zawartość
 
-### 🔍 Test hooka
+### 🔍 Test hooka <a name="test-hook"></a>
 
 ```bash
 git add .
@@ -163,56 +163,56 @@ grep '^version:' pubspec.yaml
 2. Zrób commit
 3. Sprawdź, czy wersja została zwiększona
 
-## ⚠️ Uwagi
+## ⚠️ Uwagi <a name="notes"></a>
 
-### 🔒 Bezpieczeństwo
+### 🔒 Bezpieczeństwo <a name="security"></a>
 
 - **Hook działa lokalnie** – każdy developer musi go zainstalować
 - **Nie commitować** – hook jest w `.gitignore`
 - **Backup** – hook tworzy `.bak` plik (automatycznie usuwany)
 
-### 📱 Zachowanie
+### 📱 Zachowanie <a name="behavior"></a>
 
 - **Git add** – hook automatycznie stage'uje zmiany
 - **Commit message** – hook dodaje informację o wersji
 - **Build number** – automatycznie zwiększany
 
-### 🚫 Ograniczenia
+### 🚫 Ograniczenia <a name="limitations"></a>
 
 - **Tylko patch version** – minor i major muszą być ręczne
 - **Tylko pubspec.yaml** – inne pliki nie są modyfikowane
 - **Lokalny** – nie synchronizuje się z remote
 
-## 🚨Jeśli coś nie działa
+## 🚨Jeśli coś nie działa <a name="troubleshooting"></a>
 
-### ❌ Hook nie działa
+### ❌ Hook nie działa <a name="hook-not-working"></a>
 
 Sprawdź [Git Hooks Troubleshooting](https://git-scm.com/docs/githooks#_troubleshooting)
 
-### ❌ Błąd sed
+### ❌ Błąd sed <a name="sed-error"></a>
 
 Sprawdź [sed documentation](https://www.gnu.org/software/sed/manual/) lub użyj alternatywnych narzędzi
 
-### ❌ Konflikt wersji
+### ❌ Konflikt wersji <a name="version-conflict"></a>
 
 Sprawdź [Git Conflict Resolution](https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging#_basic_merge_conflicts)
 
-### ❌ Hook pominięty
+### ❌ Hook pominięty <a name="hook-skipped"></a>
 
 Sprawdź [Git Commit Options](https://git-scm.com/docs/git-commit#Documentation/git-commit.txt---no-verify)
 
-### 🔍 Debugging
+### 🔍 Debugging <a name="debugging"></a>
 
 Sprawdź [Git Debugging Guide](https://git-scm.com/book/en/v2/Git-Tools-Debugging)
 
-## 📚 Dodatkowe Zasoby
+## 📚 Dodatkowe Zasoby <a name="additional-resources"></a>
 
 - **[🔨 Makefile](QUICKSTART.md#makefile)** – Komendy do zarządzania hooks
 - **[📖 Development Guide](../README.md)** – Główny przewodnik
 - **[Git Hooks Documentation](https://git-scm.com/docs/githooks)** – Oficjalna dokumentacja
 - **[Pre-commit Framework](https://pre-commit.com/)** – Zaawansowane git hooks
 
-## 🆘 Potrzebujesz Pomocy?
+## 🆘 Potrzebujesz Pomocy? <a name="need-help"></a>
 
 1. **📖 Sprawdź dokumentację** – może już jest odpowiedź
 2. **🔍 Użyj wyszukiwania** – Ctrl+F w plikach

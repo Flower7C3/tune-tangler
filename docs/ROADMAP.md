@@ -2,18 +2,18 @@
 
 ## 📋 Spis Treści
 
-- [🎯 Punkty Rozwoju](#-punkty-rowoju)
-  - [1️⃣ Optymalizacje Wydajności](#-optymalizacje-wydajności)
-  - [2️⃣ Ulepszenia UI](#-ulepszenia-ui)
-  - [3️⃣ Eksport i Import](#-eksport-i-import)
-  - [4️⃣ Efekty Audio](#-efekty-audio)
-  - [5️⃣ System Licencji](#-system-licencji)
-  - [6️⃣ Funkcje Audio](#-funkcje-audio)
-- [📚 Dodatkowe Zasoby](#-dodatkowe-zasoby)
+- [🎯 Punkty Rozwoju](#development-points)
+  - [1️⃣ Optymalizacje Wydajności](#performance-optimizations)
+  - [2️⃣ Ulepszenia UI](#ui-improvements)
+  - [3️⃣ Eksport i Import](#export-and-import)
+  - [4️⃣ Efekty Audio](#audio-effects)
+  - [5️⃣ System Licencji](#licensing-system)
+  - [6️⃣ Funkcje Audio](#audio-features)
+- [📚 Dodatkowe Zasoby](#additional-resources)
 
-## 🎯 **Punkty Rozwoju**
+## 🎯 **Punkty Rozwoju** <a name="development-points"></a>
 
-### **1️⃣ Optymalizacje Wydajności (Najwyższy Priorytet – UKOŃCZONE ✅)**
+### **1️⃣ Optymalizacje Wydajności (Najwyższy Priorytet – UKOŃCZONE ✅)** <a name="performance-optimizations"></a>
 
 #### **Naprawione Problemy**
 
@@ -26,7 +26,7 @@
 - ✅ **Zarządzanie pamięcią**: `AudioMemoryPool`, `IconOptimizationService`
 - ✅ **Aktualizacja bibliotek**: 38 zależności zaktualizowanych do najnowszych wersji
 
-### **2️⃣ Ulepszenia UI (Średni Priorytet – UKOŃCZONE ✅)**
+### **2️⃣ Ulepszenia UI (Średni Priorytet – UKOŃCZONE ✅)** <a name="ui-improvements"></a>
 
 #### **Proste Animacje**
 
@@ -48,7 +48,7 @@
 - ❌ **Dodatkowe gesty** – część już jest (swipe do poruszania ścieżek), reszta zbędna
 - ❌ **Pinch-to-zoom** – niepotrzebne w kontekście aplikacji
 
-### **3️⃣ Eksport i Import (Wysoki Priorytet – W TRAKCIE ROZWOJU)**
+### **3️⃣ Eksport i Import (Wysoki Priorytet – W TRAKCIE ROZWOJU)** <a name="export-and-import"></a>
 
 #### **Eksport Wszystkich Ścieżek**
 
@@ -66,7 +66,7 @@
 - **Walidacja**: Sprawdzanie integralności importowanych danych
 - **Preview**: Podgląd przed importem
 
-### **4️⃣ Efekty Audio (Odłożone na Później – WYMAGA NOWEJ BIBLIOTEKI)**
+### **4️⃣ Efekty Audio (Odłożone na Później – WYMAGA NOWEJ BIBLIOTEKI)** <a name="audio-effects"></a>
 
 - **Podstawowe efekty**:
     - Reverb (pomieszczenie, hala, echo)
@@ -80,7 +80,7 @@
     - Pitch shift (transpozycja w czasie rzeczywistym)
     - Time stretching (bez zmiany pitch)
 
-### **5️⃣ System Licencji (Średni Priorytet)**
+### **5️⃣ System Licencji (Średni Priorytet)** <a name="licensing-system"></a>
 
 #### **Funkcje Podstawowe (Bezpłatne)**
 
@@ -101,7 +101,7 @@
 - **Jednorazowa płatność**: Wszystkie funkcje dostępne
 - **Bezpłatne**: Podstawowe funkcje zawsze dostępne
 
-### **6️⃣ Funkcje Audio (Niski Priorytet)**
+### **6️⃣ Funkcje Audio (Niski Priorytet)** <a name="audio-features"></a>
 
 #### **Przetwarzanie**
 
@@ -110,7 +110,7 @@
 - **Fade in/out**: Płynne wejścia i wyjścia
 - **Crossfade**: Płynne przejścia między ścieżkami
 
-## 📚 **Dodatkowe Zasoby**
+## 📚 **Dodatkowe Zasoby** <a name="additional-resources"></a>
 
 - **[📖 Development Guide](../README.md)** – Główny przewodnik
 - **[Flutter Roadmap](https://github.com/flutter/flutter/wiki/Roadmap)** – Oficjalny plan rozwoju Flutter
