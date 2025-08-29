@@ -69,7 +69,7 @@ jobs:
 
       - name: "🔐 Decode keystore"
         id: android_keystore
-        uses: timheuer/base64-to-file@1.2
+        uses: timheuer/base64-to-file@v1.2
         with:
           fileName: tune-tangler-release-key.jks
           encodedString: ${{ secrets.KEYSTORE_BASE64 }}
