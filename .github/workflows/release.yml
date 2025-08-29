@@ -235,31 +235,33 @@ jobs:
         id: generate_release_body
         run: |
           # Use awk for better separator handling
-          awk -v repo="${{ github.repository }}" \
-              -v run_id="${{ github.run_id }}" \
-              -v run_number="${{ github.run_number }}" \
+          awk -v github_repository="${{ github.repository }}" \
+              -v github_run_id="${{ github.run_id }}" \
+              -v github_run_number="${{ github.run_number }}" \
+              -v repository_tag_name="${{ needs.build.outputs.tag_name }}" \
               -v proj_name="$(echo "${{ github.repository }}" | sed 's/.*\///' | sed 's/-/ /g' | sed 's/\b\w/\U&/g')" \
-              -v version="${{ needs.build.outputs.version }}" \
+              -v build_version="${{ needs.build.outputs.version }}" \
               -v flutter_version="${{ env.FLUTTER_VERSION }}" \
               -v java_version="${{ env.JAVA_VERSION }}" \
               -v java_distribution="${{ env.JAVA_DISTRIBUTION }}" \
-              '{gsub(/{{ repository }}/, repo); 
-                gsub(/{{ run_id }}/, run_id); 
-                gsub(/{{ run_number }}/, run_number); 
-                gsub(/{{ project_name }}/, proj_name); 
-                gsub(/{{ version }}/, version); 
-                gsub(/{{ commits }}/, ""); 
+              '{gsub(/{{ GITHUB_REPOSITORY }}/, github_repository); 
+                gsub(/{{ GITHUB_RUN_ID }}/, github_run_id); 
+                gsub(/{{ GITHUB_RUN_NUMBER }}/, github_run_number); 
+                gsub(/{{ REPOSITORY_TAG_NAME }}/, repository_tag_name); 
+                gsub(/{{ PROJECT_NAME }}/, proj_name); 
+                gsub(/{{ APP_BUILD_VERSION }}/, build_version); 
+                gsub(/{{ REPOSITORY_COMMITS }}/, ""); 
                 gsub(/{{ FLUTTER_VERSION }}/, flutter_version); 
                 gsub(/{{ JAVA_VERSION }}/, java_version); 
                 gsub(/{{ JAVA_DISTRIBUTION }}/, java_distribution); 
                 print}' .github/templates/release.md > RELEASE_NOTE.md
           
-          # Check if template contained {{ commits }} and handle it
-          if grep -q "{{ commits }}" .github/templates/release.md; then
-            echo "📝 Template contains {{ commits }} placeholder - adding commits at the end"
+          # Check if template contained {{ REPOSITORY_COMMITS }} and handle it
+          if grep -q "{{ REPOSITORY_COMMITS }}" .github/templates/release.md; then
+            echo "📝 Template contains {{ REPOSITORY_COMMITS }} placeholder - adding commits at the end"
             echo "${{ needs.version-control.outputs.commits }}" >> RELEASE_NOTE.md
           else
-            echo "📝 Template does not contain {{ commits }} placeholder - keeping as is"
+            echo "📝 Template does not contain {{ REPOSITORY_COMMITS }} placeholder - keeping as is"
           fi
           
           echo "✅ Release body generated from template"
