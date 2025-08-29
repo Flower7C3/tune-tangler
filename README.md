@@ -4,18 +4,6 @@
 
 <a href="https://github.com/Flower7C3/tune-tangler/releases/"><img alt="Latest build" src="https://github.com/Flower7C3/tune-tangler/actions/workflows/release.yml/badge.svg"/></a>
 
-## 📋 Spis Treści
-
-- [📚 Dokumentacja](#documentation)
-  - [🚀 Szybki Start](#quick-start)
-  - [🛠️ Development](#development)
-  - [📋 Projekt](#project)
-- [🔍 Jak Znaleźć Informacje](#how-to-find-information)
-  - [🆕 Nowy Developer](#new-developer)
-  - [🔧 Codzienny Development](#daily-development)
-  - [🚀 Release i Deployment](#release-and-deployment)
-- [📄 Licencja](#license)
-
 ## 📚 Dokumentacja <a name="documentation"></a>
 
 ### 🚀 Szybki Start <a name="quick-start"></a>
