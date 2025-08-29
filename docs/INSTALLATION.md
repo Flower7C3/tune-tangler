@@ -4,12 +4,12 @@
 
 ## 📋 Spis Treści
 
-- [🔍 Jak sprawdzić ABI Androida](#️-jak-sprawdzić-abi-androida)
-  - [📱 Metoda 1: Aplikacja z Google Play](#️-metoda-1-aplikacja-z-google-play)
-  - [💻 Metoda 2: Komputer + ADB](#️-metoda-2-komputer--adb)
-- [📚 Dodatkowe Zasoby](#️-dodatkowe-zasoby)
+- [🔍 Jak sprawdzić ABI Androida](#how-to-check-android-abi)
+  - [📱 Metoda 1: Aplikacja z Google Play](#method-1-google-play-app)
+  - [💻 Metoda 2: Komputer + ADB](#method-2-computer-adb)
+- [📚 Dodatkowe Zasoby](#additional-resources)
 
-## 🔍 Jak sprawdzić ABI Androida
+## 🔍 Jak sprawdzić ABI Androida <a name="how-to-check-android-abi"></a>
 
 Poszukujesz informacji o wersji, np.:
 
@@ -17,7 +17,7 @@ Poszukujesz informacji o wersji, np.:
 - `armeabi-v7a` – starsza architektura ARM
 - `x86` – Intel
 
-### 📱 Metoda 1: Aplikacja z Google Play
+### 📱 Metoda 1: Aplikacja z Google Play <a name="method-1-google-play-app"></a>
 
 1. **Wejdź do Google Play** na swoim telefonie.
 2. **Wyszukaj** jedną z aplikacji, np. `AIDA64` lub `Device Info HW`.
@@ -26,7 +26,7 @@ Poszukujesz informacji o wersji, np.:
 5. **Przejdź do zakładki** `Procesor`, `CPU`, albo podobnej.
 6. **Odczytaj informację** o architekturze lub ABI.
 
-### 💻 Metoda 2: Komputer + ADB
+### 💻 Metoda 2: Komputer + ADB <a name="method-2-computer-adb"></a>
 
 1. **Zainstaluj program `ADB`** na komputerze (instrukcja
    na [oficjalnej stronie Android](https://developer.android.com/tools/adb?hl=pl)).
@@ -46,7 +46,7 @@ Poszukujesz informacji o wersji, np.:
     adb shell getprop ro.product.cpu.abi
     ```
 
-## 📚 **Dodatkowe Zasoby**
+## 📚 **Dodatkowe Zasoby** <a name="additional-resources"></a>
 
 - **[Android ABI Guide](https://developer.android.com/ndk/guides/abis)** – Oficjalna dokumentacja ABI
 - **[ADB Installation](https://developer.android.com/tools/adb)** – Instalacja ADB
