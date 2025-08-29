@@ -1,8 +1,8 @@
-# Assistant Rules for TuneTangler Project
+# 🤖 Assistant Rules for TuneTangler Project
 
 ## 🚨 **CRITICAL RULES – NEVER BREAK**
 
-### 1. **Git Operations – NEVER DO WITHOUT EXPLICIT PERMISSION**
+### 1️⃣ **Git Operations – NEVER DO WITHOUT EXPLICIT PERMISSION**
 
 - ❌ **NEVER** commit changes without explicit user permission
 - ❌ **NEVER** push to remote without explicit user permission
@@ -12,7 +12,7 @@
 - ✅ **ALWAYS** ask before making any git operations
 - ✅ **ALWAYS** show git status before suggesting changes
 
-### 2. **Code Changes – GRADUAL AND SAFE**
+### 2️⃣ **Code Changes – GRADUAL AND SAFE**
 
 - ✅ **ALWAYS** make small, incremental changes
 - ✅ **ALWAYS** ask before making multiple file changes
@@ -21,7 +21,7 @@
 - ❌ **NEVER** make large refactoring without explicit permission
 - ❌ **NEVER** change multiple files simultaneously without approval
 
-### 3. **Project-Specific Rules**
+### 3️⃣ **Project-Specific Rules**
 
 - ✅ **ALWAYS** use `console_utils.py` to format output (if available)
 - ✅ **ALWAYS** follow Conventional Commits format
@@ -34,7 +34,7 @@
 
 ## 🔧 **WORKFLOW RULES**
 
-### 4. **When User Asks for Changes**
+### 4️⃣ **When User Asks for Changes**
 
 1. **Analyze** the current state
 2. **Propose** specific, small changes
@@ -43,7 +43,7 @@
 5. **Verify** changes work correctly
 6. **Ask** before committing
 
-### 5. **When User Asks for Git Operations**
+### 5️⃣ **When User Asks for Git Operations**
 
 1. **Show** current git status first
 2. **Explain** what will happen
@@ -51,7 +51,7 @@
 4. **Execute** only after approval
 5. **Confirm** operation completed
 
-### 6. **When User Asks for Code Review**
+### 6️⃣ **When User Asks for Code Review**
 
 1. **Read** the relevant files
 2. **Identify** potential issues
@@ -61,7 +61,7 @@
 
 ## 📝 **COMMUNICATION RULES**
 
-### 7. **Response Style**
+### 7️⃣ **Response Style**
 
 - ✅ **Keep responses concise** (user prefers shorter, less verbose responses)
 - ✅ **Use clear, actionable language**
@@ -69,7 +69,7 @@
 - ✅ **Provide step-by-step instructions when needed**
 - ✅ **Use emojis and formatting for clarity**
 
-### 8. **Error Handling**
+### 8️⃣ **Error Handling**
 
 - ✅ **Always explain what went wrong**
 - ✅ **Provide specific solutions**
@@ -78,7 +78,7 @@
 
 ## 🎯 **PROJECT KNOWLEDGE**
 
-### 9. **Remember These Key Points**
+### 9️⃣ **Remember These Key Points**
 
 - **Flutter project** with Android/iOS support
 - **Uses keystore** for app signing
@@ -87,7 +87,7 @@
 - **Documentation** in `docs/` directory
 - **Version management** through workflow
 
-### 10. **File Structure Awareness**
+### 🔟 **File Structure Awareness**
 
 - **`.github/workflows/`** – CI/CD workflows
 - **`android/`** – Android-specific configuration
@@ -98,22 +98,3 @@
 ## 🚫 **WHAT I WILL NEVER DO**
 
 - ❌ **NEVER** make assumptions about user intentions
-- ❌ **NEVER** execute commands without explicit permission
-- ❌ **NEVER** ignore project-specific rules
-- ❌ **NEVER** make changes that could break the build
-- ❌ **NEVER** suggest unsafe git operations
-- ❌ **NEVER** ignore error messages or warnings
-
-## ✅ **WHAT I WILL ALWAYS DO**
-
-- ✅ **ALWAYS** follow these rules strictly
-- ✅ **ALWAYS** ask for permission before making changes
-- ✅ **ALWAYS** explain what I'm doing and why
-- ✅ **ALWAYS** respect the project's existing structure
-- ✅ **ALWAYS** prioritize safety and stability
-- ✅ **ALWAYS** provide clear, actionable feedback
-
----
-
-**These rules ensure safe, controlled, and user-approved development.**
-**I will follow them strictly in all interactions with this project.**

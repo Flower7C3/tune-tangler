@@ -1,27 +1,27 @@
-# Release Signing Configuration
+# 🔐 Konfiguracja podpisywania Release
 
-This document explains how to configure release signing for TuneTangler to
-ensure consistent app signatures across builds.
+> Ten dokument wyjaśnia, jak skonfigurować podpisywanie release dla TuneTangler, aby
+> zapewnić spójne podpisy aplikacji w różnych buildach.
 
-## Problem
+## 🚨 Problem
 
-Without proper signing configuration, each build machine generates its own
-debug keystore, causing:
+Bez odpowiedniej konfiguracji podpisywania, każda maszyna build generuje własny
+debug keystore, co powoduje:
 
-- **Signature mismatch errors** during app updates
-- **Data loss** when users try to update the app
-- **Incompatible package** installation failures
+- **Błędy niezgodności podpisu** podczas aktualizacji aplikacji
+- **Utratę danych** gdy użytkownicy próbują zaktualizować aplikację
+- **Błędy instalacji** niezgodnych pakietów
 
-## Solution
+## ✅ Rozwiązanie
 
-Use a consistent keystore stored as GitHub secrets for all CI/CD builds.
-**We now use app bundle (.aab) instead of APK for better signing support.**
+Użyj spójnego keystore przechowywanego jako GitHub secrets dla wszystkich buildów CI/CD.
+**Teraz używamy app bundle (.aab) zamiast APK dla lepszego wsparcia podpisywania.**
 
-## One time setup steps
+## 🔧 Jednorazowe kroki konfiguracji
 
-### 1. Prepare config
+### 1️⃣ Przygotuj konfigurację
 
-Create [android/key.properties](android/key.properties) file with values:
+Utwórz plik [android/key.properties](../android/key.properties) z wartościami:
 
 ```properties
 storeFile=tune-tangler-release-key.jks
@@ -31,12 +31,11 @@ keyPassword=xxx
 dName=CN=xx, O=xx, C=PL
 ```
 
-> **Important**: Use strong, unique passwords.
+> **⚠️ Ważne**: Użyj silnych, unikalnych haseł.
 
+### 2️⃣ Generuj Keystore
 
-### 2. Generate Keystore
-
-The keystore has already been generated. If you need to regenerate it:
+Keystore został już wygenerowany. Jeśli musisz go wygenerować ponownie:
 
 ```bash
 keytool \
@@ -51,9 +50,9 @@ keytool \
   -dname '`grep dName android/key.properties | cut -d '=' -f2-9`'
 ```
 
-### 3. Prepare GitHub Secrets
+### 3️⃣ Przygotuj GitHub Secrets
 
-Add these secrets to your GitHub repository:
+Dodaj te secrets do swojego repozytorium GitHub:
 **Settings → Secrets and variables → Actions**
 
 | Secret              | Wartość                                                                               |
@@ -63,74 +62,74 @@ Add these secrets to your GitHub repository:
 | `KEY_ALIAS`         | `grep keyAlias android/key.properties \| cut -d '=' -f2 \| tr -d '\n' \| pbcopy`      |
 | `KEY_PASSWORD`      | `grep keyPassword android/key.properties \| cut -d '=' -f2 \| tr -d '\n' \| pbcopy`   |
 
-**Note**: The workflow generates `key.properties` with these credentials
-during build, so they're not stored in the repository.
+**ℹ️ Uwaga**: Workflow generuje `key.properties` z tymi danymi
+podczas buildu, więc nie są przechowywane w repozytorium.
 
-### 4. Verify Configuration
+### 4️⃣ Zweryfikuj konfigurację
 
-After setting up the secrets, verify that:
+Po ustawieniu secrets, zweryfikuj że:
 
-1. **Keystore exists**: `android/app/tune-tangler-release-key.jks`
-2. **GitHub secrets are set**: All 4 secrets are configured
-3. **Workflow can access secrets**: No permission errors
+1. **Keystore istnieje**: `android/app/tune-tangler-release-key.jks`
+2. **GitHub secrets są ustawione**: Wszystkie 4 secrets są skonfigurowane
+3. **Workflow ma dostęp do secrets**: Brak błędów uprawnień
 
-### 5. Build and Test
+### 5️⃣ Build i test
 
-Test the configuration by running the release workflow:
+Przetestuj konfigurację uruchamiając release workflow:
 
-1. **Go to Actions** in your GitHub repository
-2. **Select "Build & Release Workflow"**
-3. **Click "Run workflow"**
-4. **Monitor the build process**
+1. **Idź do Actions** w swoim repozytorium GitHub
+2. **Wybierz "Build & Release Workflow"**
+3. **Kliknij "Run workflow"**
+4. **Monitoruj proces buildu**
 
-The workflow should:
+Workflow powinien:
 
-- ✅ Download keystore from secrets
-- ✅ Generate `gradle.properties` with credentials
-- ✅ Build signed app bundle
-- ✅ Verify signature with `jarsigner`
+- ✅ Pobrać keystore z secrets
+- ✅ Wygenerować `gradle.properties` z danymi logowania
+- ✅ Zbudować podpisany app bundle
+- ✅ Zweryfikować podpis z `jarsigner`
 
-## Troubleshooting
+## 🚨Jeśli coś nie działa
 
-### Common Issues
+### ❌ Błąd "Keystore not found"
 
-**"Keystore not found" error:**
+**Rozwiązanie**
 
-- Ensure `KEYSTORE_BASE64` secret is properly set
-- Check that the base64 encoding is complete
+- Upewnij się, że secret `KEYSTORE_BASE64` jest poprawnie ustawiony
+- Sprawdź, czy kodowanie base64 jest kompletne
 
-**"Signature verification failed" error:**
+### ❌ Błąd "Signature verification failed"
 
-- Verify all 4 secrets are correctly configured
-- Check that keystore passwords match
+- Zweryfikuj, że wszystkie 4 secrets są poprawnie skonfigurowane
+- Sprawdź, czy hasła keystore pasują
 
-**Build fails with signing errors:**
+### ❌ Build nie powodzi się z błędami podpisywania
 
-- Ensure keystore file is valid
-- Check that alias and passwords are correct
+- Upewnij się, że plik keystore jest poprawny
+- Sprawdź, czy alias i hasła są poprawne
 
-### Regenerating Keystore
+### 🔁 Regenerowanie Keystore
 
-If you need to regenerate the keystore:
+Jeśli musisz wygenerować keystore ponownie:
 
-1. **Delete old keystore**: `rm android/app/tune-tangler-release-key.jks`
-2. **Generate new one**: Use the keytool command from step 1
-3. **Update GitHub secrets**: Get new base64 and update `KEYSTORE_BASE64`
-4. **Test workflow**: Run the release workflow again
+1. **Usuń stary keystore**: `rm android/app/tune-tangler-release-key.jks`
+2. **Wygeneruj nowy**: Użyj komendy keytool z kroku 1
+3. **Zaktualizuj GitHub secrets**: Pobierz nowy base64 i zaktualizuj `KEYSTORE_BASE64`
+4. **Przetestuj workflow**: Uruchom release workflow ponownie
 
-## Security Notes
+## 🔒 Uwagi bezpieczeństwa
 
-- **Never commit keystore files** to version control
-- **Use strong, unique passwords** for production
-- **Rotate keystores periodically** for security
-- **Limit access** to GitHub secrets to trusted team members
+- **Nigdy nie commituj plików keystore** do kontroli wersji
+- **Użyj silnych, unikalnych haseł** dla produkcji
+- **Rotuj keystore okresowo** dla bezpieczeństwa
+- **Ogranicz dostęp** do GitHub secrets do zaufanych członków zespołu
 
-## Benefits
+## 🎯 Korzyści
 
-With this configuration:
+Z tą konfiguracją:
 
-- ✅ **Consistent signatures** across all builds
-- ✅ **No more update conflicts** for users
-- ✅ **Secure credential storage** in GitHub
-- ✅ **Automated signing** in CI/CD pipeline
-- ✅ **Professional app distribution** ready
+- ✅ **Spójne podpisy** we wszystkich buildach
+- ✅ **Brak konfliktów aktualizacji** dla użytkowników
+- ✅ **Bezpieczne przechowywanie danych logowania** w GitHub
+- ✅ **Automatyczne podpisywanie** w pipeline CI/CD
+- ✅ **Profesjonalna dystrybucja aplikacji** gotowa
