@@ -75,6 +75,9 @@ flutter_launcher_icons:
   ios: true
   remove_alpha_ios: true
   image_path: "assets/png/logo-color.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/png/logo-color.png"
+  min_sdk_android: 21
 
 flutter_native_splash:
   color: "#ffffff"
