@@ -1,5 +1,6 @@
 {
   "appTitle": "Tune Tangler",
+  "appTitleDebug": "Tune Tangler (Debug)",
   "legalNote": "Made with ♥️ by Flower7C3",
   "cell": "{cellName}",
   "trackTitle": "Track {trackName}",

@@ -104,6 +104,12 @@ abstract class AppLocalizations {
   /// **'Tune Tangler'**
   String get appTitle;
 
+  /// No description provided for @appTitleDebug.
+  ///
+  /// In en, this message translates to:
+  /// **'Tune Tangler (Debug)'**
+  String get appTitleDebug;
+
   /// No description provided for @legalNote.
   ///
   /// In en, this message translates to:

@@ -86,7 +86,7 @@ help: ## Show this help
 	@echo "$(COLOR_RED)$(ICON_INFO) IMPORTANT: To run, build or install app in $(FORMAT_BOLD)release$(FORMAT_RESET)$(COLOR_RED) mode, you need to use GitHub Actions to build and sign the app bundle$(FORMAT_RESET)"
 	@echo ""
 	@echo "$(FORMAT_BOLD)$(COLOR_BLUE)$(ICON_DEVICE) Device Management$(FORMAT_RESET)"
-	@grep -E '^[a-zA-Z0-9_-%]+.*:.*?## .*$$' $(MAKEFILE_LIST) | grep -E '##DEVICE## ' | awk 'BEGIN {FS = ":.*?##.*?## "}; {printf "$(COLOR_CYAN)%-25s$(FORMAT_RESET) %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | grep -E '##DEVICE## ' | awk 'BEGIN {FS = ":.*?##.*?## "}; {printf "$(COLOR_CYAN)%-25s$(FORMAT_RESET) %s\n", $$1, $$2}'
 	@echo ""
 	@echo "$(FORMAT_BOLD)$(COLOR_BLUE)$(ICON_INFO) Maintenance$(FORMAT_RESET)"
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | grep -E '##MAINTENANCE## ' | awk 'BEGIN {FS = ":.*?##.*?## "}; {printf "$(COLOR_CYAN)%-25s$(FORMAT_RESET) %s\n", $$1, $$2}'
@@ -141,12 +141,12 @@ lint: ##QA## Check code style
 .PHONY: run
 run: ##BUILD## Run app in debug mode
 	@echo "$(FORMAT_HIGHLIGHT)$(ICON_ROCKET) Running app in $(FORMAT_BOLD)debug$(FORMAT_RESET)$(FORMAT_HIGHLIGHT) build type...$(FORMAT_RESET)"
-	@flutter run --debug --build-number=$(date +%s)
+	@flutter run --debug
 
 .PHONY: build-apk
 build-apk: ##BUILD## Build APK in debug mode
 	@echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Building $(FORMAT_BOLD)debug$(FORMAT_RESET)$(FORMAT_HIGHLIGHT) APK...$(FORMAT_RESET)"
-	@flutter build apk --debug --build-number=$(date +%s)
+	@flutter build apk --debug --build-number=$(($(date +%s)/1000))
 
 .PHONY: build-apk-release
 build-apk-release:
@@ -244,6 +244,32 @@ gen-l10n: ##UTILITIES## Generate l10n files
 	@echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Generating localization files...$(FORMAT_RESET)"
 	@flutter gen-l10n
 
+.PHONY: gen
+gen-images: gen-png-logos gen-icons gen-splash ##UTILITIES## Generate PNG files, app icons and splash screen
+
+.PHONY: gen-png-logos
+gen-png-logos: ##UTILITIES## Convert SVG files to PNG
+	@echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Converting SVG files to PNG...$(FORMAT_RESET)"
+	@if ! command -v rsvg-convert >/dev/null 2>&1; then \
+		echo "$(COLOR_RED)$(ICON_ERROR) Error: rsvg-convert not found$(FORMAT_RESET)"; \
+		echo "   Please install librsvg2-bin package:"; \
+		echo "   - Ubuntu/Debian: sudo apt-get install librsvg2-bin"; \
+		echo "   - macOS: brew install librsvg"; \
+		echo "   - Windows: Download from https://github.com/miyako/console-rsvg-convert"; \
+		exit 1; \
+	fi
+	@mkdir -p assets/png
+	@echo "$(COLOR_CYAN)Converting logo-dark-mode-launcher.svg -> logo-dark-mode-launcher.png (1024x1024)$(FORMAT_RESET)"; \
+	rsvg-convert -h 1024 -w 1024 "assets/svg/logo-dark-mode-launcher.svg" -o "assets/png/logo-dark-mode-launcher.png"
+	@echo "$(COLOR_CYAN)Converting logo-light-mode-launcher.svg -> logo-light-mode-launcher.png (1024x1024)$(FORMAT_RESET)"; \
+	rsvg-convert -h 1024 -w 1024 "assets/svg/logo-light-mode-launcher.svg" -o "assets/png/logo-light-mode-launcher.png"
+	@echo "$(COLOR_GREEN)$(ICON_CHECK) Launcher icon conversion completed$(FORMAT_RESET)"
+	@echo "$(COLOR_CYAN)Converting logo-dark-mode-splash.svg -> logo-dark-mode-splash.png (1152x1152)$(FORMAT_RESET)"; \
+	rsvg-convert -h 1152 -w 1152 "assets/svg/logo-dark-mode-splash.svg" -o "assets/png/logo-dark-mode-splash.png"
+	@echo "$(COLOR_CYAN)Converting logo-light-mode-splash.svg -> logo-light-mode-splash.png (1152x1152)$(FORMAT_RESET)"; \
+	rsvg-convert -h 1152 -w 1152 "assets/svg/logo-light-mode-splash.svg" -o "assets/png/logo-light-mode-splash.png"
+	@echo "$(COLOR_GREEN)$(ICON_CHECK) Splash screen icon conversion completed$(FORMAT_RESET)"
+
 .PHONY: gen-icons
 gen-icons: ##UTILITIES## Generate app icons
 	@echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Generating app icons...$(FORMAT_RESET)"
@@ -253,32 +279,6 @@ gen-icons: ##UTILITIES## Generate app icons
 gen-splash: ##UTILITIES## Generate splash screen
 	@echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Generating splash screen...$(FORMAT_RESET)"
 	@dart run flutter_native_splash:create
-
-# Git hook commands removed - version incrementing now handled by GitHub workflow
-
-# .PHONY: create-tag
-# create-tag: ##UTILITIES## Create and push version tag
-# 	@echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Creating version tag...$(FORMAT_RESET)"
-# 	@if [ -f pubspec.yaml ]; then \
-# 		VERSION=$$(grep '^version:' pubspec.yaml | sed 's/.*version: //' | sed 's/+.*//'); \
-# 		echo "$(COLOR_CYAN)$(ICON_INFO) Creating tag v$$VERSION...$(FORMAT_RESET)"; \
-# 		git tag "v$$VERSION"; \
-# 		git push origin "v$$VERSION"; \
-# 		echo "$(COLOR_GREEN)$(ICON_CHECK) Tag $(FORMAT_BOLD)v$$VERSION$(FORMAT_RESET)$(COLOR_GREEN) created and pushed"; \
-# 	else \
-# 		echo "$(COLOR_RED)$(ICON_ERROR) pubspec.yaml not found!$(FORMAT_RESET)"; \
-# 		exit 1; \
-# 	fi
-
-# .PHONY: list-tags
-# list-tags: ##UTILITIES## List all version tags
-# 	@echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Available version tags:$(FORMAT_RESET)"
-# 	@git tag --sort=-version:refname | head -10
-
-#.PHONY: rename
-#rename: ## Change name
-#	@echo "$(ICON_INFO) Changing app name...$(FORMAT_RESET)"
-#	dart run rename_app:main all="Tune Tangler"
 
 # =============================================================================
 # GIT HOOKS MANAGEMENT

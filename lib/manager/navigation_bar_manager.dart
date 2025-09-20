@@ -27,26 +27,29 @@ class NavigationBarManager {
           leading: Builder(
             builder: (context) => IconButton(
               icon: AppIcon.appLogo(
-                shapeColor: Theme.of(context).colorScheme.primary,
-                detailColor: Theme.of(context).colorScheme.inversePrimary,
+                Theme.of(context).colorScheme.inversePrimary,
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.inversePrimary,
               ),
               onPressed: () => Scaffold.of(context).openDrawer(),
             ),
           ),
-          title: Text(_trans.appTitle),
+          title: Text(_uiHelper.getAppTitle(_trans)),
           actions: [
             RepaintBoundary(
               child: IconButton(
                 icon: Icon(AppIcon.trackPlayingStart),
                 tooltip: _trans.allTracksPlayingStart,
-                onPressed: () => _trackRepository.startTracksPlaying(_trackRepository.allTracks()),
+                onPressed: () => _trackRepository
+                    .startTracksPlaying(_trackRepository.allTracks()),
               ),
             ),
             RepaintBoundary(
               child: IconButton(
                 icon: Icon(AppIcon.trackPlayingStop),
                 tooltip: _trans.allTracksPlayingStop,
-                onPressed: () => _trackRepository.stopTracksPlaying(_trackRepository.allTracks()),
+                onPressed: () => _trackRepository
+                    .stopTracksPlaying(_trackRepository.allTracks()),
               ),
             ),
             RepaintBoundary(
@@ -54,28 +57,45 @@ class NavigationBarManager {
                 icon: Icon(AppIcon.moreMenu),
                 itemBuilder: (BuildContext context) => _trackSettingsMenu,
                 onSelected: (String selection) =>
-                    _trackSettingsMenuItemSelected(AllTracksMenuItem.values.byName(selection.replaceAll('AllTracksMenuItem.', ''))),
+                    _trackSettingsMenuItemSelected(AllTracksMenuItem.values
+                        .byName(
+                            selection.replaceAll('AllTracksMenuItem.', ''))),
               ),
             ),
           ]);
 
-  Widget get buildFooter => Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
-        Center(child: Text(_trans.legalNote, style: Theme.of(_context).textTheme.labelSmall)),
-      ]);
+  Widget get buildFooter => Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Center(
+                child: Text(_trans.legalNote,
+                    style: Theme.of(_context).textTheme.labelSmall)),
+          ]);
 
   List<PopupMenuEntry<String>> get _trackSettingsMenu => [
-        _uiHelper.topTrackMenuItem(AllTracksMenuItem.playbackModeSet, AppIcon.trackPlaybackMode, _trans.allTracksPlaybackModeSet),
-        _uiHelper.topTrackMenuItem(AllTracksMenuItem.playbackVolumeSet, AppIcon.trackPlaybackVolume, _trans.allTracksPlaybackVolumeSet),
-        _uiHelper.topTrackMenuItem(AllTracksMenuItem.playbackBalanceSet, AppIcon.trackPlaybackBalance, _trans.allTracksPlaybackBalanceSet),
-        _uiHelper.topTrackMenuItem(AllTracksMenuItem.playbackSpeedSet, AppIcon.trackPlaybackSpeed, _trans.allTracksPlaybackSpeedSet),
+        _uiHelper.topTrackMenuItem(AllTracksMenuItem.playbackModeSet,
+            AppIcon.trackPlaybackMode, _trans.allTracksPlaybackModeSet),
+        _uiHelper.topTrackMenuItem(AllTracksMenuItem.playbackVolumeSet,
+            AppIcon.trackPlaybackVolume, _trans.allTracksPlaybackVolumeSet),
+        _uiHelper.topTrackMenuItem(AllTracksMenuItem.playbackBalanceSet,
+            AppIcon.trackPlaybackBalance, _trans.allTracksPlaybackBalanceSet),
+        _uiHelper.topTrackMenuItem(AllTracksMenuItem.playbackSpeedSet,
+            AppIcon.trackPlaybackSpeed, _trans.allTracksPlaybackSpeedSet),
         const PopupMenuDivider(),
         _uiHelper.topTrackMenuItem(
-            AllTracksMenuItem.playbackStartAtPositionReset, AppIcon.trackPlaybackStartAtPosition, _trans.allTracksPlaybackStartAtPositionReset),
+            AllTracksMenuItem.playbackStartAtPositionReset,
+            AppIcon.trackPlaybackStartAtPosition,
+            _trans.allTracksPlaybackStartAtPositionReset),
         _uiHelper.topTrackMenuItem(
-            AllTracksMenuItem.playbackEndAtPositionReset, AppIcon.trackPlaybackEndAtPosition, _trans.allTracksPlaybackEndAtPositionReset),
+            AllTracksMenuItem.playbackEndAtPositionReset,
+            AppIcon.trackPlaybackEndAtPosition,
+            _trans.allTracksPlaybackEndAtPositionReset),
         const PopupMenuDivider(),
-        _uiHelper.topTrackMenuItem(AllTracksMenuItem.nameReset, AppIcon.trackName, _trans.allTracksTitleReset),
-        _uiHelper.topTrackMenuItem(AllTracksMenuItem.shortcutKeyReset, AppIcon.trackKeyboardKey, _trans.allTracksShortcutKeyReset),
+        _uiHelper.topTrackMenuItem(AllTracksMenuItem.nameReset,
+            AppIcon.trackName, _trans.allTracksTitleReset),
+        _uiHelper.topTrackMenuItem(AllTracksMenuItem.shortcutKeyReset,
+            AppIcon.trackKeyboardKey, _trans.allTracksShortcutKeyReset),
       ];
 
   void _trackSettingsMenuItemSelected(AllTracksMenuItem selection) async {
@@ -86,17 +106,23 @@ class NavigationBarManager {
           _trans.allTracksPlaybackModeTitleSet,
           contentText: _trans.allTracksPlaybackModeInfoSet,
           actions: [
-            ...AppGlobalConfig.trackPlaybackReleaseMode.values<ReleaseMode>().map(
+            ...AppGlobalConfig.trackPlaybackReleaseMode
+                .values<ReleaseMode>()
+                .map(
                   (ReleaseMode value) => SimpleDialogOption(
                       padding: EdgeInsets.zero,
                       child: _uiHelper.statusIconTile(
                         AppGlobalConfig.trackPlaybackReleaseMode.icon(value),
-                        AppGlobalConfig.trackPlaybackReleaseMode.translate(value, trans: _trans),
+                        AppGlobalConfig.trackPlaybackReleaseMode
+                            .translate(value, trans: _trans),
                       ),
                       onPressed: () {
-                        _trackRepository.setTracksPlaybackMode(_trackRepository.allTracks(), value);
+                        _trackRepository.setTracksPlaybackMode(
+                            _trackRepository.allTracks(), value);
                         _uiHelper.toast(
-                            _trans.allTracksPlaybackModeSuccessSet(AppGlobalConfig.trackPlaybackReleaseMode.translate(value, trans: _trans)),
+                            _trans.allTracksPlaybackModeSuccessSet(
+                                AppGlobalConfig.trackPlaybackReleaseMode
+                                    .translate(value, trans: _trans)),
                             icon: AppIcon.trackSinglePlaybackMode);
                         Navigator.pop(_context);
                       }),
@@ -116,8 +142,11 @@ class NavigationBarManager {
           _trans.buttonCancel,
           _trans.buttonSave,
           successAction: (double value, String formattedValue) {
-            _trackRepository.setTracksPlaybackBalance(_trackRepository.allTracks(), value);
-            return _trans.allTracksPlaybackBalanceSuccessSet(AppGlobalConfig.trackPlaybackBalance.translate(value, trans: _trans));
+            _trackRepository.setTracksPlaybackBalance(
+                _trackRepository.allTracks(), value);
+            return _trans.allTracksPlaybackBalanceSuccessSet(AppGlobalConfig
+                .trackPlaybackBalance
+                .translate(value, trans: _trans));
           },
           withTrailing: false,
           configCollection: AppGlobalConfig.trackPlaybackBalance,
@@ -140,7 +169,8 @@ class NavigationBarManager {
           _trans.buttonSave,
           withTrailing: false,
           successAction: (double value, String formattedValue) {
-            _trackRepository.setTracksPlaybackVolume(_trackRepository.allTracks(), value);
+            _trackRepository.setTracksPlaybackVolume(
+                _trackRepository.allTracks(), value);
             return _trans.allTracksPlaybackVolumeSuccessSet(formattedValue);
           },
           configCollection: AppGlobalConfig.trackPlaybackVolume,
@@ -159,7 +189,8 @@ class NavigationBarManager {
           _trans.buttonSave,
           withTrailing: false,
           successAction: (double value, String formattedValue) {
-            _trackRepository.setTracksPlaybackSpeed(_trackRepository.allTracks(), value);
+            _trackRepository.setTracksPlaybackSpeed(
+                _trackRepository.allTracks(), value);
             return _trans.allTracksPlaybackSpeedSuccessSet(formattedValue);
           },
           configCollection: AppGlobalConfig.trackPlaybackSpeed,
@@ -173,7 +204,8 @@ class NavigationBarManager {
           _trans.buttonNo,
           _trans.buttonYes,
           () {
-            _trackRepository.resetTracksPlaybackStartAtPosition(_trackRepository.allTracks());
+            _trackRepository.resetTracksPlaybackStartAtPosition(
+                _trackRepository.allTracks());
             return _trans.allTracksPlaybackStartAtPositionResetSuccess;
           },
         );
@@ -186,7 +218,8 @@ class NavigationBarManager {
           _trans.buttonNo,
           _trans.buttonYes,
           () {
-            _trackRepository.resetTracksPlaybackEndAtPosition(_trackRepository.allTracks());
+            _trackRepository
+                .resetTracksPlaybackEndAtPosition(_trackRepository.allTracks());
             return _trans.allTracksPlaybackEndAtPositionResetSuccess;
           },
         );
@@ -212,7 +245,8 @@ class NavigationBarManager {
           _trans.buttonNo,
           _trans.buttonYes,
           () {
-            _trackRepository.resetTracksKeyboardKey(_trackRepository.allTracks());
+            _trackRepository
+                .resetTracksKeyboardKey(_trackRepository.allTracks());
             return _trans.allTracksShortcutKeyResetSuccess;
           },
         );

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -22,6 +23,14 @@ class UIHelper {
   BuildContext context;
 
   UIHelper(this.context);
+
+  /// Returns the appropriate app title based on build mode
+  String getAppTitle(AppLocalizations localizations) {
+    if (kDebugMode) {
+      return localizations.appTitleDebug;
+    }
+    return localizations.appTitle;
+  }
 
   Container get dragHandle => Container(
         padding: EdgeInsets.only(top: Theme.of(context).textTheme.titleSmall!.fontSize!),

@@ -12,6 +12,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'Tune Tangler';
 
   @override
+  String get appTitleDebug => 'Tune Tangler (Debug)';
+
+  @override
   String get legalNote => 'Made with ♥️ by Flower7C3';
 
   @override

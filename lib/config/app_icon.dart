@@ -21,12 +21,16 @@ class SvgColorMapper implements ColorMapper {
 }
 
 class AppIcon {
-  static Widget appLogo({Color? shapeColor, Color? detailColor}) => SvgPicture(
+  static Widget appLogo(Color backgroundColor, Color shapeColor, Color detailColor) => SvgPicture(
         SvgAssetLoader(
-          'assets/svg/logo-no-background.svg',
+          'assets/svg/logo-rgb.svg',
           colorMapper: SvgColorMapper(colors: {
-            Color.fromRGBO(17, 17, 17, 1): shapeColor,
-            Colors.white: detailColor,
+            // Colors.white: backgroundColor,
+            // Color.fromRGBO(17, 17, 17, 1): shapeColor,
+            // Colors.white: detailColor,
+            Color.fromRGBO(255, 0, 0, 1): backgroundColor,
+            Color.fromRGBO(0, 255, 0, 1): shapeColor,
+            Color.fromRGBO(0, 0, 255, 1): detailColor,
           }),
         ),
       );

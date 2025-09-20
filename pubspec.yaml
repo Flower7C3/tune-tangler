@@ -73,22 +73,23 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
-  remove_alpha_ios: true
-  image_path: "assets/png/logo-color.png"
-  adaptive_icon_background: "#FFFFFF"
-  adaptive_icon_foreground: "assets/png/logo-color.png"
-  min_sdk_android: 21
+  image_path: "assets/png/logo-light-mode-launcher.png" 
+  adaptive_icon_background: "#ffffff"
+  adaptive_icon_foreground: "assets/png/logo-light-mode-launcher.png"
 
 flutter_native_splash:
-  color: "#ffffff"
-  image: assets/png/logo-grayscale.png
-  color_dark: "#000000"
-  image_dark: assets/png/logo-grayscale-inverted.png
+  image: assets/png/logo-light-mode-splash.png
+  color: "#eeeeee"
+  image_dark: assets/png/logo-dark-mode-splash.png
+  color_dark: "#111111"
+
   android_12:
-    image: assets/png/logo-grayscale.png
-    icon_background_color: "#ffffff"
-    image_dark: assets/png/logo-grayscale-inverted.png
-    icon_background_color_dark: "#000000"
+    image: assets/png/logo-light-mode-splash.png
+    color: "#eeeeee"
+#    icon_background_color: "#dddddd"
+    image_dark: assets/png/logo-dark-mode-splash.png
+    color_dark: "#111111"
+#    icon_background_color_dark: "#222222"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -103,10 +104,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
   assets:
-    - assets/svg/
-    - assets/png/
+    - assets/svg/logo-rgb.svg
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -12,6 +12,9 @@ class AppLocalizationsPl extends AppLocalizations {
   String get appTitle => 'Plątacz Melodii';
 
   @override
+  String get appTitleDebug => 'Plątacz Melodii (Debug)';
+
+  @override
   String get legalNote => 'Stworzone z ♥️ przez Flower7C3';
 
   @override

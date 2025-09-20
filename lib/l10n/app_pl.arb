@@ -1,5 +1,6 @@
 {
   "appTitle": "Plątacz Melodii",
+  "appTitleDebug": "Plątacz Melodii (Debug)",
   "legalNote": "Stworzone z ♥️ przez Flower7C3",
   "cell": "{cellName}",
   "trackTitle": "Ścieżka {trackName}",
