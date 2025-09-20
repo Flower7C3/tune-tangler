@@ -7,8 +7,17 @@ echo "🔄 Pre-commit hook: Checking for version increment..."
 
 # Check if pubspec.yaml has been modified
 if git diff --cached --name-only | grep -q "pubspec.yaml"; then
-    echo "📝 pubspec.yaml is staged - skipping version increment"
-    exit 0
+    # Check if version line was actually changed
+    if git diff --cached pubspec.yaml | grep -q "^[+-].*version:"; then
+        echo "📝 pubspec.yaml version was manually changed - skipping version increment"
+        exit 0
+    else
+        echo "📝 pubspec.yaml is staged but version unchanged - will increment version"
+        # Continue with version increment
+    fi
+else
+    echo "📝 pubspec.yaml not staged - will increment version"
+    # Continue with version increment
 fi
 
 # Get current version from pubspec.yaml
