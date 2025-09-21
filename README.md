@@ -17,6 +17,7 @@
 - **[🔧 Setup](docs/development/SETUP.md)** – Konfiguracja środowiska developerskiego
 - **[⚡ Quick Start](docs/development/QUICKSTART.md)** – Szybkie uruchomienie projektu
 - **[🔨 Makefile](docs/development/QUICKSTART.md#makefile)** – Komendy i narzędzia
+- **[🎨 Icon Generation](docs/ICON_GENERATION.md)** – Generowanie ikon z SVG
 - **[🎣 Git Hooks](docs/development/GIT_HOOKS.md)** – Pre-commit hooks i automatyzacja
 - **[🚀 Workflows](docs/development/WORKFLOWS.md)** – GitHub Actions i CI/CD
 
@@ -37,7 +38,8 @@
 ### 🔧 Codzienny Development <a name="daily-development"></a>
 
 1. **[🔨 Makefile](docs/development/QUICKSTART.md#makefile)** – komendy do codziennej pracy
-2. **[🎣 Git Hooks](docs/development/GIT_HOOKS.md)** – automatyzacja wersjonowania
+2. **[🎨 Icon Generation](docs/ICON_GENERATION.md)** – generowanie ikon z SVG
+3. **[🎣 Git Hooks](docs/development/GIT_HOOKS.md)** – automatyzacja wersjonowania
 
 ### 🚀 Release i Deployment <a name="release-and-deployment"></a>
 

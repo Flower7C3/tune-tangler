@@ -25,12 +25,8 @@ class AppIcon {
         SvgAssetLoader(
           'assets/svg/logo-rgb.svg',
           colorMapper: SvgColorMapper(colors: {
-            // Colors.white: backgroundColor,
-            // Color.fromRGBO(17, 17, 17, 1): shapeColor,
-            // Colors.white: detailColor,
-            Color.fromRGBO(255, 0, 0, 1): backgroundColor,
-            Color.fromRGBO(0, 255, 0, 1): shapeColor,
-            Color.fromRGBO(0, 0, 255, 1): detailColor,
+            Color.fromRGBO(0, 255, 0, 1): shapeColor,      // #00ff00 -> shapeColor
+            Color.fromRGBO(0, 0, 255, 1): detailColor,      // #0000ff -> detailColor
           }),
         ),
       );

@@ -1,0 +1,61 @@
+{
+  "svg_source": "assets/svg/logo-rgb.svg",
+  "icons": [
+    {
+      "name": "dark-mode-launcher",
+      "display_name": "Dark Mode Launcher",
+      "width": 1024,
+      "height": 1024,
+      "translate_x": 122.4,
+      "translate_y": 122.4,
+      "scale": 0.7,
+      "shape_color": "#eee",
+      "wave_color": "#111",
+      "mic_color": "#111",
+      "sliders_color": "#111",
+      "text_color": "#111"
+    },
+    {
+      "name": "light-mode-launcher",
+      "display_name": "Light Mode Launcher",
+      "width": 1024,
+      "height": 1024,
+      "translate_x": 122.4,
+      "translate_y": 122.4,
+      "scale": 0.7,
+      "shape_color": "#111",
+      "wave_color": "#eee",
+      "mic_color": "#eee",
+      "sliders_color": "#eee",
+      "text_color": "#eee"
+    },
+    {
+      "name": "dark-mode-splash",
+      "display_name": "Dark Mode Splash",
+      "width": 1152,
+      "height": 1152,
+      "translate_x": 135.9864,
+      "translate_y": 135.9864,
+      "scale": 0.6667,
+      "shape_color": "#eee",
+      "wave_color": "#111",
+      "mic_color": "#111",
+      "sliders_color": "#111",
+      "text_color": "#111"
+    },
+    {
+      "name": "light-mode-splash",
+      "display_name": "Light Mode Splash",
+      "width": 1152,
+      "height": 1152,
+      "translate_x": 135.9864,
+      "translate_y": 135.9864,
+      "scale": 0.6667,
+      "shape_color": "#111",
+      "wave_color": "#eee",
+      "mic_color": "#eee",
+      "sliders_color": "#eee",
+      "text_color": "#eee"
+    }
+  ]
+}

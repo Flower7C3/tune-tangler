@@ -245,30 +245,61 @@ gen-l10n: ##UTILITIES## Generate l10n files
 	@flutter gen-l10n
 
 .PHONY: gen
-gen-images: gen-png-logos gen-icons gen-splash ##UTILITIES## Generate PNG files, app icons and splash screen
+gen-assets: gen-png-logos gen-icons gen-splash ##UTILITIES## Generate PNG files, app icons and splash screen
 
 .PHONY: gen-png-logos
-gen-png-logos: ##UTILITIES## Convert SVG files to PNG
-	@echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Converting SVG files to PNG...$(FORMAT_RESET)"
-	@if ! command -v rsvg-convert >/dev/null 2>&1; then \
+# SVG generation variables
+ICON_CONFIG = assets/icon-config.json
+
+gen-png-logos: ##UTILITIES## Generate PNG variants from JSON configuration
+	@if [ ! -f "$(ICON_CONFIG)" ]; then \
+		echo "$(COLOR_RED)$(ICON_ERROR) Error: icon-config.json not found$(FORMAT_RESET)"; \
+		exit 1; \
+	fi
+	@SVG_SOURCE=$$(jq -r '.svg_source' "$(ICON_CONFIG)"); \
+	echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Generating PNG variants from $$SVG_SOURCE...$(FORMAT_RESET)"; \
+	if [ ! -f "$$SVG_SOURCE" ]; then \
+		echo "$(COLOR_RED)$(ICON_ERROR) Error: $$SVG_SOURCE not found$(FORMAT_RESET)"; \
+		exit 1; \
+	fi; \
+	if ! command -v rsvg-convert >/dev/null 2>&1; then \
 		echo "$(COLOR_RED)$(ICON_ERROR) Error: rsvg-convert not found$(FORMAT_RESET)"; \
 		echo "   Please install librsvg2-bin package:"; \
 		echo "   - Ubuntu/Debian: sudo apt-get install librsvg2-bin"; \
 		echo "   - macOS: brew install librsvg"; \
 		echo "   - Windows: Download from https://github.com/miyako/console-rsvg-convert"; \
 		exit 1; \
+	fi; \
+	if ! command -v jq >/dev/null 2>&1; then \
+		echo "$(COLOR_RED)$(ICON_ERROR) Error: jq not found$(FORMAT_RESET)"; \
+		echo "   Please install jq:"; \
+		echo "   - Ubuntu/Debian: sudo apt-get install jq"; \
+		echo "   - macOS: brew install jq"; \
+		echo "   - Windows: Download from https://jqlang.github.io/jq/download/"; \
+		exit 1; \
 	fi
-	@mkdir -p assets/png
-	@echo "$(COLOR_CYAN)Converting logo-dark-mode-launcher.svg -> logo-dark-mode-launcher.png (1024x1024)$(FORMAT_RESET)"; \
-	rsvg-convert -h 1024 -w 1024 "assets/svg/logo-dark-mode-launcher.svg" -o "assets/png/logo-dark-mode-launcher.png"
-	@echo "$(COLOR_CYAN)Converting logo-light-mode-launcher.svg -> logo-light-mode-launcher.png (1024x1024)$(FORMAT_RESET)"; \
-	rsvg-convert -h 1024 -w 1024 "assets/svg/logo-light-mode-launcher.svg" -o "assets/png/logo-light-mode-launcher.png"
-	@echo "$(COLOR_GREEN)$(ICON_CHECK) Launcher icon conversion completed$(FORMAT_RESET)"
-	@echo "$(COLOR_CYAN)Converting logo-dark-mode-splash.svg -> logo-dark-mode-splash.png (1152x1152)$(FORMAT_RESET)"; \
-	rsvg-convert -h 1152 -w 1152 "assets/svg/logo-dark-mode-splash.svg" -o "assets/png/logo-dark-mode-splash.png"
-	@echo "$(COLOR_CYAN)Converting logo-light-mode-splash.svg -> logo-light-mode-splash.png (1152x1152)$(FORMAT_RESET)"; \
-	rsvg-convert -h 1152 -w 1152 "assets/svg/logo-light-mode-splash.svg" -o "assets/png/logo-light-mode-splash.png"
-	@echo "$(COLOR_GREEN)$(ICON_CHECK) Splash screen icon conversion completed$(FORMAT_RESET)"
+	@TEMP_DIR=$$(mktemp -d -t tunetangler-icons-XXXXXX); \
+	echo "$(COLOR_CYAN)Generating temporary SVG variants from JSON config...$(FORMAT_RESET)"; \
+	SVG_SOURCE=$$(jq -r '.svg_source' "$(ICON_CONFIG)"); \
+	jq -r '.icons[] | @base64' "$(ICON_CONFIG)" | while read -r icon_data; do \
+		name=$$(echo "$$icon_data" | base64 -d | jq -r '.name'); \
+		display_name=$$(echo "$$icon_data" | base64 -d | jq -r '.display_name'); \
+		width=$$(echo "$$icon_data" | base64 -d | jq -r '.width'); \
+		height=$$(echo "$$icon_data" | base64 -d | jq -r '.height'); \
+		translate_x=$$(echo "$$icon_data" | base64 -d | jq -r '.translate_x'); \
+		translate_y=$$(echo "$$icon_data" | base64 -d | jq -r '.translate_y'); \
+		scale=$$(echo "$$icon_data" | base64 -d | jq -r '.scale'); \
+		shape_color=$$(echo "$$icon_data" | base64 -d | jq -r '.shape_color'); \
+		detail_color=$$(echo "$$icon_data" | base64 -d | jq -r '.text_color'); \
+		echo "$(COLOR_CYAN)Generating $$display_name ($$width x $$height, scale $$scale)...$(FORMAT_RESET)"; \
+		sed "s/width=\"1500\" height=\"1500\"/width=\"$$width\" height=\"$$height\"/g; s/translate(0 0)scale(1)/translate($$translate_x $$translate_y)scale($$scale)/g; s/fill=\"#00ff00\"/fill=\"$$shape_color\"/g; s/fill=\"#0000ff\"/fill=\"$$detail_color\"/g" "$$SVG_SOURCE" > "$$TEMP_DIR/temp-$$name.svg"; \
+		echo "$(COLOR_CYAN)Converting $$display_name to PNG...$(FORMAT_RESET)"; \
+		rsvg-convert -h $$height -w $$width "$$TEMP_DIR/temp-$$name.svg" -o "assets/png/logo-$$name.png"; \
+	done; \
+	echo "$(COLOR_GREEN)$(ICON_CHECK) All icons generated$(FORMAT_RESET)"; \
+	echo "$(COLOR_CYAN)Cleaning up temporary files...$(FORMAT_RESET)"; \
+	rm -rf "$$TEMP_DIR"; \
+	echo "$(COLOR_GREEN)$(ICON_CHECK) All PNG variants generated successfully$(FORMAT_RESET)"
 
 .PHONY: gen-icons
 gen-icons: ##UTILITIES## Generate app icons
