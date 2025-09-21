@@ -27,7 +27,6 @@ class NavigationBarManager {
           leading: Builder(
             builder: (context) => IconButton(
               icon: AppIcon.appLogo(
-                Theme.of(context).colorScheme.inversePrimary,
                 Theme.of(context).colorScheme.primary,
                 Theme.of(context).colorScheme.inversePrimary,
               ),

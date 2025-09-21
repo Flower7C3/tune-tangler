@@ -51,3 +51,6 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 /android/app/.cxx
+
+# Temporary SVG files
+assets/svg/temp-*.svg

@@ -11,7 +11,8 @@ class SvgColorMapper implements ColorMapper {
   final Map<Color, Color?> colors;
 
   @override
-  Color substitute(String? id, String elementName, String attributeName, Color color) {
+  Color substitute(
+      String? id, String elementName, String attributeName, Color color) {
     if (colors.containsKey(color)) {
       return colors[color] ?? color;
     }
@@ -21,12 +22,15 @@ class SvgColorMapper implements ColorMapper {
 }
 
 class AppIcon {
-  static Widget appLogo(Color backgroundColor, Color shapeColor, Color detailColor) => SvgPicture(
+  static Widget appLogo(Color shapeColor, Color detailColor) => SvgPicture(
         SvgAssetLoader(
           'assets/svg/logo-rgb.svg',
           colorMapper: SvgColorMapper(colors: {
-            Color.fromRGBO(0, 255, 0, 1): shapeColor,      // #00ff00 -> shapeColor
-            Color.fromRGBO(0, 0, 255, 1): detailColor,      // #0000ff -> detailColor
+            Color.fromRGBO(0, 0, 0, 1): shapeColor,
+            Color.fromRGBO(255, 0, 0, 1): detailColor,
+            Color.fromRGBO(0, 255, 0, 1): detailColor,
+            Color.fromRGBO(0, 0, 255, 1): detailColor,
+            Color.fromRGBO(255, 255, 255, 1): detailColor,
           }),
         ),
       );
@@ -60,9 +64,13 @@ class AppIcon {
           width: size,
           height: size,
           alignment: Alignment.center,
-          decoration:
-              BoxDecoration(color: backgroundColor, borderRadius: BorderRadius.all(Radius.circular(UIHelper.gridGap)), shape: BoxShape.rectangle),
-          child: Text(keyName, style: TextStyle(fontSize: size, height: 1.0, color: foregroundColor)));
+          decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: BorderRadius.all(Radius.circular(UIHelper.gridGap)),
+              shape: BoxShape.rectangle),
+          child: Text(keyName,
+              style: TextStyle(
+                  fontSize: size, height: 1.0, color: foregroundColor)));
   static IconData trackPlaybackMode = Icons.replay_rounded;
   static IconData trackSinglePlaybackMode = Icons.repeat_one_rounded;
   static IconData trackRepeatPlaybackMode = Icons.repeat_rounded;
@@ -80,15 +88,19 @@ class AppIcon {
   static IconData trackPosition = Symbols.timer_play_rounded;
 
   static IconData trackDuration = Symbols.timer_rounded;
-  static IconData trackPlaybackStartAtPosition = Symbols.align_justify_flex_start_rounded;
-  static IconData trackPlaybackStartAtPositionReset = Symbols.first_page_rounded;
-  static IconData trackPlaybackEndAtPosition = Symbols.align_justify_flex_end_rounded;
+  static IconData trackPlaybackStartAtPosition =
+      Symbols.align_justify_flex_start_rounded;
+  static IconData trackPlaybackStartAtPositionReset =
+      Symbols.first_page_rounded;
+  static IconData trackPlaybackEndAtPosition =
+      Symbols.align_justify_flex_end_rounded;
   static IconData trackPlaybackEndAtPositionReset = Symbols.last_page_rounded;
   static IconData trackPlaybackPositionSub = Symbols.fast_rewind_rounded;
 
   static IconData trackPlaybackPositionAdd = Symbols.fast_forward_rounded;
   static IconData recordingInputDevice = Symbols.settings_input_component;
-  static IconData recordingAudioEncoder = Icons.integration_instructions_outlined;
+  static IconData recordingAudioEncoder =
+      Icons.integration_instructions_outlined;
   static IconData recordingSampleRate = Icons.av_timer_rounded;
   static IconData recordingBitRate = Icons.network_check_rounded;
   static IconData recordingAudioMode = Icons.mic_external_on_rounded;
@@ -133,7 +145,8 @@ class AppIcon {
   static IconData recordingInfo = Symbols.info_rounded;
   static IconData recordingProgressSlider = Symbols.start_rounded;
 
-  static IconData recordingClipSlider = Symbols.align_justify_space_even_rounded;
+  static IconData recordingClipSlider =
+      Symbols.align_justify_space_even_rounded;
 
   static IconData create = Icons.add;
 

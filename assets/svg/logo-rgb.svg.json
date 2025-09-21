@@ -1,5 +1,4 @@
 {
-  "svg_source": "assets/svg/logo-rgb.svg",
   "icons": [
     {
       "name": "dark-mode-launcher",
@@ -9,11 +8,13 @@
       "translate_x": 122.4,
       "translate_y": 122.4,
       "scale": 0.7,
-      "shape_color": "#eee",
-      "wave_color": "#111",
-      "mic_color": "#111",
-      "sliders_color": "#111",
-      "text_color": "#111"
+      "colors": {
+        "shape": "#eee",
+        "wave": "#111",
+        "mic": "#111",
+        "sliders": "#111",
+        "text": "#111"
+      }
     },
     {
       "name": "light-mode-launcher",
@@ -23,11 +24,13 @@
       "translate_x": 122.4,
       "translate_y": 122.4,
       "scale": 0.7,
-      "shape_color": "#111",
-      "wave_color": "#eee",
-      "mic_color": "#eee",
-      "sliders_color": "#eee",
-      "text_color": "#eee"
+      "colors": {
+        "shape": "#111",
+        "wave": "#eee",
+        "mic": "#eee",
+        "sliders": "#eee",
+        "text": "#eee"
+      }
     },
     {
       "name": "dark-mode-splash",
@@ -37,11 +40,13 @@
       "translate_x": 135.9864,
       "translate_y": 135.9864,
       "scale": 0.6667,
-      "shape_color": "#eee",
-      "wave_color": "#111",
-      "mic_color": "#111",
-      "sliders_color": "#111",
-      "text_color": "#111"
+      "colors": {
+        "shape": "#eee",
+        "wave": "#111",
+        "mic": "#111",
+        "sliders": "#111",
+        "text": "#111"
+      }
     },
     {
       "name": "light-mode-splash",
@@ -51,11 +56,13 @@
       "translate_x": 135.9864,
       "translate_y": 135.9864,
       "scale": 0.6667,
-      "shape_color": "#111",
-      "wave_color": "#eee",
-      "mic_color": "#eee",
-      "sliders_color": "#eee",
-      "text_color": "#eee"
+      "colors": {
+        "shape": "#111",
+        "wave": "#eee",
+        "mic": "#eee",
+        "sliders": "#eee",
+        "text": "#eee"
+      }
     }
   ]
 }

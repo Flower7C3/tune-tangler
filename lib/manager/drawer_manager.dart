@@ -49,7 +49,6 @@ class DrawerManager {
                   margin: EdgeInsets.only(bottom: 5),
                   padding: EdgeInsets.zero,
                   child: AppIcon.appLogo(
-                    Theme.of(context).colorScheme.primary,
                     Theme.of(context).colorScheme.inversePrimary,
                     Theme.of(context).colorScheme.primary,
                   ),
@@ -547,7 +546,6 @@ class DrawerManager {
       width: Theme.of(_context).textTheme.displayLarge!.fontSize,
       height: Theme.of(_context).textTheme.displayLarge!.fontSize,
       child: AppIcon.appLogo(
-        Theme.of(_context).colorScheme.surfaceContainerHigh,
         Theme.of(_context).colorScheme.primary,
         Theme.of(_context).colorScheme.surfaceContainerHigh,
       ),

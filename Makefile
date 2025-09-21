@@ -244,24 +244,23 @@ gen-l10n: ##UTILITIES## Generate l10n files
 	@echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Generating localization files...$(FORMAT_RESET)"
 	@flutter gen-l10n
 
-.PHONY: gen
+.PHONY: gen-assets
 gen-assets: gen-png-logos gen-icons gen-splash ##UTILITIES## Generate PNG files, app icons and splash screen
 
 .PHONY: gen-png-logos
 # SVG generation variables
-ICON_CONFIG = assets/icon-config.json
+SVG_SOURCE = assets/svg/logo-rgb.svg
 
 gen-png-logos: ##UTILITIES## Generate PNG variants from JSON configuration
-	@if [ ! -f "$(ICON_CONFIG)" ]; then \
-		echo "$(COLOR_RED)$(ICON_ERROR) Error: icon-config.json not found$(FORMAT_RESET)"; \
-		exit 1; \
-	fi
-	@SVG_SOURCE=$$(jq -r '.svg_source' "$(ICON_CONFIG)"); \
-	echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Generating PNG variants from $$SVG_SOURCE...$(FORMAT_RESET)"; \
-	if [ ! -f "$$SVG_SOURCE" ]; then \
-		echo "$(COLOR_RED)$(ICON_ERROR) Error: $$SVG_SOURCE not found$(FORMAT_RESET)"; \
+	@if [ ! -f "$(SVG_SOURCE).json" ]; then \
+		echo "$(COLOR_RED)$(ICON_ERROR) Error: $(SVG_SOURCE).json not found$(FORMAT_RESET)"; \
 		exit 1; \
 	fi; \
+	if [ ! -f "$(SVG_SOURCE)" ]; then \
+		echo "$(COLOR_RED)$(ICON_ERROR) Error: $(SVG_SOURCE) not found$(FORMAT_RESET)"; \
+		exit 1; \
+	fi; \
+	echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Generating PNG variants from $(SVG_SOURCE)...$(FORMAT_RESET)"; \
 	if ! command -v rsvg-convert >/dev/null 2>&1; then \
 		echo "$(COLOR_RED)$(ICON_ERROR) Error: rsvg-convert not found$(FORMAT_RESET)"; \
 		echo "   Please install librsvg2-bin package:"; \
@@ -278,10 +277,8 @@ gen-png-logos: ##UTILITIES## Generate PNG variants from JSON configuration
 		echo "   - Windows: Download from https://jqlang.github.io/jq/download/"; \
 		exit 1; \
 	fi
-	@TEMP_DIR=$$(mktemp -d -t tunetangler-icons-XXXXXX); \
-	echo "$(COLOR_CYAN)Generating temporary SVG variants from JSON config...$(FORMAT_RESET)"; \
-	SVG_SOURCE=$$(jq -r '.svg_source' "$(ICON_CONFIG)"); \
-	jq -r '.icons[] | @base64' "$(ICON_CONFIG)" | while read -r icon_data; do \
+	@echo "$(COLOR_CYAN)Generating temporary SVG variants from JSON config...$(FORMAT_RESET)"; \
+	jq -r '.icons[] | @base64' "$(SVG_SOURCE).json" | while read -r icon_data; do \
 		name=$$(echo "$$icon_data" | base64 -d | jq -r '.name'); \
 		display_name=$$(echo "$$icon_data" | base64 -d | jq -r '.display_name'); \
 		width=$$(echo "$$icon_data" | base64 -d | jq -r '.width'); \
@@ -289,27 +286,27 @@ gen-png-logos: ##UTILITIES## Generate PNG variants from JSON configuration
 		translate_x=$$(echo "$$icon_data" | base64 -d | jq -r '.translate_x'); \
 		translate_y=$$(echo "$$icon_data" | base64 -d | jq -r '.translate_y'); \
 		scale=$$(echo "$$icon_data" | base64 -d | jq -r '.scale'); \
-		shape_color=$$(echo "$$icon_data" | base64 -d | jq -r '.shape_color'); \
-		detail_color=$$(echo "$$icon_data" | base64 -d | jq -r '.text_color'); \
-		echo "$(COLOR_CYAN)Generating $$display_name ($$width x $$height, scale $$scale)...$(FORMAT_RESET)"; \
-		sed "s/width=\"1500\" height=\"1500\"/width=\"$$width\" height=\"$$height\"/g; s/translate(0 0)scale(1)/translate($$translate_x $$translate_y)scale($$scale)/g; s/fill=\"#00ff00\"/fill=\"$$shape_color\"/g; s/fill=\"#0000ff\"/fill=\"$$detail_color\"/g" "$$SVG_SOURCE" > "$$TEMP_DIR/temp-$$name.svg"; \
-		echo "$(COLOR_CYAN)Converting $$display_name to PNG...$(FORMAT_RESET)"; \
-		rsvg-convert -h $$height -w $$width "$$TEMP_DIR/temp-$$name.svg" -o "assets/png/logo-$$name.png"; \
+		echo "$(COLOR_CYAN)Generating $$display_name (x=$$translate_x, y=$$translate_y, scale=$$scale)...$(FORMAT_RESET)"; \
+		SED_CMD="s|width=\"1500\" height=\"1500\"|width=\"$$width\" height=\"$$height\"|g; s|translate(0 0)scale(1)|translate($$translate_x $$translate_y)scale($$scale)|g"; \
+		COLOR_RULES=$$(echo "$$icon_data" | base64 -d | jq -r '.colors | to_entries[] | "s|class=\\\"" + .key + "\\\" fill=\\\"[^\\\"]*\\\"|fill=\\\"" + .value + "\\\"|g"' | tr '\n' ';'); \
+		SED_CMD="$$SED_CMD; $$COLOR_RULES"; \
+		svg_temp=$$(dirname $(SVG_SOURCE))/temp-$$name.svg; \
+		sed -e "$$SED_CMD" "$(SVG_SOURCE)" > "$$svg_temp"; \
+		echo "$(COLOR_CYAN)Converting $$display_name to PNG ($$width x $$height)...$(FORMAT_RESET)"; \
+		rsvg-convert -h $$height -w $$width "$$svg_temp" -o "assets/png/logo-$$name.png"; \
+		rm -f "$$svg_temp"; \
 	done; \
-	echo "$(COLOR_GREEN)$(ICON_CHECK) All icons generated$(FORMAT_RESET)"; \
-	echo "$(COLOR_CYAN)Cleaning up temporary files...$(FORMAT_RESET)"; \
-	rm -rf "$$TEMP_DIR"; \
-	echo "$(COLOR_GREEN)$(ICON_CHECK) All PNG variants generated successfully$(FORMAT_RESET)"
+	echo "$(COLOR_GREEN)$(ICON_CHECK) All icons generated$(FORMAT_RESET)"
 
 .PHONY: gen-icons
 gen-icons: ##UTILITIES## Generate app icons
 	@echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Generating app icons...$(FORMAT_RESET)"
-	@dart run flutter_launcher_icons
+	@flutter packages pub run flutter_launcher_icons
 
 .PHONY: gen-splash
 gen-splash: ##UTILITIES## Generate splash screen
 	@echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Generating splash screen...$(FORMAT_RESET)"
-	@dart run flutter_native_splash:create
+	@flutter packages pub run flutter_native_splash:create
 
 # =============================================================================
 # GIT HOOKS MANAGEMENT
