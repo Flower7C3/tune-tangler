@@ -6,7 +6,6 @@ on:
 
 # Version variables for dependencies
 env:
-  FLUTTER_VERSION: '3.35.1'
   FLUTTER_CHANNEL: 'stable'
   JAVA_VERSION: '17'
   JAVA_DISTRIBUTION: 'zulu'
@@ -22,7 +21,6 @@ jobs:
       - name: "📲 Setup Flutter"
         uses: ./.github/actions/setup-flutter
         with:
-          flutter_version: ${{ env.FLUTTER_VERSION }}
           flutter_channel: ${{ env.FLUTTER_CHANNEL }}
           with_dependencies: true
           with_localization: false

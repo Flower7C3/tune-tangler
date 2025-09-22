@@ -2,9 +2,9 @@ name: 'Setup Flutter'
 description: 'Setup Flutter environment for TuneTangler'
 inputs:
   flutter_version:
-    description: 'Flutter version to use'
+    description: 'Flutter version to use (if not provided, will fetch latest stable)'
     required: false
-    default: '3.35.1'
+    default: ''
   flutter_channel:
     description: 'Flutter channel to use'
     required: false
@@ -25,13 +25,27 @@ runs:
     - name: "🔧 Checkout code"
       uses: actions/checkout@v4
       
+    - name: "📲 Get Flutter version"
+      id: get_flutter_version
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.flutter_version }}" ]; then
+          echo "version=${{ inputs.flutter_version }}" >> $GITHUB_OUTPUT
+          echo "Using provided Flutter version: ${{ inputs.flutter_version }}"
+        else
+          # Get the latest stable Flutter version
+          FLUTTER_VERSION=$(curl -s https://storage.googleapis.com/flutter_infra_release/releases/releases_linux.json | jq -r '.releases[] | select(.channel=="${{ inputs.flutter_channel }}") | .version' | head -1)
+          echo "version=$FLUTTER_VERSION" >> $GITHUB_OUTPUT
+          echo "Using latest ${{ inputs.flutter_channel }} Flutter version: $FLUTTER_VERSION"
+        fi
+      
     - name: "🔧 Setup Flutter"
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: ${{ inputs.flutter_version }}
+        flutter-version: ${{ steps.get_flutter_version.outputs.version }}
         channel: ${{ inputs.flutter_channel }}
         cache: true
-        cache-key: flutter-${{ runner.os }}-${{ inputs.flutter_version }}-${{ inputs.flutter_channel }}
+        cache-key: flutter-${{ runner.os }}-${{ steps.get_flutter_version.outputs.version }}-${{ inputs.flutter_channel }}
         
     - name: "📦 Get dependencies"
       if: ${{ inputs.with_dependencies == 'true' }}
