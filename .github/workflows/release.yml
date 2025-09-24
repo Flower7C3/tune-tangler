@@ -1,7 +1,9 @@
 name: Build & Release Workflow
 
 on:
-  workflow_dispatch:  # Only manual trigger - no automatic runs
+  workflow_dispatch:
+  push:
+    branches: [ main ]
 
 permissions:
   contents: write
@@ -9,7 +11,6 @@ permissions:
 
 # Version variables for dependencies
 env:
-  FLUTTER_VERSION: '3.35.1'
   FLUTTER_CHANNEL: 'stable'
   JAVA_VERSION: '17'
   JAVA_DISTRIBUTION: 'zulu'
@@ -29,7 +30,6 @@ jobs:
       - name: "📲 Setup Flutter"
         uses: ./.github/actions/setup-flutter
         with:
-          flutter_version: ${{ env.FLUTTER_VERSION }}
           flutter_channel: ${{ env.FLUTTER_CHANNEL }}
           with_dependencies: true
           with_localization: false
@@ -56,7 +56,6 @@ jobs:
       - name: "📲 Setup Flutter"
         uses: ./.github/actions/setup-flutter
         with:
-          flutter_version: ${{ env.FLUTTER_VERSION }}
           flutter_channel: ${{ env.FLUTTER_CHANNEL }}
           with_dependencies: true
           with_localization: true
@@ -238,7 +237,7 @@ jobs:
               -v repository_tag_name="${{ needs.build.outputs.tag_name }}" \
               -v proj_name="$(echo "${{ github.repository }}" | sed 's/.*\///' | sed 's/-/ /g' | sed 's/\b\w/\U&/g')" \
               -v build_version="${{ needs.build.outputs.version }}" \
-              -v flutter_version="${{ env.FLUTTER_VERSION }}" \
+              -v flutter_version="$(curl -s https://storage.googleapis.com/flutter_infra_release/releases/releases_linux.json | jq -r '.releases[] | select(.channel=="stable") | .version' | head -1)" \
               -v java_version="${{ env.JAVA_VERSION }}" \
               -v java_distribution="${{ env.JAVA_DISTRIBUTION }}" \
               '{gsub(/{{ GITHUB_REPOSITORY }}/, github_repository); 
