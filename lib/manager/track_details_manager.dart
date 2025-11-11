@@ -962,8 +962,8 @@ class TrackDetailsManager {
                       ),
                       onPressed: (loopTrack.id == track.id)
                           ? null
-                          : () {
-                              _trackRepository.move(track, loopTrack);
+                          : () async {
+                              _trackRepository.safeSwapTracks(track, loopTrack);
                               Navigator.pop(context);
                               Navigator.pop(context);
                               _uiHelper.toast(

@@ -24,10 +24,10 @@ class DrawerManager {
   final UIHelper _uiHelper;
   final TrackRepository _trackRepository;
   final AudioRecorder _audioRecorder;
-  late final SettingProfileWrapper _settingProfileWrapper;
+  late final SettingProfileWrapper _settingsProfileWrapper;
 
   DrawerManager(this._context, this._settings, this._permissionProvider, this._trans, this._uiHelper, this._trackRepository, this._audioRecorder) {
-    _settingProfileWrapper = SettingProfileWrapper(_context, _trans, _settings, _uiHelper);
+    _settingsProfileWrapper = SettingProfileWrapper(_context, _trans, _settings, _uiHelper);
   }
 
   Widget get build => StatefulBuilder(
@@ -55,9 +55,9 @@ class DrawerManager {
                 ),
               ),
               ListTile(
-                leading: Icon(AppIcon.settingProfiles),
+                leading: Icon(AppIcon.settingsProfiles),
                 title: Text(_trans.settingsProfiles),
-                onTap: _settingProfilesListsDialog,
+                onTap: _settingsProfilesListsDialog,
                 trailing: Icon(AppIcon.modalMenu),
               ),
               ExpansionTile(
@@ -218,6 +218,7 @@ class DrawerManager {
           selected: currentValue == inputDevice,
           onTap: () {
             _settings.setConfig(AppConfigFieldKey.recordingInputDevice, inputDevice);
+            _uiHelper.toast(_trans.recordingInputDeviceSuccess(inputDevice.label), icon: AppIcon.recordingInputDevice, duration: 4);
             Navigator.pop(_context, 'recordingInputDevice');
           },
         ));
@@ -361,72 +362,72 @@ class DrawerManager {
         )
       ];
 
-  Future<void> _settingProfilesListsDialog() async {
+  Future<void> _settingsProfilesListsDialog() async {
     List<Widget> options = [];
     for (int index = 0; index < _settings.settingsProfilesList.length; index++) {
       var item = _settings.settingsProfilesList[index];
       options.add(ListTile(
-        title: _settingProfileWrapper.listTitle(item),
-        subtitle: _settingProfileWrapper.listSubtitle(item),
+        title: _settingsProfileWrapper.listTitle(item),
+        subtitle: _settingsProfileWrapper.listSubtitle(item),
         trailing:  Icon(AppIcon.touchLong),
-        onTap: () => _settingProfileWrapper.load(item),
-        onLongPress: () => _settingProfilesDetailDialog(index, item),
+        onTap: () => _settingsProfileWrapper.load(item),
+        onLongPress: () => _settingsProfilesDetailDialog(index, item),
       ));
     }
     if (options.isEmpty) {
       options.add(Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [Text(_trans.settingProfilesEmpty, style: TextStyle(fontSize: 14))]));
+          children: [Text(_trans.settingsProfilesEmpty, style: TextStyle(fontSize: 14))]));
     }
     options.add(
       TextButton.icon(
         icon: Icon(AppIcon.create),
-        label: Text(_trans.settingProfileCreate),
+        label: Text(_trans.settingsProfileCreate),
         onPressed: () {
-          _settingProfileWrapper.create();
-          _settingProfilesListsDialog();
+          _settingsProfileWrapper.create();
+          _settingsProfilesListsDialog();
         },
       ),
     );
     _uiHelper.listDialog(
-      AppIcon.settingProfiles,
-      _trans.settingProfilesListTitle,
+      AppIcon.settingsProfiles,
+      _trans.settingsProfilesListTitle,
       actions: options.toList(),
     );
   }
 
-  Future<void> _settingProfilesDetailDialog(int index, SettingsProfile settingsProfile) async {
+  Future<void> _settingsProfilesDetailDialog(int index, SettingsProfile settingsProfile) async {
     _uiHelper.alertDialog(
-      AppIcon.settingProfiles,
-      _trans.settingProfile,
-      contentWidget: Column(children: _settingProfileWrapper.toList(settingsProfile)),
+      AppIcon.settingsProfiles,
+      _trans.settingsProfile,
+      contentWidget: Column(children: _settingsProfileWrapper.toList(settingsProfile)),
       actions: <Widget>[
         _uiHelper.simpleButton(_trans.buttonCancel, () {
           Navigator.pop(_context, 'Cancel');
         }),
-        _uiHelper.errorButton(_trans.settingProfileDelete, () {
-          _settingProfilesDeleteDialog(index, settingsProfile);
+        _uiHelper.errorButton(_trans.settingsProfileDelete, () {
+          _settingsProfilesDeleteDialog(index, settingsProfile);
         }),
-        _uiHelper.primaryButton(_trans.settingProfileLoad, () {
+        _uiHelper.primaryButton(_trans.settingsProfileLoad, () {
           Navigator.pop(_context, 'Load');
-          _settingProfileWrapper.load(settingsProfile);
+          _settingsProfileWrapper.load(settingsProfile);
         }),
       ],
     );
   }
 
-  Future<void> _settingProfilesDeleteDialog(int index, SettingsProfile settingsProfile) async {
+  Future<void> _settingsProfilesDeleteDialog(int index, SettingsProfile settingsProfile) async {
     _uiHelper.alertDialogReset(
-      AppIcon.settingProfiles,
-      _trans.settingProfileDeleteTitle,
-      _trans.settingProfileDeleteInfo,
+      AppIcon.settingsProfiles,
+      _trans.settingsProfileDeleteTitle,
+      _trans.settingsProfileDeleteInfo,
       _trans.buttonNo,
       _trans.buttonYes,
       () {
-        _settingProfileWrapper.delete(index);
-        _settingProfilesListsDialog();
-        return _trans.settingProfileDeleted;
+        _settingsProfileWrapper.delete(index);
+        _settingsProfilesListsDialog();
+        return _trans.settingsProfileDeleted;
       },
     );
   }

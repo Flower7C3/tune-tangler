@@ -12,18 +12,18 @@ enum HiveServiceBox {
 }
 
 class HiveService {
-  static late Box _settingProfilesBox;
+  static late Box _settingsProfilesBox;
   static late Box _globalSettingsBox;
   static late Box _trackSettingsBox;
 
   static Future<void> init() async {
-    _settingProfilesBox = await Hive.openBox('profiles');
+    _settingsProfilesBox = await Hive.openBox('profiles');
     _globalSettingsBox = await Hive.openBox('settings');
     _trackSettingsBox = await Hive.openBox('track');
   }
 
   static Future<void> dispose() async {
-    _settingProfilesBox.close();
+    _settingsProfilesBox.close();
     _globalSettingsBox.close();
     _trackSettingsBox.close();
   }
@@ -72,9 +72,9 @@ class HiveService {
         null => throw UnimplementedError(),
       };
 
-  static List<SettingsProfile> get listProfiles => _settingProfilesBox.values.whereType<SettingsProfile>().toList();
+  static List<SettingsProfile> get listProfiles => _settingsProfilesBox.values.whereType<SettingsProfile>().toList();
 
-  static Future<void> addProfile(SettingsProfile value, {bool updateState = false}) async => _settingProfilesBox.add(value);
+  static Future<void> addProfile(SettingsProfile value, {bool updateState = false}) async => _settingsProfilesBox.add(value);
 
-  static Future<void> deleteProfile(int index) async => _settingProfilesBox.deleteAt(index);
+  static Future<void> deleteProfile(int index) async => _settingsProfilesBox.deleteAt(index);
 }

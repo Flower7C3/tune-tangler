@@ -14,12 +14,14 @@ class NavigationBarManager {
   final AppLocalizations _trans;
   final UIHelper _uiHelper;
   final TrackRepository _trackRepository;
+  final GlobalKey<ScaffoldState> _scaffoldKey;
 
   NavigationBarManager(
     this._context,
     this._trans,
     this._uiHelper,
     this._trackRepository,
+    this._scaffoldKey,
   );
 
   AppBar get buildAppBar => AppBar(
@@ -95,6 +97,9 @@ class NavigationBarManager {
             AppIcon.trackName, _trans.allTracksTitleReset),
         _uiHelper.topTrackMenuItem(AllTracksMenuItem.shortcutKeyReset,
             AppIcon.trackKeyboardKey, _trans.allTracksShortcutKeyReset),
+        const PopupMenuDivider(),
+        _uiHelper.topTrackMenuItem(AllTracksMenuItem.moreSettings,
+            AppIcon.moreSettings, _trans.moreSettings),
       ];
 
   void _trackSettingsMenuItemSelected(AllTracksMenuItem selection) async {
@@ -249,6 +254,9 @@ class NavigationBarManager {
             return _trans.allTracksShortcutKeyResetSuccess;
           },
         );
+        break;
+      case AllTracksMenuItem.moreSettings:
+        _scaffoldKey.currentState?.openDrawer();
         break;
     }
   }
