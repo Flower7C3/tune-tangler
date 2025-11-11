@@ -521,6 +521,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingProfileLoaded => 'Settings profile loaded.';
 
   @override
+  String get moreSettings => 'More settings...';
+
+  @override
   String get help => 'Help';
 
   @override

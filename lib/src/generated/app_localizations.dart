@@ -867,6 +867,12 @@ abstract class AppLocalizations {
   /// **'Settings profile loaded.'**
   String get settingProfileLoaded;
 
+  /// No description provided for @moreSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'More settings...'**
+  String get moreSettings;
+
   /// No description provided for @help.
   ///
   /// In en, this message translates to:

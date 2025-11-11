@@ -22,6 +22,7 @@ class HomeScreenManager {
       _appWrapper.trans,
       _appWrapper.uiHelper,
       _appWrapper.trackRepository,
+      _appWrapper.scaffoldKey,
     );
     _drawerManager = DrawerManager(
       _appWrapper.context,

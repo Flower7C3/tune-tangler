@@ -15,6 +15,7 @@ class AppWrapper {
   final AudioRecorder audioRecorder;
   final TrackRepository trackRepository;
   final FocusNode focusNode;
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   late TrackDetailsManager trackDetailsManager;
   late BuildContext context;
   late AppLocalizations trans;

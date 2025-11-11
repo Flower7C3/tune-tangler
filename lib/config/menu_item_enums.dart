@@ -24,4 +24,5 @@ enum AllTracksMenuItem {
   playbackEndAtPositionReset,
   nameReset,
   shortcutKeyReset,
+  moreSettings,
 }

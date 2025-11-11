@@ -12,6 +12,7 @@ class HomeScreen extends StatelessWidget {
         appWrapper.setContext(context);
         HomeScreenManager homeScreenManager = HomeScreenManager(appWrapper);
         return Scaffold(
+          key: appWrapper.scaffoldKey,
           appBar: homeScreenManager.appBar,
           drawer: homeScreenManager.drawer,
           body: homeScreenManager.body,

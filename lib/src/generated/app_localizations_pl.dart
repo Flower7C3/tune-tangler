@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -523,6 +524,9 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get settingProfileLoaded => 'Profil ustawień został załadowany.';
+
+  @override
+  String get moreSettings => 'Więcej ustawień...';
 
   @override
   String get help => 'Pomoc';

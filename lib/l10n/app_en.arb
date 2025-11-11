@@ -127,6 +127,7 @@
   "settingProfileSaveSuccess": "Settings profile saved.",
   "settingProfileLoad": "Load",
   "settingProfileLoaded": "Settings profile loaded.",
+  "moreSettings": "More settings...",
   "help": "Help",
   "helpScreenMessageAboutTitle": "About",
   "helpScreenMessageAboutContent": "This application allows you to record audio from a microphone or USB audio interface (your device must support USB OTG technology) to one of several tracks. You can also import an existing audio file.\n\nRecordings can be played synchronously or asynchronously, in a loop or not.\n\nRecordings and their settings, as well as the graphic mode and language, are remembered after the application is closed.",
