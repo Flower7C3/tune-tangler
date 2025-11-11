@@ -71,7 +71,9 @@ class HomeScreenManager {
       controller: PageController(viewportFraction: 0.85),
       itemCount: rowsAmount,
       itemBuilder: (context, rowIndex) => _lazyLoadingManager.lazyLoadWidget(
-        key: 'row_${rowIndex}_rows${rowsAmount}_cols$colsAmount',
+        // Include locale in cache key to rebuild on language change
+        key:
+            'row_${rowIndex}_rows${rowsAmount}_cols${colsAmount}_locale_${_appWrapper.settings.getConfig(AppConfigFieldKey.locale).toLanguageTag()}',
         builder: () => Row(children: [
           _rowMenuManager.buildRowButtons(rowIndex),
           _trackManager.buildRowTracks(rowIndex, colsAmount),
