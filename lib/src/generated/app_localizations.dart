@@ -63,7 +63,7 @@ import 'app_localizations_pl.dart';
 /// property.
 abstract class AppLocalizations {
   AppLocalizations(String locale)
-      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -86,16 +86,16 @@ abstract class AppLocalizations {
   /// of delegates is preferred or required.
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
       <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
-    Locale('pl')
+    Locale('pl'),
   ];
 
   /// No description provided for @appTitle.
@@ -505,7 +505,9 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Swapped location of #{firstTrackName} and #{secondTrackName} recordings.'**
   String trackRecordingMoveSuccess(
-      Object firstTrackName, Object secondTrackName);
+    Object firstTrackName,
+    Object secondTrackName,
+  );
 
   /// No description provided for @trackRecordingShare.
   ///
@@ -789,11 +791,11 @@ abstract class AppLocalizations {
   /// **'Keep screen on'**
   String get menuKeepScreenOn;
 
-  /// No description provided for @settingProfile.
+  /// No description provided for @settingsProfile.
   ///
   /// In en, this message translates to:
   /// **'Settings profile'**
-  String get settingProfile;
+  String get settingsProfile;
 
   /// No description provided for @settingsProfiles.
   ///
@@ -801,71 +803,71 @@ abstract class AppLocalizations {
   /// **'Settings profiles'**
   String get settingsProfiles;
 
-  /// No description provided for @settingProfilesListTitle.
+  /// No description provided for @settingsProfilesListTitle.
   ///
   /// In en, this message translates to:
   /// **'Settings profiles'**
-  String get settingProfilesListTitle;
+  String get settingsProfilesListTitle;
 
-  /// No description provided for @settingProfilesEmpty.
+  /// No description provided for @settingsProfilesEmpty.
   ///
   /// In en, this message translates to:
   /// **'Settings profiles list is empty.'**
-  String get settingProfilesEmpty;
+  String get settingsProfilesEmpty;
 
-  /// No description provided for @settingProfileDelete.
+  /// No description provided for @settingsProfileDelete.
   ///
   /// In en, this message translates to:
   /// **'Delete'**
-  String get settingProfileDelete;
+  String get settingsProfileDelete;
 
-  /// No description provided for @settingProfileDeleteTitle.
+  /// No description provided for @settingsProfileDeleteTitle.
   ///
   /// In en, this message translates to:
-  /// **'Delete settings profile'**
-  String get settingProfileDeleteTitle;
+  /// **'Delete Settings profile'**
+  String get settingsProfileDeleteTitle;
 
-  /// No description provided for @settingProfileDeleteInfo.
+  /// No description provided for @settingsProfileDeleteInfo.
   ///
   /// In en, this message translates to:
   /// **'Settings profile will be deleted. Continue?'**
-  String get settingProfileDeleteInfo;
+  String get settingsProfileDeleteInfo;
 
-  /// No description provided for @settingProfileDeleted.
+  /// No description provided for @settingsProfileDeleted.
   ///
   /// In en, this message translates to:
   /// **'Settings profile deleted.'**
-  String get settingProfileDeleted;
+  String get settingsProfileDeleted;
 
-  /// No description provided for @settingProfileCreate.
+  /// No description provided for @settingsProfileCreate.
   ///
   /// In en, this message translates to:
   /// **'Create'**
-  String get settingProfileCreate;
+  String get settingsProfileCreate;
 
-  /// No description provided for @settingProfileCreated.
+  /// No description provided for @settingsProfileCreated.
   ///
   /// In en, this message translates to:
   /// **'Settings profile created.'**
-  String get settingProfileCreated;
+  String get settingsProfileCreated;
 
-  /// No description provided for @settingProfileSaveSuccess.
+  /// No description provided for @settingsProfileSaveSuccess.
   ///
   /// In en, this message translates to:
   /// **'Settings profile saved.'**
-  String get settingProfileSaveSuccess;
+  String get settingsProfileSaveSuccess;
 
-  /// No description provided for @settingProfileLoad.
+  /// No description provided for @settingsProfileLoad.
   ///
   /// In en, this message translates to:
   /// **'Load'**
-  String get settingProfileLoad;
+  String get settingsProfileLoad;
 
-  /// No description provided for @settingProfileLoaded.
+  /// No description provided for @settingsProfileLoaded.
   ///
   /// In en, this message translates to:
   /// **'Settings profile loaded.'**
-  String get settingProfileLoaded;
+  String get settingsProfileLoaded;
 
   /// No description provided for @moreSettings.
   ///
@@ -2239,8 +2241,9 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   }
 
   throw FlutterError(
-      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-      'an issue with the localizations generation tool. Please file an issue '
-      'on GitHub with a reproducible sample app and the gen-l10n configuration '
-      'that was used.');
+    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.',
+  );
 }

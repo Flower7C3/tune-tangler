@@ -130,7 +130,7 @@ class AppIcon {
 
   static IconData moreMenu = Icons.more_vert;
   static IconData modalMenu = Symbols.menu_open_rounded;
-  static IconData settingProfiles = Symbols.manufacturing;
+  static IconData settingsProfiles = Symbols.manufacturing;
   static IconData moreSettings = Icons.settings;
   static IconData screenSettings = Icons.display_settings;
   static IconData trackSettings = Icons.graphic_eq_rounded;

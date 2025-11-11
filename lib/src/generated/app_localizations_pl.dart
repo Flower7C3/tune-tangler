@@ -293,7 +293,9 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String trackRecordingMoveSuccess(
-      Object firstTrackName, Object secondTrackName) {
+    Object firstTrackName,
+    Object secondTrackName,
+  ) {
     return 'Zamieniono lokalizację dla nagrań #$firstTrackName i #$secondTrackName.';
   }
 
@@ -486,44 +488,44 @@ class AppLocalizationsPl extends AppLocalizations {
   String get menuKeepScreenOn => 'Utrzymaj ekran włączony';
 
   @override
-  String get settingProfile => 'Profil ustawień';
+  String get settingsProfile => 'Profil ustawień';
 
   @override
   String get settingsProfiles => 'Profile ustawień';
 
   @override
-  String get settingProfilesListTitle => 'Profile ustawień';
+  String get settingsProfilesListTitle => 'Profile ustawień';
 
   @override
-  String get settingProfilesEmpty => 'Brak zapisanych profili ustawień.';
+  String get settingsProfilesEmpty => 'Brak zapisanych profili ustawień.';
 
   @override
-  String get settingProfileDelete => 'Usuń';
+  String get settingsProfileDelete => 'Usuń';
 
   @override
-  String get settingProfileDeleteTitle => 'Usuń profil ustawień';
+  String get settingsProfileDeleteTitle => 'Usuń profil ustawień';
 
   @override
-  String get settingProfileDeleteInfo =>
+  String get settingsProfileDeleteInfo =>
       'Profil ustawień zostanie usunięty. Kontynuować?';
 
   @override
-  String get settingProfileDeleted => 'Profil ustawień został usunięty.';
+  String get settingsProfileDeleted => 'Profil ustawień został usunięty.';
 
   @override
-  String get settingProfileCreate => 'Utwórz';
+  String get settingsProfileCreate => 'Utwórz';
 
   @override
-  String get settingProfileCreated => 'Profil ustawień został utworzony.';
+  String get settingsProfileCreated => 'Profil ustawień został utworzony.';
 
   @override
-  String get settingProfileSaveSuccess => 'Profil ustawień został zapisany.';
+  String get settingsProfileSaveSuccess => 'Profil ustawień został zapisany.';
 
   @override
-  String get settingProfileLoad => 'Wczytaj';
+  String get settingsProfileLoad => 'Wczytaj';
 
   @override
-  String get settingProfileLoaded => 'Profil ustawień został załadowany.';
+  String get settingsProfileLoaded => 'Profil ustawień został załadowany.';
 
   @override
   String get moreSettings => 'Więcej ustawień...';

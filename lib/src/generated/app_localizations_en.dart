@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -291,7 +292,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String trackRecordingMoveSuccess(
-      Object firstTrackName, Object secondTrackName) {
+    Object firstTrackName,
+    Object secondTrackName,
+  ) {
     return 'Swapped location of #$firstTrackName and #$secondTrackName recordings.';
   }
 
@@ -481,44 +484,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get menuKeepScreenOn => 'Keep screen on';
 
   @override
-  String get settingProfile => 'Settings profile';
+  String get settingsProfile => 'Settings profile';
 
   @override
   String get settingsProfiles => 'Settings profiles';
 
   @override
-  String get settingProfilesListTitle => 'Settings profiles';
+  String get settingsProfilesListTitle => 'Settings profiles';
 
   @override
-  String get settingProfilesEmpty => 'Settings profiles list is empty.';
+  String get settingsProfilesEmpty => 'Settings profiles list is empty.';
 
   @override
-  String get settingProfileDelete => 'Delete';
+  String get settingsProfileDelete => 'Delete';
 
   @override
-  String get settingProfileDeleteTitle => 'Delete settings profile';
+  String get settingsProfileDeleteTitle => 'Delete Settings profile';
 
   @override
-  String get settingProfileDeleteInfo =>
+  String get settingsProfileDeleteInfo =>
       'Settings profile will be deleted. Continue?';
 
   @override
-  String get settingProfileDeleted => 'Settings profile deleted.';
+  String get settingsProfileDeleted => 'Settings profile deleted.';
 
   @override
-  String get settingProfileCreate => 'Create';
+  String get settingsProfileCreate => 'Create';
 
   @override
-  String get settingProfileCreated => 'Settings profile created.';
+  String get settingsProfileCreated => 'Settings profile created.';
 
   @override
-  String get settingProfileSaveSuccess => 'Settings profile saved.';
+  String get settingsProfileSaveSuccess => 'Settings profile saved.';
 
   @override
-  String get settingProfileLoad => 'Load';
+  String get settingsProfileLoad => 'Load';
 
-  @override
-  String get settingProfileLoaded => 'Settings profile loaded.';
+    @override
+  String get settingsProfileLoaded => 'Settings profile loaded.';
 
   @override
   String get moreSettings => 'More settings...';

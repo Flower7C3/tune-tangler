@@ -119,8 +119,8 @@ class SettingProfileWrapper {
     settingsProfile.gridRowsAmount = _settings.getConfig(AppConfigFieldKey.gridRowsAmount);
     settingsProfile.gridColsAmount = _settings.getConfig(AppConfigFieldKey.gridColsAmount);
     _settings.addProfile(settingsProfile);
-    Navigator.pop(_context, 'settingProfileCreate');
-    _uiHelper.toast(_trans.settingProfileCreated, icon: AppIcon.settingProfiles);
+    Navigator.pop(_context, 'settingsProfileCreate');
+    _uiHelper.toast(_trans.settingsProfileCreated, icon: AppIcon.settingsProfiles);
   }
 
   void load(SettingsProfile settingsProfile) {
@@ -138,15 +138,15 @@ class SettingProfileWrapper {
     _settings.setConfig(AppConfigFieldKey.wakelockEnabled, settingsProfile.wakelockEnabled);
     _settings.setConfig(AppConfigFieldKey.gridRowsAmount, settingsProfile.gridRowsAmount);
     _settings.setConfig(AppConfigFieldKey.gridColsAmount, settingsProfile.gridColsAmount);
-    Navigator.pop(_context, 'settingProfilesDialog');
-    _uiHelper.toast(_trans.settingProfileLoaded, icon: AppIcon.settingProfiles);
+    Navigator.pop(_context, 'settingsProfilesDialog');
+    _uiHelper.toast(_trans.settingsProfileLoaded, icon: AppIcon.settingsProfiles);
   }
 
   void delete(int index) {
     _settings.deleteProfile(index);
-    Navigator.pop(_context, 'settingProfilesDeleteDialog');
-    Navigator.pop(_context, 'settingProfilesDialog');
-    _uiHelper.toast(_trans.settingProfileDeleted, icon: AppIcon.settingProfiles);
+    Navigator.pop(_context, 'settingsProfilesDeleteDialog');
+    Navigator.pop(_context, 'settingsProfilesDialog');
+    _uiHelper.toast(_trans.settingsProfileDeleted, icon: AppIcon.settingsProfiles);
   }
 
   Text listTitle(SettingsProfile item) => _uiHelper.buildRichText(
