@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+printf "\n🚦 Running flutter analyze (pre-commit)...\n"
+
+if ! command -v flutter >/dev/null 2>&1; then
+  echo "⚠️  flutter not found on PATH. Skipping analyze."
+  exit 0
+fi
+
+if ! flutter analyze; then
+  echo "❌ Analyzer found errors. Fix them before committing."
+  exit 1
+fi
+
+echo "✅ Analyzer clean. Proceeding with commit."
+exit 0

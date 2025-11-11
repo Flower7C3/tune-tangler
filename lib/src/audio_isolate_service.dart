@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:isolate';
+
 import 'package:flutter/foundation.dart';
 
 /// Service for handling heavy audio operations in isolates
@@ -16,7 +17,7 @@ class AudioIsolateService {
 
     try {
       _receivePort = ReceivePort();
-      
+
       _isolate = await Isolate.spawn(
         _audioIsolateEntryPoint,
         _receivePort!.sendPort,
@@ -25,7 +26,7 @@ class AudioIsolateService {
 
       _sendPort = await _receivePort!.first as SendPort;
       _isInitialized = true;
-      
+
       debugPrint('AudioIsolate initialized successfully');
     } catch (e) {
       debugPrint('Failed to initialize AudioIsolate: $e');
@@ -50,17 +51,19 @@ class AudioIsolateService {
     }
 
     final completer = Completer<AudioProcessResult>();
-    
+
     _receivePort!.listen((message) {
       if (message is AudioProcessResult) {
         completer.complete(message);
       }
     });
 
-    _sendPort!.send(AudioProcessRequest(
-      type: AudioProcessType.processFile,
-      filePath: filePath,
-    ));
+    _sendPort!.send(
+      AudioProcessRequest(
+        type: AudioProcessType.processFile,
+        filePath: filePath,
+      ),
+    );
 
     return completer.future;
   }
@@ -72,17 +75,19 @@ class AudioIsolateService {
     }
 
     final completer = Completer<AudioMetadata>();
-    
+
     _receivePort!.listen((message) {
       if (message is AudioMetadata) {
         completer.complete(message);
       }
     });
 
-    _sendPort!.send(AudioProcessRequest(
-      type: AudioProcessType.analyzeMetadata,
-      filePath: filePath,
-    ));
+    _sendPort!.send(
+      AudioProcessRequest(
+        type: AudioProcessType.analyzeMetadata,
+        filePath: filePath,
+      ),
+    );
 
     return completer.future;
   }
@@ -98,19 +103,21 @@ class AudioIsolateService {
     }
 
     final completer = Completer<AudioConvertResult>();
-    
+
     _receivePort!.listen((message) {
       if (message is AudioConvertResult) {
         completer.complete(message);
       }
     });
 
-    _sendPort!.send(AudioProcessRequest(
-      type: AudioProcessType.convertFormat,
-      filePath: inputPath,
-      outputPath: outputPath,
-      targetFormat: targetFormat,
-    ));
+    _sendPort!.send(
+      AudioProcessRequest(
+        type: AudioProcessType.convertFormat,
+        filePath: inputPath,
+        outputPath: outputPath,
+        targetFormat: targetFormat,
+      ),
+    );
 
     return completer.future;
   }
@@ -143,29 +150,17 @@ void _audioIsolateEntryPoint(SendPort sendPort) {
             break;
         }
       } catch (e) {
-        sendPort.send(AudioProcessResult(
-          success: false,
-          error: e.toString(),
-        ));
+        sendPort.send(AudioProcessResult(success: false, error: e.toString()));
       }
     }
   });
 }
 
 /// Audio process request types
-enum AudioProcessType {
-  processFile,
-  analyzeMetadata,
-  convertFormat,
-}
+enum AudioProcessType { processFile, analyzeMetadata, convertFormat }
 
 /// Audio format types
-enum AudioFormat {
-  mp3,
-  wav,
-  aac,
-  ogg,
-}
+enum AudioFormat { mp3, wav, aac, ogg }
 
 /// Audio process request
 class AudioProcessRequest {
@@ -188,11 +183,7 @@ class AudioProcessResult {
   final String? error;
   final Map<String, dynamic>? data;
 
-  AudioProcessResult({
-    required this.success,
-    this.error,
-    this.data,
-  });
+  AudioProcessResult({required this.success, this.error, this.data});
 }
 
 /// Audio metadata

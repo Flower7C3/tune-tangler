@@ -8,15 +8,17 @@ class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key, required this.appWrapper});
 
   @override
-  Widget build(BuildContext context) => Builder(builder: (context) {
-        appWrapper.setContext(context);
-        HomeScreenManager homeScreenManager = HomeScreenManager(appWrapper);
-        return Scaffold(
-          key: appWrapper.scaffoldKey,
-          appBar: homeScreenManager.appBar,
-          drawer: homeScreenManager.drawer,
-          body: homeScreenManager.body,
-          bottomNavigationBar: homeScreenManager.bottomNavigationBar,
-        );
-      });
+  Widget build(BuildContext context) => Builder(
+    builder: (context) {
+      appWrapper.setContext(context);
+      HomeScreenManager homeScreenManager = HomeScreenManager(appWrapper);
+      return Scaffold(
+        key: appWrapper.scaffoldKey,
+        appBar: homeScreenManager.appBar,
+        drawer: homeScreenManager.drawer,
+        body: homeScreenManager.body,
+        bottomNavigationBar: homeScreenManager.bottomNavigationBar,
+      );
+    },
+  );
 }

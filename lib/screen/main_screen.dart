@@ -3,11 +3,11 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:record/record.dart';
 import 'package:tune_tangler/repository/track_repository.dart';
+import 'package:tune_tangler/screen/home_screen.dart';
 import 'package:tune_tangler/src/audio_isolate_service.dart';
 import 'package:tune_tangler/src/audio_memory_pool.dart';
 import 'package:tune_tangler/src/icon_optimization_service.dart';
 import 'package:tune_tangler/src/lazy_loading_manager.dart';
-import 'package:tune_tangler/screen/home_screen.dart';
 import 'package:tune_tangler/wrapper/app.dart';
 import 'package:tune_tangler/wrapper/hive_service.dart';
 import 'package:tune_tangler/wrapper/hive_settings_provider.dart';
@@ -18,7 +18,6 @@ import '../config/app_global_config.dart';
 import '../provider/permission_provider.dart';
 import '../src/generated/app_localizations.dart';
 
-
 class MainScreenApp extends StatefulWidget {
   const MainScreenApp({super.key});
 
@@ -26,7 +25,8 @@ class MainScreenApp extends StatefulWidget {
   State<MainScreenApp> createState() => _MainScreenAppState();
 }
 
-class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserver {
+class _MainScreenAppState extends State<MainScreenApp>
+    with WidgetsBindingObserver {
   late final AudioRecorder _audioRecorder;
   final FocusNode _focusNode = FocusNode();
   late HiveSettingsProvider _settings;
@@ -50,18 +50,20 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
     _trackRepository.stopTracksPlaying(_trackRepository.allTracks());
     _trackRepository.dispose(_trackRepository.allTracks());
     AudioIsolateService.dispose();
-    
+
     // Dispose optimization services
     AudioMemoryPool().dispose();
     IconOptimizationService().dispose();
     LazyLoadingManager().dispose();
-    
+
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused || state == AppLifecycleState.detached || state == AppLifecycleState.inactive) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached ||
+        state == AppLifecycleState.inactive) {
       _trackRepository.stopTracksPlaying(_trackRepository.allTracks());
     }
   }
@@ -70,7 +72,9 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
   Widget build(BuildContext context) {
     _settings = Provider.of<HiveSettingsProvider>(context);
     _trackRepository = TrackRepository(_settings);
-    WakelockPlus.toggle(enable: _settings.getConfig(AppConfigFieldKey.wakelockEnabled));
+    WakelockPlus.toggle(
+      enable: _settings.getConfig(AppConfigFieldKey.wakelockEnabled),
+    );
 
     AppWrapper appWrapper = AppWrapper(
       settings: _settings,
@@ -88,7 +92,8 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: AppGlobalConfig.languages.values<Locale>(),
-      localeResolutionCallback: (locale, supportedLocales) => _settings.getConfig(AppConfigFieldKey.locale, defaultValue: locale),
+      localeResolutionCallback: (locale, supportedLocales) =>
+          _settings.getConfig(AppConfigFieldKey.locale, defaultValue: locale),
       locale: _settings.getConfig(AppConfigFieldKey.locale),
       themeAnimationDuration: Duration(seconds: 0),
       theme: ThemeData(

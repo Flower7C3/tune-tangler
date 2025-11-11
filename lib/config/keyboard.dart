@@ -51,16 +51,46 @@ class AppKeyboardKeyMap {
       '/': _keyboardKeyID([LogicalKeyboardKey.slash]),
     },
     'E': {
-      '!': _keyboardKeyID([LogicalKeyboardKey.shift, LogicalKeyboardKey.digit1]),
-      '@': _keyboardKeyID([LogicalKeyboardKey.shift, LogicalKeyboardKey.digit2]),
-      '#': _keyboardKeyID([LogicalKeyboardKey.shift, LogicalKeyboardKey.digit3]),
-      '\$': _keyboardKeyID([LogicalKeyboardKey.shift, LogicalKeyboardKey.digit4]),
-      '%': _keyboardKeyID([LogicalKeyboardKey.shift, LogicalKeyboardKey.digit5]),
-      '^': _keyboardKeyID([LogicalKeyboardKey.shift, LogicalKeyboardKey.digit6]),
-      '&': _keyboardKeyID([LogicalKeyboardKey.shift, LogicalKeyboardKey.digit7]),
-      '*': _keyboardKeyID([LogicalKeyboardKey.shift, LogicalKeyboardKey.digit8]),
-      '(': _keyboardKeyID([LogicalKeyboardKey.shift, LogicalKeyboardKey.digit9]),
-      ')': _keyboardKeyID([LogicalKeyboardKey.shift, LogicalKeyboardKey.digit0]),
+      '!': _keyboardKeyID([
+        LogicalKeyboardKey.shift,
+        LogicalKeyboardKey.digit1,
+      ]),
+      '@': _keyboardKeyID([
+        LogicalKeyboardKey.shift,
+        LogicalKeyboardKey.digit2,
+      ]),
+      '#': _keyboardKeyID([
+        LogicalKeyboardKey.shift,
+        LogicalKeyboardKey.digit3,
+      ]),
+      '\$': _keyboardKeyID([
+        LogicalKeyboardKey.shift,
+        LogicalKeyboardKey.digit4,
+      ]),
+      '%': _keyboardKeyID([
+        LogicalKeyboardKey.shift,
+        LogicalKeyboardKey.digit5,
+      ]),
+      '^': _keyboardKeyID([
+        LogicalKeyboardKey.shift,
+        LogicalKeyboardKey.digit6,
+      ]),
+      '&': _keyboardKeyID([
+        LogicalKeyboardKey.shift,
+        LogicalKeyboardKey.digit7,
+      ]),
+      '*': _keyboardKeyID([
+        LogicalKeyboardKey.shift,
+        LogicalKeyboardKey.digit8,
+      ]),
+      '(': _keyboardKeyID([
+        LogicalKeyboardKey.shift,
+        LogicalKeyboardKey.digit9,
+      ]),
+      ')': _keyboardKeyID([
+        LogicalKeyboardKey.shift,
+        LogicalKeyboardKey.digit0,
+      ]),
     },
     'F': {
       'Q': _keyboardKeyID([LogicalKeyboardKey.shift, LogicalKeyboardKey.keyQ]),
@@ -84,7 +114,10 @@ class AppKeyboardKeyMap {
       'J': _keyboardKeyID([LogicalKeyboardKey.shift, LogicalKeyboardKey.keyJ]),
       'K': _keyboardKeyID([LogicalKeyboardKey.shift, LogicalKeyboardKey.keyK]),
       'L': _keyboardKeyID([LogicalKeyboardKey.shift, LogicalKeyboardKey.keyL]),
-      ':': _keyboardKeyID([LogicalKeyboardKey.shift, LogicalKeyboardKey.semicolon]),
+      ':': _keyboardKeyID([
+        LogicalKeyboardKey.shift,
+        LogicalKeyboardKey.semicolon,
+      ]),
     },
     'H': {
       'Z': _keyboardKeyID([LogicalKeyboardKey.shift, LogicalKeyboardKey.keyZ]),
@@ -94,13 +127,17 @@ class AppKeyboardKeyMap {
       'B': _keyboardKeyID([LogicalKeyboardKey.shift, LogicalKeyboardKey.keyB]),
       'N': _keyboardKeyID([LogicalKeyboardKey.shift, LogicalKeyboardKey.keyN]),
       'M': _keyboardKeyID([LogicalKeyboardKey.shift, LogicalKeyboardKey.keyM]),
-      '<': _keyboardKeyID([LogicalKeyboardKey.shift, LogicalKeyboardKey.period]),
+      '<': _keyboardKeyID([
+        LogicalKeyboardKey.shift,
+        LogicalKeyboardKey.period,
+      ]),
       '>': _keyboardKeyID([LogicalKeyboardKey.shift, LogicalKeyboardKey.comma]),
       '?': _keyboardKeyID([LogicalKeyboardKey.shift, LogicalKeyboardKey.slash]),
     },
   };
 
-  static String trackKeyboardKeyName(String rowName, int colIndex) => _keyboardKeysRows[rowName]?.keys.elementAt(colIndex) ?? '';
+  static String trackKeyboardKeyName(String rowName, int colIndex) =>
+      _keyboardKeysRows[rowName]?.keys.elementAt(colIndex) ?? '';
 
   static Iterable<String> gridRowNames() => _keyboardKeysRows.keys;
 
@@ -112,26 +149,35 @@ class AppKeyboardKeyMap {
     return items.toList();
   }
 
-  static String keyboardKeyName(int position) => keyboardKeyNames().elementAt(position);
+  static String keyboardKeyName(int position) =>
+      keyboardKeyNames().elementAt(position);
 
   static Map<String, String> _keyboardKeys() {
     var keyboardKeys = <String, String>{};
-    _keyboardKeysRows.forEach((row, keys) => keyboardKeys.addEntries(keys.entries));
+    _keyboardKeysRows.forEach(
+      (row, keys) => keyboardKeys.addEntries(keys.entries),
+    );
     return keyboardKeys;
   }
 
   static String? findPressedKeyName(KeyDownEvent event) {
     List<LogicalKeyboardKey> keys = [];
-    if (HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.shiftLeft) ||
-        HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.shiftRight)) {
+    if (HardwareKeyboard.instance.logicalKeysPressed.contains(
+          LogicalKeyboardKey.shiftLeft,
+        ) ||
+        HardwareKeyboard.instance.logicalKeysPressed.contains(
+          LogicalKeyboardKey.shiftRight,
+        )) {
       keys.add(LogicalKeyboardKey.shift);
     }
     keys.add(event.logicalKey);
     String keyId = AppKeyboardKeyMap._keyboardKeyID(keys);
 
-    String keyName = AppKeyboardKeyMap._keyboardKeys()
-        .entries
-        .firstWhere((element) => (element.value == keyId), orElse: () => MapEntry('Unknown', ''))
+    String keyName = AppKeyboardKeyMap._keyboardKeys().entries
+        .firstWhere(
+          (element) => (element.value == keyId),
+          orElse: () => MapEntry('Unknown', ''),
+        )
         .key
         .toString();
     if (keyName == 'Unknown') {

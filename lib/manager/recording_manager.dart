@@ -1,20 +1,21 @@
 import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
+import 'package:tune_tangler/adapter/track_audio_source.dart';
+import 'package:tune_tangler/config/app_config_fields.dart';
 import 'package:tune_tangler/config/app_global_config.dart';
 import 'package:tune_tangler/config/app_icon.dart';
 import 'package:tune_tangler/config/config_collection.dart';
-import 'package:tune_tangler/helper/ui_helper.dart';
-import 'package:tune_tangler/repository/track_repository.dart';
 import 'package:tune_tangler/entity/track.dart';
-import 'package:tune_tangler/adapter/track_audio_source.dart';
-import 'package:tune_tangler/config/app_config_fields.dart';
+import 'package:tune_tangler/helper/ui_helper.dart';
+import 'package:tune_tangler/main.dart';
+import 'package:tune_tangler/repository/track_repository.dart';
 import 'package:tune_tangler/src/generated/app_localizations.dart';
 import 'package:tune_tangler/wrapper/hive_settings_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:tune_tangler/main.dart';
 
 class RecordingManager {
   final HiveSettingsProvider _settings;
@@ -33,8 +34,12 @@ class RecordingManager {
 
   Future<void> importRecording(Track track) async {
     if (await Permission.audio.request().isGranted == false) {
-      _uiHelper.toast(_trans.trackRecordingImportNoPermissions(track.name.value),
-          icon: AppIcon.trackRecordingImport, type: ToastType.error, duration: 4);
+      _uiHelper.toast(
+        _trans.trackRecordingImportNoPermissions(track.name.value),
+        icon: AppIcon.trackRecordingImport,
+        type: ToastType.error,
+        duration: 4,
+      );
       return;
     }
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -42,7 +47,12 @@ class RecordingManager {
     );
 
     if (result == null) {
-      _uiHelper.toast(_trans.trackRecordingImportCancelled(track.name.value), icon: AppIcon.trackRecordingImport, type: ToastType.error, duration: 4);
+      _uiHelper.toast(
+        _trans.trackRecordingImportCancelled(track.name.value),
+        icon: AppIcon.trackRecordingImport,
+        type: ToastType.error,
+        duration: 4,
+      );
       return;
     }
     String sourcePath = result.files.single.path!;
@@ -58,18 +68,31 @@ class RecordingManager {
     track.setAudioSource(TrackAudioSource.file);
     _trackRepository.save(track);
 
-    _uiHelper.toast(_trans.trackRecordingImported(track.name.value), icon: AppIcon.trackRecordingImport);
+    _uiHelper.toast(
+      _trans.trackRecordingImported(track.name.value),
+      icon: AppIcon.trackRecordingImport,
+    );
   }
 
   RecordConfig _recordConfig() {
-    InputDevice? inputDevice = _settings.getConfig(AppConfigFieldKey.recordingInputDevice);
-    AudioEncoder audioEncoder = _settings.getConfig(AppConfigFieldKey.recordingAudioEncoder);
+    InputDevice? inputDevice = _settings.getConfig(
+      AppConfigFieldKey.recordingInputDevice,
+    );
+    AudioEncoder audioEncoder = _settings.getConfig(
+      AppConfigFieldKey.recordingAudioEncoder,
+    );
     int sampleRate = _settings.getConfig(AppConfigFieldKey.recordingSampleRate);
     int bitRate = _settings.getConfig(AppConfigFieldKey.recordingBitRate);
-    int channels = AppGlobalConfig.recordingAudioMode.decode(_settings.getConfig(AppConfigFieldKey.recordingAudioModeStereo));
+    int channels = AppGlobalConfig.recordingAudioMode.decode(
+      _settings.getConfig(AppConfigFieldKey.recordingAudioModeStereo),
+    );
     bool autoGain = _settings.getConfig(AppConfigFieldKey.recordingAutoGain);
-    bool echoCancel = _settings.getConfig(AppConfigFieldKey.recordingEchoCancel);
-    bool noiseSuppress = _settings.getConfig(AppConfigFieldKey.recordingNoiseSuppress);
+    bool echoCancel = _settings.getConfig(
+      AppConfigFieldKey.recordingEchoCancel,
+    );
+    bool noiseSuppress = _settings.getConfig(
+      AppConfigFieldKey.recordingNoiseSuppress,
+    );
     if (inputDevice == null) {
       return RecordConfig(
         encoder: audioEncoder,
@@ -116,14 +139,16 @@ class RecordingManager {
       }
 
       RecordConfig recordConfig = _recordConfig();
-      String fileExtension = AppGlobalConfig.recordingAudioEncoder.text(recordConfig.encoder, domain: ConfigItemPropertyDomain.extension);
-      String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-      String filePath = await getApplicationDocumentsDirectory().then((value) => '${value.path}/${track.id}.$timestamp.$fileExtension');
-
-      _audioRecorder.start(
-        recordConfig,
-        path: filePath,
+      String fileExtension = AppGlobalConfig.recordingAudioEncoder.text(
+        recordConfig.encoder,
+        domain: ConfigItemPropertyDomain.extension,
       );
+      String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+      String filePath = await getApplicationDocumentsDirectory().then(
+        (value) => '${value.path}/${track.id}.$timestamp.$fileExtension',
+      );
+
+      _audioRecorder.start(recordConfig, path: filePath);
 
       track.startTimer();
 
@@ -136,22 +161,30 @@ class RecordingManager {
 
       _showRecordingNotification(track);
     } catch (e) {
-      _uiHelper.toast(_trans.trackRecordingStartError(e.toString(), track.name.value), icon: AppIcon.exception, type: ToastType.error, duration: 4);
+      _uiHelper.toast(
+        _trans.trackRecordingStartError(e.toString(), track.name.value),
+        icon: AppIcon.exception,
+        type: ToastType.error,
+        duration: 4,
+      );
     }
   }
 
   Future<void> _showRecordingNotification(Track track) async {
-    AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      'recording_channel',
-      _trans.trackRecording,
-      importance: Importance.high,
-      priority: Priority.high,
-      ongoing: true,
-      silent: true,
-      onlyAlertOnce: true,
-    );
+    AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+          'recording_channel',
+          _trans.trackRecording,
+          importance: Importance.high,
+          priority: Priority.high,
+          ongoing: true,
+          silent: true,
+          onlyAlertOnce: true,
+        );
 
-    NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
+    NotificationDetails platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
+    );
 
     flutterLocalNotificationsPlugin.show(
       0,
@@ -167,7 +200,10 @@ class RecordingManager {
     track.stopTimer();
     track.setPath(null);
     _trackRepository.save(track);
-    _uiHelper.toast(_trans.trackRecordingCancelled(track.name.value), icon: AppGlobalConfig.trackState.icon(TrackState.empty));
+    _uiHelper.toast(
+      _trans.trackRecordingCancelled(track.name.value),
+      icon: AppGlobalConfig.trackState.icon(TrackState.empty),
+    );
   }
 
   Future<void> stopAndSaveRecording(Track track) async {
@@ -175,7 +211,10 @@ class RecordingManager {
       String? path = await _audioRecorder.stop();
       track.setRecorderState(RecorderState.ready);
       track.setPath(path);
-      _uiHelper.toast(_trans.trackRecordingStopSuccess(track.name.value), icon: AppGlobalConfig.trackState.icon(TrackState.idle));
+      _uiHelper.toast(
+        _trans.trackRecordingStopSuccess(track.name.value),
+        icon: AppGlobalConfig.trackState.icon(TrackState.idle),
+      );
       _trackRepository.save(track);
     } catch (e) {
       track.setRecorderState(RecorderState.empty);
@@ -185,7 +224,12 @@ class RecordingManager {
       track.setBitRate(null);
       track.setPath(null);
       _trackRepository.save(track);
-      _uiHelper.toast(_trans.trackRecordingStopError(e.toString(), track.name.value), icon: AppIcon.exception, type: ToastType.error, duration: 4);
+      _uiHelper.toast(
+        _trans.trackRecordingStopError(e.toString(), track.name.value),
+        icon: AppIcon.exception,
+        type: ToastType.error,
+        duration: 4,
+      );
     }
     flutterLocalNotificationsPlugin.cancel(0);
     track.stopTimer();

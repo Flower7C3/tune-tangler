@@ -8,32 +8,32 @@ class AudioMemoryPool {
 
   // Pool of reusable audio buffers
   final Map<int, List<Uint8List>> _bufferPools = {};
-  
+
   // Maximum number of buffers to keep in each pool
   static const int _maxPoolSize = 10;
-  
+
   // Buffer sizes to pool (common audio buffer sizes)
   static const List<int> _pooledSizes = [
-    1024,    // 1KB
-    2048,    // 2KB
-    4096,    // 4KB
-    8192,    // 8KB
-    16384,   // 16KB
-    32768,   // 32KB
-    65536,   // 64KB
+    1024, // 1KB
+    2048, // 2KB
+    4096, // 4KB
+    8192, // 8KB
+    16384, // 16KB
+    32768, // 32KB
+    65536, // 64KB
   ];
 
   /// Get a buffer from the pool or create a new one
   Uint8List getBuffer(int size) {
     // Find the closest pooled size
     final int poolSize = _getClosestPooledSize(size);
-    
-    if (_bufferPools.containsKey(poolSize) && 
+
+    if (_bufferPools.containsKey(poolSize) &&
         _bufferPools[poolSize]!.isNotEmpty) {
       // Return buffer from pool
       return _bufferPools[poolSize]!.removeLast();
     }
-    
+
     // Create new buffer if pool is empty
     return Uint8List(poolSize);
   }
@@ -41,16 +41,16 @@ class AudioMemoryPool {
   /// Return a buffer to the pool for reuse
   void returnBuffer(Uint8List buffer) {
     final int size = buffer.length;
-    
+
     // Only pool buffers of supported sizes
     if (!_pooledSizes.contains(size)) {
       return;
     }
-    
+
     if (!_bufferPools.containsKey(size)) {
       _bufferPools[size] = [];
     }
-    
+
     // Limit pool size to prevent memory bloat
     if (_bufferPools[size]!.length < _maxPoolSize) {
       // Clear buffer content before returning to pool
@@ -63,7 +63,7 @@ class AudioMemoryPool {
   int _getClosestPooledSize(int requestedSize) {
     int closest = _pooledSizes.first;
     int minDiff = (requestedSize - closest).abs();
-    
+
     for (int size in _pooledSizes) {
       int diff = (requestedSize - size).abs();
       if (diff < minDiff) {
@@ -71,7 +71,7 @@ class AudioMemoryPool {
         closest = size;
       }
     }
-    
+
     return closest;
   }
 
@@ -84,7 +84,7 @@ class AudioMemoryPool {
   /// Get pool statistics for debugging
   Map<String, dynamic> getPoolStats() {
     final Map<String, dynamic> stats = {};
-    
+
     for (int size in _pooledSizes) {
       if (_bufferPools.containsKey(size)) {
         stats['${size}B'] = _bufferPools[size]!.length;
@@ -92,7 +92,7 @@ class AudioMemoryPool {
         stats['${size}B'] = 0;
       }
     }
-    
+
     return stats;
   }
 

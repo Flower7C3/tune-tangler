@@ -33,7 +33,20 @@ class AppWrapper {
     context = ctx;
     trans = AppLocalizations.of(context)!;
     uiHelper = UIHelper(context);
-    RecordingManager recordingManager = RecordingManager(settings, trans, uiHelper, trackRepository, audioRecorder);
-    trackDetailsManager = TrackDetailsManager(context, settings, trans, uiHelper, trackRepository, recordingManager);
+    RecordingManager recordingManager = RecordingManager(
+      settings,
+      trans,
+      uiHelper,
+      trackRepository,
+      audioRecorder,
+    );
+    trackDetailsManager = TrackDetailsManager(
+      context,
+      settings,
+      trans,
+      uiHelper,
+      trackRepository,
+      recordingManager,
+    );
   }
 }

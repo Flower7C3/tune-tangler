@@ -6,7 +6,8 @@ import '../entity/track.dart';
 import 'hive_service.dart';
 
 class HiveSettingsProvider extends ChangeNotifier {
-  dynamic getConfig(dynamic key, {dynamic defaultValue}) => HiveService.get(key, defaultValue: defaultValue);
+  dynamic getConfig(dynamic key, {dynamic defaultValue}) =>
+      HiveService.get(key, defaultValue: defaultValue);
 
   Future<void> setConfig(AppConfigFieldKey key, dynamic value) async {
     HiveService.set(key, value);
@@ -25,7 +26,8 @@ class HiveSettingsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Track getTrack(int rowIndex, int columnIndex) => getAndInitializeTrack(rowIndex, columnIndex);
+  Track getTrack(int rowIndex, int columnIndex) =>
+      getAndInitializeTrack(rowIndex, columnIndex);
 
   Track getAndInitializeTrack(int rowIndex, int columnIndex) {
     Track track = HiveService.get(TrackId(rowIndex, columnIndex));

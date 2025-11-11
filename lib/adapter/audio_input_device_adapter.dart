@@ -1,10 +1,7 @@
 import 'package:hive/hive.dart';
 import 'package:record/record.dart';
 
-enum AudioInputDeviceAdapterKey {
-  id,
-  label,
-}
+enum AudioInputDeviceAdapterKey { id, label }
 
 class AudioInputDeviceAdapter extends TypeAdapter<InputDevice> {
   @override
@@ -13,7 +10,10 @@ class AudioInputDeviceAdapter extends TypeAdapter<InputDevice> {
   @override
   InputDevice read(BinaryReader reader) {
     final data = reader.readMap();
-    return InputDevice(id: data[AudioInputDeviceAdapterKey.id.toString()], label: data[AudioInputDeviceAdapterKey.label.toString()]);
+    return InputDevice(
+      id: data[AudioInputDeviceAdapterKey.id.toString()],
+      label: data[AudioInputDeviceAdapterKey.label.toString()],
+    );
   }
 
   @override

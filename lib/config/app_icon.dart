@@ -4,15 +4,17 @@ import 'package:material_symbols_icons/symbols.dart';
 import 'package:tune_tangler/helper/ui_helper.dart';
 
 class SvgColorMapper implements ColorMapper {
-  const SvgColorMapper({
-    required this.colors,
-  });
+  const SvgColorMapper({required this.colors});
 
   final Map<Color, Color?> colors;
 
   @override
   Color substitute(
-      String? id, String elementName, String attributeName, Color color) {
+    String? id,
+    String elementName,
+    String attributeName,
+    Color color,
+  ) {
     if (colors.containsKey(color)) {
       return colors[color] ?? color;
     }
@@ -23,17 +25,19 @@ class SvgColorMapper implements ColorMapper {
 
 class AppIcon {
   static Widget appLogo(Color shapeColor, Color detailColor) => SvgPicture(
-        SvgAssetLoader(
-          'assets/svg/logo-rgb.svg',
-          colorMapper: SvgColorMapper(colors: {
-            Color.fromRGBO(0, 0, 0, 1): shapeColor,
-            Color.fromRGBO(255, 0, 0, 1): detailColor,
-            Color.fromRGBO(0, 255, 0, 1): detailColor,
-            Color.fromRGBO(0, 0, 255, 1): detailColor,
-            Color.fromRGBO(255, 255, 255, 1): detailColor,
-          }),
-        ),
-      );
+    SvgAssetLoader(
+      'assets/svg/logo-rgb.svg',
+      colorMapper: SvgColorMapper(
+        colors: {
+          Color.fromRGBO(0, 0, 0, 1): shapeColor,
+          Color.fromRGBO(255, 0, 0, 1): detailColor,
+          Color.fromRGBO(0, 255, 0, 1): detailColor,
+          Color.fromRGBO(0, 0, 255, 1): detailColor,
+          Color.fromRGBO(255, 255, 255, 1): detailColor,
+        },
+      ),
+    ),
+  );
 
   static IconData language = Icons.translate_rounded;
   static IconData help = Icons.help_outline_rounded;
@@ -59,18 +63,20 @@ class AppIcon {
     Color? backgroundColor,
     Color? foregroundColor,
     required double size,
-  }) =>
-      Container(
-          width: size,
-          height: size,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: BorderRadius.all(Radius.circular(UIHelper.gridGap)),
-              shape: BoxShape.rectangle),
-          child: Text(keyName,
-              style: TextStyle(
-                  fontSize: size, height: 1.0, color: foregroundColor)));
+  }) => Container(
+    width: size,
+    height: size,
+    alignment: Alignment.center,
+    decoration: BoxDecoration(
+      color: backgroundColor,
+      borderRadius: BorderRadius.all(Radius.circular(UIHelper.gridGap)),
+      shape: BoxShape.rectangle,
+    ),
+    child: Text(
+      keyName,
+      style: TextStyle(fontSize: size, height: 1.0, color: foregroundColor),
+    ),
+  );
   static IconData trackPlaybackMode = Icons.replay_rounded;
   static IconData trackSinglePlaybackMode = Icons.repeat_one_rounded;
   static IconData trackRepeatPlaybackMode = Icons.repeat_rounded;

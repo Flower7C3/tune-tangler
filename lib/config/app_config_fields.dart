@@ -36,25 +36,49 @@ final class AppRecordingConfigField extends AppConfigField {
 
 final class AppConfigFieldsCollection {
   static final List<AppConfigField> _fields = <AppConfigField>[
-    AppScreenConfigField(AppConfigFieldKey.locale, AppGlobalConfig.languages.defaultValue),
+    AppScreenConfigField(
+      AppConfigFieldKey.locale,
+      AppGlobalConfig.languages.defaultValue,
+    ),
     AppScreenConfigField(AppConfigFieldKey.themeMode, ThemeMode.system),
-    AppScreenConfigField(AppConfigFieldKey.themeSeedColor, AppGlobalConfig.userInterfaceColor.defaultValue),
+    AppScreenConfigField(
+      AppConfigFieldKey.themeSeedColor,
+      AppGlobalConfig.userInterfaceColor.defaultValue,
+    ),
     AppScreenConfigField(AppConfigFieldKey.wakelockEnabled, false),
-    AppScreenConfigField(AppConfigFieldKey.gridRowsAmount, AppGlobalConfig.gridRows.defaultValue.toInt()),
-    AppScreenConfigField(AppConfigFieldKey.gridColsAmount, AppGlobalConfig.gridCols.defaultValue.toInt()),
+    AppScreenConfigField(
+      AppConfigFieldKey.gridRowsAmount,
+      AppGlobalConfig.gridRows.defaultValue.toInt(),
+    ),
+    AppScreenConfigField(
+      AppConfigFieldKey.gridColsAmount,
+      AppGlobalConfig.gridCols.defaultValue.toInt(),
+    ),
     AppRecordingConfigField(AppConfigFieldKey.recordingInputDevice, null),
-    AppRecordingConfigField(AppConfigFieldKey.recordingAudioEncoder, AppGlobalConfig.recordingAudioEncoder.defaultValue),
-    AppRecordingConfigField(AppConfigFieldKey.recordingSampleRate, AppGlobalConfig.recordingSampleRate.defaultValue),
-    AppRecordingConfigField(AppConfigFieldKey.recordingBitRate, AppGlobalConfig.recordingBitRate.defaultValue),
+    AppRecordingConfigField(
+      AppConfigFieldKey.recordingAudioEncoder,
+      AppGlobalConfig.recordingAudioEncoder.defaultValue,
+    ),
+    AppRecordingConfigField(
+      AppConfigFieldKey.recordingSampleRate,
+      AppGlobalConfig.recordingSampleRate.defaultValue,
+    ),
+    AppRecordingConfigField(
+      AppConfigFieldKey.recordingBitRate,
+      AppGlobalConfig.recordingBitRate.defaultValue,
+    ),
     AppRecordingConfigField(AppConfigFieldKey.recordingAudioModeStereo, true),
     AppRecordingConfigField(AppConfigFieldKey.recordingAutoGain, false),
     AppRecordingConfigField(AppConfigFieldKey.recordingEchoCancel, false),
     AppRecordingConfigField(AppConfigFieldKey.recordingNoiseSuppress, false),
   ];
 
-  static List<AppScreenConfigField> get screenList => _fields.whereType<AppScreenConfigField>().toList();
+  static List<AppScreenConfigField> get screenList =>
+      _fields.whereType<AppScreenConfigField>().toList();
 
-  static List<AppRecordingConfigField> get recordingList => _fields.whereType<AppRecordingConfigField>().toList();
+  static List<AppRecordingConfigField> get recordingList =>
+      _fields.whereType<AppRecordingConfigField>().toList();
 
-  static AppConfigField get(AppConfigFieldKey key) => _fields.firstWhere((item) => item.key == key);
+  static AppConfigField get(AppConfigFieldKey key) =>
+      _fields.firstWhere((item) => item.key == key);
 }

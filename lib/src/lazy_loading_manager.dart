@@ -8,10 +8,10 @@ class LazyLoadingManager {
 
   // Cache for loaded components
   final Map<String, Widget> _componentCache = {};
-  
+
   // Loading states
   final Map<String, bool> _loadingStates = {};
-  
+
   // Maximum cache size
   static const int _maxCacheSize = 50;
 
@@ -53,11 +53,11 @@ class LazyLoadingManager {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return placeholder ?? _buildLoadingPlaceholder();
         }
-        
+
         if (snapshot.hasError) {
           return placeholder ?? _buildErrorPlaceholder();
         }
-        
+
         return snapshot.data ?? (placeholder ?? _buildErrorPlaceholder());
       },
     );
@@ -68,11 +68,7 @@ class LazyLoadingManager {
     return const SizedBox(
       width: 100,
       height: 100,
-      child: Center(
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-        ),
-      ),
+      child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
     );
   }
 
@@ -82,11 +78,7 @@ class LazyLoadingManager {
       width: 100,
       height: 100,
       child: Center(
-        child: Icon(
-          Icons.error_outline,
-          color: Colors.red,
-          size: 24,
-        ),
+        child: Icon(Icons.error_outline, color: Colors.red, size: 24),
       ),
     );
   }
@@ -99,7 +91,7 @@ class LazyLoadingManager {
       final String oldestKey = _componentCache.keys.first;
       _componentCache.remove(oldestKey);
     }
-    
+
     _componentCache[key] = component;
   }
 
@@ -124,7 +116,9 @@ class LazyLoadingManager {
   Map<String, dynamic> getCacheStats() {
     return {
       'cachedComponents': _componentCache.length,
-      'loadingComponents': _loadingStates.values.where((loading) => loading).length,
+      'loadingComponents': _loadingStates.values
+          .where((loading) => loading)
+          .length,
       'maxCacheSize': _maxCacheSize,
     };
   }

@@ -54,18 +54,21 @@ class HomeScreenManager {
   Widget get drawer => _drawerManager.build;
 
   Widget get body => Focus(
-      focusNode: _appWrapper.focusNode,
-      autofocus: true,
-      onKeyEvent: keyEvent,
-      child: tracksList);
+    focusNode: _appWrapper.focusNode,
+    autofocus: true,
+    onKeyEvent: keyEvent,
+    child: tracksList,
+  );
 
   Widget get bottomNavigationBar => _navigationBarManager.buildFooter;
 
   Widget get tracksList {
-    final rowsAmount =
-        _appWrapper.settings.getConfig(AppConfigFieldKey.gridRowsAmount);
-    final colsAmount =
-        _appWrapper.settings.getConfig(AppConfigFieldKey.gridColsAmount);
+    final rowsAmount = _appWrapper.settings.getConfig(
+      AppConfigFieldKey.gridRowsAmount,
+    );
+    final colsAmount = _appWrapper.settings.getConfig(
+      AppConfigFieldKey.gridColsAmount,
+    );
 
     return ListView.builder(
       controller: PageController(viewportFraction: 0.85),
@@ -74,10 +77,12 @@ class HomeScreenManager {
         // Include locale in cache key to rebuild on language change
         key:
             'row_${rowIndex}_rows${rowsAmount}_cols${colsAmount}_locale_${_appWrapper.settings.getConfig(AppConfigFieldKey.locale).toLanguageTag()}',
-        builder: () => Row(children: [
-          _rowMenuManager.buildRowButtons(rowIndex),
-          _trackManager.buildRowTracks(rowIndex, colsAmount),
-        ]),
+        builder: () => Row(
+          children: [
+            _rowMenuManager.buildRowButtons(rowIndex),
+            _trackManager.buildRowTracks(rowIndex, colsAmount),
+          ],
+        ),
         placeholder: const SizedBox(height: 100),
       ),
     );

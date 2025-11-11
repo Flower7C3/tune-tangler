@@ -29,7 +29,8 @@ class TrackRepository {
 
   Set<Track> _lazyLoadCollection(int rowIndex) {
     String name = rowIndex < 0 ? 'all' : TrackRow.name(rowIndex);
-    if (!_tracksCollection.containsKey(name) || _tracksCollection[name]!.isEmpty) {
+    if (!_tracksCollection.containsKey(name) ||
+        _tracksCollection[name]!.isEmpty) {
       int colsAmount = _settings.getConfig(AppConfigFieldKey.gridColsAmount);
       if (rowIndex < 0) {
         int rowsAmount = _settings.getConfig(AppConfigFieldKey.gridRowsAmount);
@@ -154,10 +155,22 @@ class TrackRepository {
   }
 
   void resetTracksSettings(Set<Track> tracksList) {
-    setTracksPlaybackMode(tracksList, AppGlobalConfig.trackPlaybackReleaseMode.defaultValue);
-    setTracksPlaybackBalance(tracksList, AppGlobalConfig.trackPlaybackBalance.defaultValue);
-    setTracksPlaybackVolume(tracksList, AppGlobalConfig.trackPlaybackVolume.defaultValue);
-    setTracksPlaybackSpeed(tracksList, AppGlobalConfig.trackPlaybackSpeed.defaultValue);
+    setTracksPlaybackMode(
+      tracksList,
+      AppGlobalConfig.trackPlaybackReleaseMode.defaultValue,
+    );
+    setTracksPlaybackBalance(
+      tracksList,
+      AppGlobalConfig.trackPlaybackBalance.defaultValue,
+    );
+    setTracksPlaybackVolume(
+      tracksList,
+      AppGlobalConfig.trackPlaybackVolume.defaultValue,
+    );
+    setTracksPlaybackSpeed(
+      tracksList,
+      AppGlobalConfig.trackPlaybackSpeed.defaultValue,
+    );
     resetTracksPlaybackStartAtPosition(tracksList);
     resetTracksPlaybackEndAtPosition(tracksList);
     resetTracksName(tracksList);
@@ -179,7 +192,8 @@ class TrackRepository {
     }
     if (!canSwapTracks(track1, track2)) {
       throw Exception(
-          'Nie można zamienić tracków podczas nagrywania, odtwarzania lub przetwarzania');
+        'Nie można zamienić tracków podczas nagrywania, odtwarzania lub przetwarzania',
+      );
     }
 
     _isSwapping = true;
@@ -190,10 +204,16 @@ class TrackRepository {
 
     try {
       // 1. Tymczasowo zmieniamy nazwy plików aby uniknąć konfliktów
-      final tempPath1 =
-          await _createTempPathForSwap(track1.path, track1.id, 'temp_swap_1');
-      final tempPath2 =
-          await _createTempPathForSwap(track2.path, track2.id, 'temp_swap_2');
+      final tempPath1 = await _createTempPathForSwap(
+        track1.path,
+        track1.id,
+        'temp_swap_1',
+      );
+      final tempPath2 = await _createTempPathForSwap(
+        track2.path,
+        track2.id,
+        'temp_swap_2',
+      );
 
       if (track1.path != null && File(track1.path!).existsSync()) {
         await File(track1.path!).rename(tempPath1);
@@ -213,7 +233,11 @@ class TrackRepository {
       // W przypadku błędu próbujemy przywrócić oryginalne pliki
       try {
         await _restoreFilesAfterError(
-            track1, track2, tempTrack1Data, tempTrack2Data);
+          track1,
+          track2,
+          tempTrack1Data,
+          tempTrack2Data,
+        );
       } catch (restoreError) {
         debugPrint('Błąd przywracania plików: $restoreError');
       }
@@ -237,7 +261,10 @@ class TrackRepository {
 
   /// Tworzy tymczasową ścieżkę dla zamiany
   Future<String> _createTempPathForSwap(
-      String? originalPath, TrackId trackId, String tempPrefix) async {
+    String? originalPath,
+    TrackId trackId,
+    String tempPrefix,
+  ) async {
     if (originalPath == null || !File(originalPath).existsSync()) {
       return ''; // Brak pliku do przeniesienia
     }
@@ -251,10 +278,11 @@ class TrackRepository {
 
   /// Przywraca pliki w przypadku błędu (z użyciem map)
   Future<void> _restoreFilesAfterError(
-      Track track1,
-      Track track2,
-      Map<dynamic, dynamic> properties1,
-      Map<dynamic, dynamic> properties2) async {
+    Track track1,
+    Track track2,
+    Map<dynamic, dynamic> properties1,
+    Map<dynamic, dynamic> properties2,
+  ) async {
     try {
       // Przywracanie pliku dla track1
       if (properties1[TrackAdapterKey.path] != null) {

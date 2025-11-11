@@ -520,7 +520,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsProfileLoad => 'Load';
 
-    @override
+  @override
   String get settingsProfileLoaded => 'Settings profile loaded.';
 
   @override

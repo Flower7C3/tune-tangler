@@ -15,5 +15,6 @@ class PermissionProvider {
 
   PermissionStatus? get(Permission name) => _permissionStatuses[name];
 
-  void set(Permission name, PermissionStatus status) => _permissionStatuses[name] = status;
+  void set(Permission name, PermissionStatus status) =>
+      _permissionStatuses[name] = status;
 }

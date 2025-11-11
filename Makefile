@@ -313,7 +313,7 @@ gen-splash: ##UTILITIES## Generate splash screen
 # =============================================================================
 
 .PHONY: install-pre-commit-hook
-install-pre-commit-hook: ##UTILITIES## Install pre-commit hook for automatic version incrementing
+install-pre-commit-hook: ##UTILITIES## Install pre-commit hook to run flutter analyze
 	@echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Installing pre-commit hook...$(FORMAT_RESET)"
 	@if [ ! -d ".git" ]; then \
 		echo "$(COLOR_RED)$(ICON_ERROR) Error: Not in a git repository$(FORMAT_RESET)"; \
@@ -328,19 +328,19 @@ install-pre-commit-hook: ##UTILITIES## Install pre-commit hook for automatic ver
 		echo "$(COLOR_YELLOW)$(ICON_WARN) Pre-commit hook already exists, backing up...$(FORMAT_RESET)"; \
 		cp .git/hooks/pre-commit .git/hooks/pre-commit.backup; \
 	fi
-	@if [ -f "scripts/pre-commit" ]; then \
-		cp scripts/pre-commit .git/hooks/pre-commit; \
-		echo "$(COLOR_GREEN)$(ICON_CHECK) Pre-commit hook copied from scripts/$(FORMAT_RESET)"; \
+	@if [ -f ".githooks/pre-commit" ]; then \
+		cp .githooks/pre-commit .git/hooks/pre-commit; \
+		echo "$(COLOR_GREEN)$(ICON_CHECK) Pre-commit hook copied from .githooks/$(FORMAT_RESET)"; \
 	elif [ -f ".git/hooks/pre-commit" ]; then \
 		echo "$(COLOR_GREEN)$(ICON_CHECK) Pre-commit hook already in place$(FORMAT_RESET)"; \
 	else \
-		echo "$(COLOR_RED)$(ICON_ERROR) Error: Pre-commit hook not found in scripts/$(FORMAT_RESET)"; \
+		echo "$(COLOR_RED)$(ICON_ERROR) Error: Pre-commit hook not found in .githooks/$(FORMAT_RESET)"; \
 		exit 1; \
 	fi
 	@chmod +x .git/hooks/pre-commit
 	@if [ -x ".git/hooks/pre-commit" ]; then \
 		echo "$(COLOR_GREEN)$(ICON_CHECK) Pre-commit hook installed successfully!$(FORMAT_RESET)"; \
-		echo "$(COLOR_CYAN)$(ICON_INFO) Hook will now automatically increment minor version before each commit$(FORMAT_RESET)"; \
+		echo "$(COLOR_CYAN)$(ICON_INFO) Hook will now run 'flutter analyze' before each commit$(FORMAT_RESET)"; \
 		echo ""; \
 		echo "$(COLOR_YELLOW)$(ICON_INFO) To test:$(FORMAT_RESET)"; \
 		echo "   1. Make some changes to your code"; \

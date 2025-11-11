@@ -45,7 +45,7 @@ class AudioWarning {
   String toString() {
     return 'AudioWarning(type: $type, message: $message, severity: $severity)';
   }
-  
+
   /// Zwraca kolor ostrzeżenia na podstawie ważności
   Color getWarningColor() {
     switch (severity) {
@@ -57,7 +57,7 @@ class AudioWarning {
         return Colors.blue[800]!;
     }
   }
-  
+
   /// Zwraca ikonę ostrzeżenia na podstawie typu
   IconData getWarningTypeIcon() {
     switch (type) {
@@ -75,7 +75,7 @@ class AudioWarning {
         return AppIcon.exception;
     }
   }
-  
+
   /// Zwraca kolor dla listy ostrzeżeń na podstawie najwyższej ważności
   static Color getWarningColorForList(List<AudioWarning> warnings) {
     if (warnings.any((w) => w.severity == WarningSeverity.high)) {

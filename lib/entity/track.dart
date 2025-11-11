@@ -16,21 +16,9 @@ import '../config/config_collection.dart';
 import '../config/keyboard.dart';
 import 'track_row.dart';
 
-enum RecorderState {
-  empty,
-  recording,
-  processing,
-  ready,
-}
+enum RecorderState { empty, recording, processing, ready }
 
-enum TrackState {
-  empty,
-  recording,
-  processing,
-  idle,
-  playing,
-  paused,
-}
+enum TrackState { empty, recording, processing, idle, playing, paused }
 
 class TrackId {
   final int _rowIndex;
@@ -44,7 +32,9 @@ class TrackId {
   List<int> toList() => [_rowIndex, _colIndex];
 
   String get keyboardKey => AppKeyboardKeyMap.trackKeyboardKeyName(
-      TrackRow.name(_rowIndex), _colIndex);
+    TrackRow.name(_rowIndex),
+    _colIndex,
+  );
 }
 
 class Track {
@@ -59,23 +49,25 @@ class Track {
     _player = AudioPlayer();
     // Użyj normalnego trybu ale z konfiguracją audio pozwalającą na mieszanie
     _player.setPlayerMode(PlayerMode.mediaPlayer);
-    _player.setAudioContext(AudioContext(
-      iOS: AudioContextIOS(
-        category: AVAudioSessionCategory.playback,
-        options: {
-          AVAudioSessionOptions.mixWithOthers,
-          // Kluczowe dla jednoczesnego odtwarzania
-        },
+    _player.setAudioContext(
+      AudioContext(
+        iOS: AudioContextIOS(
+          category: AVAudioSessionCategory.playback,
+          options: {
+            AVAudioSessionOptions.mixWithOthers,
+            // Kluczowe dla jednoczesnego odtwarzania
+          },
+        ),
+        android: AudioContextAndroid(
+          isSpeakerphoneOn: true,
+          stayAwake: true,
+          contentType: AndroidContentType.music,
+          usageType: AndroidUsageType.media,
+          audioFocus:
+              AndroidAudioFocus.none, // Kluczowe - nie przejmuj audio focus
+        ),
       ),
-      android: AudioContextAndroid(
-        isSpeakerphoneOn: true,
-        stayAwake: true,
-        contentType: AndroidContentType.music,
-        usageType: AndroidUsageType.media,
-        audioFocus:
-            AndroidAudioFocus.none, // Kluczowe - nie przejmuj audio focus
-      ),
-    ));
+    );
   }
 
   ///*************************************************************************************************************************************************
@@ -99,8 +91,9 @@ class Track {
   Duration? _lastDurationUpdate;
   PlayerState? _lastPlayerStateUpdate;
 
-  static const Duration _throttleInterval =
-      Duration(milliseconds: 16); // 60 FPS
+  static const Duration _throttleInterval = Duration(
+    milliseconds: 16,
+  ); // 60 FPS
 
   void setStreamsInitialized() {
     durationSubscription = player.onDurationChanged.listen((Duration value) {
@@ -111,8 +104,9 @@ class Track {
       _throttledPositionUpdate(position);
     });
 
-    playerStateChangeSubscription =
-        player.onPlayerStateChanged.listen((PlayerState state) {
+    playerStateChangeSubscription = player.onPlayerStateChanged.listen((
+      PlayerState state,
+    ) {
       _throttledPlayerStateUpdate(state);
     });
 
@@ -232,20 +226,24 @@ class Track {
     progress.value = (durationAfterCut.value.inMilliseconds == 0)
         ? 0
         : positionAfterCut.value.inMilliseconds /
-            durationAfterCut.value.inMilliseconds;
+              durationAfterCut.value.inMilliseconds;
   }
 
   void _updatePositionCut() {
     positionAfterCut.value = Duration(
-        milliseconds: position.value.inMilliseconds -
-            playbackStartAtPosition.value.inMilliseconds);
+      milliseconds:
+          position.value.inMilliseconds -
+          playbackStartAtPosition.value.inMilliseconds,
+    );
     _updateProgress();
   }
 
   void _updateDurationCut() {
     durationAfterCut.value = Duration(
-        milliseconds: playbackEndAtPosition.value.inMilliseconds -
-            playbackStartAtPosition.value.inMilliseconds);
+      milliseconds:
+          playbackEndAtPosition.value.inMilliseconds -
+          playbackStartAtPosition.value.inMilliseconds,
+    );
     _updateProgress();
   }
 
@@ -254,11 +252,12 @@ class Track {
 
   IconData? get playbackStartAtPositionIcon =>
       (playbackStartAtPosition.value.inMilliseconds > 0)
-          ? AppIcon.trackPlaybackStartAtPosition
-          : null;
+      ? AppIcon.trackPlaybackStartAtPosition
+      : null;
 
-  final ValueNotifier<Duration> playbackStartAtPosition =
-      ValueNotifier(Duration());
+  final ValueNotifier<Duration> playbackStartAtPosition = ValueNotifier(
+    Duration(),
+  );
 
   void resetPlaybackStartAtPosition() => setPlaybackStartAtPosition(Duration());
 
@@ -290,12 +289,13 @@ class Track {
 
   IconData? get playbackEndAtPositionIcon =>
       (playbackEndAtPosition.value.inMilliseconds !=
-              duration.value.inMilliseconds)
-          ? AppIcon.trackPlaybackEndAtPosition
-          : null;
+          duration.value.inMilliseconds)
+      ? AppIcon.trackPlaybackEndAtPosition
+      : null;
 
-  final ValueNotifier<Duration> playbackEndAtPosition =
-      ValueNotifier(Duration());
+  final ValueNotifier<Duration> playbackEndAtPosition = ValueNotifier(
+    Duration(),
+  );
 
   void resetPlaybackEndAtPosition() => setPlaybackEndAtPosition(duration.value);
 
@@ -358,7 +358,9 @@ class Track {
   void stopPlaying() {
     if (path != null) {
       player.stop().then((status) {
-        setPosition(playbackStartAtPosition.value); // Ustaw pozycję po zatrzymaniu
+        setPosition(
+          playbackStartAtPosition.value,
+        ); // Ustaw pozycję po zatrzymaniu
       });
     }
   }
@@ -370,11 +372,13 @@ class Track {
 
   String? get path => _path;
 
-  void setPath(String? newPath,
-      {Duration? playbackStartAtPosition,
-      Duration? playbackEndAtPosition,
-      bool preserveDuration = false,
-      bool preservePlaybackPositions = false}) {
+  void setPath(
+    String? newPath, {
+    Duration? playbackStartAtPosition,
+    Duration? playbackEndAtPosition,
+    bool preserveDuration = false,
+    bool preservePlaybackPositions = false,
+  }) {
     if (newPath == null) {
       if (path != null && File(path!).existsSync()) {
         File(path!).delete();
@@ -394,25 +398,28 @@ class Track {
     player.setReleaseMode(playbackReleaseMode.value);
     player.setPlaybackRate(playbackSpeed.value);
     _path = newPath;
-    player.setSourceDeviceFile(newPath).then((value) async {
-      Duration trackDuration = await player.getDuration() ?? Duration();
-      if (!preserveDuration) {
-        setDuration(trackDuration);
-      }
-      if (!preservePlaybackPositions) {
-        setPosition(Duration());
-        setPlaybackStartAtPosition(playbackStartAtPosition ?? Duration());
-        setPlaybackEndAtPosition(playbackEndAtPosition ?? trackDuration);
-      } else {
-        // Gdy preservePlaybackPositions=true, ustaw pozycję na Duration()
-        // Pozycje odtwarzania będą ustawione po wywołaniu setPath
-        setPosition(Duration());
-      }
-      setRecorderState(RecorderState.ready);
-    }).onError((error, stack) {
-      debugPrint('Error in setPath: $error');
-      _clearPath();
-    });
+    player
+        .setSourceDeviceFile(newPath)
+        .then((value) async {
+          Duration trackDuration = await player.getDuration() ?? Duration();
+          if (!preserveDuration) {
+            setDuration(trackDuration);
+          }
+          if (!preservePlaybackPositions) {
+            setPosition(Duration());
+            setPlaybackStartAtPosition(playbackStartAtPosition ?? Duration());
+            setPlaybackEndAtPosition(playbackEndAtPosition ?? trackDuration);
+          } else {
+            // Gdy preservePlaybackPositions=true, ustaw pozycję na Duration()
+            // Pozycje odtwarzania będą ustawione po wywołaniu setPath
+            setPosition(Duration());
+          }
+          setRecorderState(RecorderState.ready);
+        })
+        .onError((error, stack) {
+          debugPrint('Error in setPath: $error');
+          _clearPath();
+        });
   }
 
   void _clearPath() {
@@ -440,10 +447,10 @@ class Track {
   }
 
   IconData? get audioSourceIcon => switch (audioSource) {
-        TrackAudioSource.recording => AppIcon.trackAudioSourceRecorded,
-        TrackAudioSource.file => AppIcon.trackAudioSourceImported,
-        _ => null
-      };
+    TrackAudioSource.recording => AppIcon.trackAudioSourceRecorded,
+    TrackAudioSource.file => AppIcon.trackAudioSourceImported,
+    _ => null,
+  };
 
   AudioEncoder? _audioEncoder;
 
@@ -479,16 +486,18 @@ class Track {
     updateState();
   }
 
-  final ValueNotifier<RecorderState> recorderState =
-      ValueNotifier(RecorderState.empty);
+  final ValueNotifier<RecorderState> recorderState = ValueNotifier(
+    RecorderState.empty,
+  );
 
   void setRecorderState(RecorderState state) {
     recorderState.value = state;
     updateState();
   }
 
-  final ValueNotifier<TrackState> state =
-      ValueNotifier(AppGlobalConfig.trackState.defaultValue);
+  final ValueNotifier<TrackState> state = ValueNotifier(
+    AppGlobalConfig.trackState.defaultValue,
+  );
 
   void updateState() {
     state.value = switch (recorderState.value) {
@@ -496,32 +505,42 @@ class Track {
       RecorderState.recording => TrackState.recording,
       RecorderState.processing => TrackState.processing,
       RecorderState.ready => switch (_playerState) {
-          PlayerState.playing => TrackState.playing,
-          PlayerState.paused => TrackState.paused,
-          _ => TrackState.idle,
-        },
+        PlayerState.playing => TrackState.playing,
+        PlayerState.paused => TrackState.paused,
+        _ => TrackState.idle,
+      },
     };
   }
 
   IconData get stateIcon => AppGlobalConfig.trackState.icon(state.value);
 
   Color stateForegroundColor(BuildContext context) =>
-      AppGlobalConfig.trackState.color(state.value,
-          context: context, domain: ConfigItemPropertyDomain.foregroundColor);
+      AppGlobalConfig.trackState.color(
+        state.value,
+        context: context,
+        domain: ConfigItemPropertyDomain.foregroundColor,
+      );
 
   Color stateBackgroundColor(BuildContext context) =>
-      AppGlobalConfig.trackState.color(state.value,
-          context: context, domain: ConfigItemPropertyDomain.backgroundColor);
+      AppGlobalConfig.trackState.color(
+        state.value,
+        context: context,
+        domain: ConfigItemPropertyDomain.backgroundColor,
+      );
 
   Color stateProgressColor(BuildContext context) =>
-      AppGlobalConfig.trackState.color(state.value,
-          context: context, domain: ConfigItemPropertyDomain.progressColor);
+      AppGlobalConfig.trackState.color(
+        state.value,
+        context: context,
+        domain: ConfigItemPropertyDomain.progressColor,
+      );
 
   ///*************************************************************************************************************************************************
   /// PLAYBACK VOLUME
 
-  final ValueNotifier<double> playbackVolume =
-      ValueNotifier(AppGlobalConfig.trackPlaybackVolume.defaultValue);
+  final ValueNotifier<double> playbackVolume = ValueNotifier(
+    AppGlobalConfig.trackPlaybackVolume.defaultValue,
+  );
 
   void setPlaybackVolume(double value) {
     player.setVolume(value);
@@ -543,8 +562,9 @@ class Track {
   ///*************************************************************************************************************************************************
   /// PLAYBACK BALANCE
 
-  final ValueNotifier<double> playbackBalance =
-      ValueNotifier(AppGlobalConfig.trackPlaybackBalance.defaultValue);
+  final ValueNotifier<double> playbackBalance = ValueNotifier(
+    AppGlobalConfig.trackPlaybackBalance.defaultValue,
+  );
 
   void setPlaybackBalance(double value) {
     player.setBalance(value);
@@ -554,8 +574,9 @@ class Track {
   ///*************************************************************************************************************************************************
   /// PLAYBACK MODE
 
-  final ValueNotifier<ReleaseMode> playbackReleaseMode =
-      ValueNotifier(AppGlobalConfig.trackPlaybackReleaseMode.defaultValue);
+  final ValueNotifier<ReleaseMode> playbackReleaseMode = ValueNotifier(
+    AppGlobalConfig.trackPlaybackReleaseMode.defaultValue,
+  );
 
   static bool isPlaybackReleaseModeSingle(ReleaseMode mode) =>
       mode == ReleaseMode.stop;
@@ -567,16 +588,18 @@ class Track {
 
   void togglePlaybackMode() {
     setPlaybackReleaseMode(
-        isPlaybackReleaseModeSingle(playbackReleaseMode.value)
-            ? ReleaseMode.loop
-            : ReleaseMode.stop);
+      isPlaybackReleaseModeSingle(playbackReleaseMode.value)
+          ? ReleaseMode.loop
+          : ReleaseMode.stop,
+    );
   }
 
   ///*************************************************************************************************************************************************
   /// PLAYBACK SPEED
 
-  final ValueNotifier<double> playbackSpeed =
-      ValueNotifier(AppGlobalConfig.trackPlaybackSpeed.defaultValue);
+  final ValueNotifier<double> playbackSpeed = ValueNotifier(
+    AppGlobalConfig.trackPlaybackSpeed.defaultValue,
+  );
 
   void setPlaybackSpeed(double value) {
     player.setPlaybackRate(value);
@@ -622,8 +645,11 @@ class Track {
           .replaceFirst(RegExp(r'^[^.]+'), id.toString());
       String newFilePath = "${appDir.path}/$newFileName";
       File newFile = oldFile.renameSync(newFilePath);
-      setPath(newFile.path,
-          preserveDuration: true, preservePlaybackPositions: true);
+      setPath(
+        newFile.path,
+        preserveDuration: true,
+        preservePlaybackPositions: true,
+      );
     } catch (e) {
       _path = null;
       setRecorderState(RecorderState.empty);
@@ -651,64 +677,84 @@ class Track {
     Track track = Track(trackId);
     track.setName(data[TrackAdapterKey.name]);
     track.setPlaybackReleaseMode(
-        ReleaseMode.values[data[TrackAdapterKey.playbackReleaseMode]]);
-    track.setPlaybackVolume(data[TrackAdapterKey.playbackVolume] ??
-        AppGlobalConfig.trackPlaybackVolume.defaultValue);
-    track.setPlaybackBalance(data[TrackAdapterKey.playbackBalance] ??
-        AppGlobalConfig.trackPlaybackBalance.defaultValue);
-    track.setPlaybackSpeed(data[TrackAdapterKey.playbackSpeed] ??
-        AppGlobalConfig.trackPlaybackSpeed.defaultValue);
+      ReleaseMode.values[data[TrackAdapterKey.playbackReleaseMode]],
+    );
+    track.setPlaybackVolume(
+      data[TrackAdapterKey.playbackVolume] ??
+          AppGlobalConfig.trackPlaybackVolume.defaultValue,
+    );
+    track.setPlaybackBalance(
+      data[TrackAdapterKey.playbackBalance] ??
+          AppGlobalConfig.trackPlaybackBalance.defaultValue,
+    );
+    track.setPlaybackSpeed(
+      data[TrackAdapterKey.playbackSpeed] ??
+          AppGlobalConfig.trackPlaybackSpeed.defaultValue,
+    );
     track.setKeyboardKey(data[TrackAdapterKey.keyboardKey] ?? '');
-    track.setAudioSource(data[TrackAdapterKey.audioSource] != null
-        ? TrackAudioSource.values[data[TrackAdapterKey.audioSource]]
-        : null);
-    track.setAudioEncoder(data[TrackAdapterKey.audioEncoder] != null
-        ? AudioEncoder.values[data[TrackAdapterKey.audioEncoder]]
-        : null);
+    track.setAudioSource(
+      data[TrackAdapterKey.audioSource] != null
+          ? TrackAudioSource.values[data[TrackAdapterKey.audioSource]]
+          : null,
+    );
+    track.setAudioEncoder(
+      data[TrackAdapterKey.audioEncoder] != null
+          ? AudioEncoder.values[data[TrackAdapterKey.audioEncoder]]
+          : null,
+    );
     track.setSampleRate(data[TrackAdapterKey.sampleRate]);
     track.setBitRate(data[TrackAdapterKey.bitRate]);
-    track.setPath(data[TrackAdapterKey.path],
-        playbackStartAtPosition: data[TrackAdapterKey.playbackStartAtPosition],
-        playbackEndAtPosition: data[TrackAdapterKey.playbackEndAtPosition]);
+    track.setPath(
+      data[TrackAdapterKey.path],
+      playbackStartAtPosition: data[TrackAdapterKey.playbackStartAtPosition],
+      playbackEndAtPosition: data[TrackAdapterKey.playbackEndAtPosition],
+    );
     track.updateState();
     return track;
   }
 
   Map<TrackAdapterKey, dynamic> toMap() => {
-        TrackAdapterKey.trackId: id,
-        TrackAdapterKey.name: name.value,
-        TrackAdapterKey.path: path,
-        TrackAdapterKey.playbackReleaseMode: playbackReleaseMode.value.index,
-        TrackAdapterKey.playbackVolume: playbackVolume.value,
-        TrackAdapterKey.playbackBalance: playbackBalance.value,
-        TrackAdapterKey.playbackSpeed: playbackSpeed.value,
-        TrackAdapterKey.playbackStartAtPosition: playbackStartAtPosition.value,
-        TrackAdapterKey.playbackEndAtPosition: playbackEndAtPosition.value,
-        TrackAdapterKey.keyboardKey: keyboardKey.value,
-        TrackAdapterKey.audioSource: audioSource?.index,
-        TrackAdapterKey.audioEncoder: audioEncoder?.index,
-        TrackAdapterKey.sampleRate: sampleRate,
-        TrackAdapterKey.bitRate: bitRate,
-      };
-
+    TrackAdapterKey.trackId: id,
+    TrackAdapterKey.name: name.value,
+    TrackAdapterKey.path: path,
+    TrackAdapterKey.playbackReleaseMode: playbackReleaseMode.value.index,
+    TrackAdapterKey.playbackVolume: playbackVolume.value,
+    TrackAdapterKey.playbackBalance: playbackBalance.value,
+    TrackAdapterKey.playbackSpeed: playbackSpeed.value,
+    TrackAdapterKey.playbackStartAtPosition: playbackStartAtPosition.value,
+    TrackAdapterKey.playbackEndAtPosition: playbackEndAtPosition.value,
+    TrackAdapterKey.keyboardKey: keyboardKey.value,
+    TrackAdapterKey.audioSource: audioSource?.index,
+    TrackAdapterKey.audioEncoder: audioEncoder?.index,
+    TrackAdapterKey.sampleRate: sampleRate,
+    TrackAdapterKey.bitRate: bitRate,
+  };
 
   /// Stosuje właściwości z mapy danych na docelowym tracku
   Future<void> applyTrackPropertiesFromMap(
-      Map<TrackAdapterKey, dynamic> properties, String tempSourcePath) async {
+    Map<TrackAdapterKey, dynamic> properties,
+    String tempSourcePath,
+  ) async {
     final originalId = properties[TrackAdapterKey.trackId] as TrackId;
 
     // 1. Ustawiamy podstawowe właściwości
-    setName(properties[TrackAdapterKey.name] == originalId.toString()
-        ? id.toString()
-        : properties[TrackAdapterKey.name]);
+    setName(
+      properties[TrackAdapterKey.name] == originalId.toString()
+          ? id.toString()
+          : properties[TrackAdapterKey.name],
+    );
 
-    setAudioSource(properties[TrackAdapterKey.audioSource] != null
-        ? TrackAudioSource.values[properties[TrackAdapterKey.audioSource]]
-        : null);
+    setAudioSource(
+      properties[TrackAdapterKey.audioSource] != null
+          ? TrackAudioSource.values[properties[TrackAdapterKey.audioSource]]
+          : null,
+    );
 
-    setAudioEncoder(properties[TrackAdapterKey.audioEncoder] != null
-        ? AudioEncoder.values[properties[TrackAdapterKey.audioEncoder]]
-        : null);
+    setAudioEncoder(
+      properties[TrackAdapterKey.audioEncoder] != null
+          ? AudioEncoder.values[properties[TrackAdapterKey.audioEncoder]]
+          : null,
+    );
 
     setSampleRate(properties[TrackAdapterKey.sampleRate]);
     setBitRate(properties[TrackAdapterKey.bitRate]);
@@ -740,8 +786,9 @@ class Track {
       try {
         final oldFile = File(properties[TrackAdapterKey.path]!);
         final appDir = await getApplicationDocumentsDirectory();
-        final originalExtension =
-            path_provider.extension(properties[TrackAdapterKey.path]!);
+        final originalExtension = path_provider.extension(
+          properties[TrackAdapterKey.path]!,
+        );
         final newFileName = '${id.toString()}$originalExtension';
         newPath = "${appDir.path}/$newFileName";
 
@@ -761,9 +808,11 @@ class Track {
 
     // 4. Ustawiamy duration i position
     setDuration(
-        properties[TrackAdapterKey.playbackEndAtPosition] ?? Duration());
+      properties[TrackAdapterKey.playbackEndAtPosition] ?? Duration(),
+    );
     setPosition(
-        properties[TrackAdapterKey.playbackStartAtPosition] ?? Duration());
+      properties[TrackAdapterKey.playbackStartAtPosition] ?? Duration(),
+    );
 
     // 5. Ustawiamy playback positions
     playbackStartAtPosition.value =
@@ -781,14 +830,18 @@ class Track {
         await player.setSourceDeviceFile(newPath);
 
         // Ustaw parametry odtwarzania z properties
-        final volume = properties[TrackAdapterKey.playbackVolume] ??
+        final volume =
+            properties[TrackAdapterKey.playbackVolume] ??
             AppGlobalConfig.trackPlaybackVolume.defaultValue;
-        final balance = properties[TrackAdapterKey.playbackBalance] ??
+        final balance =
+            properties[TrackAdapterKey.playbackBalance] ??
             AppGlobalConfig.trackPlaybackBalance.defaultValue;
-        final releaseMode = ReleaseMode.values[
-            properties[TrackAdapterKey.playbackReleaseMode] ??
+        final releaseMode =
+            ReleaseMode.values[properties[TrackAdapterKey
+                    .playbackReleaseMode] ??
                 AppGlobalConfig.trackPlaybackReleaseMode.defaultValue.index];
-        final speed = properties[TrackAdapterKey.playbackSpeed] ??
+        final speed =
+            properties[TrackAdapterKey.playbackSpeed] ??
             AppGlobalConfig.trackPlaybackSpeed.defaultValue;
 
         player.setVolume(volume);
@@ -807,15 +860,22 @@ class Track {
     }
 
     // 7. Ustawiamy playback controls z properties
-    setPlaybackVolume(properties[TrackAdapterKey.playbackVolume] ??
-        AppGlobalConfig.trackPlaybackVolume.defaultValue);
-    setPlaybackBalance(properties[TrackAdapterKey.playbackBalance] ??
-        AppGlobalConfig.trackPlaybackBalance.defaultValue);
-    setPlaybackReleaseMode(ReleaseMode.values[
-        properties[TrackAdapterKey.playbackReleaseMode] ??
-            AppGlobalConfig.trackPlaybackReleaseMode.defaultValue.index]);
-    setPlaybackSpeed(properties[TrackAdapterKey.playbackSpeed] ??
-        AppGlobalConfig.trackPlaybackSpeed.defaultValue);
+    setPlaybackVolume(
+      properties[TrackAdapterKey.playbackVolume] ??
+          AppGlobalConfig.trackPlaybackVolume.defaultValue,
+    );
+    setPlaybackBalance(
+      properties[TrackAdapterKey.playbackBalance] ??
+          AppGlobalConfig.trackPlaybackBalance.defaultValue,
+    );
+    setPlaybackReleaseMode(
+      ReleaseMode.values[properties[TrackAdapterKey.playbackReleaseMode] ??
+          AppGlobalConfig.trackPlaybackReleaseMode.defaultValue.index],
+    );
+    setPlaybackSpeed(
+      properties[TrackAdapterKey.playbackSpeed] ??
+          AppGlobalConfig.trackPlaybackSpeed.defaultValue,
+    );
 
     // 8. Przywracamy recorderState na podstawie dostępności pliku
     recorderState.value = (newPath != null && File(newPath).existsSync())

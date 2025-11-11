@@ -1,4 +1,3 @@
-
 import 'package:hive/hive.dart';
 
 import '../config/app_config_fields.dart';

@@ -21,14 +21,21 @@ class SettingsProfile {
 
   static SettingsProfile fromMap(Map data) {
     SettingsProfile settingsProfile = SettingsProfile();
-    settingsProfile.recordingInputDevice = data[AppConfigFieldKey.recordingInputDevice];
-    settingsProfile.recordingAudioEncoder = data[AppConfigFieldKey.recordingAudioEncoder];
-    settingsProfile.recordingSampleRate = data[AppConfigFieldKey.recordingSampleRate];
+    settingsProfile.recordingInputDevice =
+        data[AppConfigFieldKey.recordingInputDevice];
+    settingsProfile.recordingAudioEncoder =
+        data[AppConfigFieldKey.recordingAudioEncoder];
+    settingsProfile.recordingSampleRate =
+        data[AppConfigFieldKey.recordingSampleRate];
     settingsProfile.recordingBitRate = data[AppConfigFieldKey.recordingBitRate];
-    settingsProfile.recordingAudioModeStereo = data[AppConfigFieldKey.recordingAudioModeStereo];
-    settingsProfile.recordingAutoGain = data[AppConfigFieldKey.recordingAutoGain];
-    settingsProfile.recordingEchoCancel = data[AppConfigFieldKey.recordingEchoCancel];
-    settingsProfile.recordingNoiseSuppress = data[AppConfigFieldKey.recordingNoiseSuppress];
+    settingsProfile.recordingAudioModeStereo =
+        data[AppConfigFieldKey.recordingAudioModeStereo];
+    settingsProfile.recordingAutoGain =
+        data[AppConfigFieldKey.recordingAutoGain];
+    settingsProfile.recordingEchoCancel =
+        data[AppConfigFieldKey.recordingEchoCancel];
+    settingsProfile.recordingNoiseSuppress =
+        data[AppConfigFieldKey.recordingNoiseSuppress];
     settingsProfile.locale = data[AppConfigFieldKey.locale];
     settingsProfile.themeMode = data[AppConfigFieldKey.themeMode];
     settingsProfile.themeSeedColor = data[AppConfigFieldKey.themeSeedColor];
@@ -39,19 +46,19 @@ class SettingsProfile {
   }
 
   Map toMap() => {
-        AppConfigFieldKey.recordingInputDevice: recordingInputDevice,
-        AppConfigFieldKey.recordingAudioEncoder: recordingAudioEncoder,
-        AppConfigFieldKey.recordingSampleRate: recordingSampleRate,
-        AppConfigFieldKey.recordingBitRate: recordingBitRate,
-        AppConfigFieldKey.recordingAudioModeStereo: recordingAudioModeStereo,
-        AppConfigFieldKey.recordingAutoGain: recordingAutoGain,
-        AppConfigFieldKey.recordingEchoCancel: recordingEchoCancel,
-        AppConfigFieldKey.recordingNoiseSuppress: recordingNoiseSuppress,
-        AppConfigFieldKey.locale: locale,
-        AppConfigFieldKey.themeMode: themeMode,
-        AppConfigFieldKey.themeSeedColor: themeSeedColor,
-        AppConfigFieldKey.wakelockEnabled: wakelockEnabled,
-        AppConfigFieldKey.gridRowsAmount: gridRowsAmount,
-        AppConfigFieldKey.gridColsAmount: gridColsAmount,
-      };
+    AppConfigFieldKey.recordingInputDevice: recordingInputDevice,
+    AppConfigFieldKey.recordingAudioEncoder: recordingAudioEncoder,
+    AppConfigFieldKey.recordingSampleRate: recordingSampleRate,
+    AppConfigFieldKey.recordingBitRate: recordingBitRate,
+    AppConfigFieldKey.recordingAudioModeStereo: recordingAudioModeStereo,
+    AppConfigFieldKey.recordingAutoGain: recordingAutoGain,
+    AppConfigFieldKey.recordingEchoCancel: recordingEchoCancel,
+    AppConfigFieldKey.recordingNoiseSuppress: recordingNoiseSuppress,
+    AppConfigFieldKey.locale: locale,
+    AppConfigFieldKey.themeMode: themeMode,
+    AppConfigFieldKey.themeSeedColor: themeSeedColor,
+    AppConfigFieldKey.wakelockEnabled: wakelockEnabled,
+    AppConfigFieldKey.gridRowsAmount: gridRowsAmount,
+    AppConfigFieldKey.gridColsAmount: gridColsAmount,
+  };
 }

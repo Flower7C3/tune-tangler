@@ -16,5 +16,4 @@ class SettingsProfileAdapter extends TypeAdapter<SettingsProfile> {
   void write(BinaryWriter writer, SettingsProfile obj) {
     writer.writeMap(obj.toMap());
   }
-
 }

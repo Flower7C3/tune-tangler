@@ -29,11 +29,7 @@ void main() {
   group('Widget Tests', () {
     testWidgets('Basic MaterialApp test', (WidgetTester tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: Text('Test App'),
-          ),
-        ),
+        const MaterialApp(home: Scaffold(body: Text('Test App'))),
       );
 
       expect(find.text('Test App'), findsOneWidget);
@@ -42,11 +38,7 @@ void main() {
 
     testWidgets('Text widget test', (WidgetTester tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Center(
-            child: Text('Hello World'),
-          ),
-        ),
+        const MaterialApp(home: Center(child: Text('Hello World'))),
       );
 
       expect(find.text('Hello World'), findsOneWidget);
@@ -57,10 +49,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: ElevatedButton(
-              onPressed: null,
-              child: Text('Test Button'),
-            ),
+            body: ElevatedButton(onPressed: null, child: Text('Test Button')),
           ),
         ),
       );

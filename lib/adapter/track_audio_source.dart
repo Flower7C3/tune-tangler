@@ -1,9 +1,6 @@
 import 'package:hive/hive.dart';
 
-enum TrackAudioSource {
-  recording,
-  file,
-}
+enum TrackAudioSource { recording, file }
 
 class TrackAudioSourceAdapter extends TypeAdapter<TrackAudioSource> {
   @override
