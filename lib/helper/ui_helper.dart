@@ -850,7 +850,7 @@ class UIHelper {
         title: Text(listTitle),
         trailing: trailingLabel(currentValue),
         subtitle: (listSubtitle == null) ? null : Text(listSubtitle),
-        onTap: () => listDialog(AppIcon.language, dialogTitle, actions: options.toList()),
+        onTap: () => listDialog(icon, dialogTitle, actions: options.toList()),
       );
 
   String _translateOrFormat(dynamic value, ConfigCollection? configCollection, AppLocalizations? trans) => ((configCollection == null)

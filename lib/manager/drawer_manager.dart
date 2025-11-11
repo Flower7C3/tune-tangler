@@ -55,7 +55,7 @@ class DrawerManager {
                 ),
               ),
               ListTile(
-                leading: Icon(AppIcon.settingProfiles),
+                leading: Icon(AppIcon.settingsProfiles),
                 title: Text(_trans.settingsProfiles),
                 onTap: _settingProfilesListsDialog,
                 trailing: Icon(AppIcon.modalMenu),
@@ -218,6 +218,7 @@ class DrawerManager {
           selected: currentValue == inputDevice,
           onTap: () {
             _settings.setConfig(AppConfigFieldKey.recordingInputDevice, inputDevice);
+            _uiHelper.toast(_trans.recordingInputDeviceSuccess(inputDevice.label), icon: AppIcon.recordingInputDevice, duration: 4);
             Navigator.pop(_context, 'recordingInputDevice');
           },
         ));

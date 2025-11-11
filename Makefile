@@ -146,7 +146,7 @@ run: ##BUILD## Run app in debug mode
 .PHONY: build-apk
 build-apk: ##BUILD## Build APK in debug mode
 	@echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Building $(FORMAT_BOLD)debug$(FORMAT_RESET)$(FORMAT_HIGHLIGHT) APK...$(FORMAT_RESET)"
-	@flutter build apk --debug --build-number=$(($(date +%s)/1000))
+	@flutter build apk --debug --build-number=$$(($(date +%s)/1000))
 
 .PHONY: build-apk-release
 build-apk-release:
