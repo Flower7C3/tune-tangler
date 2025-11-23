@@ -299,6 +299,18 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get trackRecordingMoveInProgress =>
+      'Recording move is already in progress. Please try again in a moment.';
+
+  @override
+  String get trackRecordingMoveNotAllowed =>
+      'Cannot move tracks during recording, playback, or processing.';
+
+  @override
+  String get trackRecordingMoveFailed =>
+      'Failed to move tracks. Check if files were moved or deleted and try again.';
+
+  @override
   String trackRecordingShare(Object trackName) {
     return 'Share $trackName track recording';
   }

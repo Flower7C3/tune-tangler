@@ -1050,23 +1050,39 @@ class TrackDetailsManager {
                       Radius.circular(UIHelper.gridGap),
                     ),
                   ),
-                  backgroundColor: (loopTrack.id == track.id)
-                      ? Theme.of(context).colorScheme.primary
-                      : null,
+                  backgroundColor: loopTrack.stateBackgroundColor(context),
+                  foregroundColor: loopTrack.stateForegroundColor(context),
                 ),
                 onPressed: (loopTrack.id == track.id)
                     ? null
                     : () async {
-                        _trackRepository.safeSwapTracks(track, loopTrack);
-                        Navigator.pop(context);
-                        Navigator.pop(context);
-                        _uiHelper.toast(
-                          _trans.trackRecordingMoveSuccess(
-                            track.id.toString(),
-                            loopTrack.id.toString(),
-                          ),
-                          icon: AppIcon.trackRecordingMove,
-                        );
+                        try {
+                          await _trackRepository.safeSwapTracks(
+                            track,
+                            loopTrack,
+                            _trans,
+                          );
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                            Navigator.pop(context);
+                          }
+                          _uiHelper.toast(
+                            _trans.trackRecordingMoveSuccess(
+                              track.id.toString(),
+                              loopTrack.id.toString(),
+                            ),
+                            icon: AppIcon.trackRecordingMove,
+                          );
+                        } catch (e) {
+                          debugPrint(
+                            'Unexpected error while swapping tracks: $e',
+                          );
+                          _uiHelper.toast(
+                            e.toString(),
+                            icon: AppIcon.exception,
+                            type: ToastType.error,
+                          );
+                        }
                       },
                 child: Text(
                   loopTrack.name.value,

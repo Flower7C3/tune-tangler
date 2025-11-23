@@ -509,6 +509,24 @@ abstract class AppLocalizations {
     Object secondTrackName,
   );
 
+  /// No description provided for @trackRecordingMoveInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording move is already in progress. Please try again in a moment.'**
+  String get trackRecordingMoveInProgress;
+
+  /// No description provided for @trackRecordingMoveNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot move tracks during recording, playback, or processing.'**
+  String get trackRecordingMoveNotAllowed;
+
+  /// No description provided for @trackRecordingMoveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to move tracks. Check if files were moved or deleted and try again.'**
+  String get trackRecordingMoveFailed;
+
   /// No description provided for @trackRecordingShare.
   ///
   /// In en, this message translates to:

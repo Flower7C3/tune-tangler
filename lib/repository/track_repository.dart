@@ -10,6 +10,7 @@ import '../config/app_config_fields.dart';
 import '../config/app_global_config.dart';
 import '../entity/track.dart';
 import '../entity/track_row.dart';
+import '../src/generated/app_localizations.dart';
 import '../wrapper/hive_settings_provider.dart';
 
 class TrackRepository {
@@ -186,14 +187,12 @@ class TrackRepository {
   bool _isSwapping = false;
 
   /// Bezpieczna zamiana z walidacją
-  Future<void> safeSwapTracks(Track track1, Track track2) async {
+  Future<void> safeSwapTracks(Track track1, Track track2, AppLocalizations trans) async {
     if (_isSwapping) {
-      throw Exception('Zamiana tracków już trwa');
+      throw Exception(trans.trackRecordingMoveInProgress);
     }
     if (!canSwapTracks(track1, track2)) {
-      throw Exception(
-        'Nie można zamienić tracków podczas nagrywania, odtwarzania lub przetwarzania',
-      );
+      throw Exception(trans.trackRecordingMoveNotAllowed);
     }
 
     _isSwapping = true;
@@ -216,19 +215,29 @@ class TrackRepository {
       );
 
       if (track1.path != null && File(track1.path!).existsSync()) {
-        await File(track1.path!).rename(tempPath1);
+        try {
+          await File(track1.path!).rename(tempPath1);
+        } catch (_) {
+          await File(track1.path!).copy(tempPath1);
+          await File(track1.path!).delete();
+        }
       }
       if (track2.path != null && File(track2.path!).existsSync()) {
-        await File(track2.path!).rename(tempPath2);
+        try {
+          await File(track2.path!).rename(tempPath2);
+        } catch (_) {
+          await File(track2.path!).copy(tempPath2);
+          await File(track2.path!).delete();
+        }
       }
 
-      // 2. Zamiana właściwości track2 -> track1
-      await track1.applyTrackPropertiesFromMap(tempTrack2Data, tempPath2);
+      // 2. Zamiana właściwości track2 -> track1 (zachowaj klawisz skrótu)
+      await track1.applyTrackPropertiesFromMap(tempTrack2Data, tempPath2, preserveKeyboardKey: true);
 
-      // 3. Zamiana właściwości track1 -> track2
-      await track2.applyTrackPropertiesFromMap(tempTrack1Data, tempPath1);
+      // 3. Zamiana właściwości track1 -> track2 (zachowaj klawisz skrótu)
+      await track2.applyTrackPropertiesFromMap(tempTrack1Data, tempPath1, preserveKeyboardKey: true);
     } catch (e) {
-      debugPrint('Błąd podczas zamiany tracków: $e');
+      debugPrint('Error while swapping tracks: $e');
 
       // W przypadku błędu próbujemy przywrócić oryginalne pliki
       try {
@@ -239,10 +248,10 @@ class TrackRepository {
           tempTrack2Data,
         );
       } catch (restoreError) {
-        debugPrint('Błąd przywracania plików: $restoreError');
+        debugPrint('Error restoring files after swap failure: $restoreError');
       }
 
-      throw Exception('Nie udało się zamienić tracków: $e');
+      throw Exception(trans.trackRecordingMoveFailed);
     } finally {
       resetTracksCollection();
       _isSwapping = false;
@@ -316,7 +325,7 @@ class TrackRepository {
         }
       }
     } catch (e) {
-      debugPrint('Krytyczny błąd przywracania plików: $e');
+      debugPrint('Critical error while restoring files: $e');
     }
   }
 }

@@ -300,6 +300,18 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
+  String get trackRecordingMoveInProgress =>
+      'Przenoszenie nagrania już trwa. Spróbuj ponownie za chwilę.';
+
+  @override
+  String get trackRecordingMoveNotAllowed =>
+      'Nie można przenosić ścieżek podczas nagrywania, odtwarzania ani przetwarzania.';
+
+  @override
+  String get trackRecordingMoveFailed =>
+      'Nie udało się przenieść nagrań. Sprawdź, czy pliki nie zostały przeniesione lub usunięte i spróbuj ponownie.';
+
+  @override
   String trackRecordingShare(Object trackName) {
     return 'Udostępnij nagranie ścieżki $trackName';
   }

@@ -733,8 +733,9 @@ class Track {
   /// Stosuje właściwości z mapy danych na docelowym tracku
   Future<void> applyTrackPropertiesFromMap(
     Map<TrackAdapterKey, dynamic> properties,
-    String tempSourcePath,
-  ) async {
+    String tempSourcePath, {
+    bool preserveKeyboardKey = true,
+  }) async {
     final originalId = properties[TrackAdapterKey.trackId] as TrackId;
 
     // 1. Ustawiamy podstawowe właściwości
@@ -758,48 +759,48 @@ class Track {
 
     setSampleRate(properties[TrackAdapterKey.sampleRate]);
     setBitRate(properties[TrackAdapterKey.bitRate]);
-    setKeyboardKey(properties[TrackAdapterKey.keyboardKey] ?? '');
+    if (!preserveKeyboardKey) {
+      setKeyboardKey(properties[TrackAdapterKey.keyboardKey] ?? '');
+    }
 
     // 2. Przenoszenie pliku audio z tymczasowej lokalizacji do finalnej
     String? newPath;
     if (tempSourcePath.isNotEmpty && File(tempSourcePath).existsSync()) {
+      final appDir = await getApplicationDocumentsDirectory();
+      final originalExtension = path_provider.extension(tempSourcePath);
+      final newFileName = '${id.toString()}$originalExtension';
+      newPath = "${appDir.path}/$newFileName";
+      // Jeśli plik docelowy już istnieje, usuwamy go
+      if (File(newPath).existsSync()) {
+        await File(newPath).delete();
+      }
+      // Przeniesienie z fallbackiem na kopiowanie
       try {
-        final appDir = await getApplicationDocumentsDirectory();
-        final originalExtension = path_provider.extension(tempSourcePath);
-        final newFileName = '${id.toString()}$originalExtension';
-        newPath = "${appDir.path}/$newFileName";
-
-        // Jeśli plik docelowy już istnieje, usuwamy go
-        if (File(newPath).existsSync()) {
-          await File(newPath).delete();
-        }
-
-        // Przenosimy z tymczasowej lokalizacji do finalnej
         await File(tempSourcePath).rename(newPath);
-      } catch (e) {
-        debugPrint('Błąd przenoszenia pliku dla $id: $e');
-        newPath = null;
+      } catch (_) {
+        // Fallback to copy+delete to support cross-filesystem moves
+        await File(tempSourcePath).copy(newPath);
+        await File(tempSourcePath).delete();
       }
     } else if (properties[TrackAdapterKey.path] != null &&
         File(properties[TrackAdapterKey.path]!).existsSync()) {
       // Fallback: jeśli nie ma tymczasowej ścieżki, ale oryginalny plik istnieje
+      final oldFile = File(properties[TrackAdapterKey.path]!);
+      final appDir = await getApplicationDocumentsDirectory();
+      final originalExtension = path_provider.extension(
+        properties[TrackAdapterKey.path]!,
+      );
+      final newFileName = '${id.toString()}$originalExtension';
+      newPath = "${appDir.path}/$newFileName";
+      if (File(newPath).existsSync()) {
+        await File(newPath).delete();
+      }
       try {
-        final oldFile = File(properties[TrackAdapterKey.path]!);
-        final appDir = await getApplicationDocumentsDirectory();
-        final originalExtension = path_provider.extension(
-          properties[TrackAdapterKey.path]!,
-        );
-        final newFileName = '${id.toString()}$originalExtension';
-        newPath = "${appDir.path}/$newFileName";
-
-        if (File(newPath).existsSync()) {
-          await File(newPath).delete();
-        }
-
         await oldFile.rename(newPath);
-      } catch (e) {
-        debugPrint('Fallback błąd przenoszenia pliku: $e');
-        newPath = null;
+      } catch (_) {
+        // Fallback to copy+delete to support cross-filesystem moves
+        await oldFile.copy(newPath);
+        await oldFile.delete();
       }
     }
 
@@ -851,7 +852,7 @@ class Track {
 
         await player.seek(playbackStartAtPosition.value);
       } catch (e) {
-        debugPrint('Błąd ustawiania player: $e');
+        debugPrint('Error setting player source: $e');
         _path = null;
       }
     } else {
