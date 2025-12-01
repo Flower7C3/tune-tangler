@@ -2,116 +2,61 @@
 
 ## 📋 Spis Treści
 
-- [🎯 Punkty Rozwoju](#development-points)
-  - [1️⃣ Optymalizacje Wydajności](#performance-optimizations)
-  - [2️⃣ Ulepszenia UI](#ui-improvements)
-  - [3️⃣ Eksport i Import](#export-and-import)
-  - [4️⃣ Efekty Audio](#audio-effects)
-  - [5️⃣ System Licencji](#licensing-system)
-  - [6️⃣ Funkcje Audio](#audio-features)
-- [📚 Dodatkowe Zasoby](#additional-resources)
+- [🎯 Planowane prace](#planowane-prace)
+  - [3️⃣ Eksport i Import](#3-eksport-i-import-wysoki-priorytet)
+  - [4️⃣ Efekty Audio](#4-efekty-audio-odłożone--wymaga-dsp)
+  - [5️⃣ System Licencji](#5-system-licencji-średni-priorytet)
+  - [6️⃣ Funkcje Audio](#6-funkcje-audio-niski-priorytet)
+  - [7️⃣ Odtwarzanie: audioplayers vs just_audio](#7-odtwarzanie-audio-audioplayers-vs-just_audio-analiza--plan)
+- [📚 Dodatkowe Zasoby](#dodatkowe-zasoby)
 
-## 🎯 **Punkty Rozwoju** <a name="development-points"></a>
+## 🎯 Planowane prace
 
-### **1️⃣ Optymalizacje Wydajności (Najwyższy Priorytet – UKOŃCZONE ✅)** <a name="performance-optimizations"></a>
+### 3) Eksport i Import (Wysoki Priorytet)
 
-#### **Naprawione Problemy**
+#### Eksport wszystkich ścieżek
+- Kompletny backup: wszystkie ścieżki wraz z nagraniami
+- Ustawienia: profile konfiguracyjne, preferencje użytkownika
+- Metadane: nazwy, skróty klawiszowe, pozycje na siatce
+- Format: ZIP z zachowaniem struktury katalogów
+- Wersjonowanie: automatyczne tworzenie kopii zapasowych
 
-- ✅ **Zacinanie aplikacji**: Optymalizacja `ValueListenableBuilder`
-- ✅ **Niska liczba ramek (FPS)**: Przepisanie mechanizmu stanu
-- ✅ **Problemy z odtwarzaniem**: Przywrócenie `audioplayers` i naprawa `duration`
-- ✅ **Progress bar i licznik sekund**: Poprawne działanie po imporcie plików
-- ✅ **Jednoczesne odtwarzanie**: Konfiguracja `AudioContext` dla multi-track playback
-- ✅ **Optymalizacje UI**: `RepaintBoundary`, throttling, lazy loading
-- ✅ **Zarządzanie pamięcią**: `AudioMemoryPool`, `IconOptimizationService`
-- ✅ **Aktualizacja bibliotek**: 38 zależności zaktualizowanych do najnowszych wersji
+#### Import ścieżek
+- Przywracanie: pełne przywracanie z backupu
+- Merge: łączenie z istniejącymi ścieżkami
+- Konflikty: rozwiązywanie konfliktów nazw i ID
+- Walidacja: sprawdzanie integralności importowanych danych
+- Preview: podgląd przed importem
 
-### **2️⃣ Ulepszenia UI (Średni Priorytet – UKOŃCZONE ✅)** <a name="ui-improvements"></a>
+### 4) Efekty Audio (Odłożone – Wymaga DSP)
+- Podstawowe efekt: Reverb, Delay/Echo, Compression, EQ (LP/HP)
+- Zaawansowane: Distortion, Chorus/Flanger, Pitch shift, Time stretching
+- Wymaga integracji natywnego DSP lub dedykowanych wtyczek (Android/iOS)
 
-#### **Proste Animacje**
+### 5) System Licencji (Średni Priorytet)
+#### Funkcje podstawowe (bezpłatne)
+- Nagrywanie, odtwarzanie, siatka 6×4, optymalizacje UI
+#### Funkcje zaawansowane (licencja)
+- Profile, pełny backup/restore, efekty audio (po wdrożeniu), większe siatki
+#### Model licencjonowania
+- Jednorazowa płatność za pełen pakiet (TBD)
 
-- ✅ **Animacje przejść**: `AnimatedContainer`, `AnimatedOpacity`
-- ✅ **Responsive UI**: Płynne przejścia między stanami
-- ✅ **Loading indicators**: `LinearProgressIndicator`, `CircularProgressIndicator`
+### 6) Funkcje Audio (Niski Priorytet)
+- Noise reduction, Normalization, Fade in/out, Crossfade
 
-#### **Interface Elements**
+### 7) Odtwarzanie audio: audioplayers vs just_audio (Analiza + Plan)
+#### Stan obecny (audioplayers)
+- Głośność, balans, prędkość, pętla, seek, zdarzenia, kontekst audio
+#### just_audio – pokrycie
+- Głośność, prędkość, pętla/seek/zdarzenia, ClippingAudioSource, playlisty/gapless
+- Pan: wymaga pluginu; EQ: możliwy (Android) przez wtyczki
+#### Plan
+- Krótkoterminowo: pozostajemy przy audioplayers (render FFmpeg dla „zmodyfikowanych”)
+- Średni termin: prototyp ClippingAudioSource; rozpoznać pan plugin
+- Długi termin: EQ (Android) + AVAudioEngine (iOS) za flagą; rozważyć wspólną warstwę DSP
 
-- ✅ **Grupowanie menu**: Menu kontekstowe dla ścieżek już zorganizowane
-- ✅ **Szybkie akcje**: Globalne akcje i per-row już dostępne
-- ✅ **Modalne okna**: `showModalBottomSheet` dla szczegółów ścieżki,
-  `AlertDialog`/`SimpleDialog` dla ustawień
-- ✅ **Tooltips**: Implementowane w szczegółach ścieżki i przyciskach
-
-#### **Uwagi dotyczące UI:**
-
-- ❌ **Vibrace/Haptic feedback** – mogłyby się nagrywać na ścieżkę audio
-- ❌ **Dodatkowe gesty** – część już jest (swipe do poruszania ścieżek), reszta zbędna
-- ❌ **Pinch-to-zoom** – niepotrzebne w kontekście aplikacji
-
-### **3️⃣ Eksport i Import (Wysoki Priorytet – W TRAKCIE ROZWOJU)** <a name="export-and-import"></a>
-
-#### **Eksport Wszystkich Ścieżek**
-
-- **Kompletny backup**: Wszystkie ścieżki wraz z nagraniami
-- **Ustawienia**: Profile konfiguracyjne, preferencje użytkownika
-- **Metadane**: Nazwy, skróty klawiszowe, pozycje na siatce
-- **Formaty**: ZIP z zachowaniem struktury katalogów
-- **Wersjonowanie**: Automatyczne tworzenie kopii zapasowych
-
-#### **Import Ścieżek**
-
-- **Przywracanie**: Pełne przywracanie z backupu
-- **Merge**: Łączenie z istniejącymi ścieżkami
-- **Konflikty**: Rozwiązywanie konfliktów nazw i ID
-- **Walidacja**: Sprawdzanie integralności importowanych danych
-- **Preview**: Podgląd przed importem
-
-### **4️⃣ Efekty Audio (Odłożone na Później – WYMAGA NOWEJ BIBLIOTEKI)** <a name="audio-effects"></a>
-
-- **Podstawowe efekty**:
-    - Reverb (pomieszczenie, hala, echo)
-    - Delay/Echo (z kontrolą czasu i feedback)
-    - Compression (dynamika, punch)
-    - EQ (3-5 pasmowe, low/high pass)
-
-- **Zaawansowane efekty**:
-    - Distortion/Overdrive
-    - Chorus/Flanger
-    - Pitch shift (transpozycja w czasie rzeczywistym)
-    - Time stretching (bez zmiany pitch)
-
-### **5️⃣ System Licencji (Średni Priorytet)** <a name="licensing-system"></a>
-
-#### **Funkcje Podstawowe (Bezpłatne)**
-
-- **Nagrywanie**: Podstawowe nagrywanie audio
-- **Odtwarzanie**: Podstawowe odtwarzanie ścieżek
-- **Siatka**: Podstawowa siatka 6×4
-- **Ulepszenia UI**: Wszystkie optymalizacje interfejsu
-
-#### **Funkcje Zaawansowane (Licencja)**
-
-- **Profile**: Zaawansowane profile ustawień
-- **Eksport/Import**: Pełne funkcje backupu i przywracania
-- **Efekty Audio**: Wszystkie efekty audio (gdy zostaną zaimplementowane)
-- **Siatka Rozszerzona**: Duże siatki (8×6, 10×8)
-
-#### **Model Licencjonowania**
-
-- **Jednorazowa płatność**: Wszystkie funkcje dostępne
-- **Bezpłatne**: Podstawowe funkcje zawsze dostępne
-
-### **6️⃣ Funkcje Audio (Niski Priorytet)** <a name="audio-features"></a>
-
-#### **Przetwarzanie**
-
-- **Noise reduction**: Zaawansowane usuwanie szumu
-- **Normalization**: Automatyczne wyrównanie głośności
-- **Fade in/out**: Płynne wejścia i wyjścia
-- **Crossfade**: Płynne przejścia między ścieżkami
-
-## 📚 **Dodatkowe Zasoby** <a name="additional-resources"></a>
-
-- **[📖 Development Guide](../README.md)** – Główny przewodnik
-- **[Flutter Roadmap](https://github.com/flutter/flutter/wiki/Roadmap)** – Oficjalny plan rozwoju Flutter
-- **[Android Roadmap](https://developer.android.com/about/versions)** – Plan rozwoju Android
+## 📚 Dodatkowe Zasoby
+- Zdolności aplikacji: zob. [README.md](../README.md#capabilities)
+- Zrealizowane elementy (commity): zob. [docs/COMPLETED.md](./COMPLETED.md)
+- Flutter Roadmap: https://github.com/flutter/flutter/wiki/Roadmap
+- Android Roadmap: https://developer.android.com/about/versions

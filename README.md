@@ -6,6 +6,20 @@
 
 ## 📚 Dokumentacja <a name="documentation"></a>
 
+### 🧩 Zdolności aplikacji <a name="capabilities"></a>
+
+- Nagrywanie: mikrofon/USB (zależnie od urządzenia), auto‑gain/echo‑cancel/noise‑suppress (jeśli wspierane)
+- Import: wybór pliku audio do ścieżki
+- Odtwarzanie: start/stop/pause/resume, tryby pętli (single/loop), seek, odtwarzanie zakresu (początek/koniec), czas/pozycja
+- Sterowanie na żywo: głośność, balans (pan), prędkość (0.5–2.0)
+- Zarządzanie ścieżkami: zmiana nazwy (emoji), klawisze skrótu, przenoszenie/zamiana nagrań, usuwanie nagrania
+- Udostępnianie: surowy plik lub „zmodyfikowany” (trim/vol/pan/speed wbudowane przez FFmpeg)
+- Układ: konfigurowalna siatka (wiersze/kolumny), lazy‑loading dla wydajności
+- Motywy: jasny/ciemny/system, kolor akcentu
+- Lokalizacja: EN/PL (zmiana w runtime)
+- Uprawnienia: mikrofon, powiadomienia (Android), dostęp do plików (gdzie dotyczy)
+- Profile: zapisz/wczytaj/usuń profile ustawień
+
 ### 🚀 Szybki Start <a name="quick-start"></a>
 
 - **[📱 Instalacja](docs/INSTALLATION.md)** – Przewodnik instalacji i konfiguracji
@@ -17,13 +31,14 @@
 - **[🔧 Setup](docs/development/SETUP.md)** – Konfiguracja środowiska developerskiego
 - **[⚡ Quick Start](docs/development/QUICKSTART.md)** – Szybkie uruchomienie projektu
 - **[🔨 Makefile](docs/development/QUICKSTART.md#makefile)** – Komendy i narzędzia
-- **[🎨 Icon Generation](docs/ICON_GENERATION.md)** – Generowanie ikon z SVG
+- **[🎨 Icon Generation](docs/development/ICON_GENERATION.md)** – Generowanie ikon z SVG
 - **[🎣 Git Hooks](docs/development/GIT_HOOKS.md)** – Pre-commit hooks i automatyzacja
 - **[🚀 Workflows](docs/development/WORKFLOWS.md)** – GitHub Actions i CI/CD
 
 ### 📋 Projekt <a name="project"></a>
 
-- **[🗺️ Roadmap](docs/ROADMAP.md)** – Plan rozwoju i funkcje
+- **[🗺️ Roadmap](docs/ROADMAP.md)** – Plan rozwoju (przyszłe prace)
+- **[✅ Zrealizowane](docs/COMPLETED.md)** – Ukończone elementy z commitami
 - **[🔐 Release Signing](docs/RELEASE_SIGNING.md)** – Konfiguracja podpisywania
 - **[🤖 Assistant Rules](docs/ASSISTANT_RULES.md)** – Reguły dla AI asystentów
 
