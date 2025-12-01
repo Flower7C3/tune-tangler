@@ -133,6 +133,8 @@ class AppIcon {
   static IconData trackRecordingImport = Icons.file_open_rounded;
 
   static IconData trackRecordingShare = Icons.share_outlined;
+  static IconData trackRecordingShareRaw = Icons.mic_rounded;
+  static IconData trackRecordingShareModified = Symbols.instant_mix_rounded;
 
   static IconData moreMenu = Icons.more_vert;
   static IconData modalMenu = Symbols.menu_open_rounded;

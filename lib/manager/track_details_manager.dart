@@ -1,10 +1,12 @@
 import 'dart:io';
 
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'package:ffmpeg_kit_flutter_new_min_gpl/ffmpeg_kit.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:tune_tangler/helper/ui_helper.dart';
 import 'package:tune_tangler/manager/recording_manager.dart';
@@ -676,7 +678,7 @@ class TrackDetailsManager {
           ]),
           builder: (context, recorderState, child) =>
               _uiHelper.trackDetailsLine([
-                if (track.recorderState.value != RecorderState.processing)
+                  if (track.recorderState.value != RecorderState.processing)
                   FocusTraversalOrder(
                     order: NumericFocusOrder(-2),
                     child: _uiHelper.mediaPlayerButton(
@@ -684,7 +686,7 @@ class TrackDetailsManager {
                       _trans.trackRecordingShare(track.name.value),
                       onPressed:
                           (track.recorderState.value == RecorderState.ready)
-                          ? () => _share(track)
+                          ? () => _shareDialog(track)
                           : null,
                     ),
                   ),
@@ -1120,32 +1122,116 @@ class TrackDetailsManager {
     }
   }
 
-  void _share(Track track) async {
+  Future<void> _shareDialog(Track track) async {
     if (track.path == null) {
-      _uiHelper.toast(
-        _trans.trackRecordingShareNoFile(track.name.value),
-        icon: AppIcon.trackRecordingShare,
-        type: ToastType.error,
-        duration: 4,
-      );
+      _uiHelper.toast(_trans.trackRecordingShareNoFile(track.name.value),
+          icon: AppIcon.trackRecordingShare, type: ToastType.error, duration: 4);
       return;
     }
-    File file = File(track.path!);
-    if (file.existsSync() == false) {
-      _uiHelper.toast(
-        _trans.trackRecordingShareNoFile(track.name.value),
-        icon: AppIcon.trackRecordingShare,
-        type: ToastType.error,
-        duration: 4,
-      );
-      return;
-    }
-    SharePlus.instance.share(
-      ShareParams(
-        text: _trans.trackRecordingShareMessage(track.name.value),
-        files: [XFile(track.path!)],
-      ),
+    _uiHelper.listDialog(
+      AppIcon.trackRecordingShare,
+      _trans.trackRecordingShare(track.name.value),
+      actions: [
+        SimpleDialogOption(
+          padding: EdgeInsets.zero,
+          child: _uiHelper.statusIconTile(AppIcon.trackRecordingShareRaw, _trans.trackRecordingShareRaw(track.duration.value)),
+          onPressed: () async {
+            Navigator.pop(_context);
+            await _shareRaw(track);
+          },
+        ),
+        SimpleDialogOption(
+          padding: EdgeInsets.zero,
+          child: _uiHelper.statusIconTile(AppIcon.trackRecordingShareModified, _trans.trackRecordingShareProcessed(track.durationAfterCut.value)),
+          onPressed: () async {
+            Navigator.pop(_context);
+            await _shareProcessed(track);
+          },
+        ),
+      ],
     );
+  }
+
+  Future<void> _shareRaw(Track track) async {
+    try {
+      if (track.path == null || !File(track.path!).existsSync()) {
+        throw Exception(_trans.trackRecordingShareNoFile(track.name.value));
+      }
+      SharePlus.instance.share(ShareParams(files: [XFile(track.path!)]));
+      _uiHelper.toast(_trans.trackRecordingShareSuccess(track.name.value), icon: AppIcon.trackRecordingShare);
+    } catch (e) {
+      debugPrint('Error exporting raw: $e');
+      _uiHelper.toast(_trans.trackRecordingShareFailed(track.name.value), icon: AppIcon.exception, type: ToastType.error);
+    }
+  }
+
+  Future<void> _shareProcessed(Track track) async {
+    try {
+      if (track.path == null || !File(track.path!).existsSync()) {
+        throw Exception(_trans.trackRecordingShareNoFile(track.name.value));
+      }
+      final appDir = await getApplicationDocumentsDirectory();
+      final ts = DateTime.now().millisecondsSinceEpoch;
+      final outPath = "${appDir.path}/${track.id.toString()}-$ts-processed.m4a";
+
+      // Build filters
+      final startMs = track.playbackStartAtPosition.value.inMilliseconds;
+      final endMs = track.playbackEndAtPosition.value.inMilliseconds;
+      final inPath = track.path!;
+      final vol = track.playbackVolume.value; // 0..1
+      final bal = track.playbackBalance.value; // -1..1 expected
+      final speed = track.playbackSpeed.value; // 0.5..2 recommended
+
+      final leftGain = (bal <= 0) ? 1.0 : (1.0 - bal);
+      final rightGain = (bal >= 0) ? 1.0 : (1.0 + bal);
+
+      // atempo supports 0.5..2.0; chain if outside
+      List<double> atempos = [];
+      double remaining = speed;
+      if (remaining <= 0) remaining = 1.0;
+      while (remaining > 2.0) {
+        atempos.add(2.0);
+        remaining /= 2.0;
+      }
+      while (remaining < 0.5) {
+        atempos.add(0.5);
+        remaining *= 2.0;
+      }
+      atempos.add(remaining);
+      final atempoFilter = atempos.map((v) => "atempo=$v").join(',');
+
+      final panFilter = "pan=stereo|c0=${leftGain.toStringAsFixed(3)}*c0|c1=${rightGain.toStringAsFixed(3)}*c1";
+      final volumeFilter = "volume=${vol.toStringAsFixed(3)}";
+
+      final filterComplex = [panFilter, volumeFilter, atempoFilter].where((s) => s.isNotEmpty).join(',');
+
+      // ffmpeg command
+      final ss = (startMs / 1000.0);
+      final to = (endMs / 1000.0);
+      final cmd = [
+        "-y",
+        "-ss", ss.toStringAsFixed(3),
+        "-to", to.toStringAsFixed(3),
+        "-i", "'$inPath'",
+        "-vn",
+        "-filter:a", "'$filterComplex'",
+        "-c:a", "aac",
+        "-b:a", "192k",
+        "'$outPath'",
+      ].join(' ');
+
+      final session = await FFmpegKit.execute(cmd);
+      final returnCode = await session.getReturnCode();
+      if (!(returnCode?.isValueSuccess() ?? false)) {
+        throw Exception("ffmpeg failed");
+      }
+
+      SharePlus.instance.share(ShareParams(files: [XFile(outPath)]));
+      _uiHelper.toast(_trans.trackRecordingShareSuccess(track.name.value), icon: AppIcon.trackRecordingShare);
+    } catch (e) {
+      debugPrint('Error exporting processed: $e');
+      _uiHelper.toast(_trans.trackRecordingShareFailed(track.name.value), icon: AppIcon.exception, type: ToastType.error);
+    }
   }
 
   /// *************************************************************************

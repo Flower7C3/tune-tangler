@@ -326,6 +326,26 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String trackRecordingShareRaw(Object trackTime) {
+    return 'Share raw recording ($trackTime)';
+  }
+
+  @override
+  String trackRecordingShareProcessed(Object trackTime) {
+    return 'Share modified recording ($trackTime)';
+  }
+
+  @override
+  String trackRecordingShareSuccess(Object trackName) {
+    return 'Shared recording for $trackName.';
+  }
+
+  @override
+  String trackRecordingShareFailed(Object trackName) {
+    return 'Failed to share recording for $trackName.';
+  }
+
+  @override
   String get trackRecordingDelete => 'Delete recording';
 
   @override

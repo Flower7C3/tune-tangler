@@ -327,6 +327,26 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
+  String trackRecordingShareRaw(Object trackTime) {
+    return 'Udostępnij surowe nagranie ($trackTime)';
+  }
+
+  @override
+  String trackRecordingShareProcessed(Object trackTime) {
+    return 'Udostępnij zmodyfikowane nagranie ($trackTime)';
+  }
+
+  @override
+  String trackRecordingShareSuccess(Object trackName) {
+    return 'Wyeksportowano nagranie ścieżki $trackName.';
+  }
+
+  @override
+  String trackRecordingShareFailed(Object trackName) {
+    return 'Nie udało się wyeksportować nagrania ścieżki $trackName.';
+  }
+
+  @override
   String get trackRecordingDelete => 'Usuń nagranie';
 
   @override

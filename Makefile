@@ -204,7 +204,7 @@ run-emulator: ##DEVICE## Run app on emulator with interactive selection
 	echo "$(COLOR_BLUE)$(ICON_INFO) Starting $(FORMAT_BOLD)$$EMULATOR$(FORMAT_RESET)$(COLOR_BLUE) emulator and running app...$(FORMAT_RESET)"; \
 	flutter emulators --launch $$EMULATOR; \
 	echo "$(COLOR_GREEN)$(ICON_CHECK) Emulator $(FORMAT_BOLD)$$EMULATOR$(FORMAT_RESET)$(COLOR_GREEN) started! Running app...$(FORMAT_RESET)"; \
-	make run-debug
+	make run
 
 # =============================================================================
 # MAINTENANCE

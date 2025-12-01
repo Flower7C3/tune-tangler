@@ -545,6 +545,30 @@ abstract class AppLocalizations {
   /// **'There is no recording file for {trackName} track'**
   String trackRecordingShareNoFile(Object trackName);
 
+  /// No description provided for @trackRecordingShareRaw.
+  ///
+  /// In en, this message translates to:
+  /// **'Share raw recording ({trackTime})'**
+  String trackRecordingShareRaw(Object trackTime);
+
+  /// No description provided for @trackRecordingShareProcessed.
+  ///
+  /// In en, this message translates to:
+  /// **'Share modified recording ({trackTime})'**
+  String trackRecordingShareProcessed(Object trackTime);
+
+  /// No description provided for @trackRecordingShareSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared recording for {trackName}.'**
+  String trackRecordingShareSuccess(Object trackName);
+
+  /// No description provided for @trackRecordingShareFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to share recording for {trackName}.'**
+  String trackRecordingShareFailed(Object trackName);
+
   /// No description provided for @trackRecordingDelete.
   ///
   /// In en, this message translates to:
