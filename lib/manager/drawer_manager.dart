@@ -93,6 +93,13 @@ class DrawerManager {
             children: _screenSettings(setDrawerState),
           ),
           ExpansionTile(
+            leading: Icon(AppIcon.trackSettings),
+            title: Text(_trans.tracks),
+            maintainState: true,
+            childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
+            children: _tracksSettings(setDrawerState),
+          ),
+          ExpansionTile(
             leading: Icon(AppIcon.permissions),
             title: Text(_trans.permissions),
             maintainState: true,
@@ -231,6 +238,74 @@ class DrawerManager {
     ),
   ];
 
+  List<Widget> _tracksSettings(StateSetter setDrawerState) => [
+    _uiHelper.listTileSlider(
+      AppIcon.gridRowsAmount,
+      _trans.gridRowsAmount,
+      _trans.gridRowsAmountTitle,
+      _trans.gridRowsAmountInfo,
+      double.parse(
+        _settings.getConfig(AppConfigFieldKey.gridRowsAmount).toString(),
+      ),
+      AppGlobalConfig.gridRows.sliderValues.min,
+      AppGlobalConfig.gridRows.sliderValues.max,
+      AppGlobalConfig.gridRows.sliderValues.divisions,
+      _trans.buttonCancel,
+      _trans.buttonSave,
+      successAction: (double value, String formattedValue) {
+        _settings.setConfig(AppConfigFieldKey.gridRowsAmount, value.toInt());
+        _trackRepository.resetTracksCollection();
+        return _trans.gridRowsAmountSuccess(formattedValue);
+      },
+      configCollection: AppGlobalConfig.gridRows,
+    ),
+    _uiHelper.listTileSlider(
+      AppIcon.gridColsAmount,
+      _trans.gridColsAmount,
+      _trans.gridColsAmountTitle,
+      _trans.gridColsAmountInfo,
+      double.parse(
+        _settings.getConfig(AppConfigFieldKey.gridColsAmount).toString(),
+      ),
+      AppGlobalConfig.gridCols.sliderValues.min,
+      AppGlobalConfig.gridCols.sliderValues.max,
+      AppGlobalConfig.gridCols.sliderValues.divisions,
+      _trans.buttonCancel,
+      _trans.buttonSave,
+      successAction: (double value, String formattedValue) {
+        _settings.setConfig(AppConfigFieldKey.gridColsAmount, value.toInt());
+        _trackRepository.resetTracksCollection();
+        return _trans.gridColsAmountSuccess(formattedValue);
+      },
+      configCollection: AppGlobalConfig.gridCols,
+    ),
+    Divider(),
+    _uiHelper.listTileReset(
+      AppIcon.trackName,
+      _trans.allTracksTitleReset,
+      _trans.allTracksTitleResetTitle,
+      _trans.allTracksTitleResetInfo,
+      _trans.buttonNo,
+      _trans.buttonYes,
+      () {
+        _trackRepository.resetTracksName(_trackRepository.allTracks());
+        return _trans.allTracksTitleResetSuccess;
+      },
+    ),
+    _uiHelper.listTileReset(
+      AppIcon.trackKeyboardKey,
+      _trans.allTracksShortcutKeyReset,
+      _trans.allTracksShortcutKeyResetTitle,
+      _trans.allTracksShortcutKeyResetInfo,
+      _trans.buttonNo,
+      _trans.buttonYes,
+      () {
+        _trackRepository.resetTracksKeyboardKey(_trackRepository.allTracks());
+        return _trans.allTracksShortcutKeyResetSuccess;
+      },
+    ),
+  ];
+
   Future<void> _recordingSettingsDialog() async {
     InputDevice? currentValue = _settings.getConfig(
       AppConfigFieldKey.recordingInputDevice,
@@ -349,46 +424,6 @@ class DrawerManager {
             ? _trans.keepScreenOnIsEnabledSuccess
             : _trans.keepScreenOnIsDisabledSuccess;
       },
-    ),
-    _uiHelper.listTileSlider(
-      AppIcon.gridRowsAmount,
-      _trans.gridRowsAmount,
-      _trans.gridRowsAmountTitle,
-      _trans.gridRowsAmountInfo,
-      double.parse(
-        _settings.getConfig(AppConfigFieldKey.gridRowsAmount).toString(),
-      ),
-      AppGlobalConfig.gridRows.sliderValues.min,
-      AppGlobalConfig.gridRows.sliderValues.max,
-      AppGlobalConfig.gridRows.sliderValues.divisions,
-      _trans.buttonCancel,
-      _trans.buttonSave,
-      successAction: (double value, String formattedValue) {
-        _settings.setConfig(AppConfigFieldKey.gridRowsAmount, value.toInt());
-        _trackRepository.resetTracksCollection();
-        return _trans.gridRowsAmountSuccess(formattedValue);
-      },
-      configCollection: AppGlobalConfig.gridRows,
-    ),
-    _uiHelper.listTileSlider(
-      AppIcon.gridColsAmount,
-      _trans.gridColsAmount,
-      _trans.gridColsAmountTitle,
-      _trans.gridColsAmountInfo,
-      double.parse(
-        _settings.getConfig(AppConfigFieldKey.gridColsAmount).toString(),
-      ),
-      AppGlobalConfig.gridCols.sliderValues.min,
-      AppGlobalConfig.gridCols.sliderValues.max,
-      AppGlobalConfig.gridCols.sliderValues.divisions,
-      _trans.buttonCancel,
-      _trans.buttonSave,
-      successAction: (double value, String formattedValue) {
-        _settings.setConfig(AppConfigFieldKey.gridColsAmount, value.toInt());
-        _trackRepository.resetTracksCollection();
-        return _trans.gridColsAmountSuccess(formattedValue);
-      },
-      configCollection: AppGlobalConfig.gridCols,
     ),
   ];
 
@@ -761,32 +796,6 @@ class DrawerManager {
         _trackRepository.resetTracksSettings(_trackRepository.allTracks());
         return _trans.allTracksSettingsResetSuccess;
       },
-    ),
-    _uiHelper.listTileReset(
-      AppIcon.trackName,
-      _trans.allTracksTitleReset,
-      _trans.allTracksTitleResetTitle,
-          _trans.allTracksTitleResetInfo,
-          _trans.buttonNo,
-          _trans.buttonYes,
-       () {
-            _trackRepository.resetTracksName(_trackRepository.allTracks());
-            return _trans.allTracksTitleResetSuccess;
-          },
-    ),
-    _uiHelper.listTileReset(
-      AppIcon.trackKeyboardKey,
-      _trans.allTracksShortcutKeyReset,
-       _trans.allTracksShortcutKeyResetTitle,
-          _trans.allTracksShortcutKeyResetInfo,
-          _trans.buttonNo,
-          _trans.buttonYes,
-          () {
-            _trackRepository.resetTracksKeyboardKey(
-              _trackRepository.allTracks(),
-            );
-            return _trans.allTracksShortcutKeyResetSuccess;
-          },
     ),
     _uiHelper.listTileReset(
       AppIcon.deleteForever,

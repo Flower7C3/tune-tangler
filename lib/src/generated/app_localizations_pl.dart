@@ -776,7 +776,13 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
+  String get tracksSettings => 'Ustawienia ścieżek';
+
+  @override
   String get trackSettings => 'Ustawienia ścieżki';
+
+  @override
+  String get tracks => 'Ścieżki';
 
   @override
   String get track => 'Ścieżka';

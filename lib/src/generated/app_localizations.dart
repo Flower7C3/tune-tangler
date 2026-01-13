@@ -1271,11 +1271,23 @@ abstract class AppLocalizations {
   /// **'Setted grid columns amount to {value}.'**
   String gridColsAmountSuccess(Object value);
 
+  /// No description provided for @tracksSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracks settings'**
+  String get tracksSettings;
+
   /// No description provided for @trackSettings.
   ///
   /// In en, this message translates to:
   /// **'Track settings'**
   String get trackSettings;
+
+  /// No description provided for @tracks.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracks'**
+  String get tracks;
 
   /// No description provided for @track.
   ///

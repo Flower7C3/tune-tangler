@@ -769,7 +769,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get tracksSettings => 'Tracks settings';
+
+  @override
   String get trackSettings => 'Track settings';
+
+  @override
+  String get tracks => 'Tracks';
 
   @override
   String get track => 'Track';
