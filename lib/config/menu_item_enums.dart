@@ -22,7 +22,5 @@ enum AllTracksMenuItem {
   playbackBalanceSet,
   playbackStartAtPositionReset,
   playbackEndAtPositionReset,
-  nameReset,
-  shortcutKeyReset,
   moreSettings,
 }

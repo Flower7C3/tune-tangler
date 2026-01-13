@@ -114,17 +114,6 @@ class NavigationBarManager {
     ),
     const PopupMenuDivider(),
     _uiHelper.topTrackMenuItem(
-      AllTracksMenuItem.nameReset,
-      AppIcon.trackName,
-      _trans.allTracksTitleReset,
-    ),
-    _uiHelper.topTrackMenuItem(
-      AllTracksMenuItem.shortcutKeyReset,
-      AppIcon.trackKeyboardKey,
-      _trans.allTracksShortcutKeyReset,
-    ),
-    const PopupMenuDivider(),
-    _uiHelper.topTrackMenuItem(
       AllTracksMenuItem.moreSettings,
       AppIcon.moreSettings,
       _trans.moreSettings,
@@ -274,34 +263,6 @@ class NavigationBarManager {
               _trackRepository.allTracks(),
             );
             return _trans.allTracksPlaybackEndAtPositionResetSuccess;
-          },
-        );
-        break;
-      case AllTracksMenuItem.nameReset:
-        _uiHelper.alertDialogReset(
-          AppIcon.trackName,
-          _trans.allTracksTitleResetTitle,
-          _trans.allTracksTitleResetInfo,
-          _trans.buttonNo,
-          _trans.buttonYes,
-          () {
-            _trackRepository.resetTracksName(_trackRepository.allTracks());
-            return _trans.allTracksTitleResetSuccess;
-          },
-        );
-        break;
-      case AllTracksMenuItem.shortcutKeyReset:
-        _uiHelper.alertDialogReset(
-          AppIcon.trackKeyboardKey,
-          _trans.allTracksShortcutKeyResetTitle,
-          _trans.allTracksShortcutKeyResetInfo,
-          _trans.buttonNo,
-          _trans.buttonYes,
-          () {
-            _trackRepository.resetTracksKeyboardKey(
-              _trackRepository.allTracks(),
-            );
-            return _trans.allTracksShortcutKeyResetSuccess;
           },
         );
         break;

@@ -763,6 +763,32 @@ class DrawerManager {
       },
     ),
     _uiHelper.listTileReset(
+      AppIcon.trackName,
+      _trans.allTracksTitleReset,
+      _trans.allTracksTitleResetTitle,
+          _trans.allTracksTitleResetInfo,
+          _trans.buttonNo,
+          _trans.buttonYes,
+       () {
+            _trackRepository.resetTracksName(_trackRepository.allTracks());
+            return _trans.allTracksTitleResetSuccess;
+          },
+    ),
+    _uiHelper.listTileReset(
+      AppIcon.trackKeyboardKey,
+      _trans.allTracksShortcutKeyReset,
+       _trans.allTracksShortcutKeyResetTitle,
+          _trans.allTracksShortcutKeyResetInfo,
+          _trans.buttonNo,
+          _trans.buttonYes,
+          () {
+            _trackRepository.resetTracksKeyboardKey(
+              _trackRepository.allTracks(),
+            );
+            return _trans.allTracksShortcutKeyResetSuccess;
+          },
+    ),
+    _uiHelper.listTileReset(
       AppIcon.deleteForever,
       _trans.allTracksRecordingsDelete,
       _trans.allTracksRecordingsDeleteTitle,
