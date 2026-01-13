@@ -23,6 +23,7 @@ class HomeScreenManager {
       _appWrapper.uiHelper,
       _appWrapper.trackRepository,
       _appWrapper.scaffoldKey,
+      _appWrapper.settings,
     );
     _drawerManager = DrawerManager(
       _appWrapper.context,
@@ -74,9 +75,9 @@ class HomeScreenManager {
       controller: PageController(viewportFraction: 0.85),
       itemCount: rowsAmount,
       itemBuilder: (context, rowIndex) => _lazyLoadingManager.lazyLoadWidget(
-        // Include locale in cache key to rebuild on language change
+        // Include locale and version in cache key to rebuild on language change and import
         key:
-            'row_${rowIndex}_rows${rowsAmount}_cols${colsAmount}_locale_${_appWrapper.settings.getConfig(AppConfigFieldKey.locale).toLanguageTag()}',
+            'row_${rowIndex}_rows${rowsAmount}_cols${colsAmount}_locale_${_appWrapper.settings.getConfig(AppConfigFieldKey.locale).toLanguageTag()}_v${_appWrapper.settings.version}',
         builder: () => Row(
           children: [
             _rowMenuManager.buildRowButtons(rowIndex),

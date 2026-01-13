@@ -16,8 +16,6 @@ class SettingsProfile {
   late ThemeMode themeMode;
   late Color themeSeedColor;
   late bool wakelockEnabled;
-  late int gridRowsAmount;
-  late int gridColsAmount;
 
   static SettingsProfile fromMap(Map data) {
     SettingsProfile settingsProfile = SettingsProfile();
@@ -40,8 +38,6 @@ class SettingsProfile {
     settingsProfile.themeMode = data[AppConfigFieldKey.themeMode];
     settingsProfile.themeSeedColor = data[AppConfigFieldKey.themeSeedColor];
     settingsProfile.wakelockEnabled = data[AppConfigFieldKey.wakelockEnabled];
-    settingsProfile.gridRowsAmount = data[AppConfigFieldKey.gridRowsAmount];
-    settingsProfile.gridColsAmount = data[AppConfigFieldKey.gridColsAmount];
     return settingsProfile;
   }
 
@@ -58,7 +54,5 @@ class SettingsProfile {
     AppConfigFieldKey.themeMode: themeMode,
     AppConfigFieldKey.themeSeedColor: themeSeedColor,
     AppConfigFieldKey.wakelockEnabled: wakelockEnabled,
-    AppConfigFieldKey.gridRowsAmount: gridRowsAmount,
-    AppConfigFieldKey.gridColsAmount: gridColsAmount,
   };
 }

@@ -6,23 +6,32 @@ import '../entity/track.dart';
 import 'hive_service.dart';
 
 class HiveSettingsProvider extends ChangeNotifier {
+  // Licznik wersji do wymuszenia odświeżenia widoku
+  int _version = 0;
+  int get version => _version;
+
   dynamic getConfig(dynamic key, {dynamic defaultValue}) =>
       HiveService.get(key, defaultValue: defaultValue);
 
   Future<void> setConfig(AppConfigFieldKey key, dynamic value) async {
     HiveService.set(key, value);
-    notifyListeners();
+    reload();
   }
 
   List<SettingsProfile> get settingsProfilesList => HiveService.listProfiles;
 
   Future<void> addProfile(SettingsProfile value) async {
     HiveService.addProfile(value);
-    notifyListeners();
+    reload();
   }
 
   Future<void> deleteProfile(int index) async {
     HiveService.deleteProfile(index);
+    reload();
+  }
+
+  Future<void> reload() async {
+    _version++;
     notifyListeners();
   }
 

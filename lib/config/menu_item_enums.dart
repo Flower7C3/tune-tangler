@@ -22,5 +22,7 @@ enum AllTracksMenuItem {
   playbackBalanceSet,
   playbackStartAtPositionReset,
   playbackEndAtPositionReset,
+  projectExport,
+  projectImport,
   moreSettings,
 }

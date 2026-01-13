@@ -161,4 +161,10 @@ class AppIcon {
 
   static IconData touchShort = Symbols.touch_app;
   static IconData touchLong = Symbols.touch_long;
+  static IconData projectExport = Icons.save_rounded;
+  static IconData projectImport = Icons.folder_open_rounded;
+  static IconData projectPreview = Icons.preview_rounded;
+  static IconData projectName = Icons.label_rounded;
+  static IconData projectExportDate = Icons.calendar_today_rounded;
+  static IconData projectRecordingsSize = Icons.storage_rounded;
 }

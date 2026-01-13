@@ -593,6 +593,18 @@ class DrawerManager {
         ],
       ),
       ExpansionTile(
+        title: Text(_trans.helpScreenMessageProjectExportImportTitle),
+        children: [
+          _uiHelper.buildRichText(
+            _trans.helpScreenMessageProjectExportImportContent,
+            data: {
+              'projectExport': AppIcon.projectExport,
+              'projectImport': AppIcon.projectImport,
+            },
+          ),
+        ],
+      ),
+      ExpansionTile(
         title: Text(_trans.recordingSettings),
         children: [
           _uiHelper.buildRichText(

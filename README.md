@@ -8,17 +8,18 @@
 
 ### 🧩 Zdolności aplikacji <a name="capabilities"></a>
 
-- Nagrywanie: mikrofon/USB (zależnie od urządzenia), auto‑gain/echo‑cancel/noise‑suppress (jeśli wspierane)
-- Import: wybór pliku audio do ścieżki
-- Odtwarzanie: start/stop/pause/resume, tryby pętli (single/loop), seek, odtwarzanie zakresu (początek/koniec), czas/pozycja
-- Sterowanie na żywo: głośność, balans (pan), prędkość (0.5–2.0)
-- Zarządzanie ścieżkami: zmiana nazwy (emoji), klawisze skrótu, przenoszenie/zamiana nagrań, usuwanie nagrania
-- Udostępnianie: surowy plik lub „zmodyfikowany” (trim/vol/pan/speed wbudowane przez FFmpeg)
-- Układ: konfigurowalna siatka (wiersze/kolumny), lazy‑loading dla wydajności
-- Motywy: jasny/ciemny/system, kolor akcentu
-- Lokalizacja: EN/PL (zmiana w runtime)
-- Uprawnienia: mikrofon, powiadomienia (Android), dostęp do plików (gdzie dotyczy)
-- Profile: zapisz/wczytaj/usuń profile ustawień
+- **Nagrywanie**: mikrofon/USB (zależnie od urządzenia), auto‑gain/echo‑cancel/noise‑suppress (jeśli wspierane)
+- **Import**: wybór pliku audio do ścieżki
+- **Odtwarzanie**: start/stop/pause/resume, tryby pętli (single/loop), seek, odtwarzanie zakresu (początek/koniec), czas/pozycja
+- **Sterowanie na żywo**: głośność, balans (pan), prędkość (0.5–2.0)
+- **Zarządzanie ścieżkami**: zmiana nazwy (emoji), klawisze skrótu, przenoszenie/zamiana nagrań, usuwanie nagrania
+- **Udostępnianie**: surowy plik lub „zmodyfikowany” (trim/vol/pan/speed wbudowane przez FFmpeg)
+- **Układ**: konfigurowalna siatka (wiersze/kolumny), lazy‑loading dla wydajności
+- **Motywy**: jasny/ciemny/system, kolor akcentu
+- **Lokalizacja**: EN/PL (zmiana w runtime)
+- **Uprawnienia**: mikrofon, powiadomienia (Android), dostęp do plików (gdzie dotyczy)
+- **Profile**: zapisz/wczytaj/usuń profile ustawień
+- **Eksport/Import projektu**: zapisz cały projekt (ustawienia siatki, wszystkie ścieżki, nagrania) do ZIP i wczytaj go później z pełną walidacją
 
 ### 🚀 Szybki Start <a name="quick-start"></a>
 

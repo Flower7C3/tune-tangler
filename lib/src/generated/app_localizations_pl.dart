@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -36,12 +35,12 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String rowTracksPlayingStart(Object rowName) {
-    return 'Odtwarzaj ścieżki w wierszu $rowName';
+    return 'Odtwarzaj ścieżki w wierszu $rowName';
   }
 
   @override
   String rowTracksPlayingStop(Object rowName) {
-    return 'Zatrzymaj ścieżki w wierszu $rowName';
+    return 'Zatrzymaj ścieżki w wierszu $rowName';
   }
 
   @override
@@ -155,7 +154,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get trackRecordingStartNoNotificationPermission =>
-      'Brak uprawnień do powiadamiania o nagrywaniu.';
+      'Brak uprawnień do powiadamiania o nagrywaniu.';
 
   @override
   String trackRecordingStartError(Object error, Object trackName) {
@@ -204,11 +203,11 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get trackPlaybackStartAtPositionSub10 =>
-      'Zmień początek odtwarzania ścieżki o -0.01 s';
+      'Zmień początek odtwarzania ścieżki o -0.01 s';
 
   @override
   String get trackPlaybackStartAtPositionSub100 =>
-      'Zmień początek odtwarzania ścieżki o -0,1 s';
+      'Zmień początek odtwarzania ścieżki o -0,1 s';
 
   @override
   String get trackPlaybackStartAtPositionReset =>
@@ -216,19 +215,19 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get trackPlaybackStartAtPositionAdd100 =>
-      'Zmień początek odtwarzania ścieżki o +0,1 s';
+      'Zmień początek odtwarzania ścieżki o +0,1 s';
 
   @override
   String get trackPlaybackStartAtPositionAdd10 =>
-      'Zmień początek odtwarzania ścieżki o +0.01 s';
+      'Zmień początek odtwarzania ścieżki o +0.01 s';
 
   @override
   String get trackPlaybackEndAtPositionSub10 =>
-      'Zmień koniec odtwarzania ścieżki o -0.01 s';
+      'Zmień koniec odtwarzania ścieżki o -0.01 s';
 
   @override
   String get trackPlaybackEndAtPositionSub100 =>
-      'Zmień koniec odtwarzania ścieżki o -0,1 s';
+      'Zmień koniec odtwarzania ścieżki o -0,1 s';
 
   @override
   String get trackPlaybackEndAtPositionReset =>
@@ -236,11 +235,11 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get trackPlaybackEndAtPositionAdd100 =>
-      'Zmień koniec odtwarzania ścieżki o +0,1 s';
+      'Zmień koniec odtwarzania ścieżki o +0,1 s';
 
   @override
   String get trackPlaybackEndAtPositionAdd10 =>
-      'Zmień koniec odtwarzania ścieżki o +0.01 s';
+      'Zmień koniec odtwarzania ścieżki o +0.01 s';
 
   @override
   String get trackNameChange => 'Zmień nazwę ścieżki';
@@ -296,7 +295,7 @@ class AppLocalizationsPl extends AppLocalizations {
     Object firstTrackName,
     Object secondTrackName,
   ) {
-    return 'Zamieniono lokalizację dla nagrań #$firstTrackName i #$secondTrackName.';
+    return 'Zamieniono lokalizację dla nagrań #$firstTrackName i #$secondTrackName.';
   }
 
   @override
@@ -309,7 +308,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get trackRecordingMoveFailed =>
-      'Nie udało się przenieść nagrań. Sprawdź, czy pliki nie zostały przeniesione lub usunięte i spróbuj ponownie.';
+      'Nie udało się przenieść nagrań. Sprawdź, czy pliki nie zostały przeniesione lub usunięte i spróbuj ponownie.';
 
   @override
   String trackRecordingShare(Object trackName) {
@@ -374,7 +373,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String rowTracksPlaybackModeSetSuccess(Object rowName, Object value) {
-    return 'Ustawiono tryb odtwarzania dla ścieżek w wierszu $rowName na $value.';
+    return 'Ustawiono tryb odtwarzania dla ścieżek w wierszu $rowName na $value.';
   }
 
   @override
@@ -387,7 +386,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String rowTracksPlaybackSpeedSuccessSet(Object rowName, Object value) {
-    return 'Ustawiono prędkość odtwarzania dla ścieżek w wierszu $rowName na $value.';
+    return 'Ustawiono prędkość odtwarzania dla ścieżek w wierszu $rowName na $value.';
   }
 
   @override
@@ -400,7 +399,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String rowTracksPlaybackVolumeSuccessSet(Object rowName, Object value) {
-    return 'Ustawiono głośność dla ścieżek w wierszu $rowName na $value.';
+    return 'Ustawiono głośność dla ścieżek w wierszu $rowName na $value.';
   }
 
   @override
@@ -413,7 +412,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String rowTracksPlaybackBalanceSuccessSet(Object rowName, Object value) {
-    return 'Ustawiono balans odtwarzania dla ścieżek w wierszu $rowName na $value.';
+    return 'Ustawiono balans odtwarzania dla ścieżek w wierszu $rowName na $value.';
   }
 
   @override
@@ -426,12 +425,12 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String rowTracksPlaybackStartAtPositionResetInfo(Object rowName) {
-    return 'Wszystkie utwory w wierszu $rowName będą miały domyślny początek odtwarzania na. Kontynuować?';
+    return 'Wszystkie utwory w wierszu $rowName będą miały domyślny początek odtwarzania na. Kontynuować?';
   }
 
   @override
   String rowTracksPlaybackStartAtPositionResetSuccess(Object rowName) {
-    return 'Zresetowano początek odtwarzania utworów wiersza na w wierszu $rowName.';
+    return 'Zresetowano początek odtwarzania utworów wiersza na w wierszu $rowName.';
   }
 
   @override
@@ -444,12 +443,12 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String rowTracksPlaybackEndAtPositionResetInfo(Object rowName) {
-    return 'Wszystkie utwory w wierszu $rowName będą miały domyślny koniec odtwarzania na. Kontynuować?';
+    return 'Wszystkie utwory w wierszu $rowName będą miały domyślny koniec odtwarzania na. Kontynuować?';
   }
 
   @override
   String rowTracksPlaybackEndAtPositionResetSuccess(Object rowName) {
-    return 'Zresetowano wszystkie zakończenia odtwarzania utworów w wierszu $rowName.';
+    return 'Zresetowano wszystkie zakończenia odtwarzania utworów w wierszu $rowName.';
   }
 
   @override
@@ -460,46 +459,46 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String rowTracksRecordingsDeleteInfo(Object rowName) {
-    return 'Wszystkie nagrania ścieżek w wierszu $rowName zostaną usunięte. Kontynuować?';
+    return 'Wszystkie nagrania ścieżek w wierszu $rowName zostaną usunięte. Kontynuować?';
   }
 
   @override
   String rowTracksRecordingsDeleteSuccess(Object rowName) {
-    return 'Usunięto nagrania ścieżek w wierszu $rowName.';
+    return 'Usunięto nagrania ścieżek w wierszu $rowName.';
   }
 
   @override
-  String get balanceLeft100 => 'lewa 100%, prawa 0%';
+  String get balanceLeft100 => 'lewa 100%, prawa 0%';
 
   @override
-  String get balanceLeft75 => 'lewa 100%, prawa 25%';
+  String get balanceLeft75 => 'lewa 100%, prawa 25%';
 
   @override
-  String get balanceLeft50 => 'lewa 100%, prawa 50%';
+  String get balanceLeft50 => 'lewa 100%, prawa 50%';
 
   @override
-  String get balanceLeft25 => 'lewa 100%, prawa 75%';
+  String get balanceLeft25 => 'lewa 100%, prawa 75%';
 
   @override
-  String get balanceLeft => 'lewa 100%';
+  String get balanceLeft => 'lewa 100%';
 
   @override
   String get balanceCenter => 'centralnie';
 
   @override
-  String get balanceRight => 'prawa 100%';
+  String get balanceRight => 'prawa 100%';
 
   @override
-  String get balanceRight25 => 'lewa 75%, prawa 100%';
+  String get balanceRight25 => 'lewa 75%, prawa 100%';
 
   @override
-  String get balanceRight50 => 'lewa 50%, prawa 100%';
+  String get balanceRight50 => 'lewa 50%, prawa 100%';
 
   @override
-  String get balanceRight75 => 'lewa 25%, prawa 100%';
+  String get balanceRight75 => 'lewa 25%, prawa 100%';
 
   @override
-  String get balanceRight100 => 'lewa 0%, prawa 100%';
+  String get balanceRight100 => 'lewa 0%, prawa 100%';
 
   @override
   String languageWithLocale(Object locale, Object name) {
@@ -570,14 +569,14 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get helpScreenMessageAboutContent =>
-      'Ta aplikacja umożliwia rejestrację dźwięku z mikrofonu lub interfejsu USB audio (urządzenie musi obsługiwać technologię USB OTG) do jednej z wielu ścieżek. Możliwe jest również zaimportowanie istniejącego pliku audio.\n\nNagrania można odtwarzać synchronicznie lub asynchronicznie, w pętli lub bez.\n\nNagrania i ich ustawienia oraz tryb graficzny i język są zapamiętywane po wyłączeniu aplikacji.';
+      'Ta aplikacja umożliwia rejestrację dźwięku z mikrofonu lub interfejsu USB audio (urządzenie musi obsługiwać technologię USB OTG) do jednej z wielu ścieżek. Możliwe jest również zaimportowanie istniejącego pliku audio.\n\nNagrania można odtwarzać synchronicznie lub asynchronicznie, w pętli lub bez.\n\nNagrania i ich ustawienia oraz tryb graficzny i język są zapamiętywane po wyłączeniu aplikacji.';
 
   @override
   String get helpScreenMessageGridScreenTitle => 'Ekran siatki ścieżek';
 
   @override
   String get helpScreenMessageGridScreenContent =>
-      'Naciśnij krótko kolorowy blok ścieżki lub użyj skrótu klawiszowego (widocznego u góry ścieżki), aby wykonać jedną z dostępnych akcji.\n\nPrzytrzymaj blok ścieżki lub użyj skrótu klawiszowego z klawiszem Control \$[controlKey], aby otworzyć szczegóły ścieżki.';
+      'Naciśnij krótko kolorowy blok ścieżki lub użyj skrótu klawiszowego (widocznego u góry ścieżki), aby wykonać jedną z dostępnych akcji.\n\nPrzytrzymaj blok ścieżki lub użyj skrótu klawiszowego z klawiszem Control \$[controlKey], aby otworzyć szczegóły ścieżki.';
 
   @override
   String get helpScreenMessageDetailsScreenTitle => 'Ekran szczegółów ścieżki';
@@ -587,14 +586,22 @@ class AppLocalizationsPl extends AppLocalizations {
       'Istnieje kilka ustawień, takich jak: \$[recordingClip]przycinanie nagrania, \$[trackPlaybackMode]tryb odtwarzania, \$[trackPlaybackVolume]wartość głośności odtwarzania, \$[trackPlaybackBalance]balans audio, \$[trackPlaybackSpeed]prędkość odtwarzania, \$[trackName]nazwa ścieżki, \$[trackKeyboardKey]skrót klawiszowy ścieżki.\nMożesz również \$[trackRecordingMove]zmienić lokalizację ścieżki na siatce, \$[trackRecordingImport]zaimportować plik nagrania, \$[trackRecordingShare]udostępnić lub \$[deleteForever]usunąć nagranie.';
 
   @override
-  String get helpScreenMessageTrackStates => 'Statusy i akcje ścieżki';
+  String get helpScreenMessageTrackStates => 'Statusy i akcje ścieżki';
 
   @override
-  String get helpScreenMessageTrackIcons => 'Ikony informacji o ścieżce';
+  String get helpScreenMessageTrackIcons => 'Ikony informacji o ścieżce';
 
   @override
   String get helpScreenMessageSettingsInfo =>
-      'Dostępne jest ustawianie \$[recordingAudioEncoder]kodeka audio, \$[recordingSampleRate]częstotliwości próbkowania, \$[recordingBitRate]szybkości transmisji, \$[recordingAudioMode]trybu audio, \$[recordingAutoGain]automatycznego wzmocnienia, \$[recordingEchoCancel]anulowania echa i \$[recordingNoiseSuppress]tłumienia szumów.';
+      'Dostępne jest ustawianie \$[recordingAudioEncoder]kodeka audio, \$[recordingSampleRate]częstotliwości próbkowania, \$[recordingBitRate]szybkości transmisji, \$[recordingAudioMode]trybu audio, \$[recordingAutoGain]automatycznego wzmocnienia, \$[recordingEchoCancel]anulowania echa i \$[recordingNoiseSuppress]tłumienia szumów.';
+
+  @override
+  String get helpScreenMessageProjectExportImportTitle =>
+      'Eksport i import projektu';
+
+  @override
+  String get helpScreenMessageProjectExportImportContent =>
+      'Możesz \$[projectExport]zapisać cały projekt do pliku ZIP, który zawiera ustawienia siatki, wszystkie ścieżki z ich ustawieniami oraz nagrania audio. Plik można później \$[projectImport]wczytać, aby przywrócić cały stan aplikacji.\n\nEksportowany plik zawiera:\n• Ustawienia siatki (liczba wierszy i kolumn)\n• Wszystkie ustawienia ścieżek (nazwy, parametry odtwarzania, trimming, skróty klawiszowe)\n• Wszystkie nagrania audio z sumami kontrolnymi\n• Metadane projektu (wersja, data eksportu, statystyki)\n\nPrzed importem wyświetlany jest podgląd projektu, a aplikacja ostrzega o nadpisaniu bieżącej sesji. Import wykonuje pełną walidację przed modyfikacją danych.';
 
   @override
   String get stateEmpty =>
@@ -602,10 +609,10 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get stateRecording =>
-      'nagrywanie w toku (kliknij blok, aby zatrzymać nagrywanie ścieżki)';
+      'nagrywanie w toku (kliknij blok, aby zatrzymać nagrywanie ścieżki)';
 
   @override
-  String get stateProcessing => 'ładowanie nagrania w trakcie';
+  String get stateProcessing => 'ładowanie nagrania w trakcie';
 
   @override
   String get stateIdle =>
@@ -1015,11 +1022,11 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get audioRecorderAacHeInfo =>
-      'Radio internetowe i strumieniowanie przy niskim bitrate';
+      'Radio internetowe i strumieniowanie przy niskim bitrate';
 
   @override
   String get audioRecorderAacHeDetails =>
-      'Stratna kompresja, ale lepsza jakość niż MP3 przy tym samym bitrate. Świetnie nadaje się do muzyki i wideo.';
+      'Stratna kompresja, ale lepsza jakość niż MP3 przy tym samym bitrate. Świetnie nadaje się do muzyki i wideo.';
 
   @override
   String get audioRecorderAacEldName =>
@@ -1027,11 +1034,11 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get audioRecorderAacEldInfo =>
-      'Komunikacja głosowa w czasie rzeczywistym';
+      'Komunikacja głosowa w czasie rzeczywistym';
 
   @override
   String get audioRecorderAacEldDetails =>
-      'Optymalizowany pod kątem bardzo niskiego opóźnienia. Mniejsza jakość niż AAC LC, ale lepsza w komunikacji na żywo.';
+      'Optymalizowany pod kątem bardzo niskiego opóźnienia. Mniejsza jakość niż AAC LC, ale lepsza w komunikacji na żywo.';
 
   @override
   String get audioRecorderAacLcName =>
@@ -1039,22 +1046,22 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get audioRecorderAacLcInfo =>
-      'Muzyka w dobrej jakości przy niskim bitrate';
+      'Muzyka w dobrej jakości przy niskim bitrate';
 
   @override
   String get audioRecorderAacLcDetails =>
-      'Zaprojektowany dla niskiego bitrate (np. 32-64 kbps). Używany do transmisji radiowych i strumieniowania. Wyższe opóźnienie w porównaniu do AAC LC.';
+      'Zaprojektowany dla niskiego bitrate (np. 32-64 kbps). Używany do transmisji radiowych i strumieniowania. Wyższe opóźnienie w porównaniu do AAC LC.';
 
   @override
   String get audioRecorderWavName =>
       'Waveform Audio File (pcm16bit with headers)';
 
   @override
-  String get audioRecorderWavInfo => 'Nagrywanie w wysokiej jakości';
+  String get audioRecorderWavInfo => 'Nagrywanie w wysokiej jakości';
 
   @override
   String get audioRecorderWavDetails =>
-      'Bezstratny format audio, nie stosuje kompresji. Bardzo duże pliki, ale doskonała jakość. Idealny do profesjonalnej edycji i nagrywania.';
+      'Bezstratny format audio, nie stosuje kompresji. Bardzo duże pliki, ale doskonała jakość. Idealny do profesjonalnej edycji i nagrywania.';
 
   @override
   String get audioRecorderFlacName => 'FLAC (Free Lossless Audio Codec)';
@@ -1064,7 +1071,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get audioRecorderFlacDetails =>
-      'Bezstratny, ale z kompresją (ok. 50-70% mniejszy niż WAV). Obsługuje metadane, czego WAV nie potrafi. Świetny do archiwizacji muzyki w wysokiej jakości.';
+      'Bezstratny, ale z kompresją (ok. 50-70% mniejszy niż WAV). Obsługuje metadane, czego WAV nie potrafi. Świetny do archiwizacji muzyki w wysokiej jakości.';
 
   @override
   String recordingDurationValue(Object value) {
@@ -1084,7 +1091,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get recordingSampleRateInfo =>
-      'Częstotliwość próbkowania dźwięku w próbkach na sekundę (jeśli jest dostępne na urządzeniu).';
+      'Częstotliwość próbkowania dźwięku w próbkach na sekundę (jeśli jest dostępne na urządzeniu).';
 
   @override
   String recordingSampleRateSuccess(Object value) {
@@ -1104,7 +1111,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get recordingBitRateInfo =>
-      'Szybkość kodowania dźwięku w bitach na sekundę (jeśli jest dostępne na urządzeniu).';
+      'Szybkość kodowania dźwięku w bitach na sekundę (jeśli jest dostępne na urządzeniu).';
 
   @override
   String recordingBitRateSuccess(Object value) {
@@ -1140,7 +1147,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get recordingAutoGainInfo =>
-      'Rejestrator spróbuje automatycznie dostosować głośność nagrywania w ograniczonym zakresie (jeśli jest dostępna na urządzeniu). Głośność nagrywania może być mniejsza przy użyciu tej opcji.';
+      'Rejestrator spróbuje automatycznie dostosować głośność nagrywania w ograniczonym zakresie (jeśli jest dostępna na urządzeniu). Głośność nagrywania może być mniejsza przy użyciu tej opcji.';
 
   @override
   String recordingAutoGainSuccess(Object value) {
@@ -1258,14 +1265,14 @@ class AppLocalizationsPl extends AppLocalizations {
   String get permissions => 'Uprawnienia';
 
   @override
-  String get audioPermission => 'Odczyt pliku audio z urządzenia';
+  String get audioPermission => 'Odczyt pliku audio z urządzenia';
 
   @override
   String get microphonePermission => 'Nagrywanie dźwięku przez mikrofon';
 
   @override
   String get notificationPermission =>
-      'Wyświetlanie powiadomienia o stanie nagrywania';
+      'Wyświetlanie powiadomienia o stanie nagrywania';
 
   @override
   String get permissionStatusGranted => 'Przyznane';
@@ -1314,37 +1321,37 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String audioWarningFileSizeLarge(Object size) {
-    return 'Duży plik (${size}MB)';
+    return 'Duży plik ($size MB)';
   }
 
   @override
   String audioWarningFileSizeVeryLarge(Object size) {
-    return 'Bardzo duży plik (${size}MB) - może spowalniać odtwarzanie';
+    return 'Bardzo duży plik ($size MB) - może spowalniać odtwarzanie';
   }
 
   @override
   String audioWarningDurationLong(Object minutes) {
-    return 'Długie nagranie (${minutes}min)';
+    return 'Długie nagranie ($minutes min)';
   }
 
   @override
   String audioWarningDurationMedium(Object minutes) {
-    return 'Średnie nagranie (${minutes}min)';
+    return 'Średnie nagranie ($minutes min)';
   }
 
   @override
   String audioWarningSampleRateNonStandard(Object sampleRate) {
-    return 'Niestandardowa częstotliwość: ${sampleRate}Hz';
+    return 'Niestandardowa częstotliwość: $sampleRate Hz';
   }
 
   @override
   String audioWarningBitRateHigh(Object bitRate) {
-    return 'Wysoki bitrate: ${bitRate}kbps';
+    return 'Wysoki bitrate: $bitRate kbps';
   }
 
   @override
   String audioWarningBitRateLow(Object bitRate) {
-    return 'Niski bitrate: ${bitRate}kbps';
+    return 'Niski bitrate: $bitRate kbps';
   }
 
   @override
@@ -1362,7 +1369,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get audioWarningSuggestionInterfaceDelays =>
-      'Może powodować opóźnienia w interfejsie';
+      'Może powodować opóźnienia w interfejsie';
 
   @override
   String get audioWarningSuggestionMultiTrackPerformance =>
@@ -1370,7 +1377,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get audioWarningSuggestionCompatibility =>
-      'Może powodować problemy z kompatybilnością';
+      'Może powodować problemy z kompatybilnością';
 
   @override
   String get audioWarningSuggestionFileSize => 'Może wpływać na rozmiar pliku';
@@ -1386,4 +1393,114 @@ class AppLocalizationsPl extends AppLocalizations {
   @override
   String get audioWarningSuggestionCheckFile =>
       'Sprawdź czy plik nie został przeniesiony lub usunięty';
+
+  @override
+  String get projectExport => 'Zapisz projekt';
+
+  @override
+  String get projectImport => 'Wczytaj projekt';
+
+  @override
+  String get projectExportName => 'Nazwa projektu (opcjonalnie)';
+
+  @override
+  String get projectExportNameHint => 'Wprowadź nazwę projektu';
+
+  @override
+  String get projectExportSuccess => 'Projekt został zapisany';
+
+  @override
+  String get projectImportSuccess => 'Projekt został wczytany';
+
+  @override
+  String get projectImportWarning =>
+      'Wczytanie projektu nadpisze bieżącą sesję. Wszystkie nagrania zostaną usunięte, a ustawienia ścieżek zostaną nadpisane. Kontynuować?';
+
+  @override
+  String get projectImportWarningTitle => 'Ostrzeżenie';
+
+  @override
+  String get projectPreview => 'Podgląd projektu';
+
+  @override
+  String get projectMetadata => 'Metadane projektu';
+
+  @override
+  String get projectStatistics => 'Statystyki';
+
+  @override
+  String get projectName => 'Nazwa projektu';
+
+  @override
+  String get projectVersion => 'Wersja';
+
+  @override
+  String get projectExportDate => 'Data eksportu';
+
+  @override
+  String get projectGridSize => 'Rozmiar siatki';
+
+  @override
+  String get projectTotalTracks => 'Wszystkie ścieżki';
+
+  @override
+  String get projectTracksWithRecordings => 'Ścieżki z nagraniami';
+
+  @override
+  String get projectTotalRecordingsSize => 'Rozmiar nagrań';
+
+  @override
+  String get projectExporting => 'Eksportowanie projektu...';
+
+  @override
+  String get projectImporting => 'Wczytywanie projektu...';
+
+  @override
+  String get projectExportError => 'Błąd podczas eksportu projektu';
+
+  @override
+  String get projectImportError => 'Błąd podczas wczytywania projektu';
+
+  @override
+  String get projectInvalidFormat => 'Nieprawidłowy format pliku projektu';
+
+  @override
+  String get projectFileNotFound => 'Plik projektu nie został znaleziony';
+
+  @override
+  String projectChecksumMismatch(Object fileName) {
+    return 'Suma kontrolna pliku $fileName się nie zgadza';
+  }
+
+  @override
+  String get projectChecksumMismatchTitle => 'Błąd weryfikacji';
+
+  @override
+  String projectDurationMismatch(Object fileName) {
+    return 'Długość pliku $fileName się nie zgadza. Pozycje odtwarzania zostały zresetowane';
+  }
+
+  @override
+  String get projectDurationMismatchTitle => 'Ostrzeżenie długości pliku';
+
+  @override
+  String get projectExportCancel => 'Anulowano eksport projektu';
+
+  @override
+  String get projectImportCancel => 'Anulowano wczytywanie projektu';
+
+  @override
+  String get buttonExport => 'Eksportuj';
+
+  @override
+  String get buttonImport => 'Wczytaj';
+
+  @override
+  String get buttonConfirm => 'Potwierdź';
+
+  @override
+  String get projectValidating => 'Walidacja projektu...';
+
+  @override
+  String get projectValidationFailed => 'Walidacja projektu nie powiodła się';
 }

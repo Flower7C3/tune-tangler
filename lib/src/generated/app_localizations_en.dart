@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -204,11 +203,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get trackPlaybackStartAtPositionSub10 =>
-      'Change track playback start at by -0.01 s';
+      'Change track playback start at by -0.01 s';
 
   @override
   String get trackPlaybackStartAtPositionSub100 =>
-      'Change track playback start at by -0.1 s';
+      'Change track playback start at by -0.1 s';
 
   @override
   String get trackPlaybackStartAtPositionReset =>
@@ -216,30 +215,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get trackPlaybackStartAtPositionAdd100 =>
-      'Change track playback start at by +0.1 s';
+      'Change track playback start at by +0.1 s';
 
   @override
   String get trackPlaybackStartAtPositionAdd10 =>
-      'Change track playback start at by +0.01 s';
+      'Change track playback start at by +0.01 s';
 
   @override
   String get trackPlaybackEndAtPositionSub10 =>
-      'Change track playback end at by -0.01 s';
+      'Change track playback end at by -0.01 s';
 
   @override
   String get trackPlaybackEndAtPositionSub100 =>
-      'Change track playback end at by -0.1 s';
+      'Change track playback end at by -0.1 s';
 
   @override
   String get trackPlaybackEndAtPositionReset => 'Reset track playback end at';
 
   @override
   String get trackPlaybackEndAtPositionAdd100 =>
-      'Change track playback end at by +0.1 s';
+      'Change track playback end at by +0.1 s';
 
   @override
   String get trackPlaybackEndAtPositionAdd10 =>
-      'Change track playback end at by +0.01 s';
+      'Change track playback end at by +0.01 s';
 
   @override
   String get trackNameChange => 'Change track name';
@@ -300,7 +299,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get trackRecordingMoveInProgress =>
-      'Recording move is already in progress. Please try again in a moment.';
+      'Recording move is already in progress. Please try again in a moment.';
 
   @override
   String get trackRecordingMoveNotAllowed =>
@@ -466,37 +465,37 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get balanceLeft100 => 'left 100%, right 0%';
+  String get balanceLeft100 => 'left 100%, right 0%';
 
   @override
-  String get balanceLeft75 => 'left 100%, right 25%';
+  String get balanceLeft75 => 'left 100%, right 25%';
 
   @override
-  String get balanceLeft50 => 'left 100%, right 50%';
+  String get balanceLeft50 => 'left 100%, right 50%';
 
   @override
-  String get balanceLeft25 => 'left 100%, right 75%';
+  String get balanceLeft25 => 'left 100%, right 75%';
 
   @override
-  String get balanceLeft => 'left 100%';
+  String get balanceLeft => 'left 100%';
 
   @override
   String get balanceCenter => 'center';
 
   @override
-  String get balanceRight => 'right 100%';
+  String get balanceRight => 'right 100%';
 
   @override
-  String get balanceRight25 => 'left 75%, right 100%';
+  String get balanceRight25 => 'left 75%, right 100%';
 
   @override
-  String get balanceRight50 => 'left 50%, right 100%';
+  String get balanceRight50 => 'left 50%, right 100%';
 
   @override
-  String get balanceRight75 => 'left 25%, right 100%';
+  String get balanceRight75 => 'left 25%, right 100%';
 
   @override
-  String get balanceRight100 => 'left 0%, right 100%';
+  String get balanceRight100 => 'left 0%, right 100%';
 
   @override
   String languageWithLocale(Object locale, Object name) {
@@ -566,14 +565,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get helpScreenMessageAboutContent =>
-      'This application allows you to record audio from a microphone or USB audio interface (your device must support USB OTG technology) to one of several tracks. You can also import an existing audio file.\n\nRecordings can be played synchronously or asynchronously, in a loop or not.\n\nRecordings and their settings, as well as the graphic mode and language, are remembered after the application is closed.';
+      'This application allows you to record audio from a microphone or USB audio interface (your device must support USB OTG technology) to one of several tracks. You can also import an existing audio file.\n\nRecordings can be played synchronously or asynchronously, in a loop or not.\n\nRecordings and their settings, as well as the graphic mode and language, are remembered after the application is closed.';
 
   @override
   String get helpScreenMessageGridScreenTitle => 'Tracks grid screen';
 
   @override
   String get helpScreenMessageGridScreenContent =>
-      'Short press a colored track block or use a hotkey (visible at the top of the track) to perform one of the available actions.\n\nHold the track block or use the hotkey with the Control key \$[controlKey] to open the track details.';
+      'Short press a colored track block or use a hotkey (visible at the top of the track) to perform one of the available actions.\n\nHold the track block or use the hotkey with the Control key \$[controlKey] to open the track details.';
 
   @override
   String get helpScreenMessageDetailsScreenTitle => 'Track details screen';
@@ -591,6 +590,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get helpScreenMessageSettingsInfo =>
       'You can set \$[recordingAudioEncoder]audio codec, \$[recordingSampleRate]sample rate, \$[recordingBitRate]bit rate, \$[recordingAudioMode]audio mode, \$[recordingAutoGain]auto gain, \$[recordingEchoCancel]echo cancel and \$[recordingNoiseSuppress]noise suppression.';
+
+  @override
+  String get helpScreenMessageProjectExportImportTitle =>
+      'Project export and import';
+
+  @override
+  String get helpScreenMessageProjectExportImportContent =>
+      'You can \$[projectExport]save the entire project to a ZIP file, which contains grid settings, all tracks with their settings, and audio recordings. The file can later be \$[projectImport]loaded to restore the entire application state.\n\nThe exported file contains:\n• Grid settings (number of rows and columns)\n• All track settings (names, playback parameters, trimming, keyboard shortcuts)\n• All audio recordings with checksums\n• Project metadata (version, export date, statistics)\n\nBefore import, a project preview is displayed, and the application warns about overwriting the current session. Import performs full validation before modifying data.';
 
   @override
   String get stateEmpty => 'track empty (click on box to start recording)';
@@ -1126,7 +1133,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recordingAutoGainInfo =>
-      'The recorder will try to auto adjust recording volume in a limited range (if available on the device). Recording volume may be lowered by using this.';
+      'The recorder will try to auto adjust recording volume in a limited range (if available on the device). Recording volume may be lowered by using this.';
 
   @override
   String recordingAutoGainSuccess(Object value) {
@@ -1299,37 +1306,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String audioWarningFileSizeLarge(Object size) {
-    return 'Large file (${size}MB)';
+    return 'Large file ($size MB)';
   }
 
   @override
   String audioWarningFileSizeVeryLarge(Object size) {
-    return 'Very large file (${size}MB) - may slow down playback';
+    return 'Very large file ($size MB) - may slow down playback';
   }
 
   @override
   String audioWarningDurationLong(Object minutes) {
-    return 'Long recording (${minutes}min)';
+    return 'Long recording ($minutes min)';
   }
 
   @override
   String audioWarningDurationMedium(Object minutes) {
-    return 'Medium recording (${minutes}min)';
+    return 'Medium recording ($minutes min)';
   }
 
   @override
   String audioWarningSampleRateNonStandard(Object sampleRate) {
-    return 'Non-standard frequency: ${sampleRate}Hz';
+    return 'Non-standard frequency: $sampleRate Hz';
   }
 
   @override
   String audioWarningBitRateHigh(Object bitRate) {
-    return 'High bitrate: ${bitRate}kbps';
+    return 'High bitrate: $bitRate kbps';
   }
 
   @override
   String audioWarningBitRateLow(Object bitRate) {
-    return 'Low bitrate: ${bitRate}kbps';
+    return 'Low bitrate: $bitRate kbps';
   }
 
   @override
@@ -1370,4 +1377,114 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get audioWarningSuggestionCheckFile =>
       'Check if file was moved or deleted';
+
+  @override
+  String get projectExport => 'Save project';
+
+  @override
+  String get projectImport => 'Load project';
+
+  @override
+  String get projectExportName => 'Project name (optional)';
+
+  @override
+  String get projectExportNameHint => 'Enter project name';
+
+  @override
+  String get projectExportSuccess => 'Project has been saved';
+
+  @override
+  String get projectImportSuccess => 'Project has been loaded';
+
+  @override
+  String get projectImportWarning =>
+      'Loading project will overwrite current session. All recordings will be deleted and track settings will be overridden. Continue?';
+
+  @override
+  String get projectImportWarningTitle => 'Warning';
+
+  @override
+  String get projectPreview => 'Project preview';
+
+  @override
+  String get projectMetadata => 'Project metadata';
+
+  @override
+  String get projectStatistics => 'Statistics';
+
+  @override
+  String get projectName => 'Project name';
+
+  @override
+  String get projectVersion => 'Version';
+
+  @override
+  String get projectExportDate => 'Export date';
+
+  @override
+  String get projectGridSize => 'Grid size';
+
+  @override
+  String get projectTotalTracks => 'Total tracks';
+
+  @override
+  String get projectTracksWithRecordings => 'Tracks with recordings';
+
+  @override
+  String get projectTotalRecordingsSize => 'Recordings size';
+
+  @override
+  String get projectExporting => 'Exporting project...';
+
+  @override
+  String get projectImporting => 'Loading project...';
+
+  @override
+  String get projectExportError => 'Error exporting project';
+
+  @override
+  String get projectImportError => 'Error loading project';
+
+  @override
+  String get projectInvalidFormat => 'Invalid project file format';
+
+  @override
+  String get projectFileNotFound => 'Project file not found';
+
+  @override
+  String projectChecksumMismatch(Object fileName) {
+    return 'Checksum mismatch for file $fileName';
+  }
+
+  @override
+  String get projectChecksumMismatchTitle => 'Verification error';
+
+  @override
+  String projectDurationMismatch(Object fileName) {
+    return 'File length mismatch for $fileName. Playback positions have been reset';
+  }
+
+  @override
+  String get projectDurationMismatchTitle => 'File length warning';
+
+  @override
+  String get projectExportCancel => 'Project export cancelled';
+
+  @override
+  String get projectImportCancel => 'Project import cancelled';
+
+  @override
+  String get buttonExport => 'Export';
+
+  @override
+  String get buttonImport => 'Load';
+
+  @override
+  String get buttonConfirm => 'Confirm';
+
+  @override
+  String get projectValidating => 'Validating project...';
+
+  @override
+  String get projectValidationFailed => 'Project validation failed';
 }

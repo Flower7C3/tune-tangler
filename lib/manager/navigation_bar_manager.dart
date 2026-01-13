@@ -7,7 +7,9 @@ import '../config/app_global_config.dart';
 import '../config/app_icon.dart';
 import '../config/config_collection.dart';
 import '../config/menu_item_enums.dart';
+import '../manager/project_export_import_manager.dart';
 import '../src/generated/app_localizations.dart';
+import '../wrapper/hive_settings_provider.dart';
 
 class NavigationBarManager {
   final BuildContext _context;
@@ -15,6 +17,8 @@ class NavigationBarManager {
   final UIHelper _uiHelper;
   final TrackRepository _trackRepository;
   final GlobalKey<ScaffoldState> _scaffoldKey;
+  final HiveSettingsProvider _settings;
+  late final ProjectExportImportManager _projectManager;
 
   NavigationBarManager(
     this._context,
@@ -22,7 +26,16 @@ class NavigationBarManager {
     this._uiHelper,
     this._trackRepository,
     this._scaffoldKey,
-  );
+    this._settings,
+  ) {
+    _projectManager = ProjectExportImportManager(
+      _context,
+      _settings,
+      _trackRepository,
+      _trans,
+      _uiHelper,
+    );
+  }
 
   AppBar get buildAppBar => AppBar(
     backgroundColor: Theme.of(_context).colorScheme.inversePrimary,
@@ -111,6 +124,17 @@ class NavigationBarManager {
       AllTracksMenuItem.playbackEndAtPositionReset,
       AppIcon.trackPlaybackEndAtPosition,
       _trans.allTracksPlaybackEndAtPositionReset,
+    ),
+    const PopupMenuDivider(),
+    _uiHelper.topTrackMenuItem(
+      AllTracksMenuItem.projectExport,
+      AppIcon.projectExport,
+      _trans.projectExport,
+    ),
+    _uiHelper.topTrackMenuItem(
+      AllTracksMenuItem.projectImport,
+      AppIcon.projectImport,
+      _trans.projectImport,
     ),
     const PopupMenuDivider(),
     _uiHelper.topTrackMenuItem(
@@ -265,6 +289,12 @@ class NavigationBarManager {
             return _trans.allTracksPlaybackEndAtPositionResetSuccess;
           },
         );
+        break;
+      case AllTracksMenuItem.projectExport:
+        _projectManager.exportProject();
+        break;
+      case AllTracksMenuItem.projectImport:
+        _projectManager.importProject();
         break;
       case AllTracksMenuItem.moreSettings:
         _scaffoldKey.currentState?.openDrawer();

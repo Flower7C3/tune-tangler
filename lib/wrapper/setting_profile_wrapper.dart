@@ -146,18 +146,6 @@ class SettingProfileWrapper {
             ),
           ),
         ),
-        _tile(
-          AppIcon.gridRowsAmount,
-          _trans.gridRowsAmountValue(
-            AppGlobalConfig.gridRows.format(settingsProfile.gridRowsAmount),
-          ),
-        ),
-        _tile(
-          AppIcon.gridColsAmount,
-          _trans.gridColsAmountValue(
-            AppGlobalConfig.gridCols.format(settingsProfile.gridColsAmount),
-          ),
-        ),
       ],
     ),
   ];
@@ -197,12 +185,6 @@ class SettingProfileWrapper {
     );
     settingsProfile.wakelockEnabled = _settings.getConfig(
       AppConfigFieldKey.wakelockEnabled,
-    );
-    settingsProfile.gridRowsAmount = _settings.getConfig(
-      AppConfigFieldKey.gridRowsAmount,
-    );
-    settingsProfile.gridColsAmount = _settings.getConfig(
-      AppConfigFieldKey.gridColsAmount,
     );
     _settings.addProfile(settingsProfile);
     Navigator.pop(_context, 'settingsProfileCreate');
@@ -255,14 +237,6 @@ class SettingProfileWrapper {
       AppConfigFieldKey.wakelockEnabled,
       settingsProfile.wakelockEnabled,
     );
-    _settings.setConfig(
-      AppConfigFieldKey.gridRowsAmount,
-      settingsProfile.gridRowsAmount,
-    );
-    _settings.setConfig(
-      AppConfigFieldKey.gridColsAmount,
-      settingsProfile.gridColsAmount,
-    );
     Navigator.pop(_context, 'settingsProfilesDialog');
     _uiHelper.toast(
       _trans.settingsProfileLoaded,
@@ -285,7 +259,7 @@ class SettingProfileWrapper {
     data: _data(item),
   );
   Text listSubtitle(SettingsProfile item) => _uiHelper.buildRichText(
-    '\$[recordingAudioEncoderIcon]\$[recordingAudioEncoderValue] \$[recordingSampleRateIcon]\$[recordingSampleRateValue] \$[recordingBitRateIcon]\$[recordingBitRateValue] \n\$[recordingAudioModeIcon]\$[recordingAutoGainIcon]\$[recordingEchoCancelIcon] \$[themeModeIcon]\$[wakelockEnabled] \$[gridIcon]\$[gridRowsAmount]x\$[gridColsAmount] \$[colorIcon]\$[themeSeedColorName] (\$[localeTag])',
+    '\$[recordingAudioEncoderIcon]\$[recordingAudioEncoderValue] \$[recordingSampleRateIcon]\$[recordingSampleRateValue] \$[recordingBitRateIcon]\$[recordingBitRateValue] \n\$[recordingAudioModeIcon]\$[recordingAutoGainIcon]\$[recordingEchoCancelIcon] \$[themeModeIcon]\$[wakelockEnabled] \$[colorIcon]\$[themeSeedColorName] (\$[localeTag])',
     data: _data(item),
   );
 
@@ -325,8 +299,5 @@ class SettingProfileWrapper {
     ),
     'wakelockEnabled': item.wakelockEnabled ? AppIcon.keepScreenOnEnabled : '',
     'colorIcon': AppIcon.screenThemeColor,
-    'gridIcon': AppIcon.grid,
-    'gridRowsAmount': item.gridRowsAmount,
-    'gridColsAmount': item.gridColsAmount,
   };
 }

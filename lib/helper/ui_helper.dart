@@ -48,16 +48,24 @@ class UIHelper {
   );
 
   ListTile statusWidgetTile(
-    Widget widget,
+    Widget leadingWidget,
     String text, {
     Color? textColor,
     double? fontSize,
+    Widget? trailingWidget,
+    Widget? subtitleWidget,
+    EdgeInsetsGeometry? contentPadding,
   }) => ListTile(
-    leading: widget,
+    leading: leadingWidget,
     title: Text(
       text,
       style: TextStyle(color: textColor, fontSize: fontSize),
     ),
+    trailing: trailingWidget,
+    subtitle: subtitleWidget,
+    contentPadding:
+        contentPadding ??
+        const EdgeInsetsDirectional.only(start: 16.0, end: 24.0),
   );
 
   ListTile statusIconTile(
@@ -67,6 +75,9 @@ class UIHelper {
     double? iconSize,
     Color? textColor,
     double? fontSize,
+    Widget? trailingWidget,
+    Widget? subtitleWidget,
+    EdgeInsetsGeometry? contentPadding,
   }) => statusWidgetTile(
     Icon(
       IconOptimizationService().getOptimizedIcon(icon),
@@ -81,6 +92,9 @@ class UIHelper {
     text,
     textColor: textColor,
     fontSize: fontSize,
+    trailingWidget: trailingWidget,
+    subtitleWidget: subtitleWidget,
+    contentPadding: contentPadding,
   );
 
   ListTile statusTextTile(
@@ -90,6 +104,9 @@ class UIHelper {
     double? iconSize,
     Color? textColor,
     double? fontSize,
+    Widget? trailingWidget,
+    Widget? subtitleWidget,
+    EdgeInsetsGeometry? contentPadding,
   }) => statusWidgetTile(
     Text(
       icon,
@@ -98,6 +115,9 @@ class UIHelper {
     text,
     textColor: textColor,
     fontSize: fontSize,
+    trailingWidget: trailingWidget,
+    subtitleWidget: subtitleWidget,
+    contentPadding: contentPadding,
   );
 
   Widget statusIconRow(
@@ -256,6 +276,7 @@ class UIHelper {
     Widget? contentWidget,
     String? contentText,
     List<Widget>? actions,
+    BuildContext? parentContext,
   }) => _dialogBuilder(
     DialogType.alert,
     icon,
@@ -264,6 +285,7 @@ class UIHelper {
     contentWidget: contentWidget,
     contentText: contentText,
     actions: actions,
+    parentContext: parentContext,
   );
 
   void listDialog(
@@ -289,8 +311,9 @@ class UIHelper {
     Widget? contentWidget,
     String? contentText,
     List<Widget>? actions,
+    BuildContext? parentContext,
   }) => showDialog(
-    context: context,
+    context: parentContext ?? context,
     barrierDismissible: barrierDismissible,
     builder: (BuildContext buildContext) {
       switch (type) {

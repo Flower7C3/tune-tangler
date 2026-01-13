@@ -377,13 +377,13 @@ abstract class AppLocalizations {
   /// No description provided for @trackPlaybackStartAtPositionSub10.
   ///
   /// In en, this message translates to:
-  /// **'Change track playback start at by -0.01 s'**
+  /// **'Change track playback start at by -0.01 s'**
   String get trackPlaybackStartAtPositionSub10;
 
   /// No description provided for @trackPlaybackStartAtPositionSub100.
   ///
   /// In en, this message translates to:
-  /// **'Change track playback start at by -0.1 s'**
+  /// **'Change track playback start at by -0.1 s'**
   String get trackPlaybackStartAtPositionSub100;
 
   /// No description provided for @trackPlaybackStartAtPositionReset.
@@ -395,25 +395,25 @@ abstract class AppLocalizations {
   /// No description provided for @trackPlaybackStartAtPositionAdd100.
   ///
   /// In en, this message translates to:
-  /// **'Change track playback start at by +0.1 s'**
+  /// **'Change track playback start at by +0.1 s'**
   String get trackPlaybackStartAtPositionAdd100;
 
   /// No description provided for @trackPlaybackStartAtPositionAdd10.
   ///
   /// In en, this message translates to:
-  /// **'Change track playback start at by +0.01 s'**
+  /// **'Change track playback start at by +0.01 s'**
   String get trackPlaybackStartAtPositionAdd10;
 
   /// No description provided for @trackPlaybackEndAtPositionSub10.
   ///
   /// In en, this message translates to:
-  /// **'Change track playback end at by -0.01 s'**
+  /// **'Change track playback end at by -0.01 s'**
   String get trackPlaybackEndAtPositionSub10;
 
   /// No description provided for @trackPlaybackEndAtPositionSub100.
   ///
   /// In en, this message translates to:
-  /// **'Change track playback end at by -0.1 s'**
+  /// **'Change track playback end at by -0.1 s'**
   String get trackPlaybackEndAtPositionSub100;
 
   /// No description provided for @trackPlaybackEndAtPositionReset.
@@ -425,13 +425,13 @@ abstract class AppLocalizations {
   /// No description provided for @trackPlaybackEndAtPositionAdd100.
   ///
   /// In en, this message translates to:
-  /// **'Change track playback end at by +0.1 s'**
+  /// **'Change track playback end at by +0.1 s'**
   String get trackPlaybackEndAtPositionAdd100;
 
   /// No description provided for @trackPlaybackEndAtPositionAdd10.
   ///
   /// In en, this message translates to:
-  /// **'Change track playback end at by +0.01 s'**
+  /// **'Change track playback end at by +0.01 s'**
   String get trackPlaybackEndAtPositionAdd10;
 
   /// No description provided for @trackNameChange.
@@ -512,7 +512,7 @@ abstract class AppLocalizations {
   /// No description provided for @trackRecordingMoveInProgress.
   ///
   /// In en, this message translates to:
-  /// **'Recording move is already in progress. Please try again in a moment.'**
+  /// **'Recording move is already in progress. Please try again in a moment.'**
   String get trackRecordingMoveInProgress;
 
   /// No description provided for @trackRecordingMoveNotAllowed.
@@ -740,31 +740,31 @@ abstract class AppLocalizations {
   /// No description provided for @balanceLeft100.
   ///
   /// In en, this message translates to:
-  /// **'left 100%, right 0%'**
+  /// **'left 100%, right 0%'**
   String get balanceLeft100;
 
   /// No description provided for @balanceLeft75.
   ///
   /// In en, this message translates to:
-  /// **'left 100%, right 25%'**
+  /// **'left 100%, right 25%'**
   String get balanceLeft75;
 
   /// No description provided for @balanceLeft50.
   ///
   /// In en, this message translates to:
-  /// **'left 100%, right 50%'**
+  /// **'left 100%, right 50%'**
   String get balanceLeft50;
 
   /// No description provided for @balanceLeft25.
   ///
   /// In en, this message translates to:
-  /// **'left 100%, right 75%'**
+  /// **'left 100%, right 75%'**
   String get balanceLeft25;
 
   /// No description provided for @balanceLeft.
   ///
   /// In en, this message translates to:
-  /// **'left 100%'**
+  /// **'left 100%'**
   String get balanceLeft;
 
   /// No description provided for @balanceCenter.
@@ -776,31 +776,31 @@ abstract class AppLocalizations {
   /// No description provided for @balanceRight.
   ///
   /// In en, this message translates to:
-  /// **'right 100%'**
+  /// **'right 100%'**
   String get balanceRight;
 
   /// No description provided for @balanceRight25.
   ///
   /// In en, this message translates to:
-  /// **'left 75%, right 100%'**
+  /// **'left 75%, right 100%'**
   String get balanceRight25;
 
   /// No description provided for @balanceRight50.
   ///
   /// In en, this message translates to:
-  /// **'left 50%, right 100%'**
+  /// **'left 50%, right 100%'**
   String get balanceRight50;
 
   /// No description provided for @balanceRight75.
   ///
   /// In en, this message translates to:
-  /// **'left 25%, right 100%'**
+  /// **'left 25%, right 100%'**
   String get balanceRight75;
 
   /// No description provided for @balanceRight100.
   ///
   /// In en, this message translates to:
-  /// **'left 0%, right 100%'**
+  /// **'left 0%, right 100%'**
   String get balanceRight100;
 
   /// No description provided for @languageWithLocale.
@@ -932,7 +932,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpScreenMessageAboutContent.
   ///
   /// In en, this message translates to:
-  /// **'This application allows you to record audio from a microphone or USB audio interface (your device must support USB OTG technology) to one of several tracks. You can also import an existing audio file.\n\nRecordings can be played synchronously or asynchronously, in a loop or not.\n\nRecordings and their settings, as well as the graphic mode and language, are remembered after the application is closed.'**
+  /// **'This application allows you to record audio from a microphone or USB audio interface (your device must support USB OTG technology) to one of several tracks. You can also import an existing audio file.\n\nRecordings can be played synchronously or asynchronously, in a loop or not.\n\nRecordings and their settings, as well as the graphic mode and language, are remembered after the application is closed.'**
   String get helpScreenMessageAboutContent;
 
   /// No description provided for @helpScreenMessageGridScreenTitle.
@@ -944,7 +944,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpScreenMessageGridScreenContent.
   ///
   /// In en, this message translates to:
-  /// **'Short press a colored track block or use a hotkey (visible at the top of the track) to perform one of the available actions.\n\nHold the track block or use the hotkey with the Control key \$[controlKey] to open the track details.'**
+  /// **'Short press a colored track block or use a hotkey (visible at the top of the track) to perform one of the available actions.\n\nHold the track block or use the hotkey with the Control key \$[controlKey] to open the track details.'**
   String get helpScreenMessageGridScreenContent;
 
   /// No description provided for @helpScreenMessageDetailsScreenTitle.
@@ -976,6 +976,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You can set \$[recordingAudioEncoder]audio codec, \$[recordingSampleRate]sample rate, \$[recordingBitRate]bit rate, \$[recordingAudioMode]audio mode, \$[recordingAutoGain]auto gain, \$[recordingEchoCancel]echo cancel and \$[recordingNoiseSuppress]noise suppression.'**
   String get helpScreenMessageSettingsInfo;
+
+  /// No description provided for @helpScreenMessageProjectExportImportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Project export and import'**
+  String get helpScreenMessageProjectExportImportTitle;
+
+  /// No description provided for @helpScreenMessageProjectExportImportContent.
+  ///
+  /// In en, this message translates to:
+  /// **'You can \$[projectExport]save the entire project to a ZIP file, which contains grid settings, all tracks with their settings, and audio recordings. The file can later be \$[projectImport]loaded to restore the entire application state.\n\nThe exported file contains:\n• Grid settings (number of rows and columns)\n• All track settings (names, playback parameters, trimming, keyboard shortcuts)\n• All audio recordings with checksums\n• Project metadata (version, export date, statistics)\n\nBefore import, a project preview is displayed, and the application warns about overwriting the current session. Import performs full validation before modifying data.'**
+  String get helpScreenMessageProjectExportImportContent;
 
   /// No description provided for @stateEmpty.
   ///
@@ -1856,7 +1868,7 @@ abstract class AppLocalizations {
   /// No description provided for @recordingAutoGainInfo.
   ///
   /// In en, this message translates to:
-  /// **'The recorder will try to auto adjust recording volume in a limited range (if available on the device). Recording volume may be lowered by using this.'**
+  /// **'The recorder will try to auto adjust recording volume in a limited range (if available on the device). Recording volume may be lowered by using this.'**
   String get recordingAutoGainInfo;
 
   /// No description provided for @recordingAutoGainSuccess.
@@ -2162,43 +2174,43 @@ abstract class AppLocalizations {
   /// No description provided for @audioWarningFileSizeLarge.
   ///
   /// In en, this message translates to:
-  /// **'Large file ({size}MB)'**
+  /// **'Large file ({size} MB)'**
   String audioWarningFileSizeLarge(Object size);
 
   /// No description provided for @audioWarningFileSizeVeryLarge.
   ///
   /// In en, this message translates to:
-  /// **'Very large file ({size}MB) - may slow down playback'**
+  /// **'Very large file ({size} MB) - may slow down playback'**
   String audioWarningFileSizeVeryLarge(Object size);
 
   /// No description provided for @audioWarningDurationLong.
   ///
   /// In en, this message translates to:
-  /// **'Long recording ({minutes}min)'**
+  /// **'Long recording ({minutes} min)'**
   String audioWarningDurationLong(Object minutes);
 
   /// No description provided for @audioWarningDurationMedium.
   ///
   /// In en, this message translates to:
-  /// **'Medium recording ({minutes}min)'**
+  /// **'Medium recording ({minutes} min)'**
   String audioWarningDurationMedium(Object minutes);
 
   /// No description provided for @audioWarningSampleRateNonStandard.
   ///
   /// In en, this message translates to:
-  /// **'Non-standard frequency: {sampleRate}Hz'**
+  /// **'Non-standard frequency: {sampleRate} Hz'**
   String audioWarningSampleRateNonStandard(Object sampleRate);
 
   /// No description provided for @audioWarningBitRateHigh.
   ///
   /// In en, this message translates to:
-  /// **'High bitrate: {bitRate}kbps'**
+  /// **'High bitrate: {bitRate} kbps'**
   String audioWarningBitRateHigh(Object bitRate);
 
   /// No description provided for @audioWarningBitRateLow.
   ///
   /// In en, this message translates to:
-  /// **'Low bitrate: {bitRate}kbps'**
+  /// **'Low bitrate: {bitRate} kbps'**
   String audioWarningBitRateLow(Object bitRate);
 
   /// No description provided for @audioWarningChannelsMicrophone.
@@ -2266,6 +2278,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Check if file was moved or deleted'**
   String get audioWarningSuggestionCheckFile;
+
+  /// No description provided for @projectExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Save project'**
+  String get projectExport;
+
+  /// No description provided for @projectImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Load project'**
+  String get projectImport;
+
+  /// No description provided for @projectExportName.
+  ///
+  /// In en, this message translates to:
+  /// **'Project name (optional)'**
+  String get projectExportName;
+
+  /// No description provided for @projectExportNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter project name'**
+  String get projectExportNameHint;
+
+  /// No description provided for @projectExportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Project has been saved'**
+  String get projectExportSuccess;
+
+  /// No description provided for @projectImportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Project has been loaded'**
+  String get projectImportSuccess;
+
+  /// No description provided for @projectImportWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading project will overwrite current session. All recordings will be deleted and track settings will be overridden. Continue?'**
+  String get projectImportWarning;
+
+  /// No description provided for @projectImportWarningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning'**
+  String get projectImportWarningTitle;
+
+  /// No description provided for @projectPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Project preview'**
+  String get projectPreview;
+
+  /// No description provided for @projectMetadata.
+  ///
+  /// In en, this message translates to:
+  /// **'Project metadata'**
+  String get projectMetadata;
+
+  /// No description provided for @projectStatistics.
+  ///
+  /// In en, this message translates to:
+  /// **'Statistics'**
+  String get projectStatistics;
+
+  /// No description provided for @projectName.
+  ///
+  /// In en, this message translates to:
+  /// **'Project name'**
+  String get projectName;
+
+  /// No description provided for @projectVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get projectVersion;
+
+  /// No description provided for @projectExportDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Export date'**
+  String get projectExportDate;
+
+  /// No description provided for @projectGridSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid size'**
+  String get projectGridSize;
+
+  /// No description provided for @projectTotalTracks.
+  ///
+  /// In en, this message translates to:
+  /// **'Total tracks'**
+  String get projectTotalTracks;
+
+  /// No description provided for @projectTracksWithRecordings.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracks with recordings'**
+  String get projectTracksWithRecordings;
+
+  /// No description provided for @projectTotalRecordingsSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Recordings size'**
+  String get projectTotalRecordingsSize;
+
+  /// No description provided for @projectExporting.
+  ///
+  /// In en, this message translates to:
+  /// **'Exporting project...'**
+  String get projectExporting;
+
+  /// No description provided for @projectImporting.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading project...'**
+  String get projectImporting;
+
+  /// No description provided for @projectExportError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error exporting project'**
+  String get projectExportError;
+
+  /// No description provided for @projectImportError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading project'**
+  String get projectImportError;
+
+  /// No description provided for @projectInvalidFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid project file format'**
+  String get projectInvalidFormat;
+
+  /// No description provided for @projectFileNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Project file not found'**
+  String get projectFileNotFound;
+
+  /// No description provided for @projectChecksumMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Checksum mismatch for file {fileName}'**
+  String projectChecksumMismatch(Object fileName);
+
+  /// No description provided for @projectChecksumMismatchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification error'**
+  String get projectChecksumMismatchTitle;
+
+  /// No description provided for @projectDurationMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'File length mismatch for {fileName}. Playback positions have been reset'**
+  String projectDurationMismatch(Object fileName);
+
+  /// No description provided for @projectDurationMismatchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'File length warning'**
+  String get projectDurationMismatchTitle;
+
+  /// No description provided for @projectExportCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Project export cancelled'**
+  String get projectExportCancel;
+
+  /// No description provided for @projectImportCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Project import cancelled'**
+  String get projectImportCancel;
+
+  /// No description provided for @buttonExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Export'**
+  String get buttonExport;
+
+  /// No description provided for @buttonImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Load'**
+  String get buttonImport;
+
+  /// No description provided for @buttonConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get buttonConfirm;
+
+  /// No description provided for @projectValidating.
+  ///
+  /// In en, this message translates to:
+  /// **'Validating project...'**
+  String get projectValidating;
+
+  /// No description provided for @projectValidationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Project validation failed'**
+  String get projectValidationFailed;
 }
 
 class _AppLocalizationsDelegate

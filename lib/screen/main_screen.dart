@@ -70,7 +70,8 @@ class _MainScreenAppState extends State<MainScreenApp>
 
   @override
   Widget build(BuildContext context) {
-    _settings = Provider.of<HiveSettingsProvider>(context);
+    // Użyj context.watch() zamiast Provider.of() żeby reagować na zmiany
+    _settings = context.watch<HiveSettingsProvider>();
     _trackRepository = TrackRepository(_settings);
     WakelockPlus.toggle(
       enable: _settings.getConfig(AppConfigFieldKey.wakelockEnabled),
