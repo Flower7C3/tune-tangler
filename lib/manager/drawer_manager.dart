@@ -727,7 +727,7 @@ class DrawerManager {
       },
     ),
     _uiHelper.listTileReset(
-      AppIcon.deleteForever,
+      AppIcon.deleteRecordings,
       _trans.allTracksRecordingsDelete,
       _trans.allTracksRecordingsDeleteTitle,
       _trans.allTracksRecordingsDeleteInfo,

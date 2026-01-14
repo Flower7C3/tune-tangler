@@ -117,6 +117,7 @@ class AppIcon {
 
   static IconData recordingNoiseSuppress = Symbols.noise_aware_rounded;
   static IconData deleteForever = Icons.delete_forever_rounded;
+  static IconData deleteRecordings = Icons.audio_file_outlined;
 
   static IconData resetAllSettings = Icons.settings_backup_restore_rounded;
   static IconData no = Icons.cancel_outlined;
