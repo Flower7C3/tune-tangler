@@ -200,11 +200,16 @@ class ProjectExportService {
       // Konwertuj Map<TrackAdapterKey, dynamic> na Map<String, dynamic> dla JSON
       final trackMapJson = <String, dynamic>{};
       trackMap.forEach((key, value) {
-        // Konwertuj TrackId na listę [row, col]
+        // Skip path - recordings are exported separately
+        if (key == TrackAdapterKey.path) {
+          return;
+        }
+
+        // Convert TrackId to list [row, col]
         if (key == TrackAdapterKey.trackId && value is TrackId) {
           trackMapJson[key.name] = value.toList();
         }
-        // Konwertuj Duration na milisekundy
+        // Convert Duration to milliseconds
         else if (key == TrackAdapterKey.playbackStartAtPosition &&
             value is Duration) {
           trackMapJson[key.name] = value.inMilliseconds;
@@ -212,13 +217,12 @@ class ProjectExportService {
             value is Duration) {
           trackMapJson[key.name] = value.inMilliseconds;
         } else if (key == TrackAdapterKey.name && value is String) {
-          // Wyczyść nazwę z znaków kontrolnych
+          // Clean name from control characters
           String cleanName = value.replaceAll(RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F]'), '');
           trackMapJson[key.name] = cleanName;
-          if (cleanName != value) {
-          }
-        } else if (value != null) {
-          // Tylko dodaj wartości nie-null
+        } else {
+          // Export all other fields, including null values
+          // This ensures all metadata is preserved during import
           trackMapJson[key.name] = value;
         }
       });

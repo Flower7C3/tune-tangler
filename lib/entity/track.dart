@@ -378,17 +378,40 @@ class Track {
     Duration? playbackEndAtPosition,
     bool preserveDuration = false,
     bool preservePlaybackPositions = false,
+    bool clearMetadata = true,
   }) {
     if (newPath == null) {
       if (path != null && File(path!).existsSync()) {
         File(path!).delete();
       }
-      _clearPath();
+      if (clearMetadata) {
+        _clearPath();
+      } else {
+        // Clear only path-related state, preserve metadata and playback positions
+        setRecorderState(RecorderState.processing);
+        setPosition(Duration());
+        setDuration(Duration());
+        // Don't reset playback positions when clearMetadata: false
+        // They will be set explicitly if needed
+        setRecorderState(RecorderState.empty);
+        _path = null;
+      }
       return;
     }
 
     if (!File(newPath).existsSync()) {
-      _clearPath();
+      if (clearMetadata) {
+        _clearPath();
+      } else {
+        // Clear only path-related state, preserve metadata and playback positions
+        setRecorderState(RecorderState.processing);
+        setPosition(Duration());
+        setDuration(Duration());
+        // Don't reset playback positions when clearMetadata: false
+        // They will be set explicitly if needed
+        setRecorderState(RecorderState.empty);
+        _path = null;
+      }
       return;
     }
 
@@ -418,7 +441,18 @@ class Track {
         })
         .onError((error, stack) {
           debugPrint('Error in setPath: $error');
-          _clearPath();
+          if (clearMetadata) {
+            _clearPath();
+          } else {
+            // Clear only path-related state, preserve metadata and playback positions
+            setRecorderState(RecorderState.processing);
+            setPosition(Duration());
+            setDuration(Duration());
+            // Don't reset playback positions when clearMetadata: false
+            // They will be set explicitly if needed
+            setRecorderState(RecorderState.empty);
+            _path = null;
+          }
         });
   }
 
@@ -708,6 +742,7 @@ class Track {
       data[TrackAdapterKey.path],
       playbackStartAtPosition: data[TrackAdapterKey.playbackStartAtPosition],
       playbackEndAtPosition: data[TrackAdapterKey.playbackEndAtPosition],
+      clearMetadata: false,
     );
     track.updateState();
     return track;

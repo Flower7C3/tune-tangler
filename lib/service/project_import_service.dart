@@ -32,6 +32,9 @@ class ProjectImportService {
   final TrackRepository _trackRepository;
   final AppLocalizations _trans;
 
+  // Store playback positions from _importTracks for use in _importRecordings
+  Map<String, Map<String, Duration>> _trackPlaybackPositions = {};
+
   ProjectImportService(
     this._settings,
     this._trackRepository,
@@ -183,7 +186,6 @@ class ProjectImportService {
     final errors = <ProjectImportError>[];
 
     try {
-      debugPrint('[ProjectImport] Starting import of project...');
 
       final file = File(zipPath);
       final bytes = await file.readAsBytes();
@@ -455,7 +457,6 @@ class ProjectImportService {
           for (final trackData in tracks) {
             final trackMap = trackData as Map<String, dynamic>;
             final hasRecording = trackMap['hasRecording'] as bool?;
-            debugPrint('[ProjectImport] Track ${trackMap['id']}: hasRecording=$hasRecording');
             if (hasRecording == true) {
               final trackId = trackMap['id'] as String;
               final recordingSize = trackMap['recordingSize'] as int?;
@@ -653,6 +654,8 @@ class ProjectImportService {
     Archive archive,
     List<ProjectImportError> errors,
   ) async {
+    // Map to store playback positions for each track (to be used in _importRecordings)
+    final trackPlaybackPositions = <String, Map<String, Duration>>{};
     final tracksDir = archive.files.where(
       (file) => file.name.startsWith('tracks/') && file.name.endsWith('.json'),
     ).toList();
@@ -705,37 +708,33 @@ class ProjectImportService {
         trackMap[TrackAdapterKey.trackId] = trackId;
 
         // Convert milliseconds back to Duration
+        Duration? playbackStartAtPosition;
+        Duration? playbackEndAtPosition;
         if (trackMap[TrackAdapterKey.playbackStartAtPosition] != null) {
           final ms = trackMap[TrackAdapterKey.playbackStartAtPosition] as int;
-          trackMap[TrackAdapterKey.playbackStartAtPosition] =
-              Duration(milliseconds: ms);
+          playbackStartAtPosition = Duration(milliseconds: ms);
+          trackMap[TrackAdapterKey.playbackStartAtPosition] = playbackStartAtPosition;
         }
         if (trackMap[TrackAdapterKey.playbackEndAtPosition] != null) {
           final ms = trackMap[TrackAdapterKey.playbackEndAtPosition] as int;
-          trackMap[TrackAdapterKey.playbackEndAtPosition] =
-              Duration(milliseconds: ms);
+          playbackEndAtPosition = Duration(milliseconds: ms);
+          trackMap[TrackAdapterKey.playbackEndAtPosition] = playbackEndAtPosition;
         }
 
-        // Create track from map
-        // IMPORTANT: Save trimming values before calling fromMap(), because fromMap() calls setPath()
-        // and if path is null, setPath() resets positions to Duration()
-        final savedPlaybackStartAtPosition = trackMap[TrackAdapterKey.playbackStartAtPosition] as Duration?;
-        final savedPlaybackEndAtPosition = trackMap[TrackAdapterKey.playbackEndAtPosition] as Duration?;
+        // Store playback positions for use in _importRecordings
+        final trackIdStr = trackId.toString();
+        trackPlaybackPositions[trackIdStr] = {
+          'start': playbackStartAtPosition ?? Duration(),
+          'end': playbackEndAtPosition ?? Duration(),
+        };
 
         // Remove path from map before fromMap(), so setPath() doesn't try to set non-existent file
-        // (which would cause _clearPath() to be called and reset positions)
+        // Track.fromMap() will call setPath(null, clearMetadata: false) which preserves metadata
         trackMap[TrackAdapterKey.path] = null;
 
         // Create track from map (without path)
+        // Track.fromMap() uses setPath(..., clearMetadata: false) to preserve metadata
         final track = Track.fromMap(trackMap);
-
-        // Restore trimming values (which may have been reset by setPath(null))
-        if (savedPlaybackStartAtPosition != null) {
-          track.playbackStartAtPosition.value = savedPlaybackStartAtPosition;
-        }
-        if (savedPlaybackEndAtPosition != null) {
-          track.playbackEndAtPosition.value = savedPlaybackEndAtPosition;
-        }
 
         _trackRepository.save(track);
       } catch (e, stackTrace) {
@@ -748,6 +747,8 @@ class ProjectImportService {
       }
     }
 
+    // Store playback positions in class variable for use in _importRecordings
+    _trackPlaybackPositions = trackPlaybackPositions;
   }
 
   Future<void> _importRecordings(
@@ -917,12 +918,23 @@ class ProjectImportService {
           continue;
         }
 
-
-        // Save file
-        final ext = path.extension(fileName);
-        final newFileName = '${targetTrack.id.toString()}$ext';
+        // Save file with original filename from metadata if available, otherwise use filename from ZIP
+        // This preserves custom filenames that may have been used in the original project
+        final trackIdStr = targetTrack.id.toString();
+        String newFileName;
+        if (trackIdToFileName.containsKey(trackIdStr)) {
+          // Use original filename from metadata
+          newFileName = trackIdToFileName[trackIdStr]!;
+        } else {
+          // Fallback: use filename from ZIP (may be different from standard trackId.ext format)
+          newFileName = fileName;
+        }
+        
+        // Sanitize filename to prevent invalid characters
+        // Replace invalid characters with underscore (same as in export)
+        newFileName = newFileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '_');
+        
         final newFilePath = path.join(appDir.path, newFileName);
-        debugPrint('[ProjectImport] Saving recording to: $newFilePath');
         final savedFile = File(newFilePath);
         await savedFile.writeAsBytes(fileBytes);
 
@@ -945,19 +957,33 @@ class ProjectImportService {
           }
         }
 
-        // Save trimming values before setPath() (so they are not overwritten)
-        final savedPlaybackStartAtPosition = targetTrack.playbackStartAtPosition.value;
-        final savedPlaybackEndAtPosition = targetTrack.playbackEndAtPosition.value;
+        // Get playback positions from imported data (stored in _importTracks)
+        // Use original values from JSON, not from track (which may have been reset)
+        final trackIdForPositions = targetTrack.id.toString();
+        Duration savedPlaybackStartAtPosition;
+        Duration savedPlaybackEndAtPosition;
+        if (_trackPlaybackPositions.containsKey(trackIdForPositions)) {
+          final positions = _trackPlaybackPositions[trackIdForPositions]!;
+          savedPlaybackStartAtPosition = positions['start']!;
+          savedPlaybackEndAtPosition = positions['end']!;
+        } else {
+          // Fallback: use values from track (should not happen if import is correct)
+          savedPlaybackStartAtPosition = targetTrack.playbackStartAtPosition.value;
+          savedPlaybackEndAtPosition = targetTrack.playbackEndAtPosition.value;
+          debugPrint('[ProjectImport] WARNING: No playback positions found in imported data for track $trackIdForPositions, using values from track');
+        }
 
         // Set path in track
         // setPath() is asynchronous - sets state to processing, then ready/idle
         // We use preserveDuration: false to set duration from file (needed for correct durationAfterCut calculation)
         // We use preservePlaybackPositions: true to not overwrite positions during setPath()
+        // We use clearMetadata: false to preserve audioSource, audioEncoder, sampleRate, bitRate
         // After setPath() completes, we will manually set positions from imported data
         targetTrack.setPath(
           newFilePath,
           preserveDuration: false, // Allow setPath() to set duration from file
           preservePlaybackPositions: true,
+          clearMetadata: false, // Preserve metadata imported in _importTracks
         );
 
         // Wait for setPath() to complete (state will change from processing to ready/idle)
