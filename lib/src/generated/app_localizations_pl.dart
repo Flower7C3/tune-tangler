@@ -890,10 +890,11 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
-  String get allTracksPlaybackSpeedSet => 'Ustaw prędkość';
+  String get allTracksPlaybackSpeedSet => 'Ustaw prędkość odtwarzania';
 
   @override
-  String get allTracksPlaybackSpeedTitleSet => 'Ustaw prędkość ścieżek';
+  String get allTracksPlaybackSpeedTitleSet =>
+      'Ustaw prędkość odtwarzania ścieżek';
 
   @override
   String get allTracksPlaybackSpeedInfoSet =>
@@ -906,35 +907,35 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get allTracksPlaybackStartAtPositionReset =>
-      'Zresetuj początek odtwarzania na';
+      'Zresetuj początek odtwarzania';
 
   @override
   String get allTracksPlaybackStartAtPositionResetTitle =>
-      'Zresetuj początek odtwarzania wszystkich ścieżek na';
+      'Zresetuj początek odtwarzania wszystkich ścieżek';
 
   @override
   String get allTracksPlaybackStartAtPositionResetInfo =>
-      'Wszystkie ścieżki będą miały domyślny początek odtwarzania na. Kontynuować?';
+      'Wszystkie ścieżki będą miały domyślny początek odtwarzania. Kontynuować?';
 
   @override
   String get allTracksPlaybackStartAtPositionResetSuccess =>
-      'Zresetowano początek odtwarzania wszystkich ścieżek na.';
+      'Zresetowano początek odtwarzania wszystkich ścieżek.';
 
   @override
   String get allTracksPlaybackEndAtPositionReset =>
-      'Zresetowano koniec odtwarzania na';
+      'Zresetuj koniec odtwarzania';
 
   @override
   String get allTracksPlaybackEndAtPositionResetTitle =>
-      'Zresetowano koniec odtwarzania wszystkich ścieżek na';
+      'Zresetuj koniec odtwarzania wszystkich ścieżek';
 
   @override
   String get allTracksPlaybackEndAtPositionResetInfo =>
-      'Wszystkie ścieżki będą miały domyślny koniec odtwarzania na. Kontynuować?';
+      'Wszystkie ścieżki będą miały domyślny koniec odtwarzania. Kontynuować?';
 
   @override
   String get allTracksPlaybackEndAtPositionResetSuccess =>
-      'Zresetowano koniec odtwarzania wszystkich ścieżek na.';
+      'Zresetowano koniec odtwarzania wszystkich ścieżek.';
 
   @override
   String get allTracksSettingsReset => 'Zresetuj ustawienia ścieżek';
@@ -1468,6 +1469,47 @@ class AppLocalizationsPl extends AppLocalizations {
   String get projectFileNotFound => 'Plik projektu nie został znaleziony';
 
   @override
+  String projectFileMissing(Object fileName) {
+    return 'Brakuje wymaganego pliku: $fileName';
+  }
+
+  @override
+  String projectFileParseError(Object fileName) {
+    return 'Błąd parsowania pliku $fileName. Plik jest uszkodzony lub ma nieprawidłowy format.';
+  }
+
+  @override
+  String projectFileEncodingError(Object fileName) {
+    return 'Błąd kodowania w pliku $fileName. Plik może być uszkodzony lub został utworzony w innej wersji aplikacji.';
+  }
+
+  @override
+  String projectFileStructureError(Object fieldName, Object fileName) {
+    return 'Nieprawidłowa struktura w pliku $fileName. Brakuje wymaganego pola: $fieldName';
+  }
+
+  @override
+  String projectFileInvalidValue(Object details, Object fileName) {
+    return 'Nieprawidłowa wartość w pliku $fileName: $details';
+  }
+
+  @override
+  String get projectRecordingNotFound =>
+      'Nagranie wymienione w projekcie nie zostało znalezione w archiwum';
+
+  @override
+  String get projectMetadataCorrupted =>
+      'Plik projektu jest uszkodzony. Plik metadata.json nie może zostać odczytany.';
+
+  @override
+  String get projectMetadataEncodingError =>
+      'Plik projektu ma nieprawidłowe kodowanie. Plik może być uszkodzony lub został utworzony w innej wersji aplikacji.';
+
+  @override
+  String get projectMetadataParseError =>
+      'Nie można odczytać danych projektu. Plik metadata.json jest uszkodzony lub ma nieprawidłowy format.';
+
+  @override
   String projectChecksumMismatch(Object fileName) {
     return 'Suma kontrolna pliku $fileName się nie zgadza';
   }
@@ -1497,6 +1539,9 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get buttonConfirm => 'Potwierdź';
+
+  @override
+  String get buttonYesImport => 'Tak, importuj';
 
   @override
   String get projectValidating => 'Walidacja projektu...';

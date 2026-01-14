@@ -1452,6 +1452,47 @@ class AppLocalizationsEn extends AppLocalizations {
   String get projectFileNotFound => 'Project file not found';
 
   @override
+  String projectFileMissing(Object fileName) {
+    return 'Required file missing: $fileName';
+  }
+
+  @override
+  String projectFileParseError(Object fileName) {
+    return 'Parse error in file $fileName. The file is corrupted or has invalid format.';
+  }
+
+  @override
+  String projectFileEncodingError(Object fileName) {
+    return 'Encoding error in file $fileName. The file may be corrupted or was created in a different version of the application.';
+  }
+
+  @override
+  String projectFileStructureError(Object fieldName, Object fileName) {
+    return 'Invalid structure in file $fileName. Missing required field: $fieldName';
+  }
+
+  @override
+  String projectFileInvalidValue(Object details, Object fileName) {
+    return 'Invalid value in file $fileName: $details';
+  }
+
+  @override
+  String get projectRecordingNotFound =>
+      'Recording listed in project was not found in archive';
+
+  @override
+  String get projectMetadataCorrupted =>
+      'Project file is corrupted. The metadata.json file cannot be read.';
+
+  @override
+  String get projectMetadataEncodingError =>
+      'Project file has invalid encoding. The file may be corrupted or was created in a different version of the application.';
+
+  @override
+  String get projectMetadataParseError =>
+      'Cannot read project data. The metadata.json file is corrupted or has invalid format.';
+
+  @override
   String projectChecksumMismatch(Object fileName) {
     return 'Checksum mismatch for file $fileName';
   }
@@ -1481,6 +1522,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get buttonConfirm => 'Confirm';
+
+  @override
+  String get buttonYesImport => 'Yes, import';
 
   @override
   String get projectValidating => 'Validating project...';

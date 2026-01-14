@@ -2423,6 +2423,60 @@ abstract class AppLocalizations {
   /// **'Project file not found'**
   String get projectFileNotFound;
 
+  /// No description provided for @projectFileMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Required file missing: {fileName}'**
+  String projectFileMissing(Object fileName);
+
+  /// No description provided for @projectFileParseError.
+  ///
+  /// In en, this message translates to:
+  /// **'Parse error in file {fileName}. The file is corrupted or has invalid format.'**
+  String projectFileParseError(Object fileName);
+
+  /// No description provided for @projectFileEncodingError.
+  ///
+  /// In en, this message translates to:
+  /// **'Encoding error in file {fileName}. The file may be corrupted or was created in a different version of the application.'**
+  String projectFileEncodingError(Object fileName);
+
+  /// No description provided for @projectFileStructureError.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid structure in file {fileName}. Missing required field: {fieldName}'**
+  String projectFileStructureError(Object fieldName, Object fileName);
+
+  /// No description provided for @projectFileInvalidValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid value in file {fileName}: {details}'**
+  String projectFileInvalidValue(Object details, Object fileName);
+
+  /// No description provided for @projectRecordingNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording listed in project was not found in archive'**
+  String get projectRecordingNotFound;
+
+  /// No description provided for @projectMetadataCorrupted.
+  ///
+  /// In en, this message translates to:
+  /// **'Project file is corrupted. The metadata.json file cannot be read.'**
+  String get projectMetadataCorrupted;
+
+  /// No description provided for @projectMetadataEncodingError.
+  ///
+  /// In en, this message translates to:
+  /// **'Project file has invalid encoding. The file may be corrupted or was created in a different version of the application.'**
+  String get projectMetadataEncodingError;
+
+  /// No description provided for @projectMetadataParseError.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot read project data. The metadata.json file is corrupted or has invalid format.'**
+  String get projectMetadataParseError;
+
   /// No description provided for @projectChecksumMismatch.
   ///
   /// In en, this message translates to:
@@ -2476,6 +2530,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirm'**
   String get buttonConfirm;
+
+  /// No description provided for @buttonYesImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, import'**
+  String get buttonYesImport;
 
   /// No description provided for @projectValidating.
   ///

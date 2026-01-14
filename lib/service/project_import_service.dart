@@ -11,6 +11,7 @@ import '../adapter/track_adapter_key.dart';
 import '../config/app_config_fields.dart';
 import '../entity/track.dart';
 import '../repository/track_repository.dart';
+import '../src/generated/app_localizations.dart';
 import '../src/lazy_loading_manager.dart';
 import '../wrapper/hive_settings_provider.dart';
 
@@ -29,10 +30,15 @@ class ProjectImportError {
 class ProjectImportService {
   final HiveSettingsProvider _settings;
   final TrackRepository _trackRepository;
+  final AppLocalizations _trans;
 
-  ProjectImportService(this._settings, this._trackRepository);
+  ProjectImportService(
+    this._settings,
+    this._trackRepository,
+    this._trans,
+  );
 
-  /// Pobiera podgląd projektu z pliku ZIP
+  /// Gets project preview from ZIP file
   Future<Map<String, dynamic>> getProjectPreview(String zipPath) async {
     final file = File(zipPath);
     if (!file.existsSync()) {
@@ -42,7 +48,7 @@ class ProjectImportService {
     final bytes = await file.readAsBytes();
     final archive = ZipDecoder().decodeBytes(bytes);
 
-    // Znajdź metadata.json
+    // Find metadata.json
     final metadataFile = archive.findFile('metadata.json');
     if (metadataFile == null) {
       throw Exception('Invalid project format: metadata.json not found');
@@ -54,14 +60,14 @@ class ProjectImportService {
       metadataJson = utf8.decode(metadataBytes, allowMalformed: false);
     } catch (e) {
       debugPrint('[ProjectImport] ERROR decoding metadata.json as UTF-8: $e');
-      rethrow;
+      throw Exception(_trans.projectMetadataEncodingError);
     }
 
       Map<String, dynamic> metadata;
       try {
         metadata = jsonDecode(metadataJson) as Map<String, dynamic>;
 
-        // Wyczyść nazwy z znaków kontrolnych w tracks (dla podglądu)
+        // Clean track names from control characters (for preview)
         if (metadata.containsKey('tracks') && metadata['tracks'] is List) {
           final tracks = metadata['tracks'] as List<dynamic>;
           for (var track in tracks) {
@@ -79,12 +85,12 @@ class ProjectImportService {
       } catch (e) {
         debugPrint('[ProjectImport] ERROR parsing metadata.json JSON: $e');
         debugPrint('[ProjectImport] JSON content: $metadataJson');
-        // Spróbuj wyczyścić znaki kontrolne i ponownie sparsować
+        // Try to clean control characters and parse again
         try {
           String cleanedJson = metadataJson.replaceAll(RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F]'), '');
           metadata = jsonDecode(cleanedJson) as Map<String, dynamic>;
 
-          // Wyczyść nazwy w tracks
+          // Clean names in tracks
           if (metadata.containsKey('tracks') && metadata['tracks'] is List) {
             final tracks = metadata['tracks'] as List<dynamic>;
             for (var track in tracks) {
@@ -99,14 +105,14 @@ class ProjectImportService {
           }
         } catch (e2) {
           debugPrint('[ProjectImport] ERROR parsing cleaned metadata.json JSON: $e2');
-          rethrow;
+          throw Exception(_trans.projectMetadataParseError);
         }
       }
 
     return metadata;
   }
 
-  /// Waliduje projekt przed importem (bez modyfikowania danych)
+  /// Validates project before import (without modifying data)
   Future<List<ProjectImportError>> validateProject(String zipPath) async {
     final errors = <ProjectImportError>[];
 
@@ -122,39 +128,41 @@ class ProjectImportService {
       final bytes = await file.readAsBytes();
       final archive = ZipDecoder().decodeBytes(bytes);
 
-      // 1. Walidacja struktury podstawowej
+      // 1. Basic structure validation
       if (archive.findFile('metadata.json') == null) {
         errors.add(ProjectImportError(
-          message: 'Invalid project format: metadata.json not found',
+          message: _trans.projectFileMissing('metadata.json'),
+          fileName: 'metadata.json',
         ));
         return errors;
       }
       if (archive.findFile('settings/grid_settings.json') == null) {
         errors.add(ProjectImportError(
-          message: 'Invalid project format: settings/grid_settings.json not found',
+          message: _trans.projectFileMissing('settings/grid_settings.json'),
+          fileName: 'settings/grid_settings.json',
         ));
         return errors;
       }
 
-      // 2. Walidacja metadata.json
+      // 2. Validate metadata.json
       await _validateMetadata(archive, errors);
       if (errors.isNotEmpty) {
         return errors;
       }
 
-      // 3. Walidacja grid_settings.json
+      // 3. Validate grid_settings.json
       await _validateGridSettings(archive, errors);
       if (errors.isNotEmpty) {
         return errors;
       }
 
-      // 4. Walidacja wszystkich plików tracków
+      // 4. Validate all track files
       await _validateTracks(archive, errors);
       if (errors.isNotEmpty) {
         return errors;
       }
 
-      // 5. Walidacja nagrań (sumy kontrolne, długości, dopasowanie do tracków)
+      // 5. Validate recordings (checksums, lengths, matching to tracks)
       await _validateRecordings(archive, errors);
       if (errors.isNotEmpty) {
         return errors;
@@ -170,7 +178,7 @@ class ProjectImportService {
     return errors;
   }
 
-  /// Importuje projekt z pliku ZIP (tylko po pomyślnej walidacji)
+  /// Imports project from ZIP file (only after successful validation)
   Future<List<ProjectImportError>> importProject(String zipPath) async {
     final errors = <ProjectImportError>[];
 
@@ -181,38 +189,28 @@ class ProjectImportService {
       final bytes = await file.readAsBytes();
       final archive = ZipDecoder().decodeBytes(bytes);
 
-      // 1. Usuń wszystkie bieżące nagrania PRZED importem tracków
-      // (żeby nie było konfliktów z istniejącymi ścieżkami)
+      // 1. Delete all current recordings BEFORE importing tracks
+      // (to avoid conflicts with existing tracks)
       _trackRepository.deleteTracksRecordings(_trackRepository.allTracks());
 
-      // 2. Importuj ustawienia siatki
+      // 2. Import grid settings
       await _importGridSettings(archive);
 
-      // 3. Zresetuj kolekcję ścieżek (cache)
+      // 3. Reset tracks collection (cache)
       _trackRepository.resetTracksCollection();
 
-      // 4. Importuj wszystkie ścieżki PRZED nagraniami
-      // (żeby tracki istniały w repozytorium gdy będziemy przypisywać do nich nagrania)
-      await _importTracks(archive, errors);
-
-      // 5. Importuj nagrania z weryfikacją
-      // (teraz tracki już istnieją, więc można je znaleźć i przypisać do nich nagrania)
-      await _importRecordings(archive, errors);
-
-      // 6. Zresetuj kolekcję ścieżek po imporcie (żeby odświeżyć cache)
-      // To wymusi ponowne załadowanie tracków z Hive przy następnym wywołaniu allTracks()
-      _trackRepository.resetTracksCollection();
-
-      // 7. Wyczyść cache LazyLoadingManager (żeby wymusić odbudowę widgetów)
-      // To jest kluczowe - LazyLoadingManager cache'uje widgety, więc musimy wyczyścić cache
-      // żeby widgety były odbudowane z nowymi danymi z Hive
+      // 4. Clear LazyLoadingManager cache (to force widget rebuild)
+      // This is crucial - LazyLoadingManager caches widgets, so we must clear the cache
+      // so widgets are rebuilt with new data from Hive
       LazyLoadingManager().clearCache();
 
-      // 8. Odśwież ustawienia (notifyListeners) żeby widok się zaktualizował
-      // To jest kluczowe - podobnie jak przy zmianie języka, notifyListeners() powoduje
-      // ponowne wywołanie build() w MaterialApp, co odświeża całą aplikację
-      // Wersja jest zwiększana, co zmienia klucz w tracksList i wymusza rebuild
-      _settings.reload();
+      // 5. Import all tracks BEFORE recordings
+      // (so tracks exist in repository when we assign recordings to them)
+      await _importTracks(archive, errors);
+
+      // 6. Import recordings with verification
+      // (now tracks already exist, so we can find them and assign recordings to them)
+      await _importRecordings(archive, errors);
     } catch (e, stackTrace) {
       debugPrint('[ProjectImport] Exception during import: $e');
       debugPrint('[ProjectImport] Stack trace: $stackTrace');
@@ -231,7 +229,8 @@ class ProjectImportService {
     final metadataFile = archive.findFile('metadata.json');
     if (metadataFile == null) {
       errors.add(ProjectImportError(
-        message: 'metadata.json not found',
+        message: _trans.projectFileMissing('metadata.json'),
+        fileName: 'metadata.json',
       ));
       return;
     }
@@ -241,20 +240,42 @@ class ProjectImportService {
       final metadataJson = utf8.decode(metadataBytes, allowMalformed: false);
       final metadata = jsonDecode(metadataJson) as Map<String, dynamic>;
 
-      // Sprawdź wymagane pola
+      // Check required fields
       if (!metadata.containsKey('version')) {
-        errors.add(ProjectImportError(message: 'metadata.json missing version'));
+        errors.add(ProjectImportError(
+          message: _trans.projectFileStructureError('metadata.json', 'version'),
+          fileName: 'metadata.json',
+        ));
       }
       if (!metadata.containsKey('gridSize')) {
-        errors.add(ProjectImportError(message: 'metadata.json missing gridSize'));
+        errors.add(ProjectImportError(
+          message: _trans.projectFileStructureError('metadata.json', 'gridSize'),
+          fileName: 'metadata.json',
+        ));
       }
       if (!metadata.containsKey('tracks')) {
-        errors.add(ProjectImportError(message: 'metadata.json missing tracks'));
+        errors.add(ProjectImportError(
+          message: _trans.projectFileStructureError('metadata.json', 'tracks'),
+          fileName: 'metadata.json',
+        ));
       }
 
     } catch (e) {
+      debugPrint('[ProjectImport] ERROR in metadata.json: $e');
+      String errorMessage;
+      if (e.toString().contains('FormatException') ||
+          e.toString().contains('Missing extension byte') ||
+          e.toString().contains('Invalid UTF-8')) {
+        errorMessage = _trans.projectFileEncodingError('metadata.json');
+      } else if (e.toString().contains('Unexpected character') ||
+          e.toString().contains('Expected')) {
+        errorMessage = _trans.projectFileParseError('metadata.json');
+      } else {
+        errorMessage = _trans.projectMetadataCorrupted;
+      }
       errors.add(ProjectImportError(
-        message: 'Failed to parse metadata.json: $e',
+        message: errorMessage,
+        fileName: 'metadata.json',
       ));
     }
   }
@@ -266,7 +287,8 @@ class ProjectImportService {
     final settingsFile = archive.findFile('settings/grid_settings.json');
     if (settingsFile == null) {
       errors.add(ProjectImportError(
-        message: 'settings/grid_settings.json not found',
+        message: _trans.projectFileMissing('settings/grid_settings.json'),
+        fileName: 'settings/grid_settings.json',
       ));
       return;
     }
@@ -276,10 +298,18 @@ class ProjectImportService {
       final settingsJson = utf8.decode(settingsBytes, allowMalformed: false);
       final settings = jsonDecode(settingsJson) as Map<String, dynamic>;
 
-      if (!settings.containsKey('gridRowsAmount') ||
-          !settings.containsKey('gridColsAmount')) {
+      final missingFields = <String>[];
+      if (!settings.containsKey('gridRowsAmount')) {
+        missingFields.add('gridRowsAmount');
+      }
+      if (!settings.containsKey('gridColsAmount')) {
+        missingFields.add('gridColsAmount');
+      }
+
+      if (missingFields.isNotEmpty) {
         errors.add(ProjectImportError(
-          message: 'grid_settings.json missing required fields',
+          message: _trans.projectFileStructureError('settings/grid_settings.json', missingFields.join(', ')),
+          fileName: 'settings/grid_settings.json',
         ));
         return;
       }
@@ -288,14 +318,29 @@ class ProjectImportService {
       final cols = settings['gridColsAmount'] as int?;
 
       if (rows == null || cols == null || rows < 1 || cols < 1) {
+        String details = 'gridRowsAmount=${rows ?? 'null'}, gridColsAmount=${cols ?? 'null'}';
         errors.add(ProjectImportError(
-          message: 'Invalid grid size in grid_settings.json',
+          message: _trans.projectFileInvalidValue('settings/grid_settings.json', details),
+          fileName: 'settings/grid_settings.json',
         ));
       }
 
     } catch (e) {
+      debugPrint('[ProjectImport] ERROR parsing grid_settings.json: $e');
+      String errorMessage;
+      if (e.toString().contains('FormatException') ||
+          e.toString().contains('Missing extension byte') ||
+          e.toString().contains('Invalid UTF-8')) {
+        errorMessage = _trans.projectFileEncodingError('settings/grid_settings.json');
+      } else if (e.toString().contains('Unexpected character') ||
+          e.toString().contains('Expected')) {
+        errorMessage = _trans.projectFileParseError('settings/grid_settings.json');
+      } else {
+        errorMessage = _trans.projectFileParseError('settings/grid_settings.json');
+      }
       errors.add(ProjectImportError(
-        message: 'Failed to parse grid_settings.json: $e',
+        message: errorMessage,
+        fileName: 'settings/grid_settings.json',
       ));
     }
   }
@@ -314,10 +359,10 @@ class ProjectImportService {
         final trackJson = utf8.decode(trackBytes);
         final trackMapJson = jsonDecode(trackJson) as Map<String, dynamic>;
 
-        // Sprawdź wymagane pola
+        // Check required fields
         if (!trackMapJson.containsKey('trackId')) {
           errors.add(ProjectImportError(
-            message: 'Track file missing trackId: ${trackFile.name}',
+            message: _trans.projectFileStructureError(trackFile.name, 'trackId'),
             fileName: trackFile.name,
           ));
           continue;
@@ -326,15 +371,27 @@ class ProjectImportService {
         final trackIdList = trackMapJson['trackId'] as List<dynamic>?;
         if (trackIdList == null || trackIdList.length != 2) {
           errors.add(ProjectImportError(
-            message: 'Invalid trackId format: ${trackFile.name}',
+            message: _trans.projectFileInvalidValue(trackFile.name, 'trackId musi być tablicą z 2 elementami'),
             fileName: trackFile.name,
           ));
           continue;
         }
 
       } catch (e) {
+        debugPrint('[ProjectImport] ERROR validating track file ${trackFile.name}: $e');
+        String errorMessage;
+        if (e.toString().contains('FormatException') ||
+            e.toString().contains('Missing extension byte') ||
+            e.toString().contains('Invalid UTF-8')) {
+          errorMessage = _trans.projectFileEncodingError(trackFile.name);
+        } else if (e.toString().contains('Unexpected character') ||
+            e.toString().contains('Expected')) {
+          errorMessage = _trans.projectFileParseError(trackFile.name);
+        } else {
+          errorMessage = _trans.projectFileParseError(trackFile.name);
+        }
         errors.add(ProjectImportError(
-          message: 'Failed to validate track file: $e',
+          message: errorMessage,
           fileName: trackFile.name,
         ));
       }
@@ -346,7 +403,7 @@ class ProjectImportService {
     Archive archive,
     List<ProjectImportError> errors,
   ) async {
-    // Wczytaj sumy kontrolne
+    // Load checksums
     final checksumsFile = archive.findFile('recordings/checksums.json');
     final checksums = <String, String>{};
     if (checksumsFile != null) {
@@ -358,14 +415,24 @@ class ProjectImportService {
           checksums[key] = value as String;
         });
       } catch (e) {
+        debugPrint('[ProjectImport] ERROR parsing checksums.json: $e');
+        String errorMessage;
+        if (e.toString().contains('FormatException') ||
+            e.toString().contains('Missing extension byte') ||
+            e.toString().contains('Invalid UTF-8')) {
+          errorMessage = _trans.projectFileEncodingError('recordings/checksums.json');
+        } else {
+          errorMessage = _trans.projectFileParseError('recordings/checksums.json');
+        }
         errors.add(ProjectImportError(
-          message: 'Failed to parse checksums.json: $e',
+          message: errorMessage,
+          fileName: 'recordings/checksums.json',
         ));
         return;
       }
     }
 
-    // Wczytaj metadata dla mapowania i długości
+    // Load metadata for mapping and lengths
     final metadataFile = archive.findFile('metadata.json');
     final trackDurations = <String, int>{};
     final trackIdToFileName = <String, String>{};
@@ -375,7 +442,7 @@ class ProjectImportService {
         final metadataBytes = metadataFile.content as List<int>;
         String metadataJson = utf8.decode(metadataBytes, allowMalformed: false);
 
-        // Spróbuj wyczyścić znaki kontrolne jeśli potrzeba
+        // Try to clean control characters if needed
         try {
           jsonDecode(metadataJson);
         } catch (_) {
@@ -409,13 +476,47 @@ class ProjectImportService {
       } catch (e, stackTrace) {
         debugPrint('[ProjectImport] ERROR parsing metadata.json for recordings validation: $e');
         debugPrint('[ProjectImport] Stack trace: $stackTrace');
-        errors.add(ProjectImportError(
-          message: 'Failed to parse metadata.json for recordings validation: $e',
-        ));
+        String errorMessage;
+        if (e.toString().contains('FormatException') ||
+            e.toString().contains('Missing extension byte') ||
+            e.toString().contains('Invalid UTF-8')) {
+          errorMessage = _trans.projectMetadataEncodingError;
+        } else if (e.toString().contains('Unexpected character') ||
+            e.toString().contains('Expected')) {
+          errorMessage = _trans.projectMetadataParseError;
+        } else {
+          errorMessage = _trans.projectMetadataCorrupted;
+        }
+        errors.add(ProjectImportError(message: errorMessage));
         return;
       }
     } else {
       debugPrint('[ProjectImport] WARNING: metadata.json not found in archive for validation');
+    }
+
+    // First check if all recordings listed in metadata exist in archive
+    final recordingsInArchive = archive.files
+        .where(
+          (file) =>
+              file.name.startsWith('recordings/') &&
+              file.name != 'recordings/checksums.json',
+        )
+        .map((file) => path.basename(file.name))
+        .toSet();
+
+    // Check if all recordings from metadata exist in archive
+    for (final entry in trackIdToFileName.entries) {
+      final trackId = entry.key;
+      final fileName = entry.value;
+      if (!recordingsInArchive.contains(fileName)) {
+        errors.add(ProjectImportError(
+          message: _trans.projectRecordingNotFound,
+          fileName: fileName,
+        ));
+        debugPrint(
+          '[ProjectImport] Recording file not found in archive: $fileName (trackId: $trackId)',
+        );
+      }
     }
 
     final recordingsDir = archive.files.where(
@@ -424,20 +525,19 @@ class ProjectImportService {
           file.name != 'recordings/checksums.json',
     ).toList();
 
-
     for (final recordingFile in recordingsDir) {
       try {
         final fileName = path.basename(recordingFile.name);
         final fileBytes = recordingFile.content as List<int>;
 
-        // Weryfikuj sumę kontrolną
+        // Verify checksum
         if (checksums.containsKey(fileName)) {
           final expectedChecksum = checksums[fileName]!;
           final actualChecksum = sha256.convert(fileBytes).toString();
           if (actualChecksum != expectedChecksum) {
             debugPrint('[ProjectImport] Checksum mismatch for $fileName: expected $expectedChecksum, got $actualChecksum');
             errors.add(ProjectImportError(
-              message: 'Checksum mismatch for recording file',
+              message: _trans.projectChecksumMismatch(fileName),
               fileName: fileName,
             ));
             continue;
@@ -446,18 +546,18 @@ class ProjectImportService {
         } else {
         }
 
-        // Sprawdź czy plik ma odpowiadający track w metadata
+        // Check if file has corresponding track in metadata
         bool foundInMetadata = false;
 
-        // Jeśli mapowanie jest puste, spróbuj znaleźć po trackId w nazwie pliku
+        // If mapping is empty, try to find by trackId in filename
         if (trackIdToFileName.isEmpty) {
           final nameWithoutExt = path.basenameWithoutExtension(fileName);
-          // Sprawdź czy nazwa zaczyna się od trackId (format: trackId.timestamp.ext)
+          // Check if name starts with trackId (format: trackId.timestamp.ext)
           for (final entry in trackDurations.entries) {
             final trackId = entry.key;
             if (nameWithoutExt == trackId || nameWithoutExt.startsWith('$trackId.')) {
               foundInMetadata = true;
-              // Sprawdź długość
+              // Check length
               final expectedSize = entry.value;
               if (fileBytes.length != expectedSize) {
                 debugPrint('[ProjectImport] File size mismatch for $fileName: expected $expectedSize, got ${fileBytes.length}');
@@ -472,13 +572,13 @@ class ProjectImportService {
             }
           }
         } else {
-          // Normalne dopasowanie przez mapowanie
+          // Normal matching through mapping
           for (final entry in trackIdToFileName.entries) {
             final trackId = entry.key;
             final mappedFileName = entry.value;
             if (mappedFileName == fileName) {
               foundInMetadata = true;
-              // Sprawdź długość
+              // Check length
               if (trackDurations.containsKey(trackId)) {
                 final expectedSize = trackDurations[trackId]!;
                 if (fileBytes.length != expectedSize) {
@@ -575,7 +675,7 @@ class ProjectImportService {
         } catch (e) {
           debugPrint('[ProjectImport] ERROR parsing track JSON for ${trackFile.name}: $e');
           debugPrint('[ProjectImport] Track JSON content: $trackJson');
-          // Sprawdź czy są znaki kontrolne
+          // Check if there are control characters
           for (int i = 0; i < trackJson.length; i++) {
             final char = trackJson[i];
             final code = char.codeUnitAt(0);
@@ -586,7 +686,7 @@ class ProjectImportService {
           rethrow;
         }
 
-        // Konwertuj Map<String, dynamic> na Map<TrackAdapterKey, dynamic>
+        // Convert Map<String, dynamic> to Map<TrackAdapterKey, dynamic>
         final trackMap = <TrackAdapterKey, dynamic>{};
         trackMapJson.forEach((key, value) {
           final adapterKey = TrackAdapterKey.values.firstWhere(
@@ -596,7 +696,7 @@ class ProjectImportService {
           trackMap[adapterKey] = value;
         });
 
-        // Konwertuj listę [row, col] z powrotem na TrackId
+        // Convert list [row, col] back to TrackId
         final trackIdList = trackMap[TrackAdapterKey.trackId] as List<dynamic>;
         final trackId = TrackId(
           trackIdList[0] as int,
@@ -604,7 +704,7 @@ class ProjectImportService {
         );
         trackMap[TrackAdapterKey.trackId] = trackId;
 
-        // Konwertuj milisekundy z powrotem na Duration
+        // Convert milliseconds back to Duration
         if (trackMap[TrackAdapterKey.playbackStartAtPosition] != null) {
           final ms = trackMap[TrackAdapterKey.playbackStartAtPosition] as int;
           trackMap[TrackAdapterKey.playbackStartAtPosition] =
@@ -616,20 +716,20 @@ class ProjectImportService {
               Duration(milliseconds: ms);
         }
 
-        // Utwórz track z mapy
-        // WAŻNE: Zapisz wartości trimming przed wywołaniem fromMap(), bo fromMap() wywołuje setPath()
-        // a jeśli path jest null, setPath() resetuje pozycje do Duration()
+        // Create track from map
+        // IMPORTANT: Save trimming values before calling fromMap(), because fromMap() calls setPath()
+        // and if path is null, setPath() resets positions to Duration()
         final savedPlaybackStartAtPosition = trackMap[TrackAdapterKey.playbackStartAtPosition] as Duration?;
         final savedPlaybackEndAtPosition = trackMap[TrackAdapterKey.playbackEndAtPosition] as Duration?;
 
-        // Usuń path z mapy przed fromMap(), żeby setPath() nie próbowało ustawić nieistniejącego pliku
-        // (co spowodowałoby wywołanie _clearPath() i reset pozycji)
+        // Remove path from map before fromMap(), so setPath() doesn't try to set non-existent file
+        // (which would cause _clearPath() to be called and reset positions)
         trackMap[TrackAdapterKey.path] = null;
 
-        // Utwórz track z mapy (bez path)
+        // Create track from map (without path)
         final track = Track.fromMap(trackMap);
 
-        // Przywróć wartości trimming (które mogły zostać zresetowane przez setPath(null))
+        // Restore trimming values (which may have been reset by setPath(null))
         if (savedPlaybackStartAtPosition != null) {
           track.playbackStartAtPosition.value = savedPlaybackStartAtPosition;
         }
@@ -654,7 +754,7 @@ class ProjectImportService {
     Archive archive,
     List<ProjectImportError> errors,
   ) async {
-    // Wczytaj sumy kontrolne
+    // Load checksums
     final checksumsFile = archive.findFile('recordings/checksums.json');
     final checksums = <String, String>{};
     if (checksumsFile != null) {
@@ -680,7 +780,7 @@ class ProjectImportService {
       });
     }
 
-    // Wczytaj metadata dla długości plików i mapowania trackId -> fileName
+    // Load metadata for file lengths and trackId -> fileName mapping
     final metadataFile = archive.findFile('metadata.json');
     final trackDurations = <String, int>{};
     final trackIdToFileName = <String, String>{}; // Mapowanie trackId -> fileName
@@ -700,7 +800,7 @@ class ProjectImportService {
       } catch (e) {
         debugPrint('[ProjectImport] ERROR parsing metadata.json JSON (second time): $e');
         debugPrint('[ProjectImport] JSON content: $metadataJson');
-        // Spróbuj wyczyścić znaki kontrolne i ponownie sparsować
+        // Try to clean control characters and parse again
         try {
           String cleanedJson = metadataJson.replaceAll(RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F]'), '');
           metadata = jsonDecode(cleanedJson) as Map<String, dynamic>;
@@ -743,7 +843,7 @@ class ProjectImportService {
         final fileName = path.basename(recordingFile.name);
         final fileBytes = recordingFile.content as List<int>;
 
-        // Weryfikuj sumę kontrolną
+        // Verify checksum
         if (checksums.containsKey(fileName)) {
           final expectedChecksum = checksums[fileName]!;
           final actualChecksum = sha256.convert(fileBytes).toString();
@@ -759,11 +859,11 @@ class ProjectImportService {
         } else {
         }
 
-        // Znajdź track dla tego pliku
+        // Find track for this file
         final allTracks = _trackRepository.allTracks();
         Track? targetTrack;
 
-        // Metoda 1: Użyj mapowania z metadata.json (trackId -> fileName)
+        // Method 1: Use mapping from metadata.json (trackId -> fileName)
         String? targetTrackId;
         trackIdToFileName.forEach((trackId, mappedFileName) {
           if (mappedFileName == fileName) {
@@ -780,7 +880,7 @@ class ProjectImportService {
           }
         }
 
-        // Metoda 2: Szukaj po nazwie pliku w track.path (jeśli track już ma path)
+        // Method 2: Search by filename in track.path (if track already has path)
         if (targetTrack == null) {
           for (final track in allTracks) {
             if (track.path != null) {
@@ -793,13 +893,13 @@ class ProjectImportService {
           }
         }
 
-        // Metoda 3: Jeśli nie znaleziono tracku, spróbuj znaleźć po ID z nazwy pliku
-        // Nazwa pliku może być w formacie {trackId}.{timestamp}.{ext} lub {trackId}.{ext}
+        // Method 3: If track not found, try to find by ID from filename
+        // Filename may be in format {trackId}.{timestamp}.{ext} or {trackId}.{ext}
         if (targetTrack == null) {
           final nameWithoutExt = path.basenameWithoutExtension(fileName);
           for (final track in allTracks) {
             final trackIdStr = track.id.toString();
-            // Sprawdź czy nazwa pliku zaczyna się od trackId (może być format trackId.timestamp.ext)
+            // Check if filename starts with trackId (may be format trackId.timestamp.ext)
             if (nameWithoutExt == trackIdStr || nameWithoutExt.startsWith('$trackIdStr.')) {
               targetTrack = track;
               break;
@@ -818,7 +918,7 @@ class ProjectImportService {
         }
 
 
-        // Zapisz plik
+        // Save file
         final ext = path.extension(fileName);
         final newFileName = '${targetTrack.id.toString()}$ext';
         final newFilePath = path.join(appDir.path, newFileName);
@@ -826,13 +926,13 @@ class ProjectImportService {
         final savedFile = File(newFilePath);
         await savedFile.writeAsBytes(fileBytes);
 
-        // Weryfikuj długość pliku
+        // Verify file length
         final fileSize = await savedFile.length();
         final trackId = targetTrack.id.toString();
         if (trackDurations.containsKey(trackId)) {
           final expectedSize = trackDurations[trackId]!;
           if (fileSize != expectedSize) {
-            // Resetuj pozycje odtwarzania
+            // Reset playback positions
             targetTrack.resetPlaybackStartAtPosition();
             targetTrack.resetPlaybackEndAtPosition();
             _trackRepository.save(targetTrack);
@@ -845,48 +945,48 @@ class ProjectImportService {
           }
         }
 
-        // Zapisz wartości trimming przed setPath() (żeby nie zostały nadpisane)
+        // Save trimming values before setPath() (so they are not overwritten)
         final savedPlaybackStartAtPosition = targetTrack.playbackStartAtPosition.value;
         final savedPlaybackEndAtPosition = targetTrack.playbackEndAtPosition.value;
 
-        // Ustaw ścieżkę w tracku
-        // setPath() jest asynchroniczne - ustawia stan na processing, potem ready/idle
-        // Używamy preserveDuration: false, żeby ustawić duration z pliku (potrzebne do poprawnego obliczenia durationAfterCut)
-        // Używamy preservePlaybackPositions: true, żeby nie nadpisać pozycji podczas setPath()
-        // Po zakończeniu setPath() ręcznie ustawimy pozycje z zaimportowanych danych
+        // Set path in track
+        // setPath() is asynchronous - sets state to processing, then ready/idle
+        // We use preserveDuration: false to set duration from file (needed for correct durationAfterCut calculation)
+        // We use preservePlaybackPositions: true to not overwrite positions during setPath()
+        // After setPath() completes, we will manually set positions from imported data
         targetTrack.setPath(
           newFilePath,
-          preserveDuration: false, // Pozwól setPath() ustawić duration z pliku
+          preserveDuration: false, // Allow setPath() to set duration from file
           preservePlaybackPositions: true,
         );
 
-        // Poczekaj na zakończenie setPath() (stan zmieni się z processing na ready/idle)
-        // setPath() ustawia stan na processing, a następnie asynchronicznie na ready/idle
-        // Sprawdzaj stan co 100ms, maksymalnie 5 sekund (50 prób)
+        // Wait for setPath() to complete (state will change from processing to ready/idle)
+        // setPath() sets state to processing, then asynchronously to ready/idle
+        // Check state every 100ms, maximum 5 seconds (50 attempts)
         const int maxAttempts = 50;
         const int delayMs = 100;
         int attempts = 0;
 
-        // Poczekaj chwilę, aby setPath() zdążyło ustawić stan na processing
+        // Wait a moment for setPath() to set state to processing
         await Future.delayed(Duration(milliseconds: 50));
 
-        // Sprawdź, czy stan jest processing - jeśli tak, czekaj na zmianę
-        // Jeśli nie, setPath() może już się zakończyć lub nie zostało wywołane
+        // Check if state is processing - if yes, wait for change
+        // If not, setPath() may have already completed or was not called
         if (targetTrack.state.value == TrackState.processing) {
-          // Czekaj na zmianę stanu z processing na ready/idle/empty
+          // Wait for state change from processing to ready/idle/empty
           while (targetTrack.state.value == TrackState.processing && attempts < maxAttempts) {
             await Future.delayed(Duration(milliseconds: delayMs));
             attempts++;
-            // Sprawdź, czy stan się zmienił (nie jest już processing)
+            // Check if state has changed (no longer processing)
             if (targetTrack.state.value != TrackState.processing) {
               break;
             }
           }
 
-          // Jeśli nadal jest processing po maxAttempts, to timeout
+          // If still processing after maxAttempts, it's a timeout
           if (targetTrack.state.value == TrackState.processing && attempts >= maxAttempts) {
             debugPrint('[ProjectImport] WARNING: setPath() did not complete within ${maxAttempts * delayMs / 1000}s for track ${targetTrack.id.toString()}, state: ${targetTrack.state.value}');
-            // Dodaj błąd do listy, ale kontynuuj import
+            // Add error to list, but continue import
             errors.add(ProjectImportError(
               message: 'Track ${targetTrack.id.toString()} did not finish loading within timeout',
               fileName: fileName,
@@ -895,9 +995,9 @@ class ProjectImportService {
           }
         }
 
-        // Po zakończeniu setPath() ustaw pozycje odtwarzania z zaimportowanych danych
-        // (preservePlaybackPositions: true oznacza, że setPath() nie ustawia pozycji)
-        // Upewnij się, że playbackEndAtPosition nie przekracza duration z pliku
+        // After setPath() completes, set playback positions from imported data
+        // (preservePlaybackPositions: true means setPath() doesn't set positions)
+        // Make sure playbackEndAtPosition doesn't exceed duration from file
         final actualDuration = targetTrack.duration.value;
         final finalPlaybackStartAtPosition = savedPlaybackStartAtPosition;
         final finalPlaybackEndAtPosition = savedPlaybackEndAtPosition.inMilliseconds > actualDuration.inMilliseconds
@@ -907,15 +1007,15 @@ class ProjectImportService {
         targetTrack.setPlaybackStartAtPosition(finalPlaybackStartAtPosition);
         targetTrack.setPlaybackEndAtPosition(finalPlaybackEndAtPosition);
 
-        // Zapisz track do Hive
+        // Save track to Hive
         _trackRepository.save(targetTrack);
 
-        // WAŻNE: Po zapisaniu tracku do Hive, widok używa tracku z cache
-        // Cache ładuje tracki przez _settings.getTrack(), które zwraca NOWĄ instancję z Hive
-        // ValueListenableBuilder używa starej instancji z cache, która nie jest aktualizowana
-        // Musimy zresetować cache, żeby wymusić ponowne załadowanie tracków z Hive
-        // Ale to nie wystarczy - musimy też odświeżyć widok przez _settings.reload()
-        // (które zwiększa wersję i wywołuje notifyListeners())
+        // IMPORTANT: After saving track to Hive, view uses track from cache
+        // Cache loads tracks through _settings.getTrack(), which returns NEW instance from Hive
+        // ValueListenableBuilder uses old instance from cache, which is not updated
+        // We must reset cache to force reloading tracks from Hive
+        // But that's not enough - we must also refresh view through _settings.reload()
+        // (which increments version and calls notifyListeners())
       } catch (e, stackTrace) {
         debugPrint('[ProjectImport] Exception importing recording ${recordingFile.name}: $e');
         debugPrint('[ProjectImport] Stack trace: $stackTrace');

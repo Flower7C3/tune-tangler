@@ -386,6 +386,15 @@
   "projectImportError": "Error loading project",
   "projectInvalidFormat": "Invalid project file format",
   "projectFileNotFound": "Project file not found",
+  "projectFileMissing": "Required file missing: {fileName}",
+  "projectFileParseError": "Parse error in file {fileName}. The file is corrupted or has invalid format.",
+  "projectFileEncodingError": "Encoding error in file {fileName}. The file may be corrupted or was created in a different version of the application.",
+  "projectFileStructureError": "Invalid structure in file {fileName}. Missing required field: {fieldName}",
+  "projectFileInvalidValue": "Invalid value in file {fileName}: {details}",
+  "projectRecordingNotFound": "Recording listed in project was not found in archive",
+  "projectMetadataCorrupted": "Project file is corrupted. The metadata.json file cannot be read.",
+  "projectMetadataEncodingError": "Project file has invalid encoding. The file may be corrupted or was created in a different version of the application.",
+  "projectMetadataParseError": "Cannot read project data. The metadata.json file is corrupted or has invalid format.",
   "projectChecksumMismatch": "Checksum mismatch for file {fileName}",
   "projectChecksumMismatchTitle": "Verification error",
   "projectDurationMismatch": "File length mismatch for {fileName}. Playback positions have been reset",
@@ -395,6 +404,7 @@
   "buttonExport": "Export",
   "buttonImport": "Load",
   "buttonConfirm": "Confirm",
+  "buttonYesImport": "Yes, import",
   "projectValidating": "Validating project...",
   "projectValidationFailed": "Project validation failed"
 }
