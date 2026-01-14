@@ -35,88 +35,107 @@ class DrawerManager {
     this._trackRepository,
     this._audioRecorder,
   ) {
-    _settingsProfileWrapper = SettingProfileWrapper(
-      _context,
-      _trans,
-      _settings,
-      _uiHelper,
-    );
+    _settingsProfileWrapper = SettingProfileWrapper(_context, _trans, _settings, _uiHelper);
   }
+
+  bool showUserDetails = false;
 
   Widget get build => StatefulBuilder(
     builder: (BuildContext context, StateSetter setDrawerState) => Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          UserAccountsDrawerHeader(
-            accountName: Text(
-              _uiHelper.getAppTitle(_trans),
-              style: TextStyle(
-                fontSize: Theme.of(context).textTheme.headlineMedium?.fontSize,
-                color: Theme.of(context).colorScheme.inversePrimary,
+      child: Column(
+        mainAxisSize: MainAxisSize.max,
+        children: <Widget>[
+          Align(
+            alignment: Alignment.topCenter,
+            child: UserAccountsDrawerHeader(
+              accountName: Text(
+                _uiHelper.getAppTitle(_trans),
+                style: TextStyle(
+                  fontSize: Theme.of(context).textTheme.headlineMedium?.fontSize,
+                  color: Theme.of(context).colorScheme.inversePrimary,
+                ),
+              ),
+              accountEmail: Text(
+                _trans.legalNote,
+                style: TextStyle(color: Theme.of(context).colorScheme.inversePrimary),
+              ),
+              currentAccountPicture: Container(
+                margin: EdgeInsets.only(bottom: 5),
+                padding: EdgeInsets.zero,
+                child: AppIcon.appLogo(
+                  Theme.of(context).colorScheme.inversePrimary,
+                  Theme.of(context).colorScheme.primary,
+                ),
               ),
             ),
-            accountEmail: Text(
-              _trans.legalNote,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.inversePrimary,
-              ),
-            ),
-            currentAccountPicture: Container(
-              margin: EdgeInsets.only(bottom: 5),
+          ),
+          Expanded(
+            child: ListView(
               padding: EdgeInsets.zero,
-              child: AppIcon.appLogo(
-                Theme.of(context).colorScheme.inversePrimary,
-                Theme.of(context).colorScheme.primary,
-              ),
+              children: [
+                ExpansionTile(
+                  leading: Icon(AppIcon.recordingSettings),
+                  title: Text(_trans.recording),
+                  // initiallyExpanded: true,
+                  maintainState: true,
+                  childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
+                  backgroundColor: Theme.of(_context).colorScheme.primaryContainer,
+                  textColor: Theme.of(_context).colorScheme.primary,
+                  iconColor: Theme.of(_context).colorScheme.primary,
+                  children: _recordingSettings(setDrawerState),
+                ),
+                ExpansionTile(
+                  leading: Icon(AppIcon.trackSettings),
+                  title: Text(_trans.tracks),
+                  maintainState: true,
+                  childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
+                  backgroundColor: Theme.of(_context).colorScheme.primaryContainer,
+                  textColor: Theme.of(_context).colorScheme.primary,
+                  iconColor: Theme.of(_context).colorScheme.primary,
+                  children: _tracksSettings(setDrawerState),
+                ),
+                ExpansionTile(
+                  leading: Icon(AppIcon.screenSettings),
+                  title: Text(_trans.screen),
+                  maintainState: true,
+                  childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
+                  backgroundColor: Theme.of(_context).colorScheme.primaryContainer,
+                  textColor: Theme.of(_context).colorScheme.primary,
+                  iconColor: Theme.of(_context).colorScheme.primary,
+                  children: _screenSettings(setDrawerState),
+                ),
+                ExpansionTile(
+                  leading: Icon(AppIcon.permissions),
+                  title: Text(_trans.permissions),
+                  maintainState: true,
+                  childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
+                  backgroundColor: Theme.of(_context).colorScheme.secondaryContainer,
+                  textColor: Theme.of(_context).colorScheme.secondary,
+                  iconColor: Theme.of(_context).colorScheme.secondary,
+                  children: _permissionsList(setDrawerState),
+                ),
+                ExpansionTile(
+                  leading: Icon(AppIcon.dangerZone),
+                  title: Text(_trans.dangerZone),
+                  maintainState: true,
+                  childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
+                  backgroundColor: Theme.of(_context).colorScheme.errorContainer,
+                  textColor: Theme.of(_context).colorScheme.error,
+                  iconColor: Theme.of(_context).colorScheme.error,
+                  children: _dangerZone,
+                ),
+                ListTile(leading: Icon(AppIcon.help), title: Text(_trans.help), onTap: _helpDialog),
+              ],
             ),
           ),
-          ListTile(
-            leading: Icon(AppIcon.settingsProfiles),
-            title: Text(_trans.settingsProfiles),
-            onTap: _settingsProfilesListsDialog,
-            trailing: Icon(AppIcon.modalMenu),
-          ),
-          ExpansionTile(
-            leading: Icon(AppIcon.recordingSettings),
-            title: Text(_trans.recording),
-            // initiallyExpanded: true,
-            maintainState: true,
-            childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
-            children: _recordingSettings(setDrawerState),
-          ),
-          ExpansionTile(
-            leading: Icon(AppIcon.screenSettings),
-            title: Text(_trans.screen),
-            maintainState: true,
-            childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
-            children: _screenSettings(setDrawerState),
-          ),
-          ExpansionTile(
-            leading: Icon(AppIcon.trackSettings),
-            title: Text(_trans.tracks),
-            maintainState: true,
-            childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
-            children: _tracksSettings(setDrawerState),
-          ),
-          ExpansionTile(
-            leading: Icon(AppIcon.permissions),
-            title: Text(_trans.permissions),
-            maintainState: true,
-            childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
-            children: _permissionsList(setDrawerState),
-          ),
-          ExpansionTile(
-            leading: Icon(AppIcon.dangerZone),
-            title: Text(_trans.dangerZone),
-            maintainState: true,
-            childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
-            children: _dangerZone,
-          ),
-          ListTile(
-            leading: Icon(AppIcon.help),
-            title: Text(_trans.help),
-            onTap: _helpDialog,
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: ListTile(
+              leading: Icon(AppIcon.settingsProfiles),
+              title: Text(_trans.settingsProfiles),
+              onTap: _settingsProfilesListsDialog,
+              trailing: Icon(AppIcon.modalMenu),
+            ),
           ),
         ],
       ),
@@ -185,15 +204,11 @@ class DrawerManager {
       _trans.recordingAudioMode,
       disabledIcon: AppIcon.recordingAudioModeMono,
       enabledIcon: AppIcon.recordingAudioModeStereo,
-      switchValue: _settings.getConfig(
-        AppConfigFieldKey.recordingAudioModeStereo,
-      ),
+      switchValue: _settings.getConfig(AppConfigFieldKey.recordingAudioModeStereo),
       successAction: (bool value) {
         _settings.setConfig(AppConfigFieldKey.recordingAudioModeStereo, value);
         return _trans.recordingAudioModeSuccess(
-          value
-              ? _trans.recordingAudioModeOptionStereo
-              : _trans.recordingAudioModeOptionMono,
+          value ? _trans.recordingAudioModeOptionStereo : _trans.recordingAudioModeOptionMono,
         );
       },
     ),
@@ -216,9 +231,7 @@ class DrawerManager {
       switchValue: _settings.getConfig(AppConfigFieldKey.recordingEchoCancel),
       successAction: (bool value) {
         _settings.setConfig(AppConfigFieldKey.recordingEchoCancel, value);
-        return _trans.recordingEchoCancelSuccess(
-          value ? _trans.yes : _trans.no,
-        );
+        return _trans.recordingEchoCancelSuccess(value ? _trans.yes : _trans.no);
       },
     ),
     _uiHelper.listTileSwitch(
@@ -226,14 +239,10 @@ class DrawerManager {
       _trans.recordingNoiseSuppress,
       disabledIcon: AppIcon.no,
       enabledIcon: AppIcon.yes,
-      switchValue: _settings.getConfig(
-        AppConfigFieldKey.recordingNoiseSuppress,
-      ),
+      switchValue: _settings.getConfig(AppConfigFieldKey.recordingNoiseSuppress),
       successAction: (bool value) {
         _settings.setConfig(AppConfigFieldKey.recordingNoiseSuppress, value);
-        return _trans.recordingNoiseSuppressSuccess(
-          value ? _trans.yes : _trans.no,
-        );
+        return _trans.recordingNoiseSuppressSuccess(value ? _trans.yes : _trans.no);
       },
     ),
   ];
@@ -244,9 +253,7 @@ class DrawerManager {
       _trans.gridRowsAmount,
       _trans.gridRowsAmountTitle,
       _trans.gridRowsAmountInfo,
-      double.parse(
-        _settings.getConfig(AppConfigFieldKey.gridRowsAmount).toString(),
-      ),
+      double.parse(_settings.getConfig(AppConfigFieldKey.gridRowsAmount).toString()),
       AppGlobalConfig.gridRows.sliderValues.min,
       AppGlobalConfig.gridRows.sliderValues.max,
       AppGlobalConfig.gridRows.sliderValues.divisions,
@@ -264,9 +271,7 @@ class DrawerManager {
       _trans.gridColsAmount,
       _trans.gridColsAmountTitle,
       _trans.gridColsAmountInfo,
-      double.parse(
-        _settings.getConfig(AppConfigFieldKey.gridColsAmount).toString(),
-      ),
+      double.parse(_settings.getConfig(AppConfigFieldKey.gridColsAmount).toString()),
       AppGlobalConfig.gridCols.sliderValues.min,
       AppGlobalConfig.gridCols.sliderValues.max,
       AppGlobalConfig.gridCols.sliderValues.divisions,
@@ -307,9 +312,7 @@ class DrawerManager {
   ];
 
   Future<void> _recordingSettingsDialog() async {
-    InputDevice? currentValue = _settings.getConfig(
-      AppConfigFieldKey.recordingInputDevice,
-    );
+    InputDevice? currentValue = _settings.getConfig(AppConfigFieldKey.recordingInputDevice);
     var options = <Widget>[];
     options.add(
       ListTile(
@@ -321,19 +324,14 @@ class DrawerManager {
         },
       ),
     );
-    await _audioRecorder.listInputDevices().then((
-      List<InputDevice> inputDevices,
-    ) {
+    await _audioRecorder.listInputDevices().then((List<InputDevice> inputDevices) {
       for (var inputDevice in inputDevices) {
         options.add(
           ListTile(
             title: Text(_trans.recordingInputDeviceValue(inputDevice.label)),
             selected: currentValue == inputDevice,
             onTap: () {
-              _settings.setConfig(
-                AppConfigFieldKey.recordingInputDevice,
-                inputDevice,
-              );
+              _settings.setConfig(AppConfigFieldKey.recordingInputDevice, inputDevice);
               _uiHelper.toast(
                 _trans.recordingInputDeviceSuccess(inputDevice.label),
                 icon: AppIcon.recordingInputDevice,
@@ -357,13 +355,9 @@ class DrawerManager {
     _uiHelper.listTileListDialog(
       AppIcon.language,
       _trans.languageVersion,
-      listSubtitle: AppGlobalConfig.languages.format(
-        _settings.getConfig(AppConfigFieldKey.locale),
-      ),
+      listSubtitle: AppGlobalConfig.languages.format(_settings.getConfig(AppConfigFieldKey.locale)),
       dialogTitle: _trans.changeLanguage,
-      currentValue: _settings
-          .getConfig(AppConfigFieldKey.locale)
-          .toLanguageTag(),
+      currentValue: _settings.getConfig(AppConfigFieldKey.locale).toLanguageTag(),
       options: AppGlobalConfig.languages
           .values<Locale>()
           .map(
@@ -420,33 +414,21 @@ class DrawerManager {
       switchValue: _settings.getConfig(AppConfigFieldKey.wakelockEnabled),
       successAction: (bool value) {
         _settings.setConfig(AppConfigFieldKey.wakelockEnabled, value);
-        return value
-            ? _trans.keepScreenOnIsEnabledSuccess
-            : _trans.keepScreenOnIsDisabledSuccess;
+        return value ? _trans.keepScreenOnIsEnabledSuccess : _trans.keepScreenOnIsDisabledSuccess;
       },
     ),
   ];
 
   List<Widget> _permissionsList(StateSetter setDrawerState) => [
-    ...AppGlobalConfig.permissions.values<Permission>().map((
-      Permission permission,
-    ) {
-      final status =
-          _permissionProvider.get(permission) ?? PermissionStatus.denied;
+    ...AppGlobalConfig.permissions.values<Permission>().map((Permission permission) {
+      final status = _permissionProvider.get(permission) ?? PermissionStatus.denied;
       return ListTile(
         leading: Icon(AppGlobalConfig.permissions.icon(permission)),
-        title: Text(
-          AppGlobalConfig.permissions.translate(permission, trans: _trans),
-        ),
-        subtitle: Text(
-          AppGlobalConfig.permissionsStatus.translate(status, trans: _trans),
-        ),
+        title: Text(AppGlobalConfig.permissions.translate(permission, trans: _trans)),
+        subtitle: Text(AppGlobalConfig.permissionsStatus.translate(status, trans: _trans)),
         selected: status == PermissionStatus.granted,
         trailing: switch (status) {
-          PermissionStatus.granted => Icon(
-            AppIcon.yes,
-            color: Theme.of(_context).colorScheme.primary,
-          ),
+          PermissionStatus.granted => Icon(AppIcon.yes, color: Theme.of(_context).colorScheme.primary),
           PermissionStatus.denied => ElevatedButton(
             onPressed: () async {
               final status = await permission.request();
@@ -469,11 +451,7 @@ class DrawerManager {
 
   Future<void> _settingsProfilesListsDialog() async {
     List<Widget> options = [];
-    for (
-      int index = 0;
-      index < _settings.settingsProfilesList.length;
-      index++
-    ) {
+    for (int index = 0; index < _settings.settingsProfilesList.length; index++) {
       var item = _settings.settingsProfilesList[index];
       options.add(
         ListTile(
@@ -490,9 +468,7 @@ class DrawerManager {
         Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(_trans.settingsProfilesEmpty, style: TextStyle(fontSize: 14)),
-          ],
+          children: [Text(_trans.settingsProfilesEmpty, style: TextStyle(fontSize: 14))],
         ),
       );
     }
@@ -506,23 +482,14 @@ class DrawerManager {
         },
       ),
     );
-    _uiHelper.listDialog(
-      AppIcon.settingsProfiles,
-      _trans.settingsProfilesListTitle,
-      actions: options.toList(),
-    );
+    _uiHelper.listDialog(AppIcon.settingsProfiles, _trans.settingsProfilesListTitle, actions: options.toList());
   }
 
-  Future<void> _settingsProfilesDetailDialog(
-    int index,
-    SettingsProfile settingsProfile,
-  ) async {
+  Future<void> _settingsProfilesDetailDialog(int index, SettingsProfile settingsProfile) async {
     _uiHelper.alertDialog(
       AppIcon.settingsProfiles,
       _trans.settingsProfile,
-      contentWidget: Column(
-        children: _settingsProfileWrapper.toList(settingsProfile),
-      ),
+      contentWidget: Column(children: _settingsProfileWrapper.toList(settingsProfile)),
       actions: <Widget>[
         _uiHelper.simpleButton(_trans.buttonCancel, () {
           Navigator.pop(_context, 'Cancel');
@@ -538,10 +505,7 @@ class DrawerManager {
     );
   }
 
-  Future<void> _settingsProfilesDeleteDialog(
-    int index,
-    SettingsProfile settingsProfile,
-  ) async {
+  Future<void> _settingsProfilesDeleteDialog(int index, SettingsProfile settingsProfile) async {
     _uiHelper.alertDialogReset(
       AppIcon.settingsProfiles,
       _trans.settingsProfileDeleteTitle,
@@ -597,10 +561,7 @@ class DrawerManager {
         children: [
           _uiHelper.buildRichText(
             _trans.helpScreenMessageProjectExportImportContent,
-            data: {
-              'projectExport': AppIcon.projectExport,
-              'projectImport': AppIcon.projectImport,
-            },
+            data: {'projectExport': AppIcon.projectExport, 'projectImport': AppIcon.projectImport},
           ),
         ],
       ),
@@ -619,20 +580,11 @@ class DrawerManager {
               'recordingNoiseSuppress': AppIcon.recordingNoiseSuppress,
             },
           ),
-          ListTile(
-            leading: Icon(AppIcon.recordingAutoGain),
-            title: Text(_trans.recordingAutoGain),
-          ),
+          ListTile(leading: Icon(AppIcon.recordingAutoGain), title: Text(_trans.recordingAutoGain)),
           Text(_trans.recordingAutoGainInfo),
-          ListTile(
-            leading: Icon(AppIcon.recordingEchoCancel),
-            title: Text(_trans.recordingEchoCancel),
-          ),
+          ListTile(leading: Icon(AppIcon.recordingEchoCancel), title: Text(_trans.recordingEchoCancel)),
           Text(_trans.recordingEchoCancelInfo),
-          ListTile(
-            leading: Icon(AppIcon.recordingNoiseSuppress),
-            title: Text(_trans.recordingNoiseSuppress),
-          ),
+          ListTile(leading: Icon(AppIcon.recordingNoiseSuppress), title: Text(_trans.recordingNoiseSuppress)),
           Text(_trans.recordingNoiseSuppressInfo),
         ],
       ),
@@ -642,15 +594,8 @@ class DrawerManager {
             .values()
             .map(
               (value) => ExpansionTile(
-                leading: Text(
-                  AppGlobalConfig.recordingAudioEncoder.text(
-                    value,
-                    domain: ConfigItemPropertyDomain.icon,
-                  ),
-                ),
-                title: Text(
-                  AppGlobalConfig.recordingAudioEncoder.format(value),
-                ),
+                leading: Text(AppGlobalConfig.recordingAudioEncoder.text(value, domain: ConfigItemPropertyDomain.icon)),
+                title: Text(AppGlobalConfig.recordingAudioEncoder.format(value)),
                 subtitle: Text(
                   AppGlobalConfig.recordingAudioEncoder.translate(
                     value,
@@ -685,10 +630,7 @@ class DrawerManager {
         children: [
           _uiHelper.helpTrackState(TrackState.empty, _trans.stateEmpty),
           _uiHelper.helpTrackState(TrackState.recording, _trans.stateRecording),
-          _uiHelper.helpTrackState(
-            TrackState.processing,
-            _trans.stateProcessing,
-          ),
+          _uiHelper.helpTrackState(TrackState.processing, _trans.stateProcessing),
           _uiHelper.helpTrackState(TrackState.idle, _trans.stateIdle),
           _uiHelper.helpTrackState(TrackState.playing, _trans.statePlaying),
           _uiHelper.helpTrackState(TrackState.paused, _trans.statePaused),
@@ -706,18 +648,9 @@ class DrawerManager {
             ),
             _trans.theKeyboardKey.toLowerCase(),
           ),
-          _uiHelper.statusIconTile(
-            AppIcon.trackAudioSourceRecorded,
-            _trans.theAudioSourceRecorded.toLowerCase(),
-          ),
-          _uiHelper.statusIconTile(
-            AppIcon.trackAudioSourceImported,
-            _trans.theAudioSourceImported.toLowerCase(),
-          ),
-          _uiHelper.statusIconTile(
-            AppIcon.trackPlaybackVolume,
-            _trans.thePlaybackVolume.toLowerCase(),
-          ),
+          _uiHelper.statusIconTile(AppIcon.trackAudioSourceRecorded, _trans.theAudioSourceRecorded.toLowerCase()),
+          _uiHelper.statusIconTile(AppIcon.trackAudioSourceImported, _trans.theAudioSourceImported.toLowerCase()),
+          _uiHelper.statusIconTile(AppIcon.trackPlaybackVolume, _trans.thePlaybackVolume.toLowerCase()),
           _uiHelper.statusIconTile(
             AppIcon.trackPlaybackBalanceLeft,
             _trans.thePlaybackBalanceAt(_trans.balanceLeft).toLowerCase(),
@@ -734,18 +667,9 @@ class DrawerManager {
             AppIcon.trackPlaybackStartAtPosition,
             _trans.thePlaybackStartAtPosition.toLowerCase(),
           ),
-          _uiHelper.statusIconTile(
-            AppIcon.trackPlaybackEndAtPosition,
-            _trans.thePlaybackEndAtPosition.toLowerCase(),
-          ),
-          _uiHelper.statusIconTile(
-            AppIcon.trackSinglePlaybackMode,
-            _trans.singlePlaybackMode.toLowerCase(),
-          ),
-          _uiHelper.statusIconTile(
-            AppIcon.trackRepeatPlaybackMode,
-            _trans.repeatPlaybackMode.toLowerCase(),
-          ),
+          _uiHelper.statusIconTile(AppIcon.trackPlaybackEndAtPosition, _trans.thePlaybackEndAtPosition.toLowerCase()),
+          _uiHelper.statusIconTile(AppIcon.trackSinglePlaybackMode, _trans.singlePlaybackMode.toLowerCase()),
+          _uiHelper.statusIconTile(AppIcon.trackRepeatPlaybackMode, _trans.repeatPlaybackMode.toLowerCase()),
         ],
       ),
     ];
@@ -758,12 +682,7 @@ class DrawerManager {
       ),
     );
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    _uiHelper.aboutDialog(
-      packageInfo,
-      details,
-      applicationIcon: icon,
-      applicationLegalese: _trans.legalNote,
-    );
+    _uiHelper.aboutDialog(packageInfo, details, applicationIcon: icon, applicationLegalese: _trans.legalNote);
   }
 
   List<Widget> get _dangerZone => [
@@ -775,8 +694,7 @@ class DrawerManager {
       _trans.buttonNo,
       _trans.buttonYes,
       () {
-        for (AppRecordingConfigField field
-            in AppConfigFieldsCollection.recordingList) {
+        for (AppRecordingConfigField field in AppConfigFieldsCollection.recordingList) {
           _settings.setConfig(field.key, field.defaultValue);
         }
         return _trans.recordingSettingsResetSuccess;
@@ -790,8 +708,7 @@ class DrawerManager {
       _trans.buttonNo,
       _trans.buttonYes,
       () {
-        for (AppScreenConfigField field
-            in AppConfigFieldsCollection.screenList) {
+        for (AppScreenConfigField field in AppConfigFieldsCollection.screenList) {
           _settings.setConfig(field.key, field.defaultValue);
         }
         return _trans.screenSettingsResetSuccess;

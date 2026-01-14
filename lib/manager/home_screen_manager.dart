@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tune_tangler/manager/project_export_import_manager.dart';
 import 'package:tune_tangler/src/lazy_loading_manager.dart';
 import 'package:tune_tangler/wrapper/app.dart';
 
@@ -14,16 +15,25 @@ class HomeScreenManager {
   late DrawerManager _drawerManager;
   late RowMenuManager _rowMenuManager;
   late TrackManager _trackManager;
+  late ProjectExportImportManager _projectManager;
   final LazyLoadingManager _lazyLoadingManager = LazyLoadingManager();
 
   HomeScreenManager(this._appWrapper) {
+    _projectManager = ProjectExportImportManager(
+      _appWrapper.context,
+      _appWrapper.settings,
+      _appWrapper.trackRepository,
+      _appWrapper.trans,
+      _appWrapper.uiHelper,
+    );
+
     _navigationBarManager = NavigationBarManager(
       _appWrapper.context,
       _appWrapper.trans,
       _appWrapper.uiHelper,
       _appWrapper.trackRepository,
       _appWrapper.scaffoldKey,
-      _appWrapper.settings,
+      _projectManager,
     );
     _drawerManager = DrawerManager(
       _appWrapper.context,
@@ -54,22 +64,13 @@ class HomeScreenManager {
 
   Widget get drawer => _drawerManager.build;
 
-  Widget get body => Focus(
-    focusNode: _appWrapper.focusNode,
-    autofocus: true,
-    onKeyEvent: keyEvent,
-    child: tracksList,
-  );
+  Widget get body => Focus(focusNode: _appWrapper.focusNode, autofocus: true, onKeyEvent: keyEvent, child: tracksList);
 
   Widget get bottomNavigationBar => _navigationBarManager.buildFooter;
 
   Widget get tracksList {
-    final rowsAmount = _appWrapper.settings.getConfig(
-      AppConfigFieldKey.gridRowsAmount,
-    );
-    final colsAmount = _appWrapper.settings.getConfig(
-      AppConfigFieldKey.gridColsAmount,
-    );
+    final rowsAmount = _appWrapper.settings.getConfig(AppConfigFieldKey.gridRowsAmount);
+    final colsAmount = _appWrapper.settings.getConfig(AppConfigFieldKey.gridColsAmount);
 
     return ListView.builder(
       controller: PageController(viewportFraction: 0.85),
@@ -79,10 +80,7 @@ class HomeScreenManager {
         key:
             'row_${rowIndex}_rows${rowsAmount}_cols${colsAmount}_locale_${_appWrapper.settings.getConfig(AppConfigFieldKey.locale).toLanguageTag()}_v${_appWrapper.settings.version}',
         builder: () => Row(
-          children: [
-            _rowMenuManager.buildRowButtons(rowIndex),
-            _trackManager.buildRowTracks(rowIndex, colsAmount),
-          ],
+          children: [_rowMenuManager.buildRowButtons(rowIndex), _trackManager.buildRowTracks(rowIndex, colsAmount)],
         ),
         placeholder: const SizedBox(height: 100),
       ),
