@@ -555,6 +555,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsProfileLoaded => 'Settings profile loaded.';
 
   @override
+  String get helpScreenMessageSettingsProfilesTitle => 'Settings profiles';
+
+  @override
+  String get helpScreenMessageSettingsProfilesContent =>
+      'Settings profiles allow you to save and quickly restore application configuration. You can create multiple profiles with different recording and screen settings, then switch between them.\n\nEach profile contains:\n• Recording settings (\$[recordingInputDevice]input device, \$[recordingAudioEncoder]codec, \$[recordingSampleRate]sample rate, \$[recordingBitRate]bit rate, \$[recordingAudioMode]audio mode, \$[recordingAutoGain]auto-gain, \$[recordingEchoCancel]echo cancel, \$[recordingNoiseSuppress]noise suppress)\n• Screen settings (\$[language]language, \$[screenThemeMode]theme, \$[screenThemeColor]accent color, \$[keepScreenOn]keep screen on)\n\nTo create a profile, use the \$[create]\"Create\" button in the profiles dialog. To load a profile, click on it. To delete a profile, \$[touchLong]long-press it and select the \$[deleteForever]delete option.';
+
+  @override
+  String get projectExportInfo =>
+      'Project export saves all recordings and their parameters to a ZIP file that can be loaded later. Project name is optional and will be added to the file name.';
+
+  @override
+  String get settingsProfilesInfo =>
+      'Save and restore application configuration. Click to load a profile, or long-press to see details.';
+
+  @override
   String get moreSettings => 'More settings...';
 
   @override
@@ -585,7 +600,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get helpScreenMessageTrackStates => 'Track states and actions';
 
   @override
+  String get helpScreenMessageTrackStatesInfo =>
+      'Each track can be in one of several states that determine available actions. Clicking on the track block performs an action depending on the current state.';
+
+  @override
   String get helpScreenMessageTrackIcons => 'Track info icons';
+
+  @override
+  String get helpScreenMessageTrackIconsInfo =>
+      'Icons displayed on the track block inform about its properties.';
 
   @override
   String get helpScreenMessageSettingsInfo =>

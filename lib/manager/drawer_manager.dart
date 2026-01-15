@@ -40,9 +40,8 @@ class DrawerManager {
 
   bool showUserDetails = false;
 
-  Widget get build => StatefulBuilder(
-    builder: (BuildContext context, StateSetter setDrawerState) => Drawer(
-      child: Column(
+  Widget get build => Drawer(
+    child: Column(
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           Align(
@@ -51,20 +50,20 @@ class DrawerManager {
               accountName: Text(
                 _uiHelper.getAppTitle(_trans),
                 style: TextStyle(
-                  fontSize: Theme.of(context).textTheme.headlineMedium?.fontSize,
-                  color: Theme.of(context).colorScheme.inversePrimary,
+                  fontSize: Theme.of(_context).textTheme.headlineMedium?.fontSize,
+                  color: Theme.of(_context).colorScheme.inversePrimary,
                 ),
               ),
               accountEmail: Text(
                 _trans.legalNote,
-                style: TextStyle(color: Theme.of(context).colorScheme.inversePrimary),
+                style: TextStyle(color: Theme.of(_context).colorScheme.inversePrimary),
               ),
               currentAccountPicture: Container(
                 margin: EdgeInsets.only(bottom: 5),
                 padding: EdgeInsets.zero,
                 child: AppIcon.appLogo(
-                  Theme.of(context).colorScheme.inversePrimary,
-                  Theme.of(context).colorScheme.primary,
+                  Theme.of(_context).colorScheme.inversePrimary,
+                  Theme.of(_context).colorScheme.primary,
                 ),
               ),
             ),
@@ -82,7 +81,7 @@ class DrawerManager {
                   backgroundColor: Theme.of(_context).colorScheme.primaryContainer,
                   textColor: Theme.of(_context).colorScheme.primary,
                   iconColor: Theme.of(_context).colorScheme.primary,
-                  children: _recordingSettings(setDrawerState),
+                  children: _recordingSettings(),
                 ),
                 ExpansionTile(
                   leading: Icon(AppIcon.trackSettings),
@@ -92,7 +91,7 @@ class DrawerManager {
                   backgroundColor: Theme.of(_context).colorScheme.primaryContainer,
                   textColor: Theme.of(_context).colorScheme.primary,
                   iconColor: Theme.of(_context).colorScheme.primary,
-                  children: _tracksSettings(setDrawerState),
+                  children: _tracksSettings(),
                 ),
                 ExpansionTile(
                   leading: Icon(AppIcon.screenSettings),
@@ -102,7 +101,7 @@ class DrawerManager {
                   backgroundColor: Theme.of(_context).colorScheme.primaryContainer,
                   textColor: Theme.of(_context).colorScheme.primary,
                   iconColor: Theme.of(_context).colorScheme.primary,
-                  children: _screenSettings(setDrawerState),
+                  children: _screenSettings(),
                 ),
                 ExpansionTile(
                   leading: Icon(AppIcon.permissions),
@@ -112,7 +111,7 @@ class DrawerManager {
                   backgroundColor: Theme.of(_context).colorScheme.secondaryContainer,
                   textColor: Theme.of(_context).colorScheme.secondary,
                   iconColor: Theme.of(_context).colorScheme.secondary,
-                  children: _permissionsList(setDrawerState),
+                  children: _permissionsList(),
                 ),
                 ExpansionTile(
                   leading: Icon(AppIcon.dangerZone),
@@ -133,16 +132,21 @@ class DrawerManager {
             child: ListTile(
               leading: Icon(AppIcon.settingsProfiles),
               title: Text(_trans.settingsProfiles),
+              subtitle: Text(
+                _settings.settingsProfilesList.isEmpty
+                    ? _trans.settingsProfilesEmpty
+                    : '${_settings.settingsProfilesList.length} ${_trans.settingsProfile.toLowerCase()}',
+                style: TextStyle(fontSize: Theme.of(_context).textTheme.labelSmall!.fontSize),
+              ),
               onTap: _settingsProfilesListsDialog,
               trailing: Icon(AppIcon.modalMenu),
             ),
           ),
         ],
       ),
-    ),
-  );
+    );
 
-  List<Widget> _recordingSettings(StateSetter setDrawerState) => [
+  List<Widget> _recordingSettings() => [
     ListTile(
       leading: Icon(AppIcon.recordingInputDevice),
       title: Text(_trans.recordingInputDevice),
@@ -150,6 +154,7 @@ class DrawerManager {
         _settings.getConfig(AppConfigFieldKey.recordingInputDevice) != null
             ? _settings.getConfig(AppConfigFieldKey.recordingInputDevice).label
             : _trans.defaultDevice,
+        style: TextStyle(fontSize: Theme.of(_context).textTheme.labelSmall!.fontSize),
       ),
       onTap: _recordingSettingsDialog,
       trailing: Icon(AppIcon.modalMenu),
@@ -182,6 +187,7 @@ class DrawerManager {
       AppGlobalConfig.recordingSampleRate.values().toList(),
       helpMessage: _trans.recordingSampleRateInfo,
       configCollection: AppGlobalConfig.recordingSampleRate,
+      trans: _trans,
       successAction: (dynamic value, String formattedValue) {
         _settings.setConfig(AppConfigFieldKey.recordingSampleRate, value);
         return _trans.recordingAudioEncoderSuccess(formattedValue);
@@ -194,6 +200,7 @@ class DrawerManager {
       AppGlobalConfig.recordingBitRate.values().toList(),
       helpMessage: _trans.recordingBitRateInfo,
       configCollection: AppGlobalConfig.recordingBitRate,
+      trans: _trans,
       successAction: (dynamic value, String formattedValue) {
         _settings.setConfig(AppConfigFieldKey.recordingBitRate, value);
         return _trans.recordingAudioEncoderSuccess(formattedValue);
@@ -202,6 +209,10 @@ class DrawerManager {
     _uiHelper.listTileSwitch(
       AppIcon.recordingAudioMode,
       _trans.recordingAudioMode,
+        subtitleText: AppGlobalConfig.recordingAudioMode.translate(
+        _settings.getConfig(AppConfigFieldKey.recordingAudioModeStereo),
+        trans: _trans,
+      ),
       disabledIcon: AppIcon.recordingAudioModeMono,
       enabledIcon: AppIcon.recordingAudioModeStereo,
       switchValue: _settings.getConfig(AppConfigFieldKey.recordingAudioModeStereo),
@@ -215,6 +226,7 @@ class DrawerManager {
     _uiHelper.listTileSwitch(
       AppIcon.recordingAutoGain,
       _trans.recordingAutoGain,
+      subtitleText: _settings.getConfig(AppConfigFieldKey.recordingAutoGain) ? _trans.yes : _trans.no,
       disabledIcon: AppIcon.no,
       enabledIcon: AppIcon.yes,
       switchValue: _settings.getConfig(AppConfigFieldKey.recordingAutoGain),
@@ -226,6 +238,7 @@ class DrawerManager {
     _uiHelper.listTileSwitch(
       AppIcon.recordingEchoCancel,
       _trans.recordingEchoCancel,
+      subtitleText: _settings.getConfig(AppConfigFieldKey.recordingEchoCancel) ? _trans.yes : _trans.no,
       disabledIcon: AppIcon.no,
       enabledIcon: AppIcon.yes,
       switchValue: _settings.getConfig(AppConfigFieldKey.recordingEchoCancel),
@@ -237,6 +250,7 @@ class DrawerManager {
     _uiHelper.listTileSwitch(
       AppIcon.recordingNoiseSuppress,
       _trans.recordingNoiseSuppress,
+      subtitleText: _settings.getConfig(AppConfigFieldKey.recordingNoiseSuppress) ? _trans.yes : _trans.no,
       disabledIcon: AppIcon.no,
       enabledIcon: AppIcon.yes,
       switchValue: _settings.getConfig(AppConfigFieldKey.recordingNoiseSuppress),
@@ -247,7 +261,7 @@ class DrawerManager {
     ),
   ];
 
-  List<Widget> _tracksSettings(StateSetter setDrawerState) => [
+  List<Widget> _tracksSettings() => [
     _uiHelper.listTileSlider(
       AppIcon.gridRowsAmount,
       _trans.gridRowsAmount,
@@ -296,6 +310,7 @@ class DrawerManager {
         _trackRepository.resetTracksName(_trackRepository.allTracks());
         return _trans.allTracksTitleResetSuccess;
       },
+      subtitleText: '${_trackRepository.allTracks().length} ${_trans.tracks.toLowerCase()}',
     ),
     _uiHelper.listTileReset(
       AppIcon.trackKeyboardKey,
@@ -308,6 +323,7 @@ class DrawerManager {
         _trackRepository.resetTracksKeyboardKey(_trackRepository.allTracks());
         return _trans.allTracksShortcutKeyResetSuccess;
       },
+      subtitleText: '${_trackRepository.allTracks().length} ${_trans.tracks.toLowerCase()}',
     ),
   ];
 
@@ -351,7 +367,7 @@ class DrawerManager {
     );
   }
 
-  List<Widget> _screenSettings(StateSetter setDrawerState) => [
+  List<Widget> _screenSettings() => [
     _uiHelper.listTileListDialog(
       AppIcon.language,
       _trans.languageVersion,
@@ -409,6 +425,7 @@ class DrawerManager {
     _uiHelper.listTileSwitch(
       AppIcon.keepScreenOn,
       _trans.keepScreenOn,
+      subtitleText: _settings.getConfig(AppConfigFieldKey.wakelockEnabled) ? _trans.enabled : _trans.disabled,
       disabledIcon: AppIcon.keepScreenOnDisabled,
       enabledIcon: AppIcon.keepScreenOnEnabled,
       switchValue: _settings.getConfig(AppConfigFieldKey.wakelockEnabled),
@@ -419,13 +436,16 @@ class DrawerManager {
     ),
   ];
 
-  List<Widget> _permissionsList(StateSetter setDrawerState) => [
+  List<Widget> _permissionsList() => [
     ...AppGlobalConfig.permissions.values<Permission>().map((Permission permission) {
       final status = _permissionProvider.get(permission) ?? PermissionStatus.denied;
       return ListTile(
         leading: Icon(AppGlobalConfig.permissions.icon(permission)),
         title: Text(AppGlobalConfig.permissions.translate(permission, trans: _trans)),
-        subtitle: Text(AppGlobalConfig.permissionsStatus.translate(status, trans: _trans)),
+        subtitle: Text(
+          AppGlobalConfig.permissionsStatus.translate(status, trans: _trans),
+          style: TextStyle(fontSize: Theme.of(_context).textTheme.labelSmall!.fontSize),
+        ),
         selected: status == PermissionStatus.granted,
         trailing: switch (status) {
           PermissionStatus.granted => Icon(AppIcon.yes, color: Theme.of(_context).colorScheme.primary),
@@ -433,14 +453,12 @@ class DrawerManager {
             onPressed: () async {
               final status = await permission.request();
               _permissionProvider.set(permission, status);
-              setDrawerState(() {});
             },
             child: Text(_trans.grantPermission),
           ),
           _ => ElevatedButton(
             onPressed: () async {
               await openAppSettings();
-              setDrawerState(() {});
             },
             child: Text(_trans.grantPermission),
           ),
@@ -450,7 +468,13 @@ class DrawerManager {
   ];
 
   Future<void> _settingsProfilesListsDialog() async {
-    List<Widget> options = [];
+    List<Widget> options = [
+      Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Text(_trans.settingsProfilesInfo, style: Theme.of(_context).textTheme.bodyMedium),
+      ),
+      const Divider(),
+    ];
     for (int index = 0; index < _settings.settingsProfilesList.length; index++) {
       var item = _settings.settingsProfilesList[index];
       options.add(
@@ -463,7 +487,8 @@ class DrawerManager {
         ),
       );
     }
-    if (options.isEmpty) {
+    if (options.length == 2) {
+      // Only info and divider, no profiles
       options.add(
         Column(
           mainAxisSize: MainAxisSize.min,
@@ -557,11 +582,91 @@ class DrawerManager {
         ],
       ),
       ExpansionTile(
+        title: Text(_trans.helpScreenMessageTrackStates),
+        children: [
+          _uiHelper.buildRichText(
+            _trans.helpScreenMessageTrackStatesInfo, data: {}
+          ),
+          _uiHelper.helpTrackState(TrackState.empty, _trans.stateEmpty),
+          _uiHelper.helpTrackState(TrackState.recording, _trans.stateRecording),
+          _uiHelper.helpTrackState(TrackState.processing, _trans.stateProcessing),
+          _uiHelper.helpTrackState(TrackState.idle, _trans.stateIdle),
+          _uiHelper.helpTrackState(TrackState.playing, _trans.statePlaying),
+          _uiHelper.helpTrackState(TrackState.paused, _trans.statePaused),
+        ],
+      ),
+      ExpansionTile(
+        title: Text(_trans.helpScreenMessageTrackIcons),
+        children: [
+          _uiHelper.buildRichText(
+            _trans.helpScreenMessageTrackIconsInfo,
+            data: {},
+          ),
+          _uiHelper.statusWidgetTile(
+            AppIcon.trackKeyboardKeyBox(
+              'x',
+              size: Theme.of(_context).textTheme.titleMedium!.fontSize!,
+              backgroundColor: Theme.of(_context).colorScheme.primaryContainer,
+              foregroundColor: Theme.of(_context).colorScheme.primary,
+            ),
+            _trans.theKeyboardKey.toLowerCase(),
+          ),
+          _uiHelper.statusIconTile(AppIcon.trackAudioSourceRecorded, _trans.theAudioSourceRecorded.toLowerCase()),
+          _uiHelper.statusIconTile(AppIcon.trackAudioSourceImported, _trans.theAudioSourceImported.toLowerCase()),
+          _uiHelper.statusIconTile(AppIcon.trackPlaybackVolume, _trans.thePlaybackVolume.toLowerCase()),
+          _uiHelper.statusIconTile(
+            AppIcon.trackPlaybackBalanceLeft,
+            _trans.thePlaybackBalanceAt(_trans.balanceLeft).toLowerCase(),
+          ),
+          _uiHelper.statusIconTile(
+            AppIcon.trackPlaybackBalanceCenter,
+            _trans.thePlaybackBalanceAt(_trans.balanceCenter).toLowerCase(),
+          ),
+          _uiHelper.statusIconTile(
+            AppIcon.trackPlaybackBalanceRight,
+            _trans.thePlaybackBalanceAt(_trans.balanceRight).toLowerCase(),
+          ),
+          _uiHelper.statusIconTile(
+            AppIcon.trackPlaybackStartAtPosition,
+            _trans.thePlaybackStartAtPosition.toLowerCase(),
+          ),
+          _uiHelper.statusIconTile(AppIcon.trackPlaybackEndAtPosition, _trans.thePlaybackEndAtPosition.toLowerCase()),
+          _uiHelper.statusIconTile(AppIcon.trackSinglePlaybackMode, _trans.singlePlaybackMode.toLowerCase()),
+          _uiHelper.statusIconTile(AppIcon.trackRepeatPlaybackMode, _trans.repeatPlaybackMode.toLowerCase()),
+        ],
+      ),
+      ExpansionTile(
         title: Text(_trans.helpScreenMessageProjectExportImportTitle),
         children: [
           _uiHelper.buildRichText(
             _trans.helpScreenMessageProjectExportImportContent,
             data: {'projectExport': AppIcon.projectExport, 'projectImport': AppIcon.projectImport},
+          ),
+        ],
+      ),
+      ExpansionTile(
+        title: Text(_trans.helpScreenMessageSettingsProfilesTitle),
+        children: [
+          _uiHelper.buildRichText(
+            _trans.helpScreenMessageSettingsProfilesContent,
+            data: {
+              'settingsProfiles': AppIcon.settingsProfiles,
+              'recordingAudioEncoder': AppIcon.recordingAudioEncoder,
+              'recordingInputDevice': AppIcon.recordingInputDevice,
+              'recordingSampleRate': AppIcon.recordingSampleRate,
+              'recordingBitRate': AppIcon.recordingBitRate,
+              'recordingAudioMode': AppIcon.recordingAudioMode,
+              'recordingAutoGain': AppIcon.recordingAutoGain,
+              'recordingEchoCancel': AppIcon.recordingEchoCancel,
+              'recordingNoiseSuppress': AppIcon.recordingNoiseSuppress,
+              'language': AppIcon.language,
+              'screenThemeMode': AppIcon.screenThemeMode,
+              'screenThemeColor': AppIcon.screenThemeColor,
+              'keepScreenOn': AppIcon.keepScreenOn,
+              'touchLong': AppIcon.touchLong,
+              'create': AppIcon.create,
+              'deleteForever': AppIcon.deleteForever,
+            },
           ),
         ],
       ),
@@ -624,53 +729,6 @@ class DrawerManager {
               ),
             )
             .toList(),
-      ),
-      ExpansionTile(
-        title: Text(_trans.helpScreenMessageTrackStates),
-        children: [
-          _uiHelper.helpTrackState(TrackState.empty, _trans.stateEmpty),
-          _uiHelper.helpTrackState(TrackState.recording, _trans.stateRecording),
-          _uiHelper.helpTrackState(TrackState.processing, _trans.stateProcessing),
-          _uiHelper.helpTrackState(TrackState.idle, _trans.stateIdle),
-          _uiHelper.helpTrackState(TrackState.playing, _trans.statePlaying),
-          _uiHelper.helpTrackState(TrackState.paused, _trans.statePaused),
-        ],
-      ),
-      ExpansionTile(
-        title: Text(_trans.helpScreenMessageTrackIcons),
-        children: [
-          _uiHelper.statusWidgetTile(
-            AppIcon.trackKeyboardKeyBox(
-              'x',
-              size: Theme.of(_context).textTheme.titleMedium!.fontSize!,
-              backgroundColor: Theme.of(_context).colorScheme.primaryContainer,
-              foregroundColor: Theme.of(_context).colorScheme.primary,
-            ),
-            _trans.theKeyboardKey.toLowerCase(),
-          ),
-          _uiHelper.statusIconTile(AppIcon.trackAudioSourceRecorded, _trans.theAudioSourceRecorded.toLowerCase()),
-          _uiHelper.statusIconTile(AppIcon.trackAudioSourceImported, _trans.theAudioSourceImported.toLowerCase()),
-          _uiHelper.statusIconTile(AppIcon.trackPlaybackVolume, _trans.thePlaybackVolume.toLowerCase()),
-          _uiHelper.statusIconTile(
-            AppIcon.trackPlaybackBalanceLeft,
-            _trans.thePlaybackBalanceAt(_trans.balanceLeft).toLowerCase(),
-          ),
-          _uiHelper.statusIconTile(
-            AppIcon.trackPlaybackBalanceCenter,
-            _trans.thePlaybackBalanceAt(_trans.balanceCenter).toLowerCase(),
-          ),
-          _uiHelper.statusIconTile(
-            AppIcon.trackPlaybackBalanceRight,
-            _trans.thePlaybackBalanceAt(_trans.balanceRight).toLowerCase(),
-          ),
-          _uiHelper.statusIconTile(
-            AppIcon.trackPlaybackStartAtPosition,
-            _trans.thePlaybackStartAtPosition.toLowerCase(),
-          ),
-          _uiHelper.statusIconTile(AppIcon.trackPlaybackEndAtPosition, _trans.thePlaybackEndAtPosition.toLowerCase()),
-          _uiHelper.statusIconTile(AppIcon.trackSinglePlaybackMode, _trans.singlePlaybackMode.toLowerCase()),
-          _uiHelper.statusIconTile(AppIcon.trackRepeatPlaybackMode, _trans.repeatPlaybackMode.toLowerCase()),
-        ],
       ),
     ];
     Widget icon = SizedBox(

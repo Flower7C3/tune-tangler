@@ -559,6 +559,21 @@ class AppLocalizationsPl extends AppLocalizations {
   String get settingsProfileLoaded => 'Profil ustawień został załadowany.';
 
   @override
+  String get helpScreenMessageSettingsProfilesTitle => 'Profile ustawień';
+
+  @override
+  String get helpScreenMessageSettingsProfilesContent =>
+      '\$[settingsProfiles]Profile ustawień pozwalają na zapisanie i szybkie przywrócenie konfiguracji aplikacji. Możesz utworzyć wiele profili z różnymi ustawieniami nagrywania i ekranu, a następnie przełączać się między nimi.\n\nKażdy profil zawiera:\n• Ustawienia nagrywania (\$[recordingInputDevice]urządzenie wejściowe, \$[recordingAudioEncoder]kodek audio, \$[recordingSampleRate]częstotliwość próbkowania, \$[recordingBitRate]szybkość transmisji, \$[recordingAudioMode]tryb audio, \$[recordingAutoGain]automatyczne wzmocnienie, \$[recordingEchoCancel]anulowania echa i \$[recordingNoiseSuppress]tłumienie szumów)\n• Ustawienia ekranu (\$[language]język, \$[screenThemeMode]motyw, \$[screenThemeColor]kolor akcentu, \$[keepScreenOn]utrzymanie włączonego ekranu)\n\nAby utworzyć profil, użyj przycisku \$[create]\"Utwórz\" w dialogu profili. Aby wczytać profil, kliknij na niego. Aby usunąć profil, \$[touchLong]przytrzymaj go i wybierz opcję \$[deleteForever]usunięcia.';
+
+  @override
+  String get projectExportInfo =>
+      'Eksport projektu zapisuje wszystkie nagrania i ich parametry do pliku ZIP, który można później wczytać. Nazwa projektu jest opcjonalna i zostanie dodana do nazwy pliku.';
+
+  @override
+  String get settingsProfilesInfo =>
+      'Zapisuj i przywracaj konfigurację aplikacji. Kliknij, aby wczytać profil, lub przytrzymaj, aby zobaczyć szczegóły.';
+
+  @override
   String get moreSettings => 'Więcej ustawień...';
 
   @override
@@ -589,7 +604,15 @@ class AppLocalizationsPl extends AppLocalizations {
   String get helpScreenMessageTrackStates => 'Statusy i akcje ścieżki';
 
   @override
+  String get helpScreenMessageTrackStatesInfo =>
+      'Każda ścieżka może znajdować się w jednym z kilku stanów, które określają dostępne akcje. Kliknięcie na blok ścieżki wykonuje akcję zależną od aktualnego stanu.';
+
+  @override
   String get helpScreenMessageTrackIcons => 'Ikony informacji o ścieżce';
+
+  @override
+  String get helpScreenMessageTrackIconsInfo =>
+      'Ikony wyświetlane na bloku ścieżki informują o jej właściwościach.';
 
   @override
   String get helpScreenMessageSettingsInfo =>

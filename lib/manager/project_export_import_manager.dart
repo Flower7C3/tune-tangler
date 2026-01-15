@@ -48,7 +48,15 @@ class ProjectExportImportManager {
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16.0),
+              child: Text(
+                _trans.projectExportInfo,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
             TextField(
               controller: nameController,
               decoration: InputDecoration(
@@ -440,11 +448,6 @@ class ProjectExportImportManager {
     final projectName = preview['projectName'] as String?;
     final exportDate = preview['exportDateFormatted'] as String?;
 
-    final iconSize =
-        Theme.of(_context).textTheme.bodyLarge!.fontSize! *
-        UIHelper.iconSizeMultiplier;
-    final fontSize = Theme.of(_context).textTheme.bodyLarge!.fontSize!;
-
     return showDialog<bool>(
       context: _context,
       builder: (context) => AlertDialog(
@@ -458,66 +461,36 @@ class ProjectExportImportManager {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (projectName != null) ...[
-                _uiHelper.statusIconTile(
+                _uiHelper.valueIconTile(
                   AppIcon.projectName,
                   _trans.projectName,
-                  iconSize: iconSize,
-                  fontSize: fontSize,
-                  subtitleWidget: Text(
                     projectName,
-                    style: TextStyle(fontSize: fontSize),
-                  ),
-                  contentPadding: EdgeInsets.zero,
                 ),
               ],
               if (exportDate != null) ...[
-                _uiHelper.statusIconTile(
+                _uiHelper.valueIconTile(
                   AppIcon.projectExportDate,
                   _trans.projectExportDate,
-                  iconSize: iconSize,
-                  fontSize: fontSize,
-                  subtitleWidget: Text(
                     exportDate,
-                    style: TextStyle(fontSize: fontSize),
-                  ),
-                  contentPadding: EdgeInsets.zero,
                 ),
               ],
               if (gridSize != null) ...[
-                _uiHelper.statusIconTile(
+                _uiHelper.valueIconTile(
                   AppIcon.grid,
                   _trans.projectGridSize,
-                  iconSize: iconSize,
-                  fontSize: fontSize,
-                  subtitleWidget: Text(
                     '${gridSize['rows']} x ${gridSize['cols']} (${(gridSize['rows'] as int) * (gridSize['cols'] as int)} ${_trans.projectTotalTracks.toLowerCase()})',
-                    style: TextStyle(fontSize: fontSize),
-                  ),
-                  contentPadding: EdgeInsets.zero,
                 ),
               ],
               if (statistics != null) ...[
-                _uiHelper.statusIconTile(
+                _uiHelper.valueIconTile(
                   AppIcon.trackRecordingStart,
                   _trans.projectTracksWithRecordings,
-                  iconSize: iconSize,
-                  fontSize: fontSize,
-                  subtitleWidget: Text(
                     '${statistics['tracksWithRecordings']}',
-                    style: TextStyle(fontSize: fontSize),
-                  ),
-                  contentPadding: EdgeInsets.zero,
                 ),
-                _uiHelper.statusIconTile(
+                _uiHelper.valueIconTile(
                   AppIcon.projectRecordingsSize,
                   _trans.projectTotalRecordingsSize,
-                  iconSize: iconSize,
-                  fontSize: fontSize,
-                  subtitleWidget: Text(
                     '${statistics['totalRecordingsSizeFormatted']}',
-                    style: TextStyle(fontSize: fontSize),
-                  ),
-                  contentPadding: EdgeInsets.zero,
                 ),
               ],
               SizedBox(height: 16),
@@ -526,7 +499,6 @@ class ProjectExportImportManager {
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.error,
                   fontWeight: FontWeight.bold,
-                  fontSize: fontSize,
                 ),
               ),
             ],

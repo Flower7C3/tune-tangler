@@ -65,13 +65,24 @@ final class ConfigCollection {
     dynamic value, {
     required AppLocalizations trans,
     ConfigItemPropertyDomain domain = ConfigItemPropertyDomain.defaultProperty,
-  }) => _getByValue(value).firstOrNull == null
-      ? ''
-      : _getByValue(value).first.properties
-            .whereType<ConfigItemTranslatableProperty>()
-            .firstWhere((property) => (property.domain == domain))
-            .callback
-            .call(trans);
+  }) {
+    final item = _getByValue(value).firstOrNull;
+    if (item == null) {
+      return '';
+    }
+    try {
+      final property = item.properties
+          .whereType<ConfigItemTranslatableProperty>()
+          .where((property) => property.domain == domain)
+          .firstOrNull;
+      if (property == null) {
+        return '';
+      }
+      return property.callback.call(trans);
+    } catch (e) {
+      return '';
+    }
+  }
 
   final dynamic Function(dynamic value) format;
   final dynamic Function(dynamic value) decode;

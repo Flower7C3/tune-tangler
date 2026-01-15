@@ -911,6 +911,30 @@ abstract class AppLocalizations {
   /// **'Settings profile loaded.'**
   String get settingsProfileLoaded;
 
+  /// No description provided for @helpScreenMessageSettingsProfilesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings profiles'**
+  String get helpScreenMessageSettingsProfilesTitle;
+
+  /// No description provided for @helpScreenMessageSettingsProfilesContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings profiles allow you to save and quickly restore application configuration. You can create multiple profiles with different recording and screen settings, then switch between them.\n\nEach profile contains:\n• Recording settings (\$[recordingInputDevice]input device, \$[recordingAudioEncoder]codec, \$[recordingSampleRate]sample rate, \$[recordingBitRate]bit rate, \$[recordingAudioMode]audio mode, \$[recordingAutoGain]auto-gain, \$[recordingEchoCancel]echo cancel, \$[recordingNoiseSuppress]noise suppress)\n• Screen settings (\$[language]language, \$[screenThemeMode]theme, \$[screenThemeColor]accent color, \$[keepScreenOn]keep screen on)\n\nTo create a profile, use the \$[create]\"Create\" button in the profiles dialog. To load a profile, click on it. To delete a profile, \$[touchLong]long-press it and select the \$[deleteForever]delete option.'**
+  String get helpScreenMessageSettingsProfilesContent;
+
+  /// No description provided for @projectExportInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Project export saves all recordings and their parameters to a ZIP file that can be loaded later. Project name is optional and will be added to the file name.'**
+  String get projectExportInfo;
+
+  /// No description provided for @settingsProfilesInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Save and restore application configuration. Click to load a profile, or long-press to see details.'**
+  String get settingsProfilesInfo;
+
   /// No description provided for @moreSettings.
   ///
   /// In en, this message translates to:
@@ -965,11 +989,23 @@ abstract class AppLocalizations {
   /// **'Track states and actions'**
   String get helpScreenMessageTrackStates;
 
+  /// No description provided for @helpScreenMessageTrackStatesInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Each track can be in one of several states that determine available actions. Clicking on the track block performs an action depending on the current state.'**
+  String get helpScreenMessageTrackStatesInfo;
+
   /// No description provided for @helpScreenMessageTrackIcons.
   ///
   /// In en, this message translates to:
   /// **'Track info icons'**
   String get helpScreenMessageTrackIcons;
+
+  /// No description provided for @helpScreenMessageTrackIconsInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Icons displayed on the track block inform about its properties.'**
+  String get helpScreenMessageTrackIconsInfo;
 
   /// No description provided for @helpScreenMessageSettingsInfo.
   ///
