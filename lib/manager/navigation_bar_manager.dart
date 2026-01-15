@@ -70,6 +70,9 @@ class NavigationBarManager {
   );
 
   List<PopupMenuEntry<String>> get _trackSettingsMenu => [
+    _uiHelper.topTrackMenuItem(AllTracksMenuItem.projectExport, AppIcon.projectExport, _trans.projectExport),
+    _uiHelper.topTrackMenuItem(AllTracksMenuItem.projectImport, AppIcon.projectImport, _trans.projectImport),
+    const PopupMenuDivider(),
     _uiHelper.topTrackMenuItem(
       AllTracksMenuItem.playbackModeSet,
       AppIcon.trackPlaybackMode,
@@ -101,9 +104,6 @@ class NavigationBarManager {
       AppIcon.trackPlaybackEndAtPosition,
       _trans.allTracksPlaybackEndAtPositionReset,
     ),
-    const PopupMenuDivider(),
-    _uiHelper.topTrackMenuItem(AllTracksMenuItem.projectExport, AppIcon.projectExport, _trans.projectExport),
-    _uiHelper.topTrackMenuItem(AllTracksMenuItem.projectImport, AppIcon.projectImport, _trans.projectImport),
     const PopupMenuDivider(),
     _uiHelper.topTrackMenuItem(AllTracksMenuItem.moreSettings, AppIcon.moreSettings, _trans.moreSettings),
   ];
