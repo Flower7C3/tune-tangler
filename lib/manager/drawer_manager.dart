@@ -44,9 +44,7 @@ class DrawerManager {
 
   Widget get build => Drawer(
     key: _drawerKey,
-    child: RepaintBoundary(
-      child: _DrawerContent(drawerManager: this),
-    ),
+    child: RepaintBoundary(child: _DrawerContent(drawerManager: this)),
   );
 
   Widget _buildDrawerContent() => Column(
@@ -318,7 +316,6 @@ class DrawerManager {
         _trackRepository.resetTracksName(_trackRepository.allTracks());
         return _trans.allTracksTitleResetSuccess;
       },
-      subtitleText: '${_trackRepository.allTracks().length} ${_trans.tracks.toLowerCase()}',
     ),
     _uiHelper.listTileReset(
       AppIcon.trackKeyboardKey,
@@ -331,7 +328,6 @@ class DrawerManager {
         _trackRepository.resetTracksKeyboardKey(_trackRepository.allTracks());
         return _trans.allTracksShortcutKeyResetSuccess;
       },
-      subtitleText: '${_trackRepository.allTracks().length} ${_trans.tracks.toLowerCase()}',
     ),
   ];
 
@@ -356,7 +352,7 @@ class DrawerManager {
         final match = RegExp(r'^(.+?)\s*\((.+?)\)$').firstMatch(label);
         final deviceTitle = match?.group(1)?.trim() ?? label;
         final deviceDetails = match?.group(2)?.trim();
-        
+
         options.add(
           ListTile(
             title: Text(deviceTitle),
@@ -387,7 +383,8 @@ class DrawerManager {
     _uiHelper.listTileListDialog(
       AppIcon.language,
       _trans.languageVersion,
-      listSubtitle: "${AppGlobalConfig.languages.format(_settings.getConfig(AppConfigFieldKey.locale))} (${_settings.getConfig(AppConfigFieldKey.locale).toLanguageTag()})",
+      listSubtitle:
+          "${AppGlobalConfig.languages.format(_settings.getConfig(AppConfigFieldKey.locale))} (${_settings.getConfig(AppConfigFieldKey.locale).toLanguageTag()})",
       dialogTitle: _trans.changeLanguage,
       currentValue: _settings.getConfig(AppConfigFieldKey.locale).toLanguageTag(),
       options: AppGlobalConfig.languages
