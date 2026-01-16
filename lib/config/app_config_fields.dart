@@ -30,6 +30,9 @@ final class AppScreenConfigField extends AppConfigField {
   AppScreenConfigField(super.key, super.defaultValue);
 }
 
+final class AppProjectConfigField extends AppConfigField {
+  AppProjectConfigField(super.key, super.defaultValue);
+}
 final class AppRecordingConfigField extends AppConfigField {
   AppRecordingConfigField(super.key, super.defaultValue);
 }
@@ -46,11 +49,11 @@ final class AppConfigFieldsCollection {
       AppGlobalConfig.userInterfaceColor.defaultValue,
     ),
     AppScreenConfigField(AppConfigFieldKey.wakelockEnabled, false),
-    AppScreenConfigField(
+    AppProjectConfigField(
       AppConfigFieldKey.gridRowsAmount,
       AppGlobalConfig.gridRows.defaultValue.toInt(),
     ),
-    AppScreenConfigField(
+    AppProjectConfigField(
       AppConfigFieldKey.gridColsAmount,
       AppGlobalConfig.gridCols.defaultValue.toInt(),
     ),
@@ -78,6 +81,9 @@ final class AppConfigFieldsCollection {
 
   static List<AppRecordingConfigField> get recordingList =>
       _fields.whereType<AppRecordingConfigField>().toList();
+
+  static List<AppProjectConfigField> get projectList =>
+      _fields.whereType<AppProjectConfigField>().toList();
 
   static AppConfigField get(AppConfigFieldKey key) =>
       _fields.firstWhere((item) => item.key == key);

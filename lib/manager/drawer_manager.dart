@@ -39,111 +39,115 @@ class DrawerManager {
   }
 
   bool showUserDetails = false;
+  bool _hasChanges = false;
+  static const Key _drawerKey = Key('drawer_key');
 
   Widget get build => Drawer(
-    child: Column(
-      mainAxisSize: MainAxisSize.max,
-      children: <Widget>[
-        Align(
-          alignment: Alignment.topCenter,
-          child: UserAccountsDrawerHeader(
-            accountName: Text(
-              _uiHelper.getAppTitle(_trans),
-              style: TextStyle(
-                fontSize: Theme.of(_context).textTheme.headlineMedium?.fontSize,
-                color: Theme.of(_context).colorScheme.inversePrimary,
-              ),
-            ),
-            accountEmail: Text(
-              _trans.legalNote,
-              style: TextStyle(color: Theme.of(_context).colorScheme.inversePrimary),
-            ),
-            currentAccountPicture: Container(
-              margin: EdgeInsets.only(bottom: 5),
-              padding: EdgeInsets.zero,
-              child: AppIcon.appLogo(
-                Theme.of(_context).colorScheme.inversePrimary,
-                Theme.of(_context).colorScheme.primary,
-              ),
-            ),
-          ),
-        ),
-        Expanded(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              ExpansionTile(
-                leading: Icon(AppIcon.recordingSettings),
-                title: Text(_trans.recording),
-                // initiallyExpanded: true,
-                maintainState: true,
-                childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
-                backgroundColor: Theme.of(_context).colorScheme.primaryContainer,
-                textColor: Theme.of(_context).colorScheme.primary,
-                iconColor: Theme.of(_context).colorScheme.primary,
-                children: _recordingSettings(),
-              ),
-              ExpansionTile(
-                leading: Icon(AppIcon.trackSettings),
-                title: Text(_trans.tracks),
-                maintainState: true,
-                childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
-                backgroundColor: Theme.of(_context).colorScheme.primaryContainer,
-                textColor: Theme.of(_context).colorScheme.primary,
-                iconColor: Theme.of(_context).colorScheme.primary,
-                children: _tracksSettings(),
-              ),
-              ExpansionTile(
-                leading: Icon(AppIcon.screenSettings),
-                title: Text(_trans.screen),
-                maintainState: true,
-                childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
-                backgroundColor: Theme.of(_context).colorScheme.primaryContainer,
-                textColor: Theme.of(_context).colorScheme.primary,
-                iconColor: Theme.of(_context).colorScheme.primary,
-                children: _screenSettings(),
-              ),
-              ExpansionTile(
-                leading: Icon(AppIcon.permissions),
-                title: Text(_trans.permissions),
-                maintainState: true,
-                childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
-                backgroundColor: Theme.of(_context).colorScheme.secondaryContainer,
-                textColor: Theme.of(_context).colorScheme.secondary,
-                iconColor: Theme.of(_context).colorScheme.secondary,
-                children: _permissionsList(),
-              ),
-              ExpansionTile(
-                leading: Icon(AppIcon.dangerZone),
-                title: Text(_trans.dangerZone),
-                maintainState: true,
-                childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
-                backgroundColor: Theme.of(_context).colorScheme.errorContainer,
-                textColor: Theme.of(_context).colorScheme.error,
-                iconColor: Theme.of(_context).colorScheme.error,
-                children: _dangerZone,
-              ),
-              ListTile(leading: Icon(AppIcon.help), title: Text(_trans.help), onTap: _helpDialog),
-            ],
-          ),
-        ),
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: ListTile(
-            leading: Icon(AppIcon.settingsProfiles),
-            title: Text(_trans.settingsProfiles),
-            subtitle: Text(
-              _settings.settingsProfilesList.isEmpty
-                  ? _trans.settingsProfilesEmpty
-                  : '${_settings.settingsProfilesList.length} ${_trans.settingsProfile.toLowerCase()}',
-              style: TextStyle(fontSize: Theme.of(_context).textTheme.labelSmall!.fontSize),
-            ),
-            onTap: _settingsProfilesListsDialog,
-            trailing: Icon(AppIcon.modalMenu),
-          ),
-        ),
-      ],
+    key: _drawerKey,
+    child: RepaintBoundary(
+      child: _DrawerContent(drawerManager: this),
     ),
+  );
+
+  Widget _buildDrawerContent() => Column(
+    mainAxisSize: MainAxisSize.max,
+    children: <Widget>[
+      Align(
+        alignment: Alignment.topCenter,
+        child: UserAccountsDrawerHeader(
+          accountName: Text(
+            _uiHelper.getAppTitle(_trans),
+            style: TextStyle(
+              fontSize: Theme.of(_context).textTheme.headlineMedium?.fontSize,
+              color: Theme.of(_context).colorScheme.inversePrimary,
+            ),
+          ),
+          accountEmail: Text(_trans.legalNote, style: TextStyle(color: Theme.of(_context).colorScheme.inversePrimary)),
+          currentAccountPicture: Container(
+            margin: EdgeInsets.only(bottom: 5),
+            padding: EdgeInsets.zero,
+            child: AppIcon.appLogo(
+              Theme.of(_context).colorScheme.inversePrimary,
+              Theme.of(_context).colorScheme.primary,
+            ),
+          ),
+        ),
+      ),
+      Expanded(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            ExpansionTile(
+              leading: Icon(AppIcon.recordingSettings),
+              title: Text(_trans.recording),
+              // initiallyExpanded: true,
+              maintainState: true,
+              childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
+              backgroundColor: Theme.of(_context).colorScheme.primaryContainer,
+              textColor: Theme.of(_context).colorScheme.primary,
+              iconColor: Theme.of(_context).colorScheme.primary,
+              children: _recordingSettings(),
+            ),
+            ExpansionTile(
+              leading: Icon(AppIcon.trackSettings),
+              title: Text(_trans.tracks),
+              maintainState: true,
+              childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
+              backgroundColor: Theme.of(_context).colorScheme.primaryContainer,
+              textColor: Theme.of(_context).colorScheme.primary,
+              iconColor: Theme.of(_context).colorScheme.primary,
+              children: _tracksSettings(),
+            ),
+            ExpansionTile(
+              leading: Icon(AppIcon.screenSettings),
+              title: Text(_trans.screen),
+              maintainState: true,
+              childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
+              backgroundColor: Theme.of(_context).colorScheme.primaryContainer,
+              textColor: Theme.of(_context).colorScheme.primary,
+              iconColor: Theme.of(_context).colorScheme.primary,
+              children: _screenSettings(),
+            ),
+            ExpansionTile(
+              leading: Icon(AppIcon.permissions),
+              title: Text(_trans.permissions),
+              maintainState: true,
+              childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
+              backgroundColor: Theme.of(_context).colorScheme.secondaryContainer,
+              textColor: Theme.of(_context).colorScheme.secondary,
+              iconColor: Theme.of(_context).colorScheme.secondary,
+              children: _permissionsList(),
+            ),
+            ExpansionTile(
+              leading: Icon(AppIcon.dangerZone),
+              title: Text(_trans.dangerZone),
+              maintainState: true,
+              childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
+              backgroundColor: Theme.of(_context).colorScheme.errorContainer,
+              textColor: Theme.of(_context).colorScheme.error,
+              iconColor: Theme.of(_context).colorScheme.error,
+              children: _dangerZone,
+            ),
+            ListTile(leading: Icon(AppIcon.help), title: Text(_trans.help), onTap: _helpDialog),
+          ],
+        ),
+      ),
+      Align(
+        alignment: Alignment.bottomCenter,
+        child: ListTile(
+          leading: Icon(AppIcon.settingsProfiles),
+          title: Text(_trans.settingsProfiles),
+          subtitle: Text(
+            _settings.settingsProfilesList.isEmpty
+                ? _trans.settingsProfilesEmpty
+                : '${_settings.settingsProfilesList.length} ${_trans.settingsProfile.toLowerCase()}',
+            style: TextStyle(fontSize: Theme.of(_context).textTheme.labelSmall!.fontSize),
+          ),
+          onTap: _settingsProfilesListsDialog,
+          trailing: Icon(AppIcon.modalMenu),
+        ),
+      ),
+    ],
   );
 
   List<Widget> _recordingSettings() => [
@@ -274,6 +278,8 @@ class DrawerManager {
       _trans.buttonCancel,
       _trans.buttonSave,
       successAction: (double value, String formattedValue) {
+        // gridRowsAmount requires full reload after drawer close
+        _hasChanges = true;
         _settings.setConfig(AppConfigFieldKey.gridRowsAmount, value.toInt());
         _trackRepository.resetTracksCollection();
         return _trans.gridRowsAmountSuccess(formattedValue);
@@ -292,6 +298,8 @@ class DrawerManager {
       _trans.buttonCancel,
       _trans.buttonSave,
       successAction: (double value, String formattedValue) {
+        // gridColsAmount requires full reload after drawer close
+        _hasChanges = true;
         _settings.setConfig(AppConfigFieldKey.gridColsAmount, value.toInt());
         _trackRepository.resetTracksCollection();
         return _trans.gridColsAmountSuccess(formattedValue);
@@ -400,6 +408,7 @@ class DrawerManager {
       configCollection: AppGlobalConfig.screenThemeMode,
       trans: _trans,
       successAction: (dynamic value, String formattedValue) {
+        // themeMode only updates drawer, MaterialApp will pick up theme change automatically
         _settings.setConfig(AppConfigFieldKey.themeMode, value);
         return '';
       },
@@ -418,6 +427,7 @@ class DrawerManager {
       configCollection: AppGlobalConfig.userInterfaceColor,
       trans: _trans,
       successAction: (dynamic value, String formattedValue) {
+        // themeSeedColor only updates drawer, MaterialApp will pick up color change automatically
         _settings.setConfig(AppConfigFieldKey.themeSeedColor, value);
         return _trans.screenThemeColorSuccess(formattedValue);
       },
@@ -776,6 +786,9 @@ class DrawerManager {
       _trans.buttonYes,
       () {
         _trackRepository.resetTracksSettings(_trackRepository.allTracks());
+        for (AppProjectConfigField field in AppConfigFieldsCollection.projectList) {
+          _settings.setConfig(field.key, field.defaultValue);
+        }
         return _trans.allTracksSettingsResetSuccess;
       },
     ),
@@ -792,4 +805,73 @@ class DrawerManager {
       },
     ),
   ];
+}
+
+class _DrawerContent extends StatefulWidget {
+  final DrawerManager drawerManager;
+
+  const _DrawerContent({required this.drawerManager});
+
+  @override
+  State<_DrawerContent> createState() => _DrawerContentState();
+}
+
+class _DrawerContentState extends State<_DrawerContent> {
+  bool _wasDrawerOpen = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Add listener to update drawer when settings change
+    widget.drawerManager._settings.addListener(_onSettingsChanged);
+    // Monitor drawer state changes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _monitorDrawerState();
+    });
+  }
+
+  @override
+  void dispose() {
+    // Remove listener to prevent memory leaks
+    widget.drawerManager._settings.removeListener(_onSettingsChanged);
+    super.dispose();
+  }
+
+  void _monitorDrawerState() {
+    if (!mounted) return;
+    final scaffoldState = Scaffold.maybeOf(context);
+    if (scaffoldState != null) {
+      final isDrawerOpen = scaffoldState.isDrawerOpen;
+      if (_wasDrawerOpen && !isDrawerOpen && widget.drawerManager._hasChanges) {
+        // Drawer was closed, trigger reload if there were changes
+        widget.drawerManager._hasChanges = false;
+        widget.drawerManager._settings.reload();
+      }
+      _wasDrawerOpen = isDrawerOpen;
+      // Continue monitoring
+      Future.delayed(const Duration(milliseconds: 50), () {
+        if (mounted) {
+          _monitorDrawerState();
+        }
+      });
+    }
+  }
+
+  void _onSettingsChanged() {
+    if (mounted) {
+      // Check if drawer is still open before rebuilding
+      final scaffoldState = Scaffold.maybeOf(context);
+      if (scaffoldState != null && scaffoldState.isDrawerOpen) {
+        setState(() {});
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Rebuild drawer when locale changes by using Localizations.localeOf
+    // This ensures drawer updates when language changes
+    Localizations.localeOf(context);
+    return widget.drawerManager._buildDrawerContent();
+  }
 }

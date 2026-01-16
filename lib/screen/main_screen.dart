@@ -32,6 +32,7 @@ class _MainScreenAppState extends State<MainScreenApp>
   late HiveSettingsProvider _settings;
   late TrackRepository _trackRepository;
   final PermissionProvider _permissionProvider = PermissionProvider();
+  final GlobalKey _homeScreenKey = GlobalKey();
 
   @override
   void initState() {
@@ -70,57 +71,74 @@ class _MainScreenAppState extends State<MainScreenApp>
 
   @override
   Widget build(BuildContext context) {
-    // Użyj context.watch() zamiast Provider.of() żeby reagować na zmiany
-    _settings = context.watch<HiveSettingsProvider>();
-    _trackRepository = TrackRepository(_settings);
-    WakelockPlus.toggle(
-      enable: _settings.getConfig(AppConfigFieldKey.wakelockEnabled),
-    );
+    // Use Selector for version (full reload) and separate Selectors for locale, theme, color
+    return Selector<HiveSettingsProvider, int>(
+      selector: (context, settings) => settings.version,
+      builder: (context, version, child) {
+        _settings = context.read<HiveSettingsProvider>();
+        _trackRepository = TrackRepository(_settings);
+        WakelockPlus.toggle(
+          enable: _settings.getConfig(AppConfigFieldKey.wakelockEnabled),
+        );
 
-    AppWrapper appWrapper = AppWrapper(
-      settings: _settings,
-      permissionProvider: _permissionProvider,
-      audioRecorder: _audioRecorder,
-      trackRepository: _trackRepository,
-      focusNode: _focusNode,
-    );
+        AppWrapper appWrapper = AppWrapper(
+          settings: _settings,
+          permissionProvider: _permissionProvider,
+          audioRecorder: _audioRecorder,
+          trackRepository: _trackRepository,
+          focusNode: _focusNode,
+        );
 
-    return MaterialApp(
-      localizationsDelegates: [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: AppGlobalConfig.languages.values<Locale>(),
-      localeResolutionCallback: (locale, supportedLocales) =>
-          _settings.getConfig(AppConfigFieldKey.locale, defaultValue: locale),
-      locale: _settings.getConfig(AppConfigFieldKey.locale),
-      themeAnimationDuration: Duration(seconds: 0),
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: _settings.getConfig(AppConfigFieldKey.themeSeedColor),
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: _settings.getConfig(AppConfigFieldKey.themeSeedColor),
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
-      themeMode: _settings.getConfig(AppConfigFieldKey.themeMode),
-      home: HomeScreen(appWrapper: appWrapper),
-      // initialRoute: '/',
-      // routes: {
-      //   '/': (context) =>
-      //       HomeScreen(
-      //         settingsGet: _settings.get,
-      //         settingsSet: _settingsSet,
-      //         audioRecorder: _audioRecorder,
-      // },
+        return Selector<HiveSettingsProvider, Locale>(
+            selector: (context, settings) => settings.getConfig(AppConfigFieldKey.locale),
+            builder: (context, locale, child) =>
+                Selector<HiveSettingsProvider, ThemeMode>(
+                    selector: (context, settings) => settings.getConfig(AppConfigFieldKey.themeMode),
+                    builder: (context, themeMode, child) =>
+                        Selector<HiveSettingsProvider, Color>(
+                          selector: (context, settings) => settings.getConfig(AppConfigFieldKey.themeSeedColor),
+                          builder: (context, themeSeedColor, child) =>
+                              MaterialApp(
+                                localizationsDelegates: [
+                                  AppLocalizations.delegate,
+                                  GlobalMaterialLocalizations.delegate,
+                                  GlobalWidgetsLocalizations.delegate,
+                                  GlobalCupertinoLocalizations.delegate,
+                                ],
+                                supportedLocales: AppGlobalConfig.languages.values<Locale>(),
+                                localeResolutionCallback: (locale, supportedLocales) =>
+                                    _settings.getConfig(AppConfigFieldKey.locale, defaultValue: locale),
+                                locale: locale,
+                                themeAnimationDuration: Duration(seconds: 0),
+                                theme: ThemeData(
+                                  colorScheme: ColorScheme.fromSeed(
+                                    seedColor: themeSeedColor,
+                                    brightness: Brightness.light,
+                                  ),
+                                  useMaterial3: true,
+                                ),
+                                darkTheme: ThemeData(
+                                  colorScheme: ColorScheme.fromSeed(
+                                    seedColor: themeSeedColor,
+                                    brightness: Brightness.dark,
+                                  ),
+                                  useMaterial3: true,
+                                ),
+                                themeMode: themeMode,
+                                home: HomeScreen(key: _homeScreenKey, appWrapper: appWrapper),
+                                // initialRoute: '/',
+                                // routes: {
+                                //   '/': (context) =>
+                                //       HomeScreen(
+                                //         settingsGet: _settings.get,
+                                //         settingsSet: _settingsSet,
+                                //         audioRecorder: _audioRecorder,
+                                // },
+                              ),
+                        )
+                )
+        );
+      },
     );
   }
 }

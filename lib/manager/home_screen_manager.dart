@@ -78,7 +78,7 @@ class HomeScreenManager {
       itemBuilder: (context, rowIndex) => _lazyLoadingManager.lazyLoadWidget(
         // Include locale and version in cache key to rebuild on language change and import
         key:
-            'row_${rowIndex}_rows${rowsAmount}_cols${colsAmount}_locale_${_appWrapper.settings.getConfig(AppConfigFieldKey.locale).toLanguageTag()}_v${_appWrapper.settings.version}',
+            'row_${rowIndex}_rows${rowsAmount}_cols${colsAmount}_locale_${_appWrapper.settings.getConfig(AppConfigFieldKey.locale).toLanguageTag()}_theme_${_appWrapper.settings.getConfig(AppConfigFieldKey.themeMode)}_color_${_appWrapper.settings.getConfig(AppConfigFieldKey.themeSeedColor).value}_v${_appWrapper.settings.version}',
         builder: () => Row(
           children: [_rowMenuManager.buildRowButtons(rowIndex), _trackManager.buildRowTracks(rowIndex, colsAmount)],
         ),
