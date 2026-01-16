@@ -1014,7 +1014,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get recordingInputDeviceInfo =>
-      'Ustaw urządzenie wejściowe do nagrywania dźwięku.';
+      'Wybierz urządzenie wejściowe do nagrywania dźwięku.';
 
   @override
   String recordingInputDeviceSuccess(Object value) {

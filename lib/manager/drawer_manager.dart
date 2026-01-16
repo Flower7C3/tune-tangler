@@ -350,9 +350,17 @@ class DrawerManager {
     );
     await _audioRecorder.listInputDevices().then((List<InputDevice> inputDevices) {
       for (var inputDevice in inputDevices) {
+        // Parse device label: "Device Name (details)" -> title: "Device Name", subtitle: "details"
+        // or just "Device Name" -> title: "Device Name", no subtitle
+        final label = inputDevice.label.toString();
+        final match = RegExp(r'^(.+?)\s*\((.+?)\)$').firstMatch(label);
+        final deviceTitle = match?.group(1)?.trim() ?? label;
+        final deviceDetails = match?.group(2)?.trim();
+        
         options.add(
           ListTile(
-            title: Text(_trans.recordingInputDeviceValue(inputDevice.label)),
+            title: Text(deviceTitle),
+            subtitle: deviceDetails != null ? Text(deviceDetails) : null,
             selected: currentValue == inputDevice,
             onTap: () {
               _settings.setConfig(AppConfigFieldKey.recordingInputDevice, inputDevice);

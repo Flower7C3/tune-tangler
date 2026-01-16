@@ -26,24 +26,22 @@ class _HomeScreenState extends State<HomeScreen> {
     _homeScreenManager = HomeScreenManager(widget.appWrapper);
   }
 
+  /// Listen to locale changes to update AppWrapper.trans without full reload
   @override
-  Widget build(BuildContext context) {
-    // Listen to locale changes to update AppWrapper.trans without full reload
-    return Selector<HiveSettingsProvider, String>(
-      selector: (context, settings) => settings.getConfig(AppConfigFieldKey.locale).toLanguageTag(),
-      builder: (context, localeTag, child) {
-        // Update context and translations when locale changes
-        widget.appWrapper.setContext(context);
-        // Recreate HomeScreenManager to get fresh translations when locale changes
-        _homeScreenManager = HomeScreenManager(widget.appWrapper);
-        return Scaffold(
-          key: widget.appWrapper.scaffoldKey,
-          appBar: _homeScreenManager!.appBar,
-          drawer: _homeScreenManager!.drawer,
-          body: _homeScreenManager!.body,
-          bottomNavigationBar: _homeScreenManager!.bottomNavigationBar,
-        );
-      },
-    );
-  }
+  Widget build(BuildContext context) => Selector<HiveSettingsProvider, String>(
+    selector: (context, settings) => settings.getConfig(AppConfigFieldKey.locale).toLanguageTag(),
+    builder: (context, localeTag, child) {
+      // Update context and translations when locale changes
+      widget.appWrapper.setContext(context);
+      // Recreate HomeScreenManager to get fresh translations when locale changes
+      _homeScreenManager = HomeScreenManager(widget.appWrapper);
+      return Scaffold(
+        key: widget.appWrapper.scaffoldKey,
+        appBar: _homeScreenManager!.appBar,
+        drawer: _homeScreenManager!.drawer,
+        body: _homeScreenManager!.body,
+        bottomNavigationBar: _homeScreenManager!.bottomNavigationBar,
+      );
+    },
+  );
 }

@@ -259,7 +259,7 @@
   "recordingInputDevice": "Urządzenie wejściowe",
   "recordingInputDeviceValue": "Urządzenie wejściowe: {label}",
   "recordingInputDeviceTitle": "Urządzenie wejściowe",
-  "recordingInputDeviceInfo": "Ustaw urządzenie wejściowe do nagrywania dźwięku.",
+  "recordingInputDeviceInfo": "Wybierz urządzenie wejściowe do nagrywania dźwięku.",
   "recordingInputDeviceSuccess": "Ustawiono urządzenie wejściowe na {value}.",
   "recordingAudioEncoders": "Szczegóły kodeków audio",
   "recordingAudioEncoder": "Kodek audio",
