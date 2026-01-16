@@ -130,6 +130,7 @@ class SettingProfileWrapper {
     _settings.setConfig(AppConfigFieldKey.themeSeedColor, settingsProfile.themeSeedColor);
     _settings.setConfig(AppConfigFieldKey.wakelockEnabled, settingsProfile.wakelockEnabled);
     Navigator.pop(_context, 'settingsProfilesDialog');
+    _settings.reload();
     _uiHelper.toast(_trans.settingsProfileLoaded, icon: AppIcon.settingsProfiles);
   }
 

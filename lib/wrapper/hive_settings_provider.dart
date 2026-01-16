@@ -15,7 +15,6 @@ class HiveSettingsProvider extends ChangeNotifier {
 
   Future<void> setConfig(AppConfigFieldKey key, dynamic value) async {
     HiveService.set(key, value);
-    reload();
   }
 
   List<SettingsProfile> get settingsProfilesList => HiveService.listProfiles;

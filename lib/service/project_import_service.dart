@@ -20,11 +20,7 @@ class ProjectImportError {
   final String? fileName;
   final bool isWarning;
 
-  ProjectImportError({
-    required this.message,
-    this.fileName,
-    this.isWarning = false,
-  });
+  ProjectImportError({required this.message, this.fileName, this.isWarning = false});
 }
 
 class ProjectImportService {
@@ -35,11 +31,7 @@ class ProjectImportService {
   // Store playback positions from _importTracks for use in _importRecordings
   Map<String, Map<String, Duration>> _trackPlaybackPositions = {};
 
-  ProjectImportService(
-    this._settings,
-    this._trackRepository,
-    this._trans,
-  );
+  ProjectImportService(this._settings, this._trackRepository, this._trans);
 
   /// Gets project preview from ZIP file
   Future<Map<String, dynamic>> getProjectPreview(String zipPath) async {
@@ -66,11 +58,34 @@ class ProjectImportService {
       throw Exception(_trans.projectMetadataEncodingError);
     }
 
-      Map<String, dynamic> metadata;
-      try {
-        metadata = jsonDecode(metadataJson) as Map<String, dynamic>;
+    Map<String, dynamic> metadata;
+    try {
+      metadata = jsonDecode(metadataJson) as Map<String, dynamic>;
 
-        // Clean track names from control characters (for preview)
+      // Clean track names from control characters (for preview)
+      if (metadata.containsKey('tracks') && metadata['tracks'] is List) {
+        final tracks = metadata['tracks'] as List<dynamic>;
+        for (var track in tracks) {
+          if (track is Map<String, dynamic> && track.containsKey('name')) {
+            final originalName = track['name'] as String?;
+            if (originalName != null) {
+              final cleanName = originalName.replaceAll(RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F]'), '');
+              if (cleanName != originalName) {
+                track['name'] = cleanName;
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('[ProjectImport] ERROR parsing metadata.json JSON: $e');
+      debugPrint('[ProjectImport] JSON content: $metadataJson');
+      // Try to clean control characters and parse again
+      try {
+        String cleanedJson = metadataJson.replaceAll(RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F]'), '');
+        metadata = jsonDecode(cleanedJson) as Map<String, dynamic>;
+
+        // Clean names in tracks
         if (metadata.containsKey('tracks') && metadata['tracks'] is List) {
           final tracks = metadata['tracks'] as List<dynamic>;
           for (var track in tracks) {
@@ -78,39 +93,16 @@ class ProjectImportService {
               final originalName = track['name'] as String?;
               if (originalName != null) {
                 final cleanName = originalName.replaceAll(RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F]'), '');
-                if (cleanName != originalName) {
-                  track['name'] = cleanName;
-                }
+                track['name'] = cleanName;
               }
             }
           }
         }
-      } catch (e) {
-        debugPrint('[ProjectImport] ERROR parsing metadata.json JSON: $e');
-        debugPrint('[ProjectImport] JSON content: $metadataJson');
-        // Try to clean control characters and parse again
-        try {
-          String cleanedJson = metadataJson.replaceAll(RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F]'), '');
-          metadata = jsonDecode(cleanedJson) as Map<String, dynamic>;
-
-          // Clean names in tracks
-          if (metadata.containsKey('tracks') && metadata['tracks'] is List) {
-            final tracks = metadata['tracks'] as List<dynamic>;
-            for (var track in tracks) {
-              if (track is Map<String, dynamic> && track.containsKey('name')) {
-                final originalName = track['name'] as String?;
-                if (originalName != null) {
-                  final cleanName = originalName.replaceAll(RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F]'), '');
-                  track['name'] = cleanName;
-                }
-              }
-            }
-          }
-        } catch (e2) {
-          debugPrint('[ProjectImport] ERROR parsing cleaned metadata.json JSON: $e2');
-          throw Exception(_trans.projectMetadataParseError);
-        }
+      } catch (e2) {
+        debugPrint('[ProjectImport] ERROR parsing cleaned metadata.json JSON: $e2');
+        throw Exception(_trans.projectMetadataParseError);
       }
+    }
 
     return metadata;
   }
@@ -122,9 +114,7 @@ class ProjectImportService {
     try {
       final file = File(zipPath);
       if (!file.existsSync()) {
-        errors.add(ProjectImportError(
-          message: 'Project file not found',
-        ));
+        errors.add(ProjectImportError(message: 'Project file not found'));
         return errors;
       }
 
@@ -133,17 +123,16 @@ class ProjectImportService {
 
       // 1. Basic structure validation
       if (archive.findFile('metadata.json') == null) {
-        errors.add(ProjectImportError(
-          message: _trans.projectFileMissing('metadata.json'),
-          fileName: 'metadata.json',
-        ));
+        errors.add(ProjectImportError(message: _trans.projectFileMissing('metadata.json'), fileName: 'metadata.json'));
         return errors;
       }
       if (archive.findFile('settings/grid_settings.json') == null) {
-        errors.add(ProjectImportError(
-          message: _trans.projectFileMissing('settings/grid_settings.json'),
-          fileName: 'settings/grid_settings.json',
-        ));
+        errors.add(
+          ProjectImportError(
+            message: _trans.projectFileMissing('settings/grid_settings.json'),
+            fileName: 'settings/grid_settings.json',
+          ),
+        );
         return errors;
       }
 
@@ -173,9 +162,7 @@ class ProjectImportService {
     } catch (e, stackTrace) {
       debugPrint('[ProjectImport] Exception during validation: $e');
       debugPrint('[ProjectImport] Stack trace: $stackTrace');
-      errors.add(ProjectImportError(
-        message: 'Validation error: $e',
-      ));
+      errors.add(ProjectImportError(message: 'Validation error: $e'));
     }
 
     return errors;
@@ -186,7 +173,6 @@ class ProjectImportService {
     final errors = <ProjectImportError>[];
 
     try {
-
       final file = File(zipPath);
       final bytes = await file.readAsBytes();
       final archive = ZipDecoder().decodeBytes(bytes);
@@ -216,24 +202,16 @@ class ProjectImportService {
     } catch (e, stackTrace) {
       debugPrint('[ProjectImport] Exception during import: $e');
       debugPrint('[ProjectImport] Stack trace: $stackTrace');
-      errors.add(ProjectImportError(
-        message: 'Import error: $e',
-      ));
+      errors.add(ProjectImportError(message: 'Import error: $e'));
     }
 
     return errors;
   }
 
-  Future<void> _validateMetadata(
-    Archive archive,
-    List<ProjectImportError> errors,
-  ) async {
+  Future<void> _validateMetadata(Archive archive, List<ProjectImportError> errors) async {
     final metadataFile = archive.findFile('metadata.json');
     if (metadataFile == null) {
-      errors.add(ProjectImportError(
-        message: _trans.projectFileMissing('metadata.json'),
-        fileName: 'metadata.json',
-      ));
+      errors.add(ProjectImportError(message: _trans.projectFileMissing('metadata.json'), fileName: 'metadata.json'));
       return;
     }
 
@@ -244,24 +222,29 @@ class ProjectImportService {
 
       // Check required fields
       if (!metadata.containsKey('version')) {
-        errors.add(ProjectImportError(
-          message: _trans.projectFileStructureError('metadata.json', 'version'),
-          fileName: 'metadata.json',
-        ));
+        errors.add(
+          ProjectImportError(
+            message: _trans.projectFileStructureError('metadata.json', 'version'),
+            fileName: 'metadata.json',
+          ),
+        );
       }
       if (!metadata.containsKey('gridSize')) {
-        errors.add(ProjectImportError(
-          message: _trans.projectFileStructureError('metadata.json', 'gridSize'),
-          fileName: 'metadata.json',
-        ));
+        errors.add(
+          ProjectImportError(
+            message: _trans.projectFileStructureError('metadata.json', 'gridSize'),
+            fileName: 'metadata.json',
+          ),
+        );
       }
       if (!metadata.containsKey('tracks')) {
-        errors.add(ProjectImportError(
-          message: _trans.projectFileStructureError('metadata.json', 'tracks'),
-          fileName: 'metadata.json',
-        ));
+        errors.add(
+          ProjectImportError(
+            message: _trans.projectFileStructureError('metadata.json', 'tracks'),
+            fileName: 'metadata.json',
+          ),
+        );
       }
-
     } catch (e) {
       debugPrint('[ProjectImport] ERROR in metadata.json: $e');
       String errorMessage;
@@ -269,29 +252,24 @@ class ProjectImportService {
           e.toString().contains('Missing extension byte') ||
           e.toString().contains('Invalid UTF-8')) {
         errorMessage = _trans.projectFileEncodingError('metadata.json');
-      } else if (e.toString().contains('Unexpected character') ||
-          e.toString().contains('Expected')) {
+      } else if (e.toString().contains('Unexpected character') || e.toString().contains('Expected')) {
         errorMessage = _trans.projectFileParseError('metadata.json');
       } else {
         errorMessage = _trans.projectMetadataCorrupted;
       }
-      errors.add(ProjectImportError(
-        message: errorMessage,
-        fileName: 'metadata.json',
-      ));
+      errors.add(ProjectImportError(message: errorMessage, fileName: 'metadata.json'));
     }
   }
 
-  Future<void> _validateGridSettings(
-    Archive archive,
-    List<ProjectImportError> errors,
-  ) async {
+  Future<void> _validateGridSettings(Archive archive, List<ProjectImportError> errors) async {
     final settingsFile = archive.findFile('settings/grid_settings.json');
     if (settingsFile == null) {
-      errors.add(ProjectImportError(
-        message: _trans.projectFileMissing('settings/grid_settings.json'),
-        fileName: 'settings/grid_settings.json',
-      ));
+      errors.add(
+        ProjectImportError(
+          message: _trans.projectFileMissing('settings/grid_settings.json'),
+          fileName: 'settings/grid_settings.json',
+        ),
+      );
       return;
     }
 
@@ -309,10 +287,12 @@ class ProjectImportService {
       }
 
       if (missingFields.isNotEmpty) {
-        errors.add(ProjectImportError(
-          message: _trans.projectFileStructureError('settings/grid_settings.json', missingFields.join(', ')),
-          fileName: 'settings/grid_settings.json',
-        ));
+        errors.add(
+          ProjectImportError(
+            message: _trans.projectFileStructureError('settings/grid_settings.json', missingFields.join(', ')),
+            fileName: 'settings/grid_settings.json',
+          ),
+        );
         return;
       }
 
@@ -321,12 +301,13 @@ class ProjectImportService {
 
       if (rows == null || cols == null || rows < 1 || cols < 1) {
         String details = 'gridRowsAmount=${rows ?? 'null'}, gridColsAmount=${cols ?? 'null'}';
-        errors.add(ProjectImportError(
-          message: _trans.projectFileInvalidValue('settings/grid_settings.json', details),
-          fileName: 'settings/grid_settings.json',
-        ));
+        errors.add(
+          ProjectImportError(
+            message: _trans.projectFileInvalidValue('settings/grid_settings.json', details),
+            fileName: 'settings/grid_settings.json',
+          ),
+        );
       }
-
     } catch (e) {
       debugPrint('[ProjectImport] ERROR parsing grid_settings.json: $e');
       String errorMessage;
@@ -334,26 +315,17 @@ class ProjectImportService {
           e.toString().contains('Missing extension byte') ||
           e.toString().contains('Invalid UTF-8')) {
         errorMessage = _trans.projectFileEncodingError('settings/grid_settings.json');
-      } else if (e.toString().contains('Unexpected character') ||
-          e.toString().contains('Expected')) {
+      } else if (e.toString().contains('Unexpected character') || e.toString().contains('Expected')) {
         errorMessage = _trans.projectFileParseError('settings/grid_settings.json');
       } else {
         errorMessage = _trans.projectFileParseError('settings/grid_settings.json');
       }
-      errors.add(ProjectImportError(
-        message: errorMessage,
-        fileName: 'settings/grid_settings.json',
-      ));
+      errors.add(ProjectImportError(message: errorMessage, fileName: 'settings/grid_settings.json'));
     }
   }
 
-  Future<void> _validateTracks(
-    Archive archive,
-    List<ProjectImportError> errors,
-  ) async {
-    final tracksDir = archive.files.where(
-      (file) => file.name.startsWith('tracks/') && file.name.endsWith('.json'),
-    );
+  Future<void> _validateTracks(Archive archive, List<ProjectImportError> errors) async {
+    final tracksDir = archive.files.where((file) => file.name.startsWith('tracks/') && file.name.endsWith('.json'));
 
     for (final trackFile in tracksDir) {
       try {
@@ -363,22 +335,25 @@ class ProjectImportService {
 
         // Check required fields
         if (!trackMapJson.containsKey('trackId')) {
-          errors.add(ProjectImportError(
-            message: _trans.projectFileStructureError(trackFile.name, 'trackId'),
-            fileName: trackFile.name,
-          ));
+          errors.add(
+            ProjectImportError(
+              message: _trans.projectFileStructureError(trackFile.name, 'trackId'),
+              fileName: trackFile.name,
+            ),
+          );
           continue;
         }
 
         final trackIdList = trackMapJson['trackId'] as List<dynamic>?;
         if (trackIdList == null || trackIdList.length != 2) {
-          errors.add(ProjectImportError(
-            message: _trans.projectFileInvalidValue(trackFile.name, 'trackId musi być tablicą z 2 elementami'),
-            fileName: trackFile.name,
-          ));
+          errors.add(
+            ProjectImportError(
+              message: _trans.projectFileInvalidValue(trackFile.name, 'trackId musi być tablicą z 2 elementami'),
+              fileName: trackFile.name,
+            ),
+          );
           continue;
         }
-
       } catch (e) {
         debugPrint('[ProjectImport] ERROR validating track file ${trackFile.name}: $e');
         String errorMessage;
@@ -386,25 +361,17 @@ class ProjectImportService {
             e.toString().contains('Missing extension byte') ||
             e.toString().contains('Invalid UTF-8')) {
           errorMessage = _trans.projectFileEncodingError(trackFile.name);
-        } else if (e.toString().contains('Unexpected character') ||
-            e.toString().contains('Expected')) {
+        } else if (e.toString().contains('Unexpected character') || e.toString().contains('Expected')) {
           errorMessage = _trans.projectFileParseError(trackFile.name);
         } else {
           errorMessage = _trans.projectFileParseError(trackFile.name);
         }
-        errors.add(ProjectImportError(
-          message: errorMessage,
-          fileName: trackFile.name,
-        ));
+        errors.add(ProjectImportError(message: errorMessage, fileName: trackFile.name));
       }
     }
-
   }
 
-  Future<void> _validateRecordings(
-    Archive archive,
-    List<ProjectImportError> errors,
-  ) async {
+  Future<void> _validateRecordings(Archive archive, List<ProjectImportError> errors) async {
     // Load checksums
     final checksumsFile = archive.findFile('recordings/checksums.json');
     final checksums = <String, String>{};
@@ -426,10 +393,7 @@ class ProjectImportService {
         } else {
           errorMessage = _trans.projectFileParseError('recordings/checksums.json');
         }
-        errors.add(ProjectImportError(
-          message: errorMessage,
-          fileName: 'recordings/checksums.json',
-        ));
+        errors.add(ProjectImportError(message: errorMessage, fileName: 'recordings/checksums.json'));
         return;
       }
     }
@@ -469,7 +433,9 @@ class ProjectImportService {
               if (recordingFileName != null) {
                 trackIdToFileName[trackId] = recordingFileName;
               } else {
-                debugPrint('[ProjectImport] WARNING: Track $trackId has recording but no recordingFileName in metadata');
+                debugPrint(
+                  '[ProjectImport] WARNING: Track $trackId has recording but no recordingFileName in metadata',
+                );
               }
             }
           }
@@ -482,8 +448,7 @@ class ProjectImportService {
             e.toString().contains('Missing extension byte') ||
             e.toString().contains('Invalid UTF-8')) {
           errorMessage = _trans.projectMetadataEncodingError;
-        } else if (e.toString().contains('Unexpected character') ||
-            e.toString().contains('Expected')) {
+        } else if (e.toString().contains('Unexpected character') || e.toString().contains('Expected')) {
           errorMessage = _trans.projectMetadataParseError;
         } else {
           errorMessage = _trans.projectMetadataCorrupted;
@@ -497,11 +462,7 @@ class ProjectImportService {
 
     // First check if all recordings listed in metadata exist in archive
     final recordingsInArchive = archive.files
-        .where(
-          (file) =>
-              file.name.startsWith('recordings/') &&
-              file.name != 'recordings/checksums.json',
-        )
+        .where((file) => file.name.startsWith('recordings/') && file.name != 'recordings/checksums.json')
         .map((file) => path.basename(file.name))
         .toSet();
 
@@ -510,21 +471,14 @@ class ProjectImportService {
       final trackId = entry.key;
       final fileName = entry.value;
       if (!recordingsInArchive.contains(fileName)) {
-        errors.add(ProjectImportError(
-          message: _trans.projectRecordingNotFound,
-          fileName: fileName,
-        ));
-        debugPrint(
-          '[ProjectImport] Recording file not found in archive: $fileName (trackId: $trackId)',
-        );
+        errors.add(ProjectImportError(message: _trans.projectRecordingNotFound, fileName: fileName));
+        debugPrint('[ProjectImport] Recording file not found in archive: $fileName (trackId: $trackId)');
       }
     }
 
-    final recordingsDir = archive.files.where(
-      (file) =>
-          file.name.startsWith('recordings/') &&
-          file.name != 'recordings/checksums.json',
-    ).toList();
+    final recordingsDir = archive.files
+        .where((file) => file.name.startsWith('recordings/') && file.name != 'recordings/checksums.json')
+        .toList();
 
     for (final recordingFile in recordingsDir) {
       try {
@@ -536,16 +490,14 @@ class ProjectImportService {
           final expectedChecksum = checksums[fileName]!;
           final actualChecksum = sha256.convert(fileBytes).toString();
           if (actualChecksum != expectedChecksum) {
-            debugPrint('[ProjectImport] Checksum mismatch for $fileName: expected $expectedChecksum, got $actualChecksum');
-            errors.add(ProjectImportError(
-              message: _trans.projectChecksumMismatch(fileName),
-              fileName: fileName,
-            ));
+            debugPrint(
+              '[ProjectImport] Checksum mismatch for $fileName: expected $expectedChecksum, got $actualChecksum',
+            );
+            errors.add(ProjectImportError(message: _trans.projectChecksumMismatch(fileName), fileName: fileName));
             continue;
           }
           debugPrint('[ProjectImport] Checksum verified for $fileName');
-        } else {
-        }
+        } else {}
 
         // Check if file has corresponding track in metadata
         bool foundInMetadata = false;
@@ -561,14 +513,13 @@ class ProjectImportService {
               // Check length
               final expectedSize = entry.value;
               if (fileBytes.length != expectedSize) {
-                debugPrint('[ProjectImport] File size mismatch for $fileName: expected $expectedSize, got ${fileBytes.length}');
-                errors.add(ProjectImportError(
-                  message: 'File size mismatch for recording',
-                  fileName: fileName,
-                  isWarning: true,
-                ));
-              } else {
-              }
+                debugPrint(
+                  '[ProjectImport] File size mismatch for $fileName: expected $expectedSize, got ${fileBytes.length}',
+                );
+                errors.add(
+                  ProjectImportError(message: 'File size mismatch for recording', fileName: fileName, isWarning: true),
+                );
+              } else {}
               break;
             }
           }
@@ -583,14 +534,17 @@ class ProjectImportService {
               if (trackDurations.containsKey(trackId)) {
                 final expectedSize = trackDurations[trackId]!;
                 if (fileBytes.length != expectedSize) {
-                  debugPrint('[ProjectImport] File size mismatch for $fileName: expected $expectedSize, got ${fileBytes.length}');
-                  errors.add(ProjectImportError(
-                    message: 'File size mismatch for recording',
-                    fileName: fileName,
-                    isWarning: true,
-                  ));
-                } else {
-                }
+                  debugPrint(
+                    '[ProjectImport] File size mismatch for $fileName: expected $expectedSize, got ${fileBytes.length}',
+                  );
+                  errors.add(
+                    ProjectImportError(
+                      message: 'File size mismatch for recording',
+                      fileName: fileName,
+                      isWarning: true,
+                    ),
+                  );
+                } else {}
               }
               break;
             }
@@ -599,19 +553,12 @@ class ProjectImportService {
 
         if (!foundInMetadata) {
           debugPrint('[ProjectImport] Recording file $fileName not found in metadata mapping');
-          errors.add(ProjectImportError(
-            message: 'Recording file not found in metadata',
-            fileName: fileName,
-          ));
+          errors.add(ProjectImportError(message: 'Recording file not found in metadata', fileName: fileName));
         }
       } catch (e) {
-        errors.add(ProjectImportError(
-          message: 'Failed to validate recording file: $e',
-          fileName: recordingFile.name,
-        ));
+        errors.add(ProjectImportError(message: 'Failed to validate recording file: $e', fileName: recordingFile.name));
       }
     }
-
   }
 
   Future<void> _importGridSettings(Archive archive) async {
@@ -637,28 +584,22 @@ class ProjectImportService {
     }
 
     if (settings.containsKey('gridRowsAmount')) {
-      await _settings.setConfig(
-        AppConfigFieldKey.gridRowsAmount,
-        settings['gridRowsAmount'],
-      );
+      await _settings.setConfig(AppConfigFieldKey.gridRowsAmount, settings['gridRowsAmount']);
     }
     if (settings.containsKey('gridColsAmount')) {
-      await _settings.setConfig(
-        AppConfigFieldKey.gridColsAmount,
-        settings['gridColsAmount'],
-      );
+      await _settings.setConfig(AppConfigFieldKey.gridColsAmount, settings['gridColsAmount']);
+    }
+    if (settings.containsKey('gridRowsAmount') || settings.containsKey('gridColsAmount')) {
+      _settings.reload();
     }
   }
 
-  Future<void> _importTracks(
-    Archive archive,
-    List<ProjectImportError> errors,
-  ) async {
+  Future<void> _importTracks(Archive archive, List<ProjectImportError> errors) async {
     // Map to store playback positions for each track (to be used in _importRecordings)
     final trackPlaybackPositions = <String, Map<String, Duration>>{};
-    final tracksDir = archive.files.where(
-      (file) => file.name.startsWith('tracks/') && file.name.endsWith('.json'),
-    ).toList();
+    final tracksDir = archive.files
+        .where((file) => file.name.startsWith('tracks/') && file.name.endsWith('.json'))
+        .toList();
 
     for (final trackFile in tracksDir) {
       try {
@@ -683,7 +624,9 @@ class ProjectImportService {
             final char = trackJson[i];
             final code = char.codeUnitAt(0);
             if (code < 32 && code != 9 && code != 10 && code != 13) {
-              debugPrint('[ProjectImport] Found control character at position $i: code $code (0x${code.toRadixString(16)})');
+              debugPrint(
+                '[ProjectImport] Found control character at position $i: code $code (0x${code.toRadixString(16)})',
+              );
             }
           }
           rethrow;
@@ -701,10 +644,7 @@ class ProjectImportService {
 
         // Convert list [row, col] back to TrackId
         final trackIdList = trackMap[TrackAdapterKey.trackId] as List<dynamic>;
-        final trackId = TrackId(
-          trackIdList[0] as int,
-          trackIdList[1] as int,
-        );
+        final trackId = TrackId(trackIdList[0] as int, trackIdList[1] as int);
         trackMap[TrackAdapterKey.trackId] = trackId;
 
         // Convert milliseconds back to Duration
@@ -740,10 +680,9 @@ class ProjectImportService {
       } catch (e, stackTrace) {
         debugPrint('[ProjectImport] Exception importing track ${trackFile.name}: $e');
         debugPrint('[ProjectImport] Stack trace: $stackTrace');
-        errors.add(ProjectImportError(
-          message: 'Failed to import track: ${trackFile.name} - $e',
-          fileName: trackFile.name,
-        ));
+        errors.add(
+          ProjectImportError(message: 'Failed to import track: ${trackFile.name} - $e', fileName: trackFile.name),
+        );
       }
     }
 
@@ -751,10 +690,7 @@ class ProjectImportService {
     _trackPlaybackPositions = trackPlaybackPositions;
   }
 
-  Future<void> _importRecordings(
-    Archive archive,
-    List<ProjectImportError> errors,
-  ) async {
+  Future<void> _importRecordings(Archive archive, List<ProjectImportError> errors) async {
     // Load checksums
     final checksumsFile = archive.findFile('recordings/checksums.json');
     final checksums = <String, String>{};
@@ -831,11 +767,9 @@ class ProjectImportService {
       }
     }
 
-    final recordingsDir = archive.files.where(
-      (file) =>
-          file.name.startsWith('recordings/') &&
-          file.name != 'recordings/checksums.json',
-    ).toList();
+    final recordingsDir = archive.files
+        .where((file) => file.name.startsWith('recordings/') && file.name != 'recordings/checksums.json')
+        .toList();
 
     final appDir = await getApplicationDocumentsDirectory();
 
@@ -849,16 +783,14 @@ class ProjectImportService {
           final expectedChecksum = checksums[fileName]!;
           final actualChecksum = sha256.convert(fileBytes).toString();
           if (actualChecksum != expectedChecksum) {
-            debugPrint('[ProjectImport] Checksum mismatch for $fileName: expected $expectedChecksum, got $actualChecksum');
-            errors.add(ProjectImportError(
-              message: 'Checksum mismatch',
-              fileName: fileName,
-            ));
+            debugPrint(
+              '[ProjectImport] Checksum mismatch for $fileName: expected $expectedChecksum, got $actualChecksum',
+            );
+            errors.add(ProjectImportError(message: 'Checksum mismatch', fileName: fileName));
             continue;
           }
           debugPrint('[ProjectImport] Checksum verified for $fileName');
-        } else {
-        }
+        } else {}
 
         // Find track for this file
         final allTracks = _trackRepository.allTracks();
@@ -911,10 +843,7 @@ class ProjectImportService {
         if (targetTrack == null) {
           debugPrint('[ProjectImport] ERROR: Track not found for recording file $fileName');
           debugPrint('[ProjectImport] Available track IDs: ${allTracks.map((t) => t.id.toString()).join(", ")}');
-          errors.add(ProjectImportError(
-            message: 'Track not found for recording',
-            fileName: fileName,
-          ));
+          errors.add(ProjectImportError(message: 'Track not found for recording', fileName: fileName));
           continue;
         }
 
@@ -929,11 +858,11 @@ class ProjectImportService {
           // Fallback: use filename from ZIP (may be different from standard trackId.ext format)
           newFileName = fileName;
         }
-        
+
         // Sanitize filename to prevent invalid characters
         // Replace invalid characters with underscore (same as in export)
         newFileName = newFileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '_');
-        
+
         final newFilePath = path.join(appDir.path, newFileName);
         final savedFile = File(newFilePath);
         await savedFile.writeAsBytes(fileBytes);
@@ -949,11 +878,7 @@ class ProjectImportService {
             targetTrack.resetPlaybackEndAtPosition();
             _trackRepository.save(targetTrack);
 
-            errors.add(ProjectImportError(
-              message: 'File length mismatch',
-              fileName: fileName,
-              isWarning: true,
-            ));
+            errors.add(ProjectImportError(message: 'File length mismatch', fileName: fileName, isWarning: true));
           }
         }
 
@@ -970,7 +895,9 @@ class ProjectImportService {
           // Fallback: use values from track (should not happen if import is correct)
           savedPlaybackStartAtPosition = targetTrack.playbackStartAtPosition.value;
           savedPlaybackEndAtPosition = targetTrack.playbackEndAtPosition.value;
-          debugPrint('[ProjectImport] WARNING: No playback positions found in imported data for track $trackIdForPositions, using values from track');
+          debugPrint(
+            '[ProjectImport] WARNING: No playback positions found in imported data for track $trackIdForPositions, using values from track',
+          );
         }
 
         // Set path in track
@@ -1011,13 +938,17 @@ class ProjectImportService {
 
           // If still processing after maxAttempts, it's a timeout
           if (targetTrack.state.value == TrackState.processing && attempts >= maxAttempts) {
-            debugPrint('[ProjectImport] WARNING: setPath() did not complete within ${maxAttempts * delayMs / 1000}s for track ${targetTrack.id.toString()}, state: ${targetTrack.state.value}');
+            debugPrint(
+              '[ProjectImport] WARNING: setPath() did not complete within ${maxAttempts * delayMs / 1000}s for track ${targetTrack.id.toString()}, state: ${targetTrack.state.value}',
+            );
             // Add error to list, but continue import
-            errors.add(ProjectImportError(
-              message: 'Track ${targetTrack.id.toString()} did not finish loading within timeout',
-              fileName: fileName,
-              isWarning: true,
-            ));
+            errors.add(
+              ProjectImportError(
+                message: 'Track ${targetTrack.id.toString()} did not finish loading within timeout',
+                fileName: fileName,
+                isWarning: true,
+              ),
+            );
           }
         }
 
@@ -1045,12 +976,8 @@ class ProjectImportService {
       } catch (e, stackTrace) {
         debugPrint('[ProjectImport] Exception importing recording ${recordingFile.name}: $e');
         debugPrint('[ProjectImport] Stack trace: $stackTrace');
-        errors.add(ProjectImportError(
-          message: 'Failed to import recording: $e',
-          fileName: recordingFile.name,
-        ));
+        errors.add(ProjectImportError(message: 'Failed to import recording: $e', fileName: recordingFile.name));
       }
     }
-
   }
 }

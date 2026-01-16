@@ -42,109 +42,109 @@ class DrawerManager {
 
   Widget get build => Drawer(
     child: Column(
-        mainAxisSize: MainAxisSize.max,
-        children: <Widget>[
-          Align(
-            alignment: Alignment.topCenter,
-            child: UserAccountsDrawerHeader(
-              accountName: Text(
-                _uiHelper.getAppTitle(_trans),
-                style: TextStyle(
-                  fontSize: Theme.of(_context).textTheme.headlineMedium?.fontSize,
-                  color: Theme.of(_context).colorScheme.inversePrimary,
-                ),
-              ),
-              accountEmail: Text(
-                _trans.legalNote,
-                style: TextStyle(color: Theme.of(_context).colorScheme.inversePrimary),
-              ),
-              currentAccountPicture: Container(
-                margin: EdgeInsets.only(bottom: 5),
-                padding: EdgeInsets.zero,
-                child: AppIcon.appLogo(
-                  Theme.of(_context).colorScheme.inversePrimary,
-                  Theme.of(_context).colorScheme.primary,
-                ),
+      mainAxisSize: MainAxisSize.max,
+      children: <Widget>[
+        Align(
+          alignment: Alignment.topCenter,
+          child: UserAccountsDrawerHeader(
+            accountName: Text(
+              _uiHelper.getAppTitle(_trans),
+              style: TextStyle(
+                fontSize: Theme.of(_context).textTheme.headlineMedium?.fontSize,
+                color: Theme.of(_context).colorScheme.inversePrimary,
               ),
             ),
-          ),
-          Expanded(
-            child: ListView(
+            accountEmail: Text(
+              _trans.legalNote,
+              style: TextStyle(color: Theme.of(_context).colorScheme.inversePrimary),
+            ),
+            currentAccountPicture: Container(
+              margin: EdgeInsets.only(bottom: 5),
               padding: EdgeInsets.zero,
-              children: [
-                ExpansionTile(
-                  leading: Icon(AppIcon.recordingSettings),
-                  title: Text(_trans.recording),
-                  // initiallyExpanded: true,
-                  maintainState: true,
-                  childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
-                  backgroundColor: Theme.of(_context).colorScheme.primaryContainer,
-                  textColor: Theme.of(_context).colorScheme.primary,
-                  iconColor: Theme.of(_context).colorScheme.primary,
-                  children: _recordingSettings(),
-                ),
-                ExpansionTile(
-                  leading: Icon(AppIcon.trackSettings),
-                  title: Text(_trans.tracks),
-                  maintainState: true,
-                  childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
-                  backgroundColor: Theme.of(_context).colorScheme.primaryContainer,
-                  textColor: Theme.of(_context).colorScheme.primary,
-                  iconColor: Theme.of(_context).colorScheme.primary,
-                  children: _tracksSettings(),
-                ),
-                ExpansionTile(
-                  leading: Icon(AppIcon.screenSettings),
-                  title: Text(_trans.screen),
-                  maintainState: true,
-                  childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
-                  backgroundColor: Theme.of(_context).colorScheme.primaryContainer,
-                  textColor: Theme.of(_context).colorScheme.primary,
-                  iconColor: Theme.of(_context).colorScheme.primary,
-                  children: _screenSettings(),
-                ),
-                ExpansionTile(
-                  leading: Icon(AppIcon.permissions),
-                  title: Text(_trans.permissions),
-                  maintainState: true,
-                  childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
-                  backgroundColor: Theme.of(_context).colorScheme.secondaryContainer,
-                  textColor: Theme.of(_context).colorScheme.secondary,
-                  iconColor: Theme.of(_context).colorScheme.secondary,
-                  children: _permissionsList(),
-                ),
-                ExpansionTile(
-                  leading: Icon(AppIcon.dangerZone),
-                  title: Text(_trans.dangerZone),
-                  maintainState: true,
-                  childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
-                  backgroundColor: Theme.of(_context).colorScheme.errorContainer,
-                  textColor: Theme.of(_context).colorScheme.error,
-                  iconColor: Theme.of(_context).colorScheme.error,
-                  children: _dangerZone,
-                ),
-                ListTile(leading: Icon(AppIcon.help), title: Text(_trans.help), onTap: _helpDialog),
-              ],
-            ),
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: ListTile(
-              leading: Icon(AppIcon.settingsProfiles),
-              title: Text(_trans.settingsProfiles),
-              subtitle: Text(
-                _settings.settingsProfilesList.isEmpty
-                    ? _trans.settingsProfilesEmpty
-                    : '${_settings.settingsProfilesList.length} ${_trans.settingsProfile.toLowerCase()}',
-                style: TextStyle(fontSize: Theme.of(_context).textTheme.labelSmall!.fontSize),
+              child: AppIcon.appLogo(
+                Theme.of(_context).colorScheme.inversePrimary,
+                Theme.of(_context).colorScheme.primary,
               ),
-              onTap: _settingsProfilesListsDialog,
-              trailing: Icon(AppIcon.modalMenu),
             ),
           ),
-        ],
-      ),
-    );
+        ),
+        Expanded(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              ExpansionTile(
+                leading: Icon(AppIcon.recordingSettings),
+                title: Text(_trans.recording),
+                // initiallyExpanded: true,
+                maintainState: true,
+                childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
+                backgroundColor: Theme.of(_context).colorScheme.primaryContainer,
+                textColor: Theme.of(_context).colorScheme.primary,
+                iconColor: Theme.of(_context).colorScheme.primary,
+                children: _recordingSettings(),
+              ),
+              ExpansionTile(
+                leading: Icon(AppIcon.trackSettings),
+                title: Text(_trans.tracks),
+                maintainState: true,
+                childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
+                backgroundColor: Theme.of(_context).colorScheme.primaryContainer,
+                textColor: Theme.of(_context).colorScheme.primary,
+                iconColor: Theme.of(_context).colorScheme.primary,
+                children: _tracksSettings(),
+              ),
+              ExpansionTile(
+                leading: Icon(AppIcon.screenSettings),
+                title: Text(_trans.screen),
+                maintainState: true,
+                childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
+                backgroundColor: Theme.of(_context).colorScheme.primaryContainer,
+                textColor: Theme.of(_context).colorScheme.primary,
+                iconColor: Theme.of(_context).colorScheme.primary,
+                children: _screenSettings(),
+              ),
+              ExpansionTile(
+                leading: Icon(AppIcon.permissions),
+                title: Text(_trans.permissions),
+                maintainState: true,
+                childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
+                backgroundColor: Theme.of(_context).colorScheme.secondaryContainer,
+                textColor: Theme.of(_context).colorScheme.secondary,
+                iconColor: Theme.of(_context).colorScheme.secondary,
+                children: _permissionsList(),
+              ),
+              ExpansionTile(
+                leading: Icon(AppIcon.dangerZone),
+                title: Text(_trans.dangerZone),
+                maintainState: true,
+                childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
+                backgroundColor: Theme.of(_context).colorScheme.errorContainer,
+                textColor: Theme.of(_context).colorScheme.error,
+                iconColor: Theme.of(_context).colorScheme.error,
+                children: _dangerZone,
+              ),
+              ListTile(leading: Icon(AppIcon.help), title: Text(_trans.help), onTap: _helpDialog),
+            ],
+          ),
+        ),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: ListTile(
+            leading: Icon(AppIcon.settingsProfiles),
+            title: Text(_trans.settingsProfiles),
+            subtitle: Text(
+              _settings.settingsProfilesList.isEmpty
+                  ? _trans.settingsProfilesEmpty
+                  : '${_settings.settingsProfilesList.length} ${_trans.settingsProfile.toLowerCase()}',
+              style: TextStyle(fontSize: Theme.of(_context).textTheme.labelSmall!.fontSize),
+            ),
+            onTap: _settingsProfilesListsDialog,
+            trailing: Icon(AppIcon.modalMenu),
+          ),
+        ),
+      ],
+    ),
+  );
 
   List<Widget> _recordingSettings() => [
     ListTile(
@@ -209,7 +209,7 @@ class DrawerManager {
     _uiHelper.listTileSwitch(
       AppIcon.recordingAudioMode,
       _trans.recordingAudioMode,
-        subtitleText: AppGlobalConfig.recordingAudioMode.translate(
+      subtitleText: AppGlobalConfig.recordingAudioMode.translate(
         _settings.getConfig(AppConfigFieldKey.recordingAudioModeStereo),
         trans: _trans,
       ),
@@ -584,9 +584,7 @@ class DrawerManager {
       ExpansionTile(
         title: Text(_trans.helpScreenMessageTrackStates),
         children: [
-          _uiHelper.buildRichText(
-            _trans.helpScreenMessageTrackStatesInfo, data: {}
-          ),
+          _uiHelper.buildRichText(_trans.helpScreenMessageTrackStatesInfo, data: {}),
           _uiHelper.helpTrackState(TrackState.empty, _trans.stateEmpty),
           _uiHelper.helpTrackState(TrackState.recording, _trans.stateRecording),
           _uiHelper.helpTrackState(TrackState.processing, _trans.stateProcessing),
@@ -598,10 +596,7 @@ class DrawerManager {
       ExpansionTile(
         title: Text(_trans.helpScreenMessageTrackIcons),
         children: [
-          _uiHelper.buildRichText(
-            _trans.helpScreenMessageTrackIconsInfo,
-            data: {},
-          ),
+          _uiHelper.buildRichText(_trans.helpScreenMessageTrackIconsInfo, data: {}),
           _uiHelper.statusWidgetTile(
             AppIcon.trackKeyboardKeyBox(
               'x',
