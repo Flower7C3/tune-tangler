@@ -444,19 +444,6 @@ class UIHelper {
     child: Text(text),
   );
 
-  Widget trailingLabel(String text) => Container(
-    decoration: BoxDecoration(
-      color: Theme.of(context).colorScheme.inversePrimary,
-      borderRadius: BorderRadius.circular(24),
-    ),
-    padding: EdgeInsets.all(4),
-    child: Container(
-      decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary, borderRadius: BorderRadius.circular(16)),
-      padding: EdgeInsets.all(8),
-      child: Text(text, style: TextStyle(color: Colors.white)),
-    ),
-  );
-
   Widget trailingStatus(String text, IconData icon, type) => Container(
     decoration: BoxDecoration(
       color: Theme.of(context).colorScheme.inversePrimary,
@@ -620,9 +607,6 @@ class UIHelper {
       configCollection != null ? configCollection.format(currentValue) : currentValue.toString(),
       style: TextStyle(fontSize: Theme.of(context).textTheme.labelSmall!.fontSize),
     ),
-    trailing: (withTrailing == true)
-        ? trailingLabel(configCollection != null ? configCollection.format(currentValue) : currentValue.toString())
-        : null,
     onTap: () {
       showDialog(
         context: context,
@@ -659,13 +643,15 @@ class UIHelper {
               simpleButton(cancelLabel, () => Navigator.pop(context, cancelLabel)),
               primaryButton(saveLabel, () {
                 Navigator.pop(context, saveLabel);
-                toast(successAction(currentValue, _translateOrFormat(currentValue, configCollection, trans)), icon: icon);
+                toast(
+                  successAction(currentValue, _translateOrFormat(currentValue, configCollection, trans)),
+                  icon: icon,
+                );
               }),
             ],
           ),
         ),
-      ).then((_) {
-      });
+      ).then((_) {});
     },
   );
 
@@ -698,176 +684,73 @@ class UIHelper {
     ConfigItemPropertyDomain? tileTrailing,
   }) {
     showDialog(
-    context: context,
-    builder: (context) => StatefulBuilder(
-      builder: (BuildContext context, StateSetter setModalState) => AlertDialog(
-        title: statusIconTile(icon, dialogTitle),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(dialogInfo),
-            if (configCollection != null && tileLeading != null && tileTrailing != null)
-              ListTile(
-                leading: Text(configCollection.text(currentValue, domain: tileLeading)),
-                trailing: Text(configCollection.text(currentValue, domain: tileTrailing)),
-                minVerticalPadding: 0,
-              ),
-            if (tileLeading != null && tileTrailing != null)
-              SliderTheme(
-                data: sliderTheme ?? SliderThemeData(),
-                child: Slider(
-                  value: currentValue,
-                  min: minValue,
-                  max: maxValue,
-                  divisions: divisions?.toInt(),
-                  label: _translateOrFormat(currentValue, configCollection, trans),
-                  onChanged: (double newValue) {
-                    setModalState(() {
-                      currentValue = newValue;
-                    });
-                  },
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (BuildContext context, StateSetter setModalState) => AlertDialog(
+          title: statusIconTile(icon, dialogTitle),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(dialogInfo),
+              if (configCollection != null && tileLeading != null && tileTrailing != null)
+                ListTile(
+                  leading: Text(configCollection.text(currentValue, domain: tileLeading)),
+                  trailing: Text(configCollection.text(currentValue, domain: tileTrailing)),
+                  minVerticalPadding: 0,
                 ),
-              ),
-            if (tileLeading == null && tileTrailing == null)
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SliderTheme(
-                    data: sliderTheme ?? SliderThemeData(),
-                    child: Slider(
-                      value: currentValue,
-                      min: minValue,
-                      max: maxValue,
-                      divisions: divisions?.toInt(),
-                      label: _translateOrFormat(currentValue, configCollection, trans),
-                      onChanged: (double newValue) {
-                        setModalState(() {
-                          currentValue = newValue;
-                        });
-                      },
-                    ),
+              if (tileLeading != null && tileTrailing != null)
+                SliderTheme(
+                  data: sliderTheme ?? SliderThemeData(),
+                  child: Slider(
+                    value: currentValue,
+                    min: minValue,
+                    max: maxValue,
+                    divisions: divisions?.toInt(),
+                    label: _translateOrFormat(currentValue, configCollection, trans),
+                    onChanged: (double newValue) {
+                      setModalState(() {
+                        currentValue = newValue;
+                      });
+                    },
                   ),
-                  Text(_format(currentValue, configCollection)),
-                ],
-              ),
+                ),
+              if (tileLeading == null && tileTrailing == null)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SliderTheme(
+                      data: sliderTheme ?? SliderThemeData(),
+                      child: Slider(
+                        value: currentValue,
+                        min: minValue,
+                        max: maxValue,
+                        divisions: divisions?.toInt(),
+                        label: _translateOrFormat(currentValue, configCollection, trans),
+                        onChanged: (double newValue) {
+                          setModalState(() {
+                            currentValue = newValue;
+                          });
+                        },
+                      ),
+                    ),
+                    Text(_format(currentValue, configCollection)),
+                  ],
+                ),
+            ],
+          ),
+          actions: [
+            simpleButton(cancelLabel, () {
+              Navigator.pop(context, cancelLabel);
+            }),
+            primaryButton(saveLabel, () {
+              Navigator.pop(context, saveLabel);
+              toast(successAction(currentValue, _translateOrFormat(currentValue, configCollection, trans)), icon: icon);
+            }),
           ],
         ),
-        actions: [
-          simpleButton(cancelLabel, () {
-            Navigator.pop(context, cancelLabel);
-          }),
-          primaryButton(saveLabel, () {
-            Navigator.pop(context, saveLabel);
-            toast(successAction(currentValue, _translateOrFormat(currentValue, configCollection, trans)), icon: icon);
-          }),
-        ],
       ),
-    ),
-      );
-  }
-
-  ListTile listTileRadioDialog(
-    IconData icon,
-    String listTitle,
-    String? listSubtitle,
-    String dialogTitle,
-    String dialogInfo,
-    dynamic currentValue,
-    List<dynamic> values,
-    String cancelLabel,
-    String saveLabel, {
-    required String Function(dynamic value, String formattedValue) successAction,
-    bool withTrailing = true,
-    ConfigCollection? configCollection,
-    AppLocalizations? trans,
-  }) {
-    double sliderValue = values.indexOf(currentValue).toDouble();
-
-    List<Widget> subtitle = [];
-    if (listSubtitle != null) {
-      subtitle.add(Text(listSubtitle, style: TextStyle(fontSize: Theme
-          .of(context)
-          .textTheme
-          .labelSmall!
-          .fontSize)));
-    }
-    String translatedValue = (trans.toString() != 'null' && configCollection != null && trans != null)
-        ? configCollection.translate(currentValue, trans: trans)
-        : '';
-    if (translatedValue != '') {
-      subtitle.add(Text(translatedValue, style: TextStyle(fontSize: Theme
-          .of(context)
-          .textTheme
-          .labelSmall!
-          .fontSize)));
-    }
-    return ListTile(
-      leading: Icon(icon),
-      title: Text(listTitle),
-      subtitle: (subtitle.isNotEmpty)
-          ? Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: subtitle.toList(),
-      )
-          : null,
-      trailing: (withTrailing == true && configCollection != null)
-          ? trailingLabel(configCollection.format(currentValue))
-          : null,
-      onTap: () {
-        showDialog(
-          context: context,
-          builder: (context) =>
-              StatefulBuilder(
-                builder: (BuildContext context, StateSetter setModalState) =>
-                    AlertDialog(
-                      title: statusIconTile(icon, dialogTitle),
-                      content: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(dialogInfo),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Slider(
-                                value: sliderValue,
-                                min: 0,
-                                max: (values.length - 1).toDouble(),
-                                divisions: (values.length - 1),
-                                label: _translateOrFormat(currentValue, configCollection, trans),
-                                onChanged: (double newValue) {
-                                  setModalState(() {
-                                    sliderValue = newValue;
-                                    currentValue = values[sliderValue.toInt()];
-                                  });
-                                },
-                              ),
-                              Text(_format(currentValue, configCollection)),
-                            ],
-                          ),
-                        ],
-                      ),
-                      actions: [
-                        simpleButton(cancelLabel, () {
-                          Navigator.pop(context, cancelLabel);
-                        }),
-                        primaryButton(saveLabel, () {
-                          Navigator.pop(context, saveLabel);
-                          toast(
-                            successAction(currentValue, _translateOrFormat(currentValue, configCollection, trans)),
-                            icon: icon,
-                          );
-                        }),
-                      ],
-                    ),
-              ),
-        ).then((_) {
-        });
-      },
     );
   }
 
@@ -1050,17 +933,10 @@ class UIHelper {
   }) => ListTile(
     leading: Icon(icon),
     title: Text(listTitle),
-    trailing: trailingLabel(currentValue),
     subtitle: (listSubtitle == null)
         ? null
         : Text(listSubtitle, style: TextStyle(fontSize: Theme.of(context).textTheme.labelSmall!.fontSize)),
-    onTap: () => listDialog(
-      icon,
-      dialogTitle,
-      actions: options.toList(),
-      onDialogClosed: () {
-      },
-    ),
+    onTap: () => listDialog(icon, dialogTitle, actions: options.toList(), onDialogClosed: () {}),
   );
 
   Flexible gridBuilder({

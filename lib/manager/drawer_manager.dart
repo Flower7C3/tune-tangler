@@ -387,7 +387,7 @@ class DrawerManager {
     _uiHelper.listTileListDialog(
       AppIcon.language,
       _trans.languageVersion,
-      listSubtitle: AppGlobalConfig.languages.format(_settings.getConfig(AppConfigFieldKey.locale)),
+      listSubtitle: "${AppGlobalConfig.languages.format(_settings.getConfig(AppConfigFieldKey.locale))} (${_settings.getConfig(AppConfigFieldKey.locale).toLanguageTag()})",
       dialogTitle: _trans.changeLanguage,
       currentValue: _settings.getConfig(AppConfigFieldKey.locale).toLanguageTag(),
       options: AppGlobalConfig.languages
