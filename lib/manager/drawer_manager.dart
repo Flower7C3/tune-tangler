@@ -43,7 +43,7 @@ class DrawerManager {
 
   Widget get build => Drawer(
     key: _drawerKey,
-    child: _buildDrawerContent(),
+    child: RepaintBoundary(child: _DrawerContent(drawerManager: this)),
   );
 
   Widget _buildDrawerContent() => Column(
@@ -803,4 +803,49 @@ class DrawerManager {
       },
     ),
   ];
+}
+
+class _DrawerContent extends StatefulWidget {
+  final DrawerManager drawerManager;
+
+  const _DrawerContent({required this.drawerManager});
+
+  @override
+  State<_DrawerContent> createState() => _DrawerContentState();
+}
+
+class _DrawerContentState extends State<_DrawerContent> {
+  // bool _wasDrawerOpen = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Add listener to update drawer when settings change
+    widget.drawerManager._settings.addListener(_onSettingsChanged);
+  }
+
+  @override
+  void dispose() {
+    // Remove listener to prevent memory leaks
+    widget.drawerManager._settings.removeListener(_onSettingsChanged);
+    super.dispose();
+  }
+
+  void _onSettingsChanged() {
+    if (mounted) {
+      // Check if drawer is still open before rebuilding
+      final scaffoldState = Scaffold.maybeOf(context);
+      if (scaffoldState != null && scaffoldState.isDrawerOpen) {
+        setState(() {});
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Rebuild drawer when locale changes by using Localizations.localeOf
+    // This ensures drawer updates when language changes
+    Localizations.localeOf(context);
+    return widget.drawerManager._buildDrawerContent();
+  }
 }
