@@ -24,13 +24,7 @@ class RecordingManager {
   final TrackRepository _trackRepository;
   final AudioRecorder _audioRecorder;
 
-  RecordingManager(
-    this._settings,
-    this._trans,
-    this._uiHelper,
-    this._trackRepository,
-    this._audioRecorder,
-  );
+  RecordingManager(this._settings, this._trans, this._uiHelper, this._trackRepository, this._audioRecorder);
 
   Future<void> importRecording(Track track) async {
     if (await Permission.audio.request().isGranted == false) {
@@ -42,9 +36,7 @@ class RecordingManager {
       );
       return;
     }
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.audio,
-    );
+    FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.audio);
 
     if (result == null) {
       _uiHelper.toast(
@@ -68,31 +60,20 @@ class RecordingManager {
     track.setAudioSource(TrackAudioSource.file);
     _trackRepository.save(track);
 
-    _uiHelper.toast(
-      _trans.trackRecordingImported(track.name.value),
-      icon: AppIcon.trackRecordingImport,
-    );
+    _uiHelper.toast(_trans.trackRecordingImported(track.name.value), icon: AppIcon.trackRecordingImport);
   }
 
   RecordConfig _recordConfig() {
-    InputDevice? inputDevice = _settings.getConfig(
-      AppConfigFieldKey.recordingInputDevice,
-    );
-    AudioEncoder audioEncoder = _settings.getConfig(
-      AppConfigFieldKey.recordingAudioEncoder,
-    );
+    InputDevice? inputDevice = _settings.getConfig(AppConfigFieldKey.recordingInputDevice);
+    AudioEncoder audioEncoder = _settings.getConfig(AppConfigFieldKey.recordingAudioEncoder);
     int sampleRate = _settings.getConfig(AppConfigFieldKey.recordingSampleRate);
     int bitRate = _settings.getConfig(AppConfigFieldKey.recordingBitRate);
     int channels = AppGlobalConfig.recordingAudioMode.decode(
       _settings.getConfig(AppConfigFieldKey.recordingAudioModeStereo),
     );
     bool autoGain = _settings.getConfig(AppConfigFieldKey.recordingAutoGain);
-    bool echoCancel = _settings.getConfig(
-      AppConfigFieldKey.recordingEchoCancel,
-    );
-    bool noiseSuppress = _settings.getConfig(
-      AppConfigFieldKey.recordingNoiseSuppress,
-    );
+    bool echoCancel = _settings.getConfig(AppConfigFieldKey.recordingEchoCancel);
+    bool noiseSuppress = _settings.getConfig(AppConfigFieldKey.recordingNoiseSuppress);
     if (inputDevice == null) {
       return RecordConfig(
         encoder: audioEncoder,
@@ -171,20 +152,17 @@ class RecordingManager {
   }
 
   Future<void> _showRecordingNotification(Track track) async {
-    AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-          'recording_channel',
-          _trans.trackRecording,
-          importance: Importance.high,
-          priority: Priority.high,
-          ongoing: true,
-          silent: true,
-          onlyAlertOnce: true,
-        );
-
-    NotificationDetails platformChannelSpecifics = NotificationDetails(
-      android: androidPlatformChannelSpecifics,
+    AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
+      'recording_channel',
+      _trans.trackRecording,
+      importance: Importance.high,
+      priority: Priority.high,
+      ongoing: true,
+      silent: true,
+      onlyAlertOnce: true,
     );
+
+    NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
 
     flutterLocalNotificationsPlugin.show(
       0,

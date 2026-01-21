@@ -24,17 +24,10 @@ class HiveService {
     _trackSettingsBox.close();
   }
 
-  static Future<void> set(
-    dynamic key,
-    dynamic value, {
-    bool updateState = false,
-  }) async {
+  static Future<void> set(dynamic key, dynamic value, {bool updateState = false}) async {
     switch (key) {
       case AppConfigFieldKey _:
-        _globalSettingsBox.put(
-          AppConfigFieldsCollection.get(key).key.name,
-          value,
-        );
+        _globalSettingsBox.put(AppConfigFieldsCollection.get(key).key.name, value);
         switch (key) {
           case AppConfigFieldKey.wakelockEnabled:
             WakelockPlus.toggle(enable: value);
@@ -51,42 +44,31 @@ class HiveService {
   static dynamic get(dynamic key, {dynamic defaultValue}) => switch (key) {
     AppConfigFieldKey _ => _globalSettingsBox.get(
       AppConfigFieldsCollection.get(key).key.name,
-      defaultValue: AppConfigFieldsCollection.get(key).defaultValue,
+      defaultValue: defaultValue ?? AppConfigFieldsCollection.get(key).defaultValue,
     ),
-    TrackId _ => _trackSettingsBox.get(
-      key.toString(),
-      defaultValue: Track(key),
-    ),
+    TrackId _ => _trackSettingsBox.get(key.toString(), defaultValue: defaultValue ?? Track(key)),
     Object() => throw UnimplementedError(),
     null => throw UnimplementedError(),
   };
 
   static Future<void> delete(dynamic key) async => switch (key) {
-    AppConfigFieldKey _ => await _globalSettingsBox.delete(
-      AppConfigFieldsCollection.get(key).key.name,
-    ),
+    AppConfigFieldKey _ => await _globalSettingsBox.delete(AppConfigFieldsCollection.get(key).key.name),
     TrackId _ => await _trackSettingsBox.delete(key.toString()),
     Object() => throw UnimplementedError(),
     null => throw UnimplementedError(),
   };
 
   static bool containsKey(dynamic key) => switch (key) {
-    AppConfigFieldKey _ => _globalSettingsBox.containsKey(
-      AppConfigFieldsCollection.get(key).key.name,
-    ),
+    AppConfigFieldKey _ => _globalSettingsBox.containsKey(AppConfigFieldsCollection.get(key).key.name),
     TrackId _ => _trackSettingsBox.containsKey(key.toString()),
     Object() => throw UnimplementedError(),
     null => throw UnimplementedError(),
   };
 
-  static List<SettingsProfile> get listProfiles =>
-      _settingsProfilesBox.values.whereType<SettingsProfile>().toList();
+  static List<SettingsProfile> get listProfiles => _settingsProfilesBox.values.whereType<SettingsProfile>().toList();
 
-  static Future<void> addProfile(
-    SettingsProfile value, {
-    bool updateState = false,
-  }) async => _settingsProfilesBox.add(value);
+  static Future<void> addProfile(SettingsProfile value, {bool updateState = false}) async =>
+      _settingsProfilesBox.add(value);
 
-  static Future<void> deleteProfile(int index) async =>
-      _settingsProfilesBox.deleteAt(index);
+  static Future<void> deleteProfile(int index) async => _settingsProfilesBox.deleteAt(index);
 }
