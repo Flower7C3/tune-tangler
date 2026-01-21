@@ -32,7 +32,7 @@ class RowMenuManager {
         children: [
           _uiHelper.mediaPlayerButton(
             AppIcon.trackPlayingStart,
-            _trans.rowTracksPlayingStart(rowIndex),
+            _trans.rowTracksPlayingStart(TrackRow.name(rowIndex)),
             boxSize: Theme.of(_context).textTheme.displaySmall!.fontSize! * 0.9,
             onPressed: () => _trackRepository.startTracksPlaying(
               _trackRepository.rowTracks(rowIndex),
@@ -40,7 +40,7 @@ class RowMenuManager {
           ),
           _uiHelper.mediaPlayerButton(
             AppIcon.trackPlayingStop,
-            _trans.rowTracksPlayingStop(rowIndex),
+            _trans.rowTracksPlayingStop(TrackRow.name(rowIndex)),
             boxSize: Theme.of(_context).textTheme.displaySmall!.fontSize! * 0.9,
             onPressed: () => _trackRepository.stopTracksPlaying(
               _trackRepository.rowTracks(rowIndex),
