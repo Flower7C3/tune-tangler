@@ -127,7 +127,7 @@ class RowMenuManager {
             TrackRow.name(rowIndex),
             AppGlobalConfig.trackPlaybackVolume.format(selection),
           ),
-          icon: AppIcon.trackPlaybackSpeed,
+          icon: AppIcon.trackPlaybackVolume,
         );
         Navigator.pop(_context);
       },
