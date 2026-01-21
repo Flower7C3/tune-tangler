@@ -12,7 +12,6 @@ import '../config/app_config_fields.dart';
 import '../entity/track.dart';
 import '../repository/track_repository.dart';
 import '../src/generated/app_localizations.dart';
-import '../src/lazy_loading_manager.dart';
 import '../wrapper/hive_settings_provider.dart';
 
 class ProjectImportError {
@@ -186,11 +185,6 @@ class ProjectImportService {
 
       // 3. Reset tracks collection (cache)
       _trackRepository.resetTracksCollection();
-
-      // 4. Clear LazyLoadingManager cache (to force widget rebuild)
-      // This is crucial - LazyLoadingManager caches widgets, so we must clear the cache
-      // so widgets are rebuilt with new data from Hive
-      LazyLoadingManager().clearCache();
 
       // 5. Import all tracks BEFORE recordings
       // (so tracks exist in repository when we assign recordings to them)
@@ -584,14 +578,16 @@ class ProjectImportService {
     }
 
     if (settings.containsKey('gridRowsAmount')) {
-      await _settings.setConfig(AppConfigFieldKey.gridRowsAmount, settings['gridRowsAmount']);
+      _settings.setConfig(AppConfigFieldKey.gridRowsAmount, 0);
+      await Future.delayed(Duration(milliseconds: 100));
+      _settings.setConfig(AppConfigFieldKey.gridRowsAmount, settings['gridRowsAmount']);
     }
     if (settings.containsKey('gridColsAmount')) {
-      await _settings.setConfig(AppConfigFieldKey.gridColsAmount, settings['gridColsAmount']);
+      _settings.setConfig(AppConfigFieldKey.gridColsAmount, 0);
+      await Future.delayed(Duration(milliseconds: 100));
+      _settings.setConfig(AppConfigFieldKey.gridColsAmount, settings['gridColsAmount']);
     }
-    if (settings.containsKey('gridRowsAmount') || settings.containsKey('gridColsAmount')) {
-      _settings.reload();
-    }
+    _settings.reload();
   }
 
   Future<void> _importTracks(Archive archive, List<ProjectImportError> errors) async {

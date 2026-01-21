@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:tune_tangler/manager/project_export_import_manager.dart';
-import 'package:tune_tangler/src/lazy_loading_manager.dart';
 import 'package:tune_tangler/wrapper/app.dart';
 
 import '../config/app_config_fields.dart';
@@ -8,6 +8,7 @@ import '../manager/drawer_manager.dart';
 import '../manager/navigation_bar_manager.dart';
 import '../manager/row_menu_manager.dart';
 import '../manager/track_manager.dart';
+import '../wrapper/hive_settings_provider.dart';
 
 class HomeScreenManager {
   final AppWrapper _appWrapper;
@@ -16,7 +17,6 @@ class HomeScreenManager {
   late RowMenuManager _rowMenuManager;
   late TrackManager _trackManager;
   late ProjectExportImportManager _projectManager;
-  final LazyLoadingManager _lazyLoadingManager = LazyLoadingManager();
 
   HomeScreenManager(this._appWrapper) {
     _projectManager = ProjectExportImportManager(
@@ -64,28 +64,30 @@ class HomeScreenManager {
 
   Widget get drawer => _drawerManager.build;
 
-  Widget get body => Focus(focusNode: _appWrapper.focusNode, autofocus: true, onKeyEvent: keyEvent, child: tracksList);
-
-  Widget get bottomNavigationBar => _navigationBarManager.buildFooter;
-
-  Widget get tracksList {
-    final rowsAmount = _appWrapper.settings.getConfig(AppConfigFieldKey.gridRowsAmount);
-    final colsAmount = _appWrapper.settings.getConfig(AppConfigFieldKey.gridColsAmount);
-
-    return ListView.builder(
-      controller: PageController(viewportFraction: 0.85),
-      itemCount: rowsAmount,
-      itemBuilder: (context, rowIndex) => _lazyLoadingManager.lazyLoadWidget(
-        // Include locale and version in cache key to rebuild on language change and import
-        key:
-            'row_${rowIndex}_rows${rowsAmount}_cols${colsAmount}_locale_${_appWrapper.settings.getConfig(AppConfigFieldKey.locale).toLanguageTag()}_theme_${_appWrapper.settings.getConfig(AppConfigFieldKey.themeMode)}_color_${_appWrapper.settings.getConfig(AppConfigFieldKey.themeSeedColor).value}_v${_appWrapper.settings.version}',
-        builder: () => Row(
-          children: [_rowMenuManager.buildRowButtons(rowIndex), _trackManager.buildRowTracks(rowIndex, colsAmount)],
+  Widget get body => Focus(
+    focusNode: _appWrapper.focusNode,
+    autofocus: true,
+    onKeyEvent: keyEvent,
+    child: Selector<HiveSettingsProvider, int>(
+      selector: (context, settings) => settings.getConfig(AppConfigFieldKey.gridRowsAmount),
+      builder: (context, gridRowsAmount, child) => ListView.builder(
+        controller: PageController(viewportFraction: 0.85),
+        itemCount: gridRowsAmount,
+        itemBuilder: (context, rowIndex) => Row(
+          children: [
+            _rowMenuManager.buildRowButtons(rowIndex),
+            Selector<HiveSettingsProvider, int>(
+              selector: (context, settings) => settings.getConfig(AppConfigFieldKey.gridColsAmount),
+              builder: (context, gridColsAmount, child) => _trackManager.buildRowTracks(rowIndex, gridColsAmount),
+            ),
+          ],
         ),
-        placeholder: const SizedBox(height: 100),
       ),
-    );
-  }
+    ),
+  );
+
+  // Include locale and version in cache key to rebuild on language change and import
+  Widget get bottomNavigationBar => _navigationBarManager.buildFooter;
 
   KeyEventResult keyEvent(FocusNode node, KeyEvent event) {
     _trackManager.onKeyEvent(event);

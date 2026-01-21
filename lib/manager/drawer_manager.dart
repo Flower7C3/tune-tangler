@@ -39,12 +39,11 @@ class DrawerManager {
   }
 
   bool showUserDetails = false;
-  bool _hasChanges = false;
   static const Key _drawerKey = Key('drawer_key');
 
   Widget get build => Drawer(
     key: _drawerKey,
-    child: RepaintBoundary(child: _DrawerContent(drawerManager: this)),
+    child: _buildDrawerContent(),
   );
 
   Widget _buildDrawerContent() => Column(
@@ -276,8 +275,6 @@ class DrawerManager {
       _trans.buttonCancel,
       _trans.buttonSave,
       successAction: (double value, String formattedValue) {
-        // gridRowsAmount requires full reload after drawer close
-        _hasChanges = true;
         _settings.setConfig(AppConfigFieldKey.gridRowsAmount, value.toInt());
         _trackRepository.resetTracksCollection();
         return _trans.gridRowsAmountSuccess(formattedValue);
@@ -296,8 +293,6 @@ class DrawerManager {
       _trans.buttonCancel,
       _trans.buttonSave,
       successAction: (double value, String formattedValue) {
-        // gridColsAmount requires full reload after drawer close
-        _hasChanges = true;
         _settings.setConfig(AppConfigFieldKey.gridColsAmount, value.toInt());
         _trackRepository.resetTracksCollection();
         return _trans.gridColsAmountSuccess(formattedValue);
@@ -413,7 +408,6 @@ class DrawerManager {
       configCollection: AppGlobalConfig.screenThemeMode,
       trans: _trans,
       successAction: (dynamic value, String formattedValue) {
-        // themeMode only updates drawer, MaterialApp will pick up theme change automatically
         _settings.setConfig(AppConfigFieldKey.themeMode, value);
         return '';
       },
@@ -432,7 +426,6 @@ class DrawerManager {
       configCollection: AppGlobalConfig.userInterfaceColor,
       trans: _trans,
       successAction: (dynamic value, String formattedValue) {
-        // themeSeedColor only updates drawer, MaterialApp will pick up color change automatically
         _settings.setConfig(AppConfigFieldKey.themeSeedColor, value);
         return _trans.screenThemeColorSuccess(formattedValue);
       },
@@ -810,73 +803,4 @@ class DrawerManager {
       },
     ),
   ];
-}
-
-class _DrawerContent extends StatefulWidget {
-  final DrawerManager drawerManager;
-
-  const _DrawerContent({required this.drawerManager});
-
-  @override
-  State<_DrawerContent> createState() => _DrawerContentState();
-}
-
-class _DrawerContentState extends State<_DrawerContent> {
-  bool _wasDrawerOpen = true;
-
-  @override
-  void initState() {
-    super.initState();
-    // Add listener to update drawer when settings change
-    widget.drawerManager._settings.addListener(_onSettingsChanged);
-    // Monitor drawer state changes
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _monitorDrawerState();
-    });
-  }
-
-  @override
-  void dispose() {
-    // Remove listener to prevent memory leaks
-    widget.drawerManager._settings.removeListener(_onSettingsChanged);
-    super.dispose();
-  }
-
-  void _monitorDrawerState() {
-    if (!mounted) return;
-    final scaffoldState = Scaffold.maybeOf(context);
-    if (scaffoldState != null) {
-      final isDrawerOpen = scaffoldState.isDrawerOpen;
-      if (_wasDrawerOpen && !isDrawerOpen && widget.drawerManager._hasChanges) {
-        // Drawer was closed, trigger reload if there were changes
-        widget.drawerManager._hasChanges = false;
-        widget.drawerManager._settings.reload();
-      }
-      _wasDrawerOpen = isDrawerOpen;
-      // Continue monitoring
-      Future.delayed(const Duration(milliseconds: 50), () {
-        if (mounted) {
-          _monitorDrawerState();
-        }
-      });
-    }
-  }
-
-  void _onSettingsChanged() {
-    if (mounted) {
-      // Check if drawer is still open before rebuilding
-      final scaffoldState = Scaffold.maybeOf(context);
-      if (scaffoldState != null && scaffoldState.isDrawerOpen) {
-        setState(() {});
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // Rebuild drawer when locale changes by using Localizations.localeOf
-    // This ensures drawer updates when language changes
-    Localizations.localeOf(context);
-    return widget.drawerManager._buildDrawerContent();
-  }
 }
