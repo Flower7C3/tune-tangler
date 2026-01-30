@@ -3,6 +3,15 @@ name: Test Workflow
 on:
   pull_request:
     branches: [ main ]
+    paths-ignore:
+      - '.githooks/**'
+      - '.github/**'
+      - '.idea/**'
+      - '.vscode/**'
+      - 'docs/**'
+      - 'assets/screenshots/**'
+      - 'Makefile'
+      - 'README.md'
 
 # Version variables for dependencies
 env:
