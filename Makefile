@@ -163,6 +163,14 @@ install-apk: ##BUILD## Build and install APK in debug mode
 	adb -s $$DEVICE install -r build/app/outputs/flutter-apk/app-debug.apk; \
 	echo "$(COLOR_GREEN)$(ICON_CHECK)APK installed on $(FORMAT_BOLD)$$DEVICE$(FORMAT_RESET)$(COLOR_GREEN) device!$(FORMAT_RESET)"
 
+.PHONY: install-apk-release
+install-apk-release:
+	@echo "$(FORMAT_HIGHLIGHT)$(ICON_BUILD) APK Installation$(FORMAT_RESET)"
+	@DEVICE=$(DEVICE); $(choose-device); \
+	echo "$(COLOR_BLUE)$(ICON_INFO) Installing $(FORMAT_BOLD)debug$(FORMAT_RESET)$(COLOR_BLUE) APK on $(FORMAT_BOLD)$$DEVICE$(FORMAT_RESET)$(COLOR_BLUE) device...$(FORMAT_RESET)"; \
+	adb -s $$DEVICE install -r build/app/outputs/flutter-apk/app-arm64-v8a-release.apk; \
+	echo "$(COLOR_GREEN)$(ICON_CHECK)APK installed on $(FORMAT_BOLD)$$DEVICE$(FORMAT_RESET)$(COLOR_GREEN) device!$(FORMAT_RESET)"
+
 .PHONY: clean
 clean: ##BUILD## Clean build and cache
 	@echo "$(ICON_CLEAN) Cleaning build and cache...$(FORMAT_RESET)"
@@ -307,6 +315,46 @@ gen-icons: ##UTILITIES## Generate app icons
 gen-splash: ##UTILITIES## Generate splash screen
 	@echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Generating splash screen...$(FORMAT_RESET)"
 	@flutter packages pub run flutter_native_splash:create
+
+# Screenshots: DEVICE_ID=adb_id DEVICE_NAME=pixel9|tablet10 (name for filenames)
+SCREENSHOTS_DIR := assets/screenshots
+SCREENSHOTS_LANGS := en pl
+SCREENSHOTS_MODES := light dark
+SCREENSHOTS_SCREENS := main recording details drawer
+
+.PHONY: screenshots
+screenshots: ##DEVICE## Capture screenshot set (DEVICE_ID= optional, DEVICE_NAME= e.g. pixel9 tablet10)
+	@device_id="$(DEVICE_ID)"; device_name="$(DEVICE_NAME)"; \
+	mkdir -p $(SCREENSHOTS_DIR); \
+	if [ -z "$$device_id" ]; then \
+		DEVICES=($$(adb devices | grep -E "^[^[:space:]]+[[:space:]]+device" | awk '{print $$1}')); \
+		if [ "$${#DEVICES[@]}" -eq 0 ]; then \
+			echo "$(COLOR_RED)$(ICON_ERROR) No devices found!$(FORMAT_RESET)"; exit 1; \
+		fi; \
+		echo "$(COLOR_CYAN)$(ICON_INFO) Select device (ID):$(FORMAT_RESET)"; \
+		select device_id in "$${DEVICES[@]}"; do \
+			if [ -n "$$device_id" ]; then break; fi; \
+			echo "$(COLOR_RED)$(ICON_ERROR) Invalid selection$(FORMAT_RESET)"; \
+		done; \
+		echo "$(COLOR_BLUE)$(ICON_INFO) Device: $(FORMAT_BOLD)$$device_id$(FORMAT_RESET)$(COLOR_BLUE)$(FORMAT_RESET)"; \
+	fi; \
+	if [ -z "$$device_name" ]; then device_name="$$device_id"; fi; \
+	echo "$(COLOR_BLUE)$(ICON_INFO) Device name for files: $(FORMAT_BOLD)$$device_name$(FORMAT_RESET)$(COLOR_BLUE)$(FORMAT_RESET)"; \
+	echo "$(FORMAT_HIGHLIGHT)$(ICON_BUILD) Screenshots → $(SCREENSHOTS_DIR)/tune-tangler-$$device_name-<lang>-<mode>-<screen>.png$(FORMAT_RESET)"; \
+	for lang in $(SCREENSHOTS_LANGS); do \
+		for mode in $(SCREENSHOTS_MODES); do \
+			echo ""; \
+			printf "$(COLOR_YELLOW)Prepare $(FORMAT_BOLD)%s %s$(FORMAT_RESET)$(COLOR_YELLOW) mode and hit Enter...$(FORMAT_RESET)" "$$lang" "$$mode"; read _; \
+			for screen in $(SCREENSHOTS_SCREENS); do \
+				file="$(SCREENSHOTS_DIR)/tune-tangler-$$device_name-$$lang-$$mode-$$screen.png"; \
+				printf "  taking $(FORMAT_BOLD)%s %s %-12s$(FORMAT_RESET) " "$$lang" "$$mode" "$$screen"; \
+				printf "[3]"; sleep 1; printf "\b\b\b[2]"; sleep 1; printf "\b\b\b[1]"; sleep 1; printf "\b\b\b[0]\a"; \
+				adb -s "$$device_id" exec-out screencap -p > "$$file" && printf "\b\b\b[$(COLOR_GREEN)done$(FORMAT_RESET)]\n" || printf "\b\b\b[$(COLOR_RED)done$(FORMAT_RESET)]\n"; \
+			done; \
+		done; \
+	done; \
+	echo ""; \
+	echo "$(COLOR_GREEN)$(ICON_CHECK) Screenshots saved to $(SCREENSHOTS_DIR)/$(FORMAT_RESET)"
 
 # =============================================================================
 # GIT HOOKS MANAGEMENT
