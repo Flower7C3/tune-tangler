@@ -4,6 +4,16 @@ on:
   workflow_dispatch:
   push:
     branches: [ main ]
+    paths-ignore:
+      - '.githooks/**'
+      - '.github/**'
+      - '.idea/**'
+      - '.vscode/**'
+      - 'docs/**'
+      - 'docs/**'
+      - 'assets/screenshots/**'
+      - 'Makefile'
+      - 'README.md'
 
 permissions:
   contents: write
