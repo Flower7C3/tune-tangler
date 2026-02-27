@@ -14,6 +14,7 @@ class AppWrapper {
   final AudioRecorder audioRecorder;
   final TrackRepository trackRepository;
   final FocusNode focusNode;
+  final bool hasDynamicColor;
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   late BuildContext context;
   late UIHelper uiHelper;
@@ -24,6 +25,7 @@ class AppWrapper {
     required this.audioRecorder,
     required this.trackRepository,
     required this.focusNode,
+    this.hasDynamicColor = false,
   });
 
   void setContext(BuildContext ctx) {

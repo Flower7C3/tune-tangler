@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   audioplayers_windows
+  dynamic_color
   emoji_picker_flutter
   permission_handler_windows
   record_windows

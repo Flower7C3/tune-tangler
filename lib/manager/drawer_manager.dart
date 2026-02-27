@@ -24,6 +24,7 @@ class DrawerManager {
   final UIHelper _uiHelper;
   final TrackRepository _trackRepository;
   final AudioRecorder _audioRecorder;
+  final bool _hasDynamicColor;
   late final SettingProfileWrapper _settingsProfileWrapper;
 
   DrawerManager(
@@ -34,6 +35,7 @@ class DrawerManager {
     this._uiHelper,
     this._trackRepository,
     this._audioRecorder,
+    this._hasDynamicColor,
   ) {
     _settingsProfileWrapper = SettingProfileWrapper(_context, _trans, _settings, _uiHelper);
   }
@@ -422,9 +424,12 @@ class DrawerManager {
       dialogTitle: _trans.screenThemeColorTitle,
       dialogInfo: _trans.screenThemeColorInfo,
       currentValue: _settings.getConfig(AppConfigFieldKey.themeSeedColor),
-      values: AppGlobalConfig.userInterfaceColor.values<Color>().toList(),
+      values: _hasDynamicColor
+          ? AppGlobalConfig.userInterfaceColor.values<Color>().toList()
+          : AppGlobalConfig.userInterfaceColor.values<Color>().where((c) => c != AppGlobalConfig.systemAccentColor).toList(),
       configCollection: AppGlobalConfig.userInterfaceColor,
       trans: _trans,
+      systemColorSentinel: _hasDynamicColor ? AppGlobalConfig.systemAccentColor : null,
       successAction: (dynamic value, String formattedValue) {
         _settings.setConfig(AppConfigFieldKey.themeSeedColor, value);
         return _trans.screenThemeColorSuccess(formattedValue);

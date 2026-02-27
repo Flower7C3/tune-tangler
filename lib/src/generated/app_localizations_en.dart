@@ -724,7 +724,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get disabled => 'disabled';
 
   @override
-  String get screenThemeColor => 'Theme accent color';
+  String get screenSystemThemeColor => 'device settings';
+
+  @override
+  String get screenThemeColor => 'Accent color';
 
   @override
   String screenThemeColorValue(Object value) {

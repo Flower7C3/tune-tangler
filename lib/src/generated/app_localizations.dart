@@ -1205,10 +1205,16 @@ abstract class AppLocalizations {
   /// **'disabled'**
   String get disabled;
 
+  /// No description provided for @screenSystemThemeColor.
+  ///
+  /// In en, this message translates to:
+  /// **'device settings'**
+  String get screenSystemThemeColor;
+
   /// No description provided for @screenThemeColor.
   ///
   /// In en, this message translates to:
-  /// **'Theme accent color'**
+  /// **'Accent color'**
   String get screenThemeColor;
 
   /// No description provided for @screenThemeColorValue.

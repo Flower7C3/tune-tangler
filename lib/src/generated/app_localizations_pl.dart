@@ -730,7 +730,10 @@ class AppLocalizationsPl extends AppLocalizations {
   String get disabled => 'wyłączono';
 
   @override
-  String get screenThemeColor => 'Kolor akcentu motywu';
+  String get screenSystemThemeColor => 'wg urządzenia';
+
+  @override
+  String get screenThemeColor => 'Kolor akcentu';
 
   @override
   String screenThemeColorValue(Object value) {

@@ -43,6 +43,7 @@ class HomeScreenManager {
       _appWrapper.uiHelper,
       _appWrapper.trackRepository,
       _appWrapper.audioRecorder,
+      _appWrapper.hasDynamicColor,
     );
     _rowMenuManager = RowMenuManager(
       _appWrapper.context,

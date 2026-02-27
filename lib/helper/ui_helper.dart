@@ -826,37 +826,94 @@ class UIHelper {
     required String Function(dynamic value, String formattedValue) successAction,
     ConfigCollection? configCollection,
     AppLocalizations? trans,
-  }) => ListTile(
-    leading: Icon(icon),
-    title: Text(listTitle),
-    subtitle: listSubtitle == null ? null : Text(listSubtitle),
-    trailing: Container(
+    Color? systemColorSentinel,
+  }) {
+    final isSystemSelected = systemColorSentinel != null && currentValue == systemColorSentinel;
+    final trailingWidget = Container(
       width: 30,
       height: 30,
-      decoration: BoxDecoration(color: currentValue, borderRadius: BorderRadius.circular(24)),
-    ),
-    onTap: () => alertDialog(
-      AppIcon.screenThemeColor,
-      dialogTitle,
-      contentText: dialogInfo,
-      contentWidget: gridBuilder(
-        itemCount: values.length,
-        itemBuilder: (context, index) => ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: values[index],
-            shape: CircleBorder(),
-            padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isSystemSelected ? Theme.of(context).colorScheme.primary : currentValue,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: isSystemSelected
+          ? Icon(Icons.brightness_5_outlined, size: 16, color: Theme.of(context).colorScheme.onPrimary)
+          : null,
+    );
+
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(listTitle),
+      subtitle: listSubtitle == null
+          ? null
+          : Text(listSubtitle, style: TextStyle(fontSize: Theme.of(context).textTheme.labelSmall!.fontSize)),
+      trailing: trailingWidget,
+      onTap: () => alertDialog(
+        AppIcon.screenThemeColor,
+        dialogTitle,
+        contentText: dialogInfo,
+        contentWidget: Flexible(
+          child: SizedBox(
+            width: double.maxFinite,
+            child: GridView.builder(
+              shrinkWrap: true,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 4,
+                crossAxisSpacing: gridGap,
+                mainAxisSpacing: gridGap,
+                childAspectRatio: 1,
+              ),
+              padding: EdgeInsets.zero,
+              itemCount: values.length,
+              itemBuilder: (context, index) {
+                final color = values[index];
+                final isSystemOption = systemColorSentinel != null && color == systemColorSentinel;
+                final label = _translateOrFormat(color, configCollection, trans);
+                final isSelected = color == currentValue;
+                return InkWell(
+                  borderRadius: BorderRadius.circular(8),
+                  onTap: () {
+                    Navigator.pop(context);
+                    toast(successAction(color, label), icon: icon);
+                  },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: gridGap * 7,
+                        height: gridGap * 7,
+                        decoration: BoxDecoration(
+                          color: isSystemOption ? Theme.of(context).colorScheme.surfaceContainerHighest : color,
+                          shape: BoxShape.circle,
+                          border: isSelected
+                              ? Border.all(color: Theme.of(context).colorScheme.onSurface, width: 2.5)
+                              : isSystemOption
+                                  ? Border.all(color: Theme.of(context).colorScheme.outline, width: 1.5)
+                                  : null,
+                        ),
+                        child: isSystemOption
+                            ? Center(child: Icon(Icons.brightness_5_outlined, size: 18, color: Theme.of(context).colorScheme.primary))
+                            : null,
+                      ),
+                      SizedBox(height: 2),
+                      Text(
+                        label,
+                        style: Theme.of(context).textTheme.labelSmall,
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
-          onPressed: () {
-            dynamic selectedValue = values[index];
-            Navigator.pop(context);
-            toast(successAction(selectedValue, _translateOrFormat(selectedValue, configCollection, trans)), icon: icon);
-          },
-          child: null,
         ),
       ),
-    ),
-  );
+    );
+  }
 
   ListTile listTileSwitch(
     IconData icon,

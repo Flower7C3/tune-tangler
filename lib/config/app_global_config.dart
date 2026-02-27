@@ -437,7 +437,17 @@ final class AppGlobalConfig {
     defaultValue: _getSystemLocale(),
   );
 
+  /// Sentinel value meaning "use system/wallpaper accent color" (Android 12+ Dynamic Color).
+  static const Color systemAccentColor = Color(0x00000001);
+
   static final ConfigCollection userInterfaceColor = ConfigCollection([
+    ConfigItem<Color>(
+      systemAccentColor,
+      properties: [
+        ConfigItemIconProperty(AppIcon.screenSystemThemeMode),
+        ConfigItemTranslatableProperty((trans) => trans.screenSystemThemeColor),
+      ],
+    ),
     ConfigItem<Color>(Colors.red, properties: [ConfigItemTranslatableProperty((trans) => trans.red)]),
     ConfigItem<Color>(Colors.green, properties: [ConfigItemTranslatableProperty((trans) => trans.green)]),
     ConfigItem<Color>(Colors.blue, properties: [ConfigItemTranslatableProperty((trans) => trans.blue)]),
@@ -453,7 +463,7 @@ final class AppGlobalConfig {
     ConfigItem<Color>(Colors.brown, properties: [ConfigItemTranslatableProperty((trans) => trans.brown)]),
     ConfigItem<Color>(Colors.teal, properties: [ConfigItemTranslatableProperty((trans) => trans.teal)]),
     ConfigItem<Color>(Colors.black, properties: [ConfigItemTranslatableProperty((trans) => trans.black)]),
-  ], defaultValue: Color.fromRGBO(162, 0, 255, 1));
+  ], defaultValue: systemAccentColor);
 
   static final ConfigCollection trackState = ConfigCollection([
     ConfigItem<TrackState>(

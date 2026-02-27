@@ -1,3 +1,4 @@
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
@@ -58,6 +59,8 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
   late TrackRepository _trackRepository;
   final PermissionProvider _permissionProvider = PermissionProvider();
   final GlobalKey _homeScreenKey = GlobalKey();
+  ColorScheme? _lightDynamic;
+  ColorScheme? _darkDynamic;
 
   @override
   void initState() {
@@ -66,6 +69,21 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
     _audioRecorder = AudioRecorder();
     _focusNode.requestFocus();
     _permissionProvider.init();
+    _fetchDynamicColors();
+  }
+
+  Future<void> _fetchDynamicColors() async {
+    try {
+      final corePalette = await DynamicColorPlugin.getCorePalette();
+      if (corePalette != null && mounted) {
+        _lightDynamic = corePalette.toColorScheme();
+        _darkDynamic = corePalette.toColorScheme(brightness: Brightness.dark);
+        final currentColor = context.read<HiveSettingsProvider>().getConfig(AppConfigFieldKey.themeSeedColor);
+        if (currentColor == AppGlobalConfig.systemAccentColor) {
+          setState(() {});
+        }
+      }
+    } catch (_) {}
   }
 
   @override
@@ -105,6 +123,7 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
       audioRecorder: _audioRecorder,
       trackRepository: _trackRepository,
       focusNode: _focusNode,
+      hasDynamicColor: _lightDynamic != null,
     );
 
     return Selector<HiveSettingsProvider, _AppSettings>(
@@ -113,43 +132,36 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
         themeMode: settings.getConfig(AppConfigFieldKey.themeMode),
         themeSeedColor: settings.getConfig(AppConfigFieldKey.themeSeedColor),
       ),
-      builder: (context, appSettings, child) => MaterialApp(
-        localizationsDelegates: [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: AppGlobalConfig.languages.values<Locale>(),
-        localeResolutionCallback: (locale, supportedLocales) =>
-            _settings.getConfig(AppConfigFieldKey.locale, defaultValue: locale),
-        locale: appSettings.locale,
-        themeAnimationDuration: Duration(seconds: 0),
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: appSettings.themeSeedColor,
-            brightness: Brightness.light,
-          ),
-          useMaterial3: true,
-        ),
-        darkTheme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: appSettings.themeSeedColor,
-            brightness: Brightness.dark,
-          ),
-          useMaterial3: true,
-        ),
-        themeMode: appSettings.themeMode,
-        home: HomeScreen(key: _homeScreenKey, appWrapper: appWrapper),
-        // initialRoute: '/',
-        // routes: {
-        //   '/': (context) =>
-        //       HomeScreen(
-        //         settingsGet: _settings.get,
-        //         settingsSet: _settingsSet,
-        //         audioRecorder: _audioRecorder,
-        // },
-      ),
+      builder: (context, appSettings, child) {
+        final isSystem = appSettings.themeSeedColor == AppGlobalConfig.systemAccentColor;
+        final Color fallbackSeed = isSystem
+            ? const Color.fromRGBO(162, 0, 255, 1)
+            : appSettings.themeSeedColor;
+        final lightScheme = isSystem && _lightDynamic != null
+            ? _lightDynamic!
+            : ColorScheme.fromSeed(seedColor: fallbackSeed, brightness: Brightness.light);
+        final darkScheme = isSystem && _darkDynamic != null
+            ? _darkDynamic!
+            : ColorScheme.fromSeed(seedColor: fallbackSeed, brightness: Brightness.dark);
+
+        return MaterialApp(
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppGlobalConfig.languages.values<Locale>(),
+          localeResolutionCallback: (locale, supportedLocales) =>
+              _settings.getConfig(AppConfigFieldKey.locale, defaultValue: locale),
+          locale: appSettings.locale,
+          themeAnimationDuration: Duration(seconds: 0),
+          theme: ThemeData(colorScheme: lightScheme, useMaterial3: true),
+          darkTheme: ThemeData(colorScheme: darkScheme, useMaterial3: true),
+          themeMode: appSettings.themeMode,
+          home: HomeScreen(key: _homeScreenKey, appWrapper: appWrapper),
+        );
+      },
     );
   }
 }
