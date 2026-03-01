@@ -8,6 +8,7 @@ import 'package:tune_tangler/screen/home_screen.dart';
 import 'package:tune_tangler/src/audio_isolate_service.dart';
 import 'package:tune_tangler/src/audio_memory_pool.dart';
 import 'package:tune_tangler/src/icon_optimization_service.dart';
+import 'package:tune_tangler/src/screenshot_service.dart';
 import 'package:tune_tangler/wrapper/app.dart';
 import 'package:tune_tangler/wrapper/hive_service.dart';
 import 'package:tune_tangler/wrapper/hive_settings_provider.dart';
@@ -59,8 +60,10 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
   late TrackRepository _trackRepository;
   final PermissionProvider _permissionProvider = PermissionProvider();
   final GlobalKey _homeScreenKey = GlobalKey();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   ColorScheme? _lightDynamic;
   ColorScheme? _darkDynamic;
+  ScreenshotService? _screenshotService;
 
   @override
   void initState() {
@@ -88,6 +91,7 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
 
   @override
   void dispose() {
+    _screenshotService?.dispose();
     WidgetsBinding.instance.removeObserver(this);
     _audioRecorder.dispose();
     HiveService.dispose();
@@ -116,6 +120,7 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
     _settings = context.read<HiveSettingsProvider>();
     _trackRepository = TrackRepository(_settings);
     WakelockPlus.toggle(enable: _settings.getConfig(AppConfigFieldKey.wakelockEnabled));
+    _screenshotService ??= ScreenshotService(_settings, _scaffoldKey);
 
     AppWrapper appWrapper = AppWrapper(
       settings: _settings,
@@ -123,6 +128,7 @@ class _MainScreenAppState extends State<MainScreenApp> with WidgetsBindingObserv
       audioRecorder: _audioRecorder,
       trackRepository: _trackRepository,
       focusNode: _focusNode,
+      scaffoldKey: _scaffoldKey,
       hasDynamicColor: _lightDynamic != null,
     );
 

@@ -40,25 +40,40 @@ final class ConfigCollection {
 
   Iterable<ConfigItem> _getByValue(dynamic value) => items.where((item) => item.value == value);
 
-  String text(dynamic value, {ConfigItemPropertyDomain domain = ConfigItemPropertyDomain.defaultProperty}) =>
-      _getByValue(
-        value,
-      ).first.properties.whereType<ConfigItemTextProperty>().firstWhere((property) => (property.domain == domain)).text;
+  String text(dynamic value, {ConfigItemPropertyDomain domain = ConfigItemPropertyDomain.defaultProperty}) {
+    final item = _getByValue(value).firstOrNull;
+    if (item == null) return value.toString();
+    return item.properties
+        .whereType<ConfigItemTextProperty>()
+        .where((property) => property.domain == domain)
+        .firstOrNull
+        ?.text ?? value.toString();
+  }
 
-  IconData icon(dynamic value, {ConfigItemPropertyDomain domain = ConfigItemPropertyDomain.defaultProperty}) =>
-      _getByValue(
-        value,
-      ).first.properties.whereType<ConfigItemIconProperty>().firstWhere((property) => (property.domain == domain)).icon;
+  IconData icon(dynamic value, {ConfigItemPropertyDomain domain = ConfigItemPropertyDomain.defaultProperty}) {
+    final item = _getByValue(value).firstOrNull;
+    if (item == null) return Icons.help_outline;
+    return item.properties
+        .whereType<ConfigItemIconProperty>()
+        .where((property) => property.domain == domain)
+        .firstOrNull
+        ?.icon ?? Icons.help_outline;
+  }
 
   Color color(
     dynamic value, {
     required BuildContext context,
     ConfigItemPropertyDomain domain = ConfigItemPropertyDomain.defaultProperty,
-  }) => _getByValue(value).first.properties
-      .whereType<ConfigItemColorProperty>()
-      .firstWhere((property) => (property.domain == domain))
-      .callback
-      .call(context);
+  }) {
+    final item = _getByValue(value).firstOrNull;
+    if (item == null) return Theme.of(context).colorScheme.primary;
+    final property = item.properties
+        .whereType<ConfigItemColorProperty>()
+        .where((property) => property.domain == domain)
+        .firstOrNull;
+    if (property == null) return Theme.of(context).colorScheme.primary;
+    return property.callback.call(context);
+  }
 
   String translate(
     dynamic value, {

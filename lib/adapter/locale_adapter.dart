@@ -7,8 +7,8 @@ class LocaleAdapter extends TypeAdapter<Locale> {
 
   @override
   Locale read(BinaryReader reader) {
-    final index = reader.readString().split('-');
-    return Locale(index[0], index[1]);
+    final parts = reader.readString().split('-');
+    return Locale(parts[0], parts.length > 1 ? parts[1] : '');
   }
 
   @override

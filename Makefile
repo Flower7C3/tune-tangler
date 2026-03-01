@@ -316,14 +316,21 @@ gen-splash: ##UTILITIES## Generate splash screen
 	@echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Generating splash screen...$(FORMAT_RESET)"
 	@flutter packages pub run flutter_native_splash:create
 
-# Screenshots: DEVICE_ID=adb_id DEVICE_NAME=pixel9|tablet10 (name for filenames)
+# Screenshots: DEVICE_ID=adb_id DEVICE_NAME=pixel9|tablet10 SCREEN=main (name for filenames)
 SCREENSHOTS_DIR := assets/screenshots
 SCREENSHOTS_LANGS := en pl
 SCREENSHOTS_MODES := light dark
-SCREENSHOTS_SCREENS := main recording details drawer
+SCREENSHOTS_SCREENS := main drawer drawer-recording drawer-tracks drawer-screen drawer-danger navigation-menu row-menu details-empty recording details-recording details-overview details-controls details-info
+SCREEN :=
+SCREENSHOTS_SCREENS_RESOLVED := $(if $(SCREEN),$(SCREEN),$(SCREENSHOTS_SCREENS))
+SCREENSHOT_ACTION := pro.kwiatek.tune_tangler.SCREENSHOT_CMD
+SCREENSHOT_DEMO_ACTION := com.android.systemui.demo
+SCREENSHOT_DELAY_SHORT := 0.3
+SCREENSHOT_DELAY_ANIM := 0.8
+SCREENSHOT_DELAY_REBUILD := 1.0
 
 .PHONY: screenshots
-screenshots: ##DEVICE## Capture screenshot set (DEVICE_ID= optional, DEVICE_NAME= e.g. pixel9 tablet10)
+screenshots: ##DEVICE## Capture screenshot set (`DEVICE_ID=` DEVICE_NAME= SCREEN= optional)
 	@device_id="$(DEVICE_ID)"; device_name="$(DEVICE_NAME)"; \
 	mkdir -p $(SCREENSHOTS_DIR); \
 	if [ -z "$$device_id" ]; then \
@@ -340,18 +347,117 @@ screenshots: ##DEVICE## Capture screenshot set (DEVICE_ID= optional, DEVICE_NAME
 	fi; \
 	if [ -z "$$device_name" ]; then device_name="$$device_id"; fi; \
 	echo "$(COLOR_BLUE)$(ICON_INFO) Device name for files: $(FORMAT_BOLD)$$device_name$(FORMAT_RESET)$(COLOR_BLUE)$(FORMAT_RESET)"; \
-	echo "$(FORMAT_HIGHLIGHT)$(ICON_BUILD) Screenshots → $(SCREENSHOTS_DIR)/tune-tangler-$$device_name-<lang>-<mode>-<screen>.png$(FORMAT_RESET)"; \
-	for lang in $(SCREENSHOTS_LANGS); do \
-		for mode in $(SCREENSHOTS_MODES); do \
-			echo ""; \
-			printf "$(COLOR_YELLOW)Prepare $(FORMAT_BOLD)%s %s$(FORMAT_RESET)$(COLOR_YELLOW) mode and hit Enter...$(FORMAT_RESET)" "$$lang" "$$mode"; read _; \
-			for screen in $(SCREENSHOTS_SCREENS); do \
-				file="$(SCREENSHOTS_DIR)/tune-tangler-$$device_name-$$lang-$$mode-$$screen.png"; \
-				printf "  taking $(FORMAT_BOLD)%s %s %-12s$(FORMAT_RESET) " "$$lang" "$$mode" "$$screen"; \
-				printf "[3]"; sleep 1; printf "\b\b\b[2]"; sleep 1; printf "\b\b\b[1]"; sleep 1; printf "\b\b\b[0]\a"; \
-				adb -s "$$device_id" exec-out screencap -p > "$$file" && printf "\b\b\b[$(COLOR_GREEN)done$(FORMAT_RESET)]\n" || printf "\b\b\b[$(COLOR_RED)done$(FORMAT_RESET)]\n"; \
+	echo "$(FORMAT_HIGHLIGHT)$(ICON_BUILD) Screenshots → $(SCREENSHOTS_DIR)/tune-tangler-$$device_name-<lang>-<mode>-<index>-<screen>.png$(FORMAT_RESET)"; \
+	echo ""; \
+	echo "$(COLOR_CYAN)$(ICON_INFO) Automated screens: $(FORMAT_BOLD)main, drawer*$(FORMAT_RESET)$(COLOR_CYAN) (language & theme switched via ADB)$(FORMAT_RESET)"; \
+	echo "$(COLOR_YELLOW)$(ICON_INFO) Manual screens will prompt you to prepare the app$(FORMAT_RESET)"; \
+	echo ""; \
+	cleanup() { \
+		echo ""; \
+		echo "$(COLOR_CYAN)$(ICON_INFO) Restoring device settings...$(FORMAT_RESET)"; \
+		adb -s "$$device_id" shell am broadcast -a $(SCREENSHOT_DEMO_ACTION) -e command exit > /dev/null 2>&1; \
+		adb -s "$$device_id" shell am broadcast -a $(SCREENSHOT_ACTION) --es cmd closeDrawer > /dev/null 2>&1; \
+		echo "$(COLOR_GREEN)$(ICON_CHECK) Demo mode disabled$(FORMAT_RESET)"; \
+	}; \
+	trap cleanup EXIT; \
+	echo "$(COLOR_CYAN)$(ICON_INFO) Enabling demo mode (clean status bar)...$(FORMAT_RESET)"; \
+	adb -s "$$device_id" shell settings put global sysui_demo_allowed 1 > /dev/null 2>&1; \
+	adb -s "$$device_id" shell am broadcast -a $(SCREENSHOT_DEMO_ACTION) -e command enter > /dev/null 2>&1; \
+	adb -s "$$device_id" shell am broadcast -a $(SCREENSHOT_DEMO_ACTION) -e command clock -e hhmm 1200 > /dev/null 2>&1; \
+	adb -s "$$device_id" shell am broadcast -a $(SCREENSHOT_DEMO_ACTION) -e command battery -e level 100 -e plugged false > /dev/null 2>&1; \
+	adb -s "$$device_id" shell am broadcast -a $(SCREENSHOT_DEMO_ACTION) -e command network -e wifi show -e level 4 > /dev/null 2>&1; \
+	adb -s "$$device_id" shell am broadcast -a $(SCREENSHOT_DEMO_ACTION) -e command network -e mobile show -e datatype none -e level 4 > /dev/null 2>&1; \
+	adb -s "$$device_id" shell am broadcast -a $(SCREENSHOT_DEMO_ACTION) -e command notifications -e visible false > /dev/null 2>&1; \
+	echo "$(COLOR_GREEN)$(ICON_CHECK) Demo mode enabled (12:00, full battery, full signal, no notifications)$(FORMAT_RESET)"; \
+	echo ""; \
+	all_screens=($(SCREENSHOTS_SCREENS)); \
+	screens=($(SCREENSHOTS_SCREENS_RESOLVED)); \
+	for screen in "$${screens[@]}"; do \
+		printf "====================================\n$(COLOR_BLUE)Set $(FORMAT_BOLD)%s$(FORMAT_RESET)$(COLOR_BLUE) screen$(FORMAT_RESET)" "$$screen"; \
+		rm -f $(SCREENSHOTS_DIR)/tune-tangler-$$device_name-*-$$screen.png 2>/dev/null; \
+		case "$$screen" in \
+			main|navigation-menu) \
+			  	printf ", $(COLOR_CYAN)close drawer$(FORMAT_RESET)"; \
+				adb -s "$$device_id" shell am broadcast -a $(SCREENSHOT_ACTION) --es cmd closeDrawer > /dev/null 2>&1; \
+				printf " [$(COLOR_GREEN)$(ICON_CHECK)$(FORMAT_RESET)]"; \
+				sleep $(SCREENSHOT_DELAY_ANIM); \
+				;; \
+			drawer*) \
+			  	printf ", $(COLOR_CYAN)close drawer$(FORMAT_RESET)"; \
+				adb -s "$$device_id" shell am broadcast -a $(SCREENSHOT_ACTION) --es cmd closeDrawer > /dev/null 2>&1; \
+				printf " [$(COLOR_GREEN)$(ICON_CHECK)$(FORMAT_RESET)]"; \
+				sleep $(SCREENSHOT_DELAY_ANIM); \
+			  	printf ", $(COLOR_CYAN)open drawer$(FORMAT_RESET)"; \
+				adb -s "$$device_id" shell am broadcast -a $(SCREENSHOT_ACTION) --es cmd openDrawer > /dev/null 2>&1; \
+				printf " [$(COLOR_GREEN)$(ICON_CHECK)$(FORMAT_RESET)]"; \
+				sleep $(SCREENSHOT_DELAY_ANIM); \
+				;; \
+		esac; \
+		printf "\n"; \
+		for lang in $(SCREENSHOTS_LANGS); do \
+			printf "  $(COLOR_CYAN)using $(FORMAT_BOLD)%s$(FORMAT_RESET)$(COLOR_CYAN) screen$(FORMAT_RESET), $(COLOR_BLUE)set $(FORMAT_BOLD)%s$(FORMAT_RESET)$(COLOR_BLUE) lang" "$$screen" "$$lang"; \
+			adb -s "$$device_id" shell am broadcast -a $(SCREENSHOT_ACTION) --es cmd setLocale --es lang "$$lang" > /dev/null 2>&1; \
+			printf " [$(COLOR_GREEN)$(ICON_CHECK)$(FORMAT_RESET)]"; \
+			sleep $(SCREENSHOT_DELAY_REBUILD); \
+			case "$$screen" in \
+				main|navigation-menu) \
+				;; \
+				drawer*) \
+				;; \
+				*) \
+					printf ", $(COLOR_YELLOW)prepare screen on device and press Enter...$(FORMAT_RESET)"; read _; \
+				;; \
+			esac; \
+			printf "\n"; \
+			for mode in $(SCREENSHOTS_MODES); do \
+				printf "  $(COLOR_CYAN)using $(FORMAT_BOLD)%s$(FORMAT_RESET)$(COLOR_CYAN) screen$(FORMAT_RESET), $(COLOR_CYAN)using $(FORMAT_BOLD)%s$(FORMAT_RESET)$(COLOR_CYAN) lang$(FORMAT_RESET), $(COLOR_BLUE)set $(FORMAT_BOLD)%s$(FORMAT_RESET)$(COLOR_BLUE) theme$(FORMAT_RESET)" "$$screen" "$$lang" "$$mode"; \
+				adb -s "$$device_id" shell am broadcast -a $(SCREENSHOT_ACTION) --es cmd setThemeMode --es mode "$$mode" > /dev/null 2>&1; \
+				printf " [$(COLOR_GREEN)$(ICON_CHECK)$(FORMAT_RESET)]"; \
+				sleep $(SCREENSHOT_DELAY_REBUILD); \
+				case "$$screen" in \
+					drawer-*) \
+					  	section="$${screen#drawer-}"; \
+						printf ", $(COLOR_CYAN)expand drawer section$(FORMAT_RESET)"; \
+						adb -s "$$device_id" shell am broadcast -a $(SCREENSHOT_ACTION) --es cmd expandDrawerSection --es section "$$section" > /dev/null 2>&1; \
+						printf " [$(COLOR_GREEN)$(ICON_CHECK)$(FORMAT_RESET)]"; \
+						sleep $(SCREENSHOT_DELAY_ANIM); \
+						sleep $(SCREENSHOT_DELAY_ANIM); \
+						sleep $(SCREENSHOT_DELAY_ANIM); \
+						;; \
+					navigation-menu) \
+						printf ", $(COLOR_CYAN)open nav menu$(FORMAT_RESET)"; \
+						adb -s "$$device_id" shell am broadcast -a $(SCREENSHOT_ACTION) --es cmd openNavigationMenu > /dev/null 2>&1; \
+						printf " [$(COLOR_GREEN)$(ICON_CHECK)$(FORMAT_RESET)]"; \
+						sleep $(SCREENSHOT_DELAY_ANIM); \
+						;; \
+				esac; \
+				file_index=0; for _i in $${!all_screens[@]}; do if [ "$${all_screens[$$_i]}" = "$$screen" ]; then file_index=$$((_i + 1)); break; fi; done; \
+				file="$(SCREENSHOTS_DIR)/tune-tangler-$$device_name-$$lang-$$mode-$$file_index-$$screen.png"; \
+				printf ", taking screenshot [ ]"; \
+				adb -s "$$device_id" exec-out screencap -p > "$$file" && printf "\b\b\b[$(COLOR_GREEN)$(ICON_CHECK)$(FORMAT_RESET)]\n" || printf "\b\b\b[$(COLOR_RED)$(ICON_ERROR)$(FORMAT_RESET)]\n"; \
+				sleep $(SCREENSHOT_DELAY_SHORT); \
+				case "$$screen" in \
+					navigation-menu) \
+						echo "  going back..."; \
+						adb -s "$$device_id" shell input keyevent KEYCODE_BACK > /dev/null 2>&1; \
+						sleep $(SCREENSHOT_DELAY_ANIM); \
+						;; \
+				esac; \
 			done; \
+			case "$$screen" in \
+				row-menu|details*) \
+					echo "  going back..."; \
+					adb -s "$$device_id" shell input keyevent KEYCODE_BACK; \
+					sleep $(SCREENSHOT_DELAY_ANIM); \
+				;; \
+			esac; \
 		done; \
+		case "$$screen" in \
+			drawer*) \
+				adb -s "$$device_id" shell am broadcast -a $(SCREENSHOT_ACTION) --es cmd closeDrawer > /dev/null 2>&1; \
+				sleep $(SCREENSHOT_DELAY_ANIM); \
+				;; \
+		esac; \
 	done; \
 	echo ""; \
 	echo "$(COLOR_GREEN)$(ICON_CHECK) Screenshots saved to $(SCREENSHOTS_DIR)/$(FORMAT_RESET)"

@@ -9,6 +9,7 @@ import '../config/config_collection.dart';
 import '../config/menu_item_enums.dart';
 import '../manager/project_export_import_manager.dart';
 import '../src/generated/app_localizations.dart';
+import '../src/screenshot_service.dart';
 
 class NavigationBarManager {
   final BuildContext _context;
@@ -17,6 +18,7 @@ class NavigationBarManager {
   final TrackRepository _trackRepository;
   final GlobalKey<ScaffoldState> _scaffoldKey;
   final ProjectExportImportManager _projectManager;
+  final GlobalKey<PopupMenuButtonState<String>> _popupMenuKey = GlobalKey<PopupMenuButtonState<String>>();
 
   NavigationBarManager(
     this._context,
@@ -25,7 +27,9 @@ class NavigationBarManager {
     this._trackRepository,
     this._scaffoldKey,
     this._projectManager,
-  );
+  ) {
+    ScreenshotService.registerPopupMenu(_popupMenuKey);
+  }
 
   AppBar get buildAppBar => AppBar(
     backgroundColor: Theme.of(_context).colorScheme.inversePrimary,
@@ -53,6 +57,7 @@ class NavigationBarManager {
       ),
       RepaintBoundary(
         child: PopupMenuButton<String>(
+          key: _popupMenuKey,
           icon: Icon(AppIcon.moreMenu),
           itemBuilder: (BuildContext context) => _trackSettingsMenu,
           onSelected: (String selection) => _trackSettingsMenuItemSelected(

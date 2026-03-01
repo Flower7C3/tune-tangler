@@ -15,6 +15,7 @@ import '../entity/settings_profile.dart';
 import '../entity/track.dart';
 import '../provider/permission_provider.dart';
 import '../src/generated/app_localizations.dart';
+import '../src/screenshot_service.dart';
 
 class DrawerManager {
   final BuildContext _context;
@@ -27,6 +28,18 @@ class DrawerManager {
   final bool _hasDynamicColor;
   late final SettingProfileWrapper _settingsProfileWrapper;
 
+  final ExpansibleController _recordingController = ExpansibleController();
+  final ExpansibleController _tracksController = ExpansibleController();
+  final ExpansibleController _screenController = ExpansibleController();
+  final ExpansibleController _permissionsController = ExpansibleController();
+  final ExpansibleController _dangerController = ExpansibleController();
+
+  final GlobalKey _recordingKey = GlobalKey(debugLabel: 'drawer_recording');
+  final GlobalKey _tracksKey = GlobalKey(debugLabel: 'drawer_tracks');
+  final GlobalKey _screenKey = GlobalKey(debugLabel: 'drawer_screen');
+  final GlobalKey _permissionsKey = GlobalKey(debugLabel: 'drawer_permissions');
+  final GlobalKey _dangerKey = GlobalKey(debugLabel: 'drawer_danger');
+
   DrawerManager(
     this._context,
     this._settings,
@@ -38,6 +51,11 @@ class DrawerManager {
     this._hasDynamicColor,
   ) {
     _settingsProfileWrapper = SettingProfileWrapper(_context, _trans, _settings, _uiHelper);
+    ScreenshotService.registerDrawerSection('recording', _recordingController, _recordingKey);
+    ScreenshotService.registerDrawerSection('tracks', _tracksController, _tracksKey);
+    ScreenshotService.registerDrawerSection('screen', _screenController, _screenKey);
+    ScreenshotService.registerDrawerSection('permissions', _permissionsController, _permissionsKey);
+    ScreenshotService.registerDrawerSection('danger', _dangerController, _dangerKey);
   }
 
   bool showUserDetails = false;
@@ -77,9 +95,10 @@ class DrawerManager {
           padding: EdgeInsets.zero,
           children: [
             ExpansionTile(
+              key: _recordingKey,
+              controller: _recordingController,
               leading: Icon(AppIcon.recordingSettings),
               title: Text(_trans.recording),
-              // initiallyExpanded: true,
               maintainState: true,
               childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
               backgroundColor: Theme.of(_context).colorScheme.primaryContainer,
@@ -88,6 +107,8 @@ class DrawerManager {
               children: _recordingSettings(),
             ),
             ExpansionTile(
+              key: _tracksKey,
+              controller: _tracksController,
               leading: Icon(AppIcon.trackSettings),
               title: Text(_trans.tracks),
               maintainState: true,
@@ -98,6 +119,8 @@ class DrawerManager {
               children: _tracksSettings(),
             ),
             ExpansionTile(
+              key: _screenKey,
+              controller: _screenController,
               leading: Icon(AppIcon.screenSettings),
               title: Text(_trans.screen),
               maintainState: true,
@@ -108,6 +131,8 @@ class DrawerManager {
               children: _screenSettings(),
             ),
             ExpansionTile(
+              key: _permissionsKey,
+              controller: _permissionsController,
               leading: Icon(AppIcon.permissions),
               title: Text(_trans.permissions),
               maintainState: true,
@@ -118,6 +143,8 @@ class DrawerManager {
               children: _permissionsList(),
             ),
             ExpansionTile(
+              key: _dangerKey,
+              controller: _dangerController,
               leading: Icon(AppIcon.dangerZone),
               title: Text(_trans.dangerZone),
               maintainState: true,
