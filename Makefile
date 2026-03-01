@@ -69,30 +69,23 @@ define choose-emulator
 	echo "$(COLOR_BLUE)$(ICON_INFO) Selected $(FORMAT_BOLD)$$EMULATOR$(FORMAT_RESET)$(COLOR_BLUE) emulator$(FORMAT_RESET)"
 endef
 
-# Auto-generated help: make help
 .PHONY: help
-help: ## Show this help
-	@echo "$(FORMAT_BOLD)$(COLOR_CYAN)TuneTangler - Available Commands$(FORMAT_RESET)"
-	@echo ""
-	@echo "$(FORMAT_BOLD)$(COLOR_BLUE)$(ICON_ROCKET) Development Setup$(FORMAT_RESET)"
-	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | grep -E '##SETUP## ' | awk 'BEGIN {FS = ":.*?##.*?## "}; {printf "$(COLOR_CYAN)%-25s$(FORMAT_RESET) %s\n", $$1, $$2}'
-	@echo ""
-	@echo "$(FORMAT_BOLD)$(COLOR_BLUE)$(ICON_TEST) Code Quality$(FORMAT_RESET)"
-	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | grep -E '##QA##' | awk 'BEGIN {FS = ":.*?##.*?## "}; {printf "$(COLOR_CYAN)%-25s$(FORMAT_RESET) %s\n", $$1, $$2}'
-	@echo ""
-	@echo "$(FORMAT_BOLD)$(COLOR_BLUE)$(ICON_BUILD) Run & Build$(FORMAT_RESET)"
-	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | grep -E '##BUILD## ' | awk 'BEGIN {FS = ":.*?##.*?## "}; {printf "$(COLOR_CYAN)%-25s$(FORMAT_RESET) %s\n", $$1, $$2}'
-	@echo ""
-	@echo "$(COLOR_RED)$(ICON_INFO) IMPORTANT: To run, build or install app in $(FORMAT_BOLD)release$(FORMAT_RESET)$(COLOR_RED) mode, you need to use GitHub Actions to build and sign the app bundle$(FORMAT_RESET)"
-	@echo ""
-	@echo "$(FORMAT_BOLD)$(COLOR_BLUE)$(ICON_DEVICE) Device Management$(FORMAT_RESET)"
-	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | grep -E '##DEVICE## ' | awk 'BEGIN {FS = ":.*?##.*?## "}; {printf "$(COLOR_CYAN)%-25s$(FORMAT_RESET) %s\n", $$1, $$2}'
-	@echo ""
-	@echo "$(FORMAT_BOLD)$(COLOR_BLUE)$(ICON_INFO) Maintenance$(FORMAT_RESET)"
-	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | grep -E '##MAINTENANCE## ' | awk 'BEGIN {FS = ":.*?##.*?## "}; {printf "$(COLOR_CYAN)%-25s$(FORMAT_RESET) %s\n", $$1, $$2}'
-	@echo ""
-	@echo "$(FORMAT_BOLD)$(COLOR_BLUE)$(ICON_UPGRADE) Utilities$(FORMAT_RESET)"
-	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | grep -E '##UTILITIES## ' | awk 'BEGIN {FS = ":.*?##.*?## "}; {printf "$(COLOR_CYAN)%-25s$(FORMAT_RESET) %s\n", $$1, $$2}'
+help: ##HELP## Display this help screen.
+	@echo "$(FORMAT_BOLD)$(COLOR_CYAN)🎵 TuneTangler - Available Commands$(FORMAT_RESET)"
+	@group_key=(SETUP DEVICE BUILD QA MAINTENANCE UTILITIES); \
+	group_name=("Development Setup" "Device Management" "Run & Build" "Code Quality" "Maintenance" "Utilities"); \
+	group_icon=($(ICON_ROCKET) $(ICON_DEVICE) $(ICON_BUILD) $(ICON_TEST) $(ICON_INFO) $(ICON_UPGRADE)); \
+	for id in "$${!group_key[@]}"; do \
+		key=$${group_key[$$id]}; \
+		name=$${group_name[$$id]}; \
+		icon=$${group_icon[$$id]}; \
+		printf "\n$(FORMAT_BOLD)$(COLOR_BLUE)$$icon $$name$(FORMAT_RESET)\n"; \
+		egrep -h '^[a-zA-Z0-9_-]+:.*?##'"$$key"'## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?##'"$$key"'## "}; {printf "'$$(tput setaf 6)$$(tput bold)'  %-30s'$$(tput sgr0)' %s\n", $$1, $$2}' | sed -E 's/`([^`]+)`/'$$(tput setaf 7)$$(tput bold)'\1'$$(tput sgr0)'/g'; \
+		if [ "$$key" = "BUILD" ]; then \
+			printf "$(COLOR_RED)  $(ICON_INFO) Release mode requires GitHub Actions to build and sign the app bundle$(FORMAT_RESET)\n"; \
+		fi; \
+	done; \
+	echo ""
 
 # =============================================================================
 # DEVELOPMENT SETUP
@@ -139,7 +132,7 @@ lint: ##QA## Check code style
 # BUILD & RUN
 # =============================================================================
 .PHONY: run
-run: ##BUILD## Run app in debug mode
+run: ##BUILD## Run app in debug mode. Options: `DEVICE=`
 	@echo "$(FORMAT_HIGHLIGHT)$(ICON_ROCKET) Running app in $(FORMAT_BOLD)debug$(FORMAT_RESET)$(FORMAT_HIGHLIGHT) build type...$(FORMAT_RESET)"
 	@flutter run --debug
 
@@ -156,7 +149,7 @@ build-apk-release:
   	flutter build appbundle
 
 .PHONY: install-apk
-install-apk: ##BUILD## Build and install APK in debug mode
+install-apk: ##BUILD## Build and install APK in debug mode. Options: `DEVICE=`
 	@echo "$(FORMAT_HIGHLIGHT)$(ICON_BUILD) APK Installation$(FORMAT_RESET)"
 	@DEVICE=$(DEVICE); $(choose-device); \
 	echo "$(COLOR_BLUE)$(ICON_INFO) Installing $(FORMAT_BOLD)debug$(FORMAT_RESET)$(COLOR_BLUE) APK on $(FORMAT_BOLD)$$DEVICE$(FORMAT_RESET)$(COLOR_BLUE) device...$(FORMAT_RESET)"; \
@@ -199,14 +192,14 @@ list-emulators: ##DEVICE## Show available emulators
 	@echo "$(COLOR_CYAN)$(ICON_INFO) Use make run-emulator to run app on emulator with selection$(FORMAT_RESET)"
 
 .PHONY: start-emulator
-start-emulator: ##DEVICE## Start emulator with interactive selection
+start-emulator: ##DEVICE## Start emulator. Options: `EMULATOR=`
 	@EMULATOR=$(EMULATOR); \
 	$(choose-emulator); \
 	echo "$(COLOR_BLUE)$(ICON_INFO) Starting $(FORMAT_BOLD)$$EMULATOR$(FORMAT_RESET)$(COLOR_BLUE) emulator...$(FORMAT_RESET)"; \
 	flutter emulators --launch $$EMULATOR
 
 .PHONY: run-emulator
-run-emulator: ##DEVICE## Run app on emulator with interactive selection
+run-emulator: ##DEVICE## Run app on emulator. Options: `EMULATOR=`
 	@EMULATOR=$(EMULATOR); \
 	$(choose-emulator); \
 	echo "$(COLOR_BLUE)$(ICON_INFO) Starting $(FORMAT_BOLD)$$EMULATOR$(FORMAT_RESET)$(COLOR_BLUE) emulator and running app...$(FORMAT_RESET)"; \
@@ -330,7 +323,7 @@ SCREENSHOT_DELAY_ANIM := 0.8
 SCREENSHOT_DELAY_REBUILD := 1.0
 
 .PHONY: screenshots
-screenshots: ##DEVICE## Capture screenshot set (`DEVICE_ID=` DEVICE_NAME= SCREEN= optional)
+screenshots: ##QA## Capture screenshot sets. Options: `DEVICE_ID=` `DEVICE_NAME=` `SCREEN=`
 	@device_id="$(DEVICE_ID)"; device_name="$(DEVICE_NAME)"; \
 	mkdir -p $(SCREENSHOTS_DIR); \
 	if [ -z "$$device_id" ]; then \
