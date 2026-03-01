@@ -5,15 +5,36 @@ on:
   push:
     branches: [ main ]
     paths-ignore:
-      - '.githooks/**'
-      - '.github/**'
+      # IDE and editor configuration
       - '.idea/**'
       - '.vscode/**'
+      - '*.iml'
+      # CI/CD and git tooling
+      - '.githooks/**'
+      - '.github/**'
+      # Linter and metadata config
+      - '.markdownlint.json'
+      - '.metadata'
+      - 'analysis_options.yaml'
+      - 'devtools_options.yaml'
+      # Documentation and assets not affecting the build
       - 'docs/**'
-      - 'docs/**'
-      - 'assets/screenshots/**'
-      - 'Makefile'
+      - 'assets/png/**'          # source logos for icon generation
+      - 'assets/svg/**'          # source SVGs for icon generation
+      - 'assets/screenshots/**'  # Google Play screenshots
+      - 'LICENSE'
       - 'README.md'
+      - 'missing_translations.txt'
+      # Platforms not built in this workflow (Android only)
+      - 'ios/**'
+      - 'linux/**'
+      - 'macos/**'
+      - 'windows/**'
+      # Tests and localization config don't change the app binary
+      - 'test/**'
+      - 'l10n.yaml'
+      # Dev tooling
+      - 'Makefile'
 
 permissions:
   contents: write

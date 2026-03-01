@@ -4,14 +4,32 @@ on:
   pull_request:
     branches: [ main ]
     paths-ignore:
-      - '.githooks/**'
-      - '.github/**'
+      # IDE and editor configuration
       - '.idea/**'
       - '.vscode/**'
+      - '*.iml'
+      # CI/CD and git tooling
+      - '.githooks/**'
+      - '.github/**'
+      # Linter and metadata config
+      - '.markdownlint.json'
+      - '.metadata'
+      - 'devtools_options.yaml'
+      # Documentation and assets not affecting the build
       - 'docs/**'
-      - 'assets/screenshots/**'
-      - 'Makefile'
+      - 'assets/png/**'          # source logos for icon generation
+      - 'assets/svg/**'          # source SVGs for icon generation
+      - 'assets/screenshots/**'  # Google Play screenshots
+      - 'LICENSE'
       - 'README.md'
+      - 'missing_translations.txt'
+      # Platforms not built in this workflow (Android only)
+      - 'ios/**'
+      - 'linux/**'
+      - 'macos/**'
+      - 'windows/**'
+      # Dev tooling
+      - 'Makefile'
 
 # Version variables for dependencies
 env:
