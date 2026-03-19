@@ -1,0 +1,103 @@
+{
+  "output_dir": "assets/screenshots",
+  "file_prefix": "tune-tangler",
+  "languages": ["en", "pl"],
+  "themes": ["light", "dark"],
+  "delays": {
+    "short": 0.3,
+    "animation": 0.8,
+    "rebuild": 1.0
+  },
+  "adb": {
+    "action": "pro.kwiatek.tune_tangler.SCREENSHOT_CMD",
+    "demo_action": "com.android.systemui.demo"
+  },
+  "demo_mode": {
+    "clock": "1200",
+    "battery_level": 100,
+    "wifi_level": 4,
+    "mobile_level": 4
+  },
+  "screens": [
+    {
+      "name": "main",
+      "auto": true,
+      "before_screen": ["cmd:closeDrawer"]
+    },
+    {
+      "name": "drawer",
+      "auto": true,
+      "before_screen": ["cmd:closeDrawer", "cmd:openDrawer"],
+      "after_screen": ["cmd:closeDrawer"]
+    },
+    {
+      "name": "drawer-recording",
+      "auto": true,
+      "before_screen": ["cmd:closeDrawer", "cmd:openDrawer"],
+      "before_capture": ["cmd:expandDrawerSection section=recording", "wait:1.6"],
+      "after_screen": ["cmd:closeDrawer"]
+    },
+    {
+      "name": "drawer-tracks",
+      "auto": true,
+      "before_screen": ["cmd:closeDrawer", "cmd:openDrawer"],
+      "before_capture": ["cmd:expandDrawerSection section=tracks", "wait:1.6"],
+      "after_screen": ["cmd:closeDrawer"]
+    },
+    {
+      "name": "drawer-screen",
+      "auto": true,
+      "before_screen": ["cmd:closeDrawer", "cmd:openDrawer"],
+      "before_capture": ["cmd:expandDrawerSection section=screen", "wait:1.6"],
+      "after_screen": ["cmd:closeDrawer"]
+    },
+    {
+      "name": "drawer-danger",
+      "auto": true,
+      "before_screen": ["cmd:closeDrawer", "cmd:openDrawer"],
+      "before_capture": ["cmd:expandDrawerSection section=danger", "wait:1.6"],
+      "after_screen": ["cmd:closeDrawer"]
+    },
+    {
+      "name": "navigation-menu",
+      "auto": true,
+      "before_screen": ["cmd:closeDrawer"],
+      "before_capture": ["cmd:openNavigationMenu"],
+      "after_capture": ["key:KEYCODE_BACK"]
+    },
+    {
+      "name": "row-menu",
+      "auto": false,
+      "after_lang": ["key:KEYCODE_BACK"]
+    },
+    {
+      "name": "details-empty",
+      "auto": false,
+      "after_lang": ["key:KEYCODE_BACK"]
+    },
+    {
+      "name": "recording",
+      "auto": false
+    },
+    {
+      "name": "details-recording",
+      "auto": false,
+      "after_lang": ["key:KEYCODE_BACK"]
+    },
+    {
+      "name": "details-overview",
+      "auto": false,
+      "after_lang": ["key:KEYCODE_BACK"]
+    },
+    {
+      "name": "details-controls",
+      "auto": false,
+      "after_lang": ["key:KEYCODE_BACK"]
+    },
+    {
+      "name": "details-info",
+      "auto": false,
+      "after_lang": ["key:KEYCODE_BACK"]
+    }
+  ]
+}
