@@ -246,68 +246,8 @@ gen-l10n: ##UTILITIES## Generate l10n files
 	@flutter gen-l10n
 
 .PHONY: gen-assets
-gen-assets: gen-png-logos gen-icons gen-splash ##UTILITIES## Generate PNG files, app icons and splash screen
-
-.PHONY: gen-png-logos
-# SVG generation variables
-SVG_SOURCE = assets/svg/logo-rgb.svg
-
-gen-png-logos: ##UTILITIES## Generate PNG variants from JSON configuration
-	@if [ ! -f "$(SVG_SOURCE).json" ]; then \
-		echo "$(COLOR_RED)$(ICON_ERROR) Error: $(SVG_SOURCE).json not found$(FORMAT_RESET)"; \
-		exit 1; \
-	fi; \
-	if [ ! -f "$(SVG_SOURCE)" ]; then \
-		echo "$(COLOR_RED)$(ICON_ERROR) Error: $(SVG_SOURCE) not found$(FORMAT_RESET)"; \
-		exit 1; \
-	fi; \
-	echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Generating PNG variants from $(SVG_SOURCE)...$(FORMAT_RESET)"; \
-	if ! command -v rsvg-convert >/dev/null 2>&1; then \
-		echo "$(COLOR_RED)$(ICON_ERROR) Error: rsvg-convert not found$(FORMAT_RESET)"; \
-		echo "   Please install librsvg2-bin package:"; \
-		echo "   - Ubuntu/Debian: sudo apt-get install librsvg2-bin"; \
-		echo "   - macOS: brew install librsvg"; \
-		echo "   - Windows: Download from https://github.com/miyako/console-rsvg-convert"; \
-		exit 1; \
-	fi; \
-	if ! command -v jq >/dev/null 2>&1; then \
-		echo "$(COLOR_RED)$(ICON_ERROR) Error: jq not found$(FORMAT_RESET)"; \
-		echo "   Please install jq:"; \
-		echo "   - Ubuntu/Debian: sudo apt-get install jq"; \
-		echo "   - macOS: brew install jq"; \
-		echo "   - Windows: Download from https://jqlang.github.io/jq/download/"; \
-		exit 1; \
-	fi
-	@echo "$(COLOR_CYAN)Generating temporary SVG variants from JSON config...$(FORMAT_RESET)"; \
-	jq -r '.icons[] | @base64' "$(SVG_SOURCE).json" | while read -r icon_data; do \
-		name=$$(echo "$$icon_data" | base64 -d | jq -r '.name'); \
-		display_name=$$(echo "$$icon_data" | base64 -d | jq -r '.display_name'); \
-		width=$$(echo "$$icon_data" | base64 -d | jq -r '.width'); \
-		height=$$(echo "$$icon_data" | base64 -d | jq -r '.height'); \
-		translate_x=$$(echo "$$icon_data" | base64 -d | jq -r '.translate_x'); \
-		translate_y=$$(echo "$$icon_data" | base64 -d | jq -r '.translate_y'); \
-		scale=$$(echo "$$icon_data" | base64 -d | jq -r '.scale'); \
-		echo "$(COLOR_CYAN)Generating $$display_name (x=$$translate_x, y=$$translate_y, scale=$$scale)...$(FORMAT_RESET)"; \
-		SED_CMD="s|width=\"1500\" height=\"1500\"|width=\"$$width\" height=\"$$height\"|g; s|translate(0 0)scale(1)|translate($$translate_x $$translate_y)scale($$scale)|g"; \
-		COLOR_RULES=$$(echo "$$icon_data" | base64 -d | jq -r '.colors | to_entries[] | "s|class=\\\"" + .key + "\\\" fill=\\\"[^\\\"]*\\\"|fill=\\\"" + .value + "\\\"|g"' | tr '\n' ';'); \
-		SED_CMD="$$SED_CMD; $$COLOR_RULES"; \
-		svg_temp=$$(dirname $(SVG_SOURCE))/temp-$$name.svg; \
-		sed -e "$$SED_CMD" "$(SVG_SOURCE)" > "$$svg_temp"; \
-		echo "$(COLOR_CYAN)Converting $$display_name to PNG ($$width x $$height)...$(FORMAT_RESET)"; \
-		rsvg-convert -h $$height -w $$width "$$svg_temp" -o "assets/png/logo-$$name.png"; \
-		rm -f "$$svg_temp"; \
-	done; \
-	echo "$(COLOR_GREEN)$(ICON_CHECK) All icons generated$(FORMAT_RESET)"
-
-.PHONY: gen-icons
-gen-icons: ##UTILITIES## Generate app icons
-	@echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Generating app icons...$(FORMAT_RESET)"
-	@flutter packages pub run flutter_launcher_icons
-
-.PHONY: gen-splash
-gen-splash: ##UTILITIES## Generate splash screen
-	@echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Generating splash screen...$(FORMAT_RESET)"
-	@flutter packages pub run flutter_native_splash:create
+gen-assets: ##UTILITIES## Generate all icons and splash screens from SVG. Requires: `rsvg-convert` `jq` `sips`
+	@bash bin/generate-icons.sh
 
 # Screenshots: DEVICE_ID=adb_id DEVICE_NAME=pixel9|tablet10 SCREEN=main (name for filenames)
 SCREENSHOTS_DIR := assets/screenshots

@@ -1,5 +1,22 @@
 {
+  "svg_source": "assets/svg/logo-rgb.svg",
   "icons": [
+    {
+      "name": "monochrome-launcher",
+      "display_name": "Monochrome (themed icon)",
+      "width": 1024,
+      "height": 1024,
+      "translate_x": 122.4,
+      "translate_y": 122.4,
+      "scale": 0.7,
+      "colors": {
+        "shape": "#eee",
+        "wave": "#111",
+        "mic": "#111",
+        "sliders": "#111",
+        "text": "#111"
+      }
+    },
     {
       "name": "dark-mode-launcher",
       "display_name": "Dark Mode Launcher",
@@ -64,5 +81,38 @@
         "text": "#eee"
       }
     }
-  ]
+  ],
+  "android": {
+    "res_dir": "android/app/src/main/res",
+    "adaptive_icon_inset": "16%",
+    "launcher": {
+      "light": {
+        "foreground": "light-mode-launcher",
+        "background_color": "#ffffff"
+      },
+      "dark": {
+        "foreground": "dark-mode-launcher",
+        "background_color": "#111111"
+      },
+      "monochrome": "monochrome-launcher"
+    },
+    "splash": {
+      "light": {
+        "image": "light-mode-splash",
+        "background_color": "#eeeeee"
+      },
+      "dark": {
+        "image": "dark-mode-splash",
+        "background_color": "#111111"
+      }
+    }
+  },
+  "ios": {
+    "assets_dir": "ios/Runner/Assets.xcassets/AppIcon.appiconset",
+    "launcher": {
+      "light": "light-mode-launcher",
+      "dark": "dark-mode-launcher",
+      "tinted": "monochrome-launcher"
+    }
+  }
 }
