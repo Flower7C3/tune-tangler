@@ -5,11 +5,29 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
+import android.os.Bundle
+import androidx.core.view.WindowCompat
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        applyContentAboveSystemNavBar()
+        // Flutter may reapply edge-to-edge after the first frame.
+        window.decorView.post { applyContentAboveSystemNavBar() }
+    }
+
+    override fun onPostResume() {
+        super.onPostResume()
+        applyContentAboveSystemNavBar()
+    }
+
+    private fun applyContentAboveSystemNavBar() {
+        WindowCompat.setDecorFitsSystemWindows(window, true)
+    }
+
     companion object {
         private const val CHANNEL = "pro.kwiatek.tune_tangler/screenshot"
         private const val ACTION = "pro.kwiatek.tune_tangler.SCREENSHOT_CMD"
