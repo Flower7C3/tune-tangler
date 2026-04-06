@@ -1,6 +1,5 @@
 import 'dart:math' show max;
 
-import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tune_tangler/config/app_config_fields.dart';
@@ -8,18 +7,18 @@ import 'package:tune_tangler/manager/home_screen_manager.dart';
 import 'package:tune_tangler/wrapper/app.dart';
 import 'package:tune_tangler/wrapper/hive_settings_provider.dart';
 
-/// Bottom inset for the system navigation bar. Some devices report 0 in
-/// [MediaQuery] while still drawing the 3-button bar over the app (OEM / edge-to-edge).
+/// Extra bottom space so the scaffold (incl. footer) clears the system navigation area.
+///
+/// Uses [MediaQueryData.viewPadding] only (not [MediaQueryData.padding]): that value
+/// tracks the real system UI — **no bar / gesture pill / 3-button bar** — without
+/// treating “small or zero inset” as an error (which wrongly forced ~48px on
+/// gesture navigation). Merged with the platform [implicitView] when present.
 double _navBarBottomReserve(BuildContext context) {
   final mq = MediaQuery.of(context);
-  double v = max(mq.viewPadding.bottom, mq.padding.bottom);
+  double v = mq.viewPadding.bottom;
   final implicit = WidgetsBinding.instance.platformDispatcher.implicitView;
   if (implicit != null) {
-    final fromView = MediaQueryData.fromView(implicit);
-    v = max(v, max(fromView.viewPadding.bottom, fromView.padding.bottom));
-  }
-  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android && v < 8.0) {
-    v = 48.0;
+    v = max(v, MediaQueryData.fromView(implicit).viewPadding.bottom);
   }
   return v;
 }
