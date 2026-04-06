@@ -57,7 +57,7 @@ Future<void> main() async {
     android: androidSettings,
   );
 
-  await flutterLocalNotificationsPlugin.initialize(settings);
+  await flutterLocalNotificationsPlugin.initialize(settings: settings);
 
   //************************************
   // Set main screen

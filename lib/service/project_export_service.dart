@@ -142,9 +142,6 @@ class ProjectExportService {
     // 6. Zapisz ZIP do pliku tymczasowego
     final encoder = ZipEncoder();
     final zipData = encoder.encode(archive);
-    if (zipData == null) {
-      throw Exception('Failed to encode ZIP archive');
-    }
 
     // 7. Utwórz nazwę pliku
     final fileName = _generateFileName(projectName);
@@ -343,10 +340,10 @@ class ProjectExportService {
         'id': track.id.toString(),
         'name': cleanName,
         'hasRecording': hasRecording,
-        if (recordingSize != null) 'recordingSize': recordingSize,
-        if (recordingFormat != null) 'recordingFormat': recordingFormat,
-        if (recordingChecksum != null) 'recordingChecksum': recordingChecksum,
-        if (recordingFileName != null) 'recordingFileName': recordingFileName,
+        'recordingSize': ?recordingSize,
+        'recordingFormat': ?recordingFormat,
+        'recordingChecksum': ?recordingChecksum,
+        'recordingFileName': ?recordingFileName,
       });
       
       // Sprawdź czy recordingFileName zostało dodane

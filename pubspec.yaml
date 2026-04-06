@@ -45,17 +45,16 @@ dependencies:
   permission_handler: ^12.0.1
   path_provider: ^2.1.5
   audioplayers: ^6.1.2
-  file_picker: ^10.3.1
+  file_picker: ^11.0.1
   share_plus: ^12.0.1
   path: ^1.9.0
   emoji_picker_flutter: ^4.3.0
-  flutter_local_notifications: ^19.4.0
-  flutter_foreground_task: ^9.1.0
+  flutter_local_notifications: ^21.0.0
   provider: ^6.1.2
   flutter_svg_icons: ^0.0.1+4
   flutter_svg: ^2.0.17
   ffmpeg_kit_flutter_new_min_gpl: ^2.1.1
-  archive: ^3.4.0
+  archive: ^4.0.9
   crypto: ^3.0.0
   dynamic_color: ^1.8.1
 

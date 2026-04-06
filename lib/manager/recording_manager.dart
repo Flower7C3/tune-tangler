@@ -36,7 +36,7 @@ class RecordingManager {
       );
       return;
     }
-    FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.audio);
+    FilePickerResult? result = await FilePicker.pickFiles(type: FileType.audio);
 
     if (result == null) {
       _uiHelper.toast(
@@ -165,16 +165,16 @@ class RecordingManager {
     NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
 
     flutterLocalNotificationsPlugin.show(
-      0,
-      _trans.trackRecordingInfo(track.name.value),
-      _trans.clickToOpenApp,
-      platformChannelSpecifics,
+      id: 0,
+      title: _trans.trackRecordingInfo(track.name.value),
+      body: _trans.clickToOpenApp,
+      notificationDetails: platformChannelSpecifics,
     );
   }
 
   Future<void> cancelRecording(Track track) async {
     _audioRecorder.cancel();
-    flutterLocalNotificationsPlugin.cancel(0);
+    flutterLocalNotificationsPlugin.cancel(id: 0);
     track.stopTimer();
     track.setPath(null);
     _trackRepository.save(track);
@@ -209,7 +209,7 @@ class RecordingManager {
         duration: 4,
       );
     }
-    flutterLocalNotificationsPlugin.cancel(0);
+    flutterLocalNotificationsPlugin.cancel(id: 0);
     track.stopTimer();
     _trackRepository.save(track);
   }
