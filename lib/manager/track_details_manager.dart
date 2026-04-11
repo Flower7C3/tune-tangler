@@ -62,12 +62,21 @@ class TrackDetailsManager {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) => LayoutBuilder(
-        builder: (context, BoxConstraints constraints) =>
-            DraggableScrollableSheet(
+        builder: (context, BoxConstraints constraints) {
+          final double h = constraints.maxHeight;
+          double maxChild = h > 0 ? (900 / h).clamp(0.3, 0.9) : 0.9;
+          double minChild = h > 0 ? (420 / h).clamp(0.3, 0.9) : 0.3;
+          if (minChild > maxChild) {
+            minChild = maxChild;
+          }
+          double initial = h > 0 ? (640 / h).clamp(0.3, 0.9) : 0.5;
+          if (initial < minChild) initial = minChild;
+          if (initial > maxChild) initial = maxChild;
+          return DraggableScrollableSheet(
               expand: false,
-              initialChildSize: (640 / constraints.maxHeight).clamp(0.3, 0.9),
-              minChildSize: (420 / constraints.maxHeight).clamp(0.3, 0.9),
-              maxChildSize: (900 / constraints.maxHeight).clamp(0.3, 0.9),
+              initialChildSize: initial,
+              minChildSize: minChild,
+              maxChildSize: maxChild,
               builder: (context, ScrollController scrollController) => Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -76,7 +85,8 @@ class TrackDetailsManager {
                   ..._trackDetailsPlayerIcons(track),
                 ],
               ),
-            ),
+            );
+        },
       ),
     );
   }
@@ -129,65 +139,77 @@ class TrackDetailsManager {
     child: ValueListenableBuilder<RecorderState>(
       valueListenable: track.recorderState,
       builder: (context, recorderState, child) => DefaultTabController(
+        key: ValueKey<RecorderState>(recorderState),
         length: switch (recorderState) {
           RecorderState.empty => 1,
-          RecorderState.processing => 0,
+          RecorderState.processing => 1,
           RecorderState.recording => 1,
           RecorderState.ready => 3,
         },
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (recorderState != RecorderState.processing)
-              TabBar(
-                tabs: [
+            TabBar(
+              tabs: [
+                if (recorderState == RecorderState.processing)
+                  Tab(icon: Icon(Symbols.hourglass_rounded)),
+                if (recorderState == RecorderState.recording)
+                  Tab(icon: Icon(AppIcon.recordingInProgress)),
+                if (recorderState == RecorderState.ready)
+                  Tab(icon: Icon(AppIcon.recordingProgress)),
+                if (recorderState == RecorderState.empty ||
+                    recorderState == RecorderState.ready)
+                  Tab(icon: Icon(AppIcon.recordingControls)),
+                if (recorderState == RecorderState.ready)
+                  Tab(icon: Icon(AppIcon.recordingInfo)),
+              ],
+            ),
+            Expanded(
+              child: TabBarView(
+                children: [
+                  if (recorderState == RecorderState.processing)
+                    _uiHelper.trackDetailsTabElement([
+                      Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(UIHelper.gridGap * 8),
+                          child: CircularProgressIndicator(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                    ]),
                   if (recorderState == RecorderState.recording)
-                    Tab(icon: Icon(AppIcon.recordingInProgress)),
+                    _uiHelper.trackDetailsTabElement([
+                      _trackDetailsRecordingBox(track),
+                      _trackDetailsInfoBox(track),
+                    ]),
                   if (recorderState == RecorderState.ready)
-                    Tab(icon: Icon(AppIcon.recordingProgress)),
+                    _uiHelper.trackDetailsTabElement([
+                      _trackDetailsProgress(track),
+                      _trackDetailsClip(track),
+                    ]),
                   if (recorderState == RecorderState.empty ||
                       recorderState == RecorderState.ready)
-                    Tab(icon: Icon(AppIcon.recordingControls)),
+                    ValueListenableBuilder(
+                      valueListenable: CombinedNotifier([
+                        track.playbackVolume,
+                        track.playbackBalance,
+                        track.playbackSpeed,
+                      ]),
+                      builder: (context, _, _) =>
+                          _uiHelper.trackDetailsTabElement([
+                            _trackDetailsPlaybackVolumeControl(track),
+                            _trackDetailsPlaybackBalanceControl(track),
+                            _trackDetailsPlaybackSpeedControl(track),
+                          ]),
+                    ),
                   if (recorderState == RecorderState.ready)
-                    Tab(icon: Icon(AppIcon.recordingInfo)),
+                    _uiHelper.trackDetailsTabElement([
+                      _trackDetailsInfoBox(track),
+                    ]),
                 ],
               ),
-            if (recorderState != RecorderState.processing)
-              Expanded(
-                child: TabBarView(
-                  children: [
-                    if (recorderState == RecorderState.recording)
-                      _uiHelper.trackDetailsTabElement([
-                        _trackDetailsRecordingBox(track),
-                        _trackDetailsInfoBox(track),
-                      ]),
-                    if (recorderState == RecorderState.ready)
-                      _uiHelper.trackDetailsTabElement([
-                        _trackDetailsProgress(track),
-                        _trackDetailsClip(track),
-                      ]),
-                    if (recorderState == RecorderState.empty ||
-                        recorderState == RecorderState.ready)
-                      ValueListenableBuilder(
-                        valueListenable: CombinedNotifier([
-                          track.playbackVolume,
-                          track.playbackBalance,
-                          track.playbackSpeed,
-                        ]),
-                        builder: (context, _, _) =>
-                            _uiHelper.trackDetailsTabElement([
-                              _trackDetailsPlaybackVolumeControl(track),
-                              _trackDetailsPlaybackBalanceControl(track),
-                              _trackDetailsPlaybackSpeedControl(track),
-                            ]),
-                      ),
-                    if (recorderState == RecorderState.ready)
-                      _uiHelper.trackDetailsTabElement([
-                        _trackDetailsInfoBox(track),
-                      ]),
-                  ],
-                ),
-              ),
+            ),
           ],
         ),
       ),

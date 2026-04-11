@@ -16,9 +16,14 @@ class IconOptimizationService {
   // Maximum cache size
   static const int _maxCacheSize = 100;
 
+  /// Same numeric [IconData.codePoint] can exist in different icon fonts; cache keys must
+  /// include font identity or glyphs resolve to the wrong font and may render blank.
+  String _iconDataCacheKey(IconData icon) =>
+      '${icon.codePoint}_${icon.fontFamily ?? ''}_${icon.fontPackage ?? ''}';
+
   /// Get optimized icon with caching
   IconData getOptimizedIcon(IconData icon, {String? key}) {
-    final String cacheKey = key ?? icon.codePoint.toString();
+    final String cacheKey = key ?? _iconDataCacheKey(icon);
 
     if (_iconCache.containsKey(cacheKey)) {
       return _iconCache[cacheKey]!;

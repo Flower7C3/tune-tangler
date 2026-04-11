@@ -187,7 +187,7 @@ class RecordingManager {
   Future<void> stopAndSaveRecording(Track track) async {
     try {
       String? path = await _audioRecorder.stop();
-      track.setRecorderState(RecorderState.ready);
+      // [setPath] drives empty → processing → ready; avoid a redundant ready frame before processing.
       track.setPath(path);
       _uiHelper.toast(
         _trans.trackRecordingStopSuccess(track.name.value),

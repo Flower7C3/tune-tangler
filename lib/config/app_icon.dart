@@ -9,12 +9,7 @@ class SvgColorMapper implements ColorMapper {
   final Map<Color, Color?> colors;
 
   @override
-  Color substitute(
-    String? id,
-    String elementName,
-    String attributeName,
-    Color color,
-  ) {
+  Color substitute(String? id, String elementName, String attributeName, Color color) {
     if (colors.containsKey(color)) {
       return colors[color] ?? color;
     }
@@ -94,19 +89,15 @@ class AppIcon {
   static IconData trackPosition = Symbols.timer_play_rounded;
 
   static IconData trackDuration = Symbols.timer_rounded;
-  static IconData trackPlaybackStartAtPosition =
-      Symbols.align_justify_flex_start_rounded;
-  static IconData trackPlaybackStartAtPositionReset =
-      Symbols.first_page_rounded;
-  static IconData trackPlaybackEndAtPosition =
-      Symbols.align_justify_flex_end_rounded;
+  static IconData trackPlaybackStartAtPosition = Symbols.align_justify_flex_start_rounded;
+  static IconData trackPlaybackStartAtPositionReset = Symbols.first_page_rounded;
+  static IconData trackPlaybackEndAtPosition = Symbols.align_justify_flex_end_rounded;
   static IconData trackPlaybackEndAtPositionReset = Symbols.last_page_rounded;
   static IconData trackPlaybackPositionSub = Symbols.fast_rewind_rounded;
 
   static IconData trackPlaybackPositionAdd = Symbols.fast_forward_rounded;
   static IconData recordingInputDevice = Symbols.settings_input_component;
-  static IconData recordingAudioEncoder =
-      Icons.integration_instructions_outlined;
+  static IconData recordingAudioEncoder = Icons.integration_instructions_outlined;
   static IconData recordingSampleRate = Icons.av_timer_rounded;
   static IconData recordingBitRate = Icons.network_check_rounded;
   static IconData recordingAudioMode = Icons.mic_external_on_rounded;
@@ -155,8 +146,7 @@ class AppIcon {
   static IconData recordingInfo = Symbols.info_rounded;
   static IconData recordingProgressSlider = Symbols.start_rounded;
 
-  static IconData recordingClipSlider =
-      Symbols.align_justify_space_even_rounded;
+  static IconData recordingClipSlider = Symbols.align_justify_space_even_rounded;
 
   static IconData create = Icons.add;
 
