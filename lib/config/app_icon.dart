@@ -141,7 +141,9 @@ class AppIcon {
   static IconData dangerZone = Icons.dangerous_outlined;
   static IconData recordingInProgress = Symbols.voicemail_rounded;
   static IconData recordingProgress = Symbols.edit_audio_rounded;
-  static IconData recordingControls = Symbols.instant_mix_rounded;
+  /// Use Material Icons here: Symbols subsetting in release builds can omit this glyph
+  /// (it left the track-details playback tab blank).
+  static IconData recordingControls = Icons.tune_rounded;
 
   static IconData recordingInfo = Symbols.info_rounded;
   static IconData recordingProgressSlider = Symbols.start_rounded;

@@ -145,8 +145,8 @@ build-apk: ##BUILD## Build APK in debug mode
 build-apk-release:
 	@echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Building $(FORMAT_BOLD)release$(FORMAT_RESET)$(FORMAT_HIGHLIGHT) AAB and APK...$(FORMAT_RESET)"; \
 	export GRADLE_OPTS="-Dorg.gradle.daemon=true -Dorg.gradle.parallel=true -Dorg.gradle.jvmargs=-Xmx4g"; \
-	flutter build apk --split-per-abi; \
-  	flutter build appbundle
+	flutter build apk --split-per-abi --no-tree-shake-icons && \
+	flutter build appbundle --no-tree-shake-icons
 
 .PHONY: install-apk
 install-apk: ##BUILD## Build and install APK in debug mode. Options: `DEVICE=`
@@ -160,8 +160,26 @@ install-apk: ##BUILD## Build and install APK in debug mode. Options: `DEVICE=`
 install-apk-release:
 	@echo "$(FORMAT_HIGHLIGHT)$(ICON_BUILD) APK Installation$(FORMAT_RESET)"
 	@DEVICE=$(DEVICE); $(choose-device); \
-	echo "$(COLOR_BLUE)$(ICON_INFO) Installing $(FORMAT_BOLD)debug$(FORMAT_RESET)$(COLOR_BLUE) APK on $(FORMAT_BOLD)$$DEVICE$(FORMAT_RESET)$(COLOR_BLUE) device...$(FORMAT_RESET)"; \
-	adb -s $$DEVICE install -r build/app/outputs/flutter-apk/app-arm64-v8a-release.apk; \
+	ABI=$$(adb -s $$DEVICE shell getprop ro.product.cpu.abi | tr -d '\r'); \
+	APK="build/app/outputs/flutter-apk/app-release.apk"; \
+	case "$$ABI" in \
+		arm64-v8a) CANDIDATE="build/app/outputs/flutter-apk/app-arm64-v8a-release.apk" ;; \
+		armeabi-v7a) CANDIDATE="build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk" ;; \
+		x86_64) CANDIDATE="build/app/outputs/flutter-apk/app-x86_64-release.apk" ;; \
+		*) CANDIDATE="" ;; \
+	esac; \
+	if [ -n "$$CANDIDATE" ] && [ -f "$$CANDIDATE" ]; then \
+		APK="$$CANDIDATE"; \
+		echo "$(COLOR_BLUE)$(ICON_INFO) Installing split release APK ($$ABI): $$APK$(FORMAT_RESET)"; \
+	elif [ -f "$$APK" ]; then \
+		echo "$(COLOR_YELLOW)$(ICON_WARN) Split APK not found; using universal $$APK (rebuild with make build-apk-release if icons are wrong)$(FORMAT_RESET)"; \
+	else \
+		echo "$(COLOR_RED)$(ICON_ERROR) No release APK under build/app/outputs/flutter-apk/. Run make build-apk-release first.$(FORMAT_RESET)"; \
+		exit 1; \
+	fi; \
+	echo "$(COLOR_BLUE)$(ICON_INFO) Uninstalling previous release on $$DEVICE (if any)...$(FORMAT_RESET)"; \
+	adb -s $$DEVICE uninstall pro.kwiatek.tune_tangler 2>/dev/null || true; \
+	adb -s $$DEVICE install -r "$$APK"; \
 	echo "$(COLOR_GREEN)$(ICON_CHECK)APK installed on $(FORMAT_BOLD)$$DEVICE$(FORMAT_RESET)$(COLOR_GREEN) device!$(FORMAT_RESET)"
 
 .PHONY: clean

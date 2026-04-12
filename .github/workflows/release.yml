@@ -138,13 +138,13 @@ jobs:
 
       # This step builds the APK for your Flutter application in release mode.
       - name: "🏗️ Build APK"
-        run: flutter build apk --split-per-abi --build-number=${{ github.run_number }}
+        run: flutter build apk --split-per-abi --no-tree-shake-icons --build-number=${{ github.run_number }}
 
       # This step builds the Android App Bundle (AAB) for your Flutter application
       - name: "🏗️ Build App Bundle"
         run: |
           export GRADLE_OPTS="-Dorg.gradle.daemon=true -Dorg.gradle.parallel=true -Dorg.gradle.jvmargs=-Xmx4g"
-          flutter build appbundle --build-number=${{ github.run_number }}
+          flutter build appbundle --no-tree-shake-icons --build-number=${{ github.run_number }}
 
       # Verify app bundle signature
       - name: "🔐 Verify build"

@@ -78,7 +78,7 @@ class TrackDetailsManager {
               minChildSize: minChild,
               maxChildSize: maxChild,
               builder: (context, ScrollController scrollController) => Column(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisSize: MainAxisSize.max,
                 children: [
                   ..._trackDetailsTitle(track),
                   _trackDetailsTabs(track),
@@ -147,7 +147,7 @@ class TrackDetailsManager {
           RecorderState.ready => 3,
         },
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: MainAxisSize.max,
           children: [
             TabBar(
               tabs: [
