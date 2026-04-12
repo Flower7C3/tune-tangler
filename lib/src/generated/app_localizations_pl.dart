@@ -809,6 +809,63 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
+  String get keyboardLayoutPreset => 'Układ klawiatury';
+
+  @override
+  String get keyboardLayoutPresetInfo =>
+      'Układ standardowy wykorzystuje pełną mapę klawiatury PC. Układ 24 klawiszy odpowiada stałemu blokowi 6×4 i blokuje rozmiar siatki ścieżek.';
+
+  @override
+  String get keyboardLayoutQwertyName => 'Standard (QWERTY)';
+
+  @override
+  String get keyboardLayoutGrid24Name => '24 klawisze (blok 6×4)';
+
+  @override
+  String keyboardLayoutPresetSuccess(Object layout) {
+    return 'Układ klawiatury: $layout.';
+  }
+
+  @override
+  String keyboardLayoutPresetSuccessWithReset(Object layout) {
+    return 'Układ klawiatury: $layout. Skróty zostały zresetowane do domyślnych.';
+  }
+
+  @override
+  String get keyboardLayoutChangeTitle => 'Potwierdź zmianę układu klawiatury';
+
+  @override
+  String keyboardLayoutChangeIntro(Object fromLayout, Object toLayout) {
+    return 'Przechodzisz z układu „$fromLayout” na „$toLayout”.';
+  }
+
+  @override
+  String get keyboardLayoutChangeDetailGrid24 =>
+      'Układ 24 klawiszy odpowiada stałemu blokowi 6×4 (wiersze fizyczne: 1234, 8765, 90ab, fedc, ghij, nmlk). Siatka ścieżek będzie zawsze miała 6 wierszy i 4 kolumny. Skróty ustawione pod pełną klawiaturę mogą nie mieć odpowiednika na tym bloku — ich zachowanie może sprawić, że części ścieżek nie da się już wygodnie wyzwolić z urządzenia.';
+
+  @override
+  String get keyboardLayoutChangeDetailQwerty =>
+      'Układ standardowy wykorzystuje pełną mapę klawiatury PC (cyfry, rzędy liter, znaki z Shift). Znowu możesz zmieniać rozmiar siatki w ustawieniach ścieżek. Skróty z bloku 24 klawiszy nadal działają, jeśli te same klawisze są na klawiaturze komputera.';
+
+  @override
+  String get keyboardLayoutChangeDecision =>
+      'Zresetować skróty wszystkich ścieżek do domyślnych dla nowego układu, czy zachować obecne przypisania — wtedy część skrótów może nie odpowiadać nowej mapie.';
+
+  @override
+  String get keyboardLayoutChangeKeepShortcuts =>
+      'Zmień układ, zachowaj skróty';
+
+  @override
+  String get keyboardLayoutChangeResetShortcuts => 'Zmień i zresetuj skróty';
+
+  @override
+  String get keyboardLayoutGridLockedTitle => 'Rozmiar siatki (stały)';
+
+  @override
+  String get keyboardLayoutGridLockedSubtitle =>
+      'Ten układ zawsze używa 6 wierszy i 4 kolumn.';
+
+  @override
   String get tracksSettings => 'Ustawienia ścieżek';
 
   @override

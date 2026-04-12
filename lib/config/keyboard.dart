@@ -1,7 +1,11 @@
 import 'package:flutter/services.dart';
 
+import '../wrapper/hive_service.dart';
+import 'app_config_fields.dart';
+import 'keyboard_layout_preset.dart';
+
 class AppKeyboardKeyMap {
-  static final Map<String, Map<String, String>> _keyboardKeysRows = {
+  static final Map<String, Map<String, String>> _qwertyKeyboardKeysRows = {
     'A': {
       '1': _keyboardKeyID([LogicalKeyboardKey.digit1]),
       '2': _keyboardKeyID([LogicalKeyboardKey.digit2]),
@@ -135,6 +139,52 @@ class AppKeyboardKeyMap {
       '?': _keyboardKeyID([LogicalKeyboardKey.shift, LogicalKeyboardKey.slash]),
     },
   };
+
+  /// 4×6 hardware layout: 1234, 8765, 90ab, fedc, ghij, nmlk
+  static final Map<String, Map<String, String>> _grid24KeyboardKeysRows = {
+    'A': {
+      '1': _keyboardKeyID([LogicalKeyboardKey.digit1]),
+      '2': _keyboardKeyID([LogicalKeyboardKey.digit2]),
+      '3': _keyboardKeyID([LogicalKeyboardKey.digit3]),
+      '4': _keyboardKeyID([LogicalKeyboardKey.digit4]),
+    },
+    'B': {
+      '8': _keyboardKeyID([LogicalKeyboardKey.digit8]),
+      '7': _keyboardKeyID([LogicalKeyboardKey.digit7]),
+      '6': _keyboardKeyID([LogicalKeyboardKey.digit6]),
+      '5': _keyboardKeyID([LogicalKeyboardKey.digit5]),
+    },
+    'C': {
+      '9': _keyboardKeyID([LogicalKeyboardKey.digit9]),
+      '0': _keyboardKeyID([LogicalKeyboardKey.digit0]),
+      'a': _keyboardKeyID([LogicalKeyboardKey.keyA]),
+      'b': _keyboardKeyID([LogicalKeyboardKey.keyB]),
+    },
+    'D': {
+      'f': _keyboardKeyID([LogicalKeyboardKey.keyF]),
+      'e': _keyboardKeyID([LogicalKeyboardKey.keyE]),
+      'd': _keyboardKeyID([LogicalKeyboardKey.keyD]),
+      'c': _keyboardKeyID([LogicalKeyboardKey.keyC]),
+    },
+    'E': {
+      'g': _keyboardKeyID([LogicalKeyboardKey.keyG]),
+      'h': _keyboardKeyID([LogicalKeyboardKey.keyH]),
+      'i': _keyboardKeyID([LogicalKeyboardKey.keyI]),
+      'j': _keyboardKeyID([LogicalKeyboardKey.keyJ]),
+    },
+    'F': {
+      'n': _keyboardKeyID([LogicalKeyboardKey.keyN]),
+      'm': _keyboardKeyID([LogicalKeyboardKey.keyM]),
+      'l': _keyboardKeyID([LogicalKeyboardKey.keyL]),
+      'k': _keyboardKeyID([LogicalKeyboardKey.keyK]),
+    },
+  };
+
+  static Map<String, Map<String, String>> get _keyboardKeysRows =>
+      KeyboardLayoutPreset.fromStored(HiveService.get(AppConfigFieldKey.keyboardLayoutPreset)) ==
+              KeyboardLayoutPreset.grid24
+          ? _grid24KeyboardKeysRows
+          : _qwertyKeyboardKeysRows;
 
   static String trackKeyboardKeyName(String rowName, int colIndex) =>
       _keyboardKeysRows[rowName]?.keys.elementAt(colIndex) ?? '';

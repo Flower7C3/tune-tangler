@@ -47,6 +47,9 @@ class AppIcon {
   static IconData gridRowsAmount = Icons.table_rows_rounded;
   static IconData gridColsAmount = Icons.view_column_rounded;
   static IconData grid = Icons.grid_4x4_rounded;
+  static IconData keyboardLayoutPreset = Icons.keyboard_outlined;
+  static IconData keyboardLayoutQwerty = Icons.keyboard_rounded;
+  static IconData keyboardLayoutGrid24 = Icons.grid_view_rounded;
 
   static IconData trackName = Icons.text_fields;
   static IconData trackKeyboardKey = Icons.keyboard_alt_rounded;

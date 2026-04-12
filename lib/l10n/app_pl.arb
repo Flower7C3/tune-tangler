@@ -203,6 +203,37 @@
   "gridColsAmountTitle": "Liczba kolumn siatki",
   "gridColsAmountInfo": "Ustaw liczbę kolumn siatki, która będzie widoczna na liście ścieżek.",
   "gridColsAmountSuccess": "Ustawiono liczbę kolumn siatki na {value}.",
+  "keyboardLayoutPreset": "Układ klawiatury",
+  "keyboardLayoutPresetInfo": "Układ standardowy wykorzystuje pełną mapę klawiatury PC. Układ 24 klawiszy odpowiada stałemu blokowi 6×4 i blokuje rozmiar siatki ścieżek.",
+  "keyboardLayoutQwertyName": "Standard (QWERTY)",
+  "keyboardLayoutGrid24Name": "24 klawisze (blok 6×4)",
+  "keyboardLayoutPresetSuccess": "Układ klawiatury: {layout}.",
+  "@keyboardLayoutPresetSuccess": {
+    "placeholders": {
+      "layout": {}
+    }
+  },
+  "keyboardLayoutPresetSuccessWithReset": "Układ klawiatury: {layout}. Skróty zostały zresetowane do domyślnych.",
+  "@keyboardLayoutPresetSuccessWithReset": {
+    "placeholders": {
+      "layout": {}
+    }
+  },
+  "keyboardLayoutChangeTitle": "Potwierdź zmianę układu klawiatury",
+  "keyboardLayoutChangeIntro": "Przechodzisz z układu „{fromLayout}” na „{toLayout}”.",
+  "@keyboardLayoutChangeIntro": {
+    "placeholders": {
+      "fromLayout": {},
+      "toLayout": {}
+    }
+  },
+  "keyboardLayoutChangeDetailGrid24": "Układ 24 klawiszy odpowiada stałemu blokowi 6×4 (wiersze fizyczne: 1234, 8765, 90ab, fedc, ghij, nmlk). Siatka ścieżek będzie zawsze miała 6 wierszy i 4 kolumny. Skróty ustawione pod pełną klawiaturę mogą nie mieć odpowiednika na tym bloku — ich zachowanie może sprawić, że części ścieżek nie da się już wygodnie wyzwolić z urządzenia.",
+  "keyboardLayoutChangeDetailQwerty": "Układ standardowy wykorzystuje pełną mapę klawiatury PC (cyfry, rzędy liter, znaki z Shift). Znowu możesz zmieniać rozmiar siatki w ustawieniach ścieżek. Skróty z bloku 24 klawiszy nadal działają, jeśli te same klawisze są na klawiaturze komputera.",
+  "keyboardLayoutChangeDecision": "Zresetować skróty wszystkich ścieżek do domyślnych dla nowego układu, czy zachować obecne przypisania — wtedy część skrótów może nie odpowiadać nowej mapie.",
+  "keyboardLayoutChangeKeepShortcuts": "Zmień układ, zachowaj skróty",
+  "keyboardLayoutChangeResetShortcuts": "Zmień i zresetuj skróty",
+  "keyboardLayoutGridLockedTitle": "Rozmiar siatki (stały)",
+  "keyboardLayoutGridLockedSubtitle": "Ten układ zawsze używa 6 wierszy i 4 kolumn.",
   "tracksSettings": "Ustawienia ścieżek",
   "trackSettings": "Ustawienia ścieżki",
   "tracks": "Ścieżki",

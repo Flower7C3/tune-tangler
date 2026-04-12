@@ -11,6 +11,7 @@ import 'package:tune_tangler/wrapper/setting_profile_wrapper.dart';
 import '../config/app_config_fields.dart';
 import '../config/app_global_config.dart';
 import '../config/app_icon.dart';
+import '../config/keyboard_layout_preset.dart';
 import '../entity/settings_profile.dart';
 import '../entity/track.dart';
 import '../provider/permission_provider.dart';
@@ -59,6 +60,7 @@ class DrawerManager {
   }
 
   bool showUserDetails = false;
+  bool _keyboardLayoutConfirmInProgress = false;
   static const Key _drawerKey = Key('drawer_key');
 
   Widget get build => Drawer(
@@ -291,44 +293,60 @@ class DrawerManager {
     ),
   ];
 
-  List<Widget> _tracksSettings() => [
-    _uiHelper.listTileSlider(
-      AppIcon.gridRowsAmount,
-      _trans.gridRowsAmount,
-      _trans.gridRowsAmountTitle,
-      _trans.gridRowsAmountInfo,
-      double.parse(_settings.getConfig(AppConfigFieldKey.gridRowsAmount).toString()),
-      AppGlobalConfig.gridRows.sliderValues.min,
-      AppGlobalConfig.gridRows.sliderValues.max,
-      AppGlobalConfig.gridRows.sliderValues.divisions,
-      _trans.buttonCancel,
-      _trans.buttonSave,
-      successAction: (double value, String formattedValue) {
-        _settings.setConfig(AppConfigFieldKey.gridRowsAmount, value.toInt());
-        _trackRepository.resetTracksCollection();
-        return _trans.gridRowsAmountSuccess(formattedValue);
-      },
-      configCollection: AppGlobalConfig.gridRows,
-    ),
-    _uiHelper.listTileSlider(
-      AppIcon.gridColsAmount,
-      _trans.gridColsAmount,
-      _trans.gridColsAmountTitle,
-      _trans.gridColsAmountInfo,
-      double.parse(_settings.getConfig(AppConfigFieldKey.gridColsAmount).toString()),
-      AppGlobalConfig.gridCols.sliderValues.min,
-      AppGlobalConfig.gridCols.sliderValues.max,
-      AppGlobalConfig.gridCols.sliderValues.divisions,
-      _trans.buttonCancel,
-      _trans.buttonSave,
-      successAction: (double value, String formattedValue) {
-        _settings.setConfig(AppConfigFieldKey.gridColsAmount, value.toInt());
-        _trackRepository.resetTracksCollection();
-        return _trans.gridColsAmountSuccess(formattedValue);
-      },
-      configCollection: AppGlobalConfig.gridCols,
-    ),
-    Divider(),
+  List<Widget> _tracksSettings() {
+    final keyboardPreset = KeyboardLayoutPreset.fromStored(
+      _settings.getConfig(AppConfigFieldKey.keyboardLayoutPreset),
+    );
+    return [
+      _keyboardLayoutPresetTile(),
+      if (keyboardPreset != KeyboardLayoutPreset.grid24) ...[
+        _uiHelper.listTileSlider(
+          AppIcon.gridRowsAmount,
+          _trans.gridRowsAmount,
+          _trans.gridRowsAmountTitle,
+          _trans.gridRowsAmountInfo,
+          double.parse(_settings.getConfig(AppConfigFieldKey.gridRowsAmount).toString()),
+          AppGlobalConfig.gridRows.sliderValues.min,
+          AppGlobalConfig.gridRows.sliderValues.max,
+          AppGlobalConfig.gridRows.sliderValues.divisions,
+          _trans.buttonCancel,
+          _trans.buttonSave,
+          successAction: (double value, String formattedValue) {
+            _settings.setConfig(AppConfigFieldKey.gridRowsAmount, value.toInt());
+            _trackRepository.resetTracksCollection();
+            return _trans.gridRowsAmountSuccess(formattedValue);
+          },
+          configCollection: AppGlobalConfig.gridRows,
+        ),
+        _uiHelper.listTileSlider(
+          AppIcon.gridColsAmount,
+          _trans.gridColsAmount,
+          _trans.gridColsAmountTitle,
+          _trans.gridColsAmountInfo,
+          double.parse(_settings.getConfig(AppConfigFieldKey.gridColsAmount).toString()),
+          AppGlobalConfig.gridCols.sliderValues.min,
+          AppGlobalConfig.gridCols.sliderValues.max,
+          AppGlobalConfig.gridCols.sliderValues.divisions,
+          _trans.buttonCancel,
+          _trans.buttonSave,
+          successAction: (double value, String formattedValue) {
+            _settings.setConfig(AppConfigFieldKey.gridColsAmount, value.toInt());
+            _trackRepository.resetTracksCollection();
+            return _trans.gridColsAmountSuccess(formattedValue);
+          },
+          configCollection: AppGlobalConfig.gridCols,
+        ),
+      ] else ...[
+        ListTile(
+          leading: Icon(AppIcon.grid),
+          title: Text(_trans.keyboardLayoutGridLockedTitle),
+          subtitle: Text(
+            _trans.keyboardLayoutGridLockedSubtitle,
+            style: TextStyle(fontSize: Theme.of(_context).textTheme.labelSmall?.fontSize),
+          ),
+        ),
+      ],
+      Divider(),
     _uiHelper.listTileReset(
       AppIcon.trackName,
       _trans.allTracksTitleReset,
@@ -353,7 +371,133 @@ class DrawerManager {
         return _trans.allTracksShortcutKeyResetSuccess;
       },
     ),
-  ];
+    ];
+  }
+
+  Widget _keyboardLayoutPresetTile() {
+    final currentValue = _settings.getConfig(AppConfigFieldKey.keyboardLayoutPreset);
+    final values = AppGlobalConfig.keyboardLayoutPreset.values<String>().toList();
+    return ExpansionTile(
+      leading: Icon(AppIcon.keyboardLayoutPreset),
+      title: Text(_trans.keyboardLayoutPreset),
+      subtitle: Text(
+        AppGlobalConfig.keyboardLayoutPreset.translate(currentValue, trans: _trans),
+        style: TextStyle(fontSize: Theme.of(_context).textTheme.labelSmall?.fontSize),
+      ),
+      childrenPadding: EdgeInsets.only(left: UIHelper.gridGap * 3),
+      trailing: Icon(AppGlobalConfig.keyboardLayoutPreset.icon(currentValue)),
+      children: [
+        Wrap(
+          spacing: UIHelper.gridGap,
+          children: List.generate(
+            values.length,
+            (index) => ChoiceChip(
+              label: Text(
+                AppGlobalConfig.keyboardLayoutPreset.translate(values[index], trans: _trans),
+              ),
+              showCheckmark: false,
+              avatar: Icon(AppGlobalConfig.keyboardLayoutPreset.icon(values[index])),
+              selected: values[index] == currentValue,
+              onSelected: (bool selected) {
+                if (selected) {
+                  _confirmKeyboardLayoutChange(values[index]);
+                }
+              },
+            ),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: UIHelper.gridGap),
+          child: Text(
+            _trans.keyboardLayoutPresetInfo,
+            style: Theme.of(_context).textTheme.labelMedium,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _confirmKeyboardLayoutChange(dynamic selectedValue) async {
+    if (_keyboardLayoutConfirmInProgress) {
+      return;
+    }
+
+    final fromPreset = KeyboardLayoutPreset.fromStored(
+      _settings.getConfig(AppConfigFieldKey.keyboardLayoutPreset),
+    );
+    final toPreset = KeyboardLayoutPreset.fromStored(selectedValue);
+    if (fromPreset == toPreset) {
+      return;
+    }
+
+    final formattedCurrent = AppGlobalConfig.keyboardLayoutPreset.translate(fromPreset.name, trans: _trans);
+    final formattedNew = AppGlobalConfig.keyboardLayoutPreset.translate(toPreset.name, trans: _trans);
+    final isTargetGrid24 = toPreset == KeyboardLayoutPreset.grid24;
+
+    _keyboardLayoutConfirmInProgress = true;
+    String? choice;
+    try {
+      choice = await showDialog<String>(
+        context: _context,
+        barrierDismissible: false,
+        builder: (BuildContext dialogContext) => AlertDialog(
+          title: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(AppIcon.keyboardLayoutPreset),
+              SizedBox(width: UIHelper.gridGap),
+              Expanded(child: Text(_trans.keyboardLayoutChangeTitle)),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(_trans.keyboardLayoutChangeIntro(formattedCurrent, formattedNew)),
+                SizedBox(height: UIHelper.gridGap * 2),
+                Text(
+                  isTargetGrid24 ? _trans.keyboardLayoutChangeDetailGrid24 : _trans.keyboardLayoutChangeDetailQwerty,
+                ),
+                SizedBox(height: UIHelper.gridGap * 2),
+                Text(_trans.keyboardLayoutChangeDecision),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, 'cancel'),
+              child: Text(_trans.buttonCancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, 'keep'),
+              child: Text(_trans.keyboardLayoutChangeKeepShortcuts),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogContext, 'reset'),
+              child: Text(_trans.keyboardLayoutChangeResetShortcuts),
+            ),
+          ],
+        ),
+      );
+    } finally {
+      _keyboardLayoutConfirmInProgress = false;
+    }
+
+    if (choice == null || choice == 'cancel') {
+      return;
+    }
+
+    await _settings.setConfig(AppConfigFieldKey.keyboardLayoutPreset, toPreset.name);
+    if (choice == 'reset') {
+      _trackRepository.resetTracksKeyboardKey(_trackRepository.allTracks());
+    }
+    _trackRepository.resetTracksCollection();
+
+    final message = choice == 'reset'
+        ? _trans.keyboardLayoutPresetSuccessWithReset(formattedNew)
+        : _trans.keyboardLayoutPresetSuccess(formattedNew);
+    _uiHelper.toast(message, icon: AppIcon.keyboardLayoutPreset);
+  }
 
   Future<void> _recordingSettingsDialog() async {
     InputDevice? currentValue = _settings.getConfig(AppConfigFieldKey.recordingInputDevice);

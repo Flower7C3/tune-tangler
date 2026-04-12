@@ -1325,6 +1325,96 @@ abstract class AppLocalizations {
   /// **'Setted grid columns amount to {value}.'**
   String gridColsAmountSuccess(Object value);
 
+  /// No description provided for @keyboardLayoutPreset.
+  ///
+  /// In en, this message translates to:
+  /// **'Keyboard layout'**
+  String get keyboardLayoutPreset;
+
+  /// No description provided for @keyboardLayoutPresetInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard layout uses the full PC keyboard map. The 24-key layout matches a fixed 6×4 pad and locks the track grid to that size.'**
+  String get keyboardLayoutPresetInfo;
+
+  /// No description provided for @keyboardLayoutQwertyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard (QWERTY)'**
+  String get keyboardLayoutQwertyName;
+
+  /// No description provided for @keyboardLayoutGrid24Name.
+  ///
+  /// In en, this message translates to:
+  /// **'24 keys (6×4 pad)'**
+  String get keyboardLayoutGrid24Name;
+
+  /// No description provided for @keyboardLayoutPresetSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Keyboard layout: {layout}.'**
+  String keyboardLayoutPresetSuccess(Object layout);
+
+  /// No description provided for @keyboardLayoutPresetSuccessWithReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Keyboard layout: {layout}. Shortcut keys were reset to defaults.'**
+  String keyboardLayoutPresetSuccessWithReset(Object layout);
+
+  /// No description provided for @keyboardLayoutChangeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm keyboard layout change'**
+  String get keyboardLayoutChangeTitle;
+
+  /// No description provided for @keyboardLayoutChangeIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'You are switching from {fromLayout} to {toLayout}.'**
+  String keyboardLayoutChangeIntro(Object fromLayout, Object toLayout);
+
+  /// No description provided for @keyboardLayoutChangeDetailGrid24.
+  ///
+  /// In en, this message translates to:
+  /// **'The 24-key layout matches a fixed 6×4 pad (physical rows: 1234, 8765, 90ab, fedc, ghij, nmlk). The track grid will always be 6 rows × 4 columns. Shortcuts you created for the full keyboard may not exist on this pad; keeping them can leave some tracks without a matching hardware key.'**
+  String get keyboardLayoutChangeDetailGrid24;
+
+  /// No description provided for @keyboardLayoutChangeDetailQwerty.
+  ///
+  /// In en, this message translates to:
+  /// **'The standard layout uses the full PC keyboard map (digits, letter rows, shifted symbols). You can change grid size again in track settings. Shortcuts from the 24-key pad remain valid if the same keys exist on your computer keyboard.'**
+  String get keyboardLayoutChangeDetailQwerty;
+
+  /// No description provided for @keyboardLayoutChangeDecision.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset all track shortcut keys to the defaults for the new layout, or keep your current assignments knowing some keys may no longer line up with the new map.'**
+  String get keyboardLayoutChangeDecision;
+
+  /// No description provided for @keyboardLayoutChangeKeepShortcuts.
+  ///
+  /// In en, this message translates to:
+  /// **'Change layout, keep shortcuts'**
+  String get keyboardLayoutChangeKeepShortcuts;
+
+  /// No description provided for @keyboardLayoutChangeResetShortcuts.
+  ///
+  /// In en, this message translates to:
+  /// **'Change and reset shortcuts'**
+  String get keyboardLayoutChangeResetShortcuts;
+
+  /// No description provided for @keyboardLayoutGridLockedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid size (fixed)'**
+  String get keyboardLayoutGridLockedTitle;
+
+  /// No description provided for @keyboardLayoutGridLockedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This layout always uses 6 rows and 4 columns.'**
+  String get keyboardLayoutGridLockedSubtitle;
+
   /// No description provided for @tracksSettings.
   ///
   /// In en, this message translates to:

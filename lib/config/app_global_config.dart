@@ -9,6 +9,7 @@ import 'package:record/record.dart';
 import '../entity/track.dart';
 import 'app_icon.dart';
 import 'config_collection.dart';
+import 'keyboard_layout_preset.dart';
 
 enum ToastType { success, error }
 
@@ -25,6 +26,26 @@ final class AppGlobalConfig {
     sliderValues: ConfigSliderValues(min: 2, max: 10, divisions: 8),
     defaultValue: 4,
     format: (dynamic value) => value.toStringAsFixed(0),
+  );
+
+  static final ConfigCollection keyboardLayoutPreset = ConfigCollection(
+    [
+      ConfigItem<String>(
+        KeyboardLayoutPreset.qwerty.name,
+        properties: [
+          ConfigItemIconProperty(AppIcon.keyboardLayoutQwerty),
+          ConfigItemTranslatableProperty((trans) => trans.keyboardLayoutQwertyName),
+        ],
+      ),
+      ConfigItem<String>(
+        KeyboardLayoutPreset.grid24.name,
+        properties: [
+          ConfigItemIconProperty(AppIcon.keyboardLayoutGrid24),
+          ConfigItemTranslatableProperty((trans) => trans.keyboardLayoutGrid24Name),
+        ],
+      ),
+    ],
+    defaultValue: KeyboardLayoutPreset.qwerty.name,
   );
 
   static final ConfigCollection permissions = ConfigCollection([

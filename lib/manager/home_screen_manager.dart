@@ -69,21 +69,25 @@ class HomeScreenManager {
     focusNode: _appWrapper.focusNode,
     autofocus: true,
     onKeyEvent: keyEvent,
-    child: Selector<HiveSettingsProvider, int>(
-      selector: (context, settings) => settings.getConfig(AppConfigFieldKey.gridRowsAmount),
-      builder: (context, gridRowsAmount, child) => ListView.builder(
-        controller: PageController(viewportFraction: 0.85),
-        itemCount: gridRowsAmount,
-        itemBuilder: (context, rowIndex) => Row(
-          children: [
-            _rowMenuManager.buildRowButtons(rowIndex),
-            Selector<HiveSettingsProvider, int>(
-              selector: (context, settings) => settings.getConfig(AppConfigFieldKey.gridColsAmount),
-              builder: (context, gridColsAmount, child) => _trackManager.buildRowTracks(rowIndex, gridColsAmount),
-            ),
-          ],
-        ),
+    child: Selector<HiveSettingsProvider, (int, int, String)>(
+      selector: (context, settings) => (
+        settings.getConfig(AppConfigFieldKey.gridRowsAmount) as int,
+        settings.getConfig(AppConfigFieldKey.gridColsAmount) as int,
+        settings.getConfig(AppConfigFieldKey.keyboardLayoutPreset).toString(),
       ),
+      builder: (context, dims, child) {
+        final (gridRowsAmount, gridColsAmount, _) = dims;
+        return ListView.builder(
+          controller: PageController(viewportFraction: 0.85),
+          itemCount: gridRowsAmount,
+          itemBuilder: (context, rowIndex) => Row(
+            children: [
+              _rowMenuManager.buildRowButtons(rowIndex),
+              _trackManager.buildRowTracks(rowIndex, gridColsAmount),
+            ],
+          ),
+        );
+      },
     ),
   );
 

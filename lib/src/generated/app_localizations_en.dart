@@ -802,6 +802,63 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get keyboardLayoutPreset => 'Keyboard layout';
+
+  @override
+  String get keyboardLayoutPresetInfo =>
+      'Standard layout uses the full PC keyboard map. The 24-key layout matches a fixed 6×4 pad and locks the track grid to that size.';
+
+  @override
+  String get keyboardLayoutQwertyName => 'Standard (QWERTY)';
+
+  @override
+  String get keyboardLayoutGrid24Name => '24 keys (6×4 pad)';
+
+  @override
+  String keyboardLayoutPresetSuccess(Object layout) {
+    return 'Keyboard layout: $layout.';
+  }
+
+  @override
+  String keyboardLayoutPresetSuccessWithReset(Object layout) {
+    return 'Keyboard layout: $layout. Shortcut keys were reset to defaults.';
+  }
+
+  @override
+  String get keyboardLayoutChangeTitle => 'Confirm keyboard layout change';
+
+  @override
+  String keyboardLayoutChangeIntro(Object fromLayout, Object toLayout) {
+    return 'You are switching from $fromLayout to $toLayout.';
+  }
+
+  @override
+  String get keyboardLayoutChangeDetailGrid24 =>
+      'The 24-key layout matches a fixed 6×4 pad (physical rows: 1234, 8765, 90ab, fedc, ghij, nmlk). The track grid will always be 6 rows × 4 columns. Shortcuts you created for the full keyboard may not exist on this pad; keeping them can leave some tracks without a matching hardware key.';
+
+  @override
+  String get keyboardLayoutChangeDetailQwerty =>
+      'The standard layout uses the full PC keyboard map (digits, letter rows, shifted symbols). You can change grid size again in track settings. Shortcuts from the 24-key pad remain valid if the same keys exist on your computer keyboard.';
+
+  @override
+  String get keyboardLayoutChangeDecision =>
+      'Reset all track shortcut keys to the defaults for the new layout, or keep your current assignments knowing some keys may no longer line up with the new map.';
+
+  @override
+  String get keyboardLayoutChangeKeepShortcuts =>
+      'Change layout, keep shortcuts';
+
+  @override
+  String get keyboardLayoutChangeResetShortcuts => 'Change and reset shortcuts';
+
+  @override
+  String get keyboardLayoutGridLockedTitle => 'Grid size (fixed)';
+
+  @override
+  String get keyboardLayoutGridLockedSubtitle =>
+      'This layout always uses 6 rows and 4 columns.';
+
+  @override
   String get tracksSettings => 'Tracks settings';
 
   @override

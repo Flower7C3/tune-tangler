@@ -577,17 +577,23 @@ class ProjectImportService {
       rethrow;
     }
 
+    if (settings.containsKey('keyboardLayoutPreset')) {
+      await _settings.setConfig(
+        AppConfigFieldKey.keyboardLayoutPreset,
+        settings['keyboardLayoutPreset'],
+      );
+    }
     if (settings.containsKey('gridRowsAmount')) {
-      _settings.setConfig(AppConfigFieldKey.gridRowsAmount, 0);
+      await _settings.setConfig(AppConfigFieldKey.gridRowsAmount, 0);
       await Future.delayed(Duration(milliseconds: 100));
-      _settings.setConfig(AppConfigFieldKey.gridRowsAmount, settings['gridRowsAmount']);
+      await _settings.setConfig(AppConfigFieldKey.gridRowsAmount, settings['gridRowsAmount']);
     }
     if (settings.containsKey('gridColsAmount')) {
-      _settings.setConfig(AppConfigFieldKey.gridColsAmount, 0);
+      await _settings.setConfig(AppConfigFieldKey.gridColsAmount, 0);
       await Future.delayed(Duration(milliseconds: 100));
-      _settings.setConfig(AppConfigFieldKey.gridColsAmount, settings['gridColsAmount']);
+      await _settings.setConfig(AppConfigFieldKey.gridColsAmount, settings['gridColsAmount']);
     }
-    _settings.reload();
+    await _settings.reload();
   }
 
   Future<void> _importTracks(Archive archive, List<ProjectImportError> errors) async {

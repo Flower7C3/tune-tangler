@@ -156,10 +156,12 @@ class ProjectExportService {
   Future<void> _exportGridSettings(Archive archive) async {
     final gridRows = _settings.getConfig(AppConfigFieldKey.gridRowsAmount);
     final gridCols = _settings.getConfig(AppConfigFieldKey.gridColsAmount);
+    final keyboardLayoutPreset = _settings.getConfig(AppConfigFieldKey.keyboardLayoutPreset);
 
     final settings = {
       'gridRowsAmount': gridRows,
       'gridColsAmount': gridCols,
+      'keyboardLayoutPreset': keyboardLayoutPreset,
     };
 
     String settingsJson;

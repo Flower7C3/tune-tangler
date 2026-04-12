@@ -17,6 +17,7 @@ enum AppConfigFieldKey {
   recordingNoiseSuppress,
   gridRowsAmount,
   gridColsAmount,
+  keyboardLayoutPreset,
 }
 
 final class AppConfigField {
@@ -56,6 +57,10 @@ final class AppConfigFieldsCollection {
     AppProjectConfigField(
       AppConfigFieldKey.gridColsAmount,
       AppGlobalConfig.gridCols.defaultValue.toInt(),
+    ),
+    AppProjectConfigField(
+      AppConfigFieldKey.keyboardLayoutPreset,
+      AppGlobalConfig.keyboardLayoutPreset.defaultValue,
     ),
     AppRecordingConfigField(AppConfigFieldKey.recordingInputDevice, null),
     AppRecordingConfigField(
