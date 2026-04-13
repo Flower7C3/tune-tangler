@@ -1150,6 +1150,10 @@ class TrackDetailsManager {
           icon: AppIcon.trackRecordingShare, type: ToastType.error, duration: 4);
       return;
     }
+    if (!_trackHasProcessedExportModifications(track)) {
+      await _shareRaw(track);
+      return;
+    }
     _uiHelper.listDialog(
       AppIcon.trackRecordingShare,
       _trans.trackRecordingShare(track.name.value),
@@ -1172,6 +1176,26 @@ class TrackDetailsManager {
         ),
       ],
     );
+  }
+
+  /// True when [_shareProcessed] would differ from the raw file (trim or non-default playback params).
+  bool _trackHasProcessedExportModifications(Track track) {
+    final durationMs = track.duration.value.inMilliseconds;
+    if (track.playbackStartAtPosition.value.inMilliseconds > 0) return true;
+    if (durationMs > 0 && track.playbackEndAtPosition.value.inMilliseconds < durationMs) {
+      return true;
+    }
+    const eps = 1e-6;
+    if ((track.playbackVolume.value - AppGlobalConfig.trackPlaybackVolume.defaultValue).abs() > eps) {
+      return true;
+    }
+    if ((track.playbackBalance.value - AppGlobalConfig.trackPlaybackBalance.defaultValue).abs() > eps) {
+      return true;
+    }
+    if ((track.playbackSpeed.value - AppGlobalConfig.trackPlaybackSpeed.defaultValue).abs() > eps) {
+      return true;
+    }
+    return false;
   }
 
   Future<void> _shareRaw(Track track) async {
