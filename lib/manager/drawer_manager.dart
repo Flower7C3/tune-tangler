@@ -795,23 +795,32 @@ class DrawerManager {
           _uiHelper.statusIconTile(AppIcon.trackPlaybackVolume, _trans.thePlaybackVolume.toLowerCase()),
           _uiHelper.statusIconTile(
             AppIcon.trackPlaybackBalanceLeft,
-            _trans.thePlaybackBalanceAt(_trans.balanceLeft).toLowerCase(),
+            _trans.helpTrackIconBalanceLeftLegend,
           ),
           _uiHelper.statusIconTile(
             AppIcon.trackPlaybackBalanceCenter,
-            _trans.thePlaybackBalanceAt(_trans.balanceCenter).toLowerCase(),
+            _trans.helpTrackIconBalanceCenterLegend,
           ),
           _uiHelper.statusIconTile(
             AppIcon.trackPlaybackBalanceRight,
-            _trans.thePlaybackBalanceAt(_trans.balanceRight).toLowerCase(),
+            _trans.helpTrackIconBalanceRightLegend,
           ),
           _uiHelper.statusIconTile(
             AppIcon.trackPlaybackStartAtPosition,
-            _trans.thePlaybackStartAtPosition.toLowerCase(),
+            _trans.helpTrackIconPlaybackStartTrimLegend,
           ),
-          _uiHelper.statusIconTile(AppIcon.trackPlaybackEndAtPosition, _trans.thePlaybackEndAtPosition.toLowerCase()),
-          _uiHelper.statusIconTile(AppIcon.trackSinglePlaybackMode, _trans.singlePlaybackMode.toLowerCase()),
-          _uiHelper.statusIconTile(AppIcon.trackRepeatPlaybackMode, _trans.repeatPlaybackMode.toLowerCase()),
+          _uiHelper.statusIconTile(
+            AppIcon.trackPlaybackEndAtPosition,
+            _trans.helpTrackIconPlaybackEndTrimLegend,
+          ),
+          _uiHelper.statusIconTile(
+            AppIcon.trackSinglePlaybackMode,
+            _trans.helpTrackIconSinglePlaybackModeLegend,
+          ),
+          _uiHelper.statusIconTile(
+            AppIcon.trackRepeatPlaybackMode,
+            _trans.helpTrackIconRepeatPlaybackModeLegend,
+          ),
         ],
       ),
       ExpansionTile(

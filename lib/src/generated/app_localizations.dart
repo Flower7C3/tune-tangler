@@ -449,13 +449,13 @@ abstract class AppLocalizations {
   /// No description provided for @trackNameChangeInfo.
   ///
   /// In en, this message translates to:
-  /// **'Select icon to be setted as new name for {trackName} track.'**
+  /// **'Select an icon to use as the new name for track {trackName}.'**
   String trackNameChangeInfo(Object trackName);
 
   /// No description provided for @trackNameChangeSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Setted new track name to {trackName}.'**
+  /// **'Track name updated to {trackName}.'**
   String trackNameChangeSuccess(Object trackName);
 
   /// No description provided for @trackKeyboardKeyChange.
@@ -473,13 +473,13 @@ abstract class AppLocalizations {
   /// No description provided for @trackKeyboardKeyChangeInfo.
   ///
   /// In en, this message translates to:
-  /// **'Select icon to be setted as new keyboard key for {trackName} track.'**
+  /// **'Select an icon to use as the new keyboard shortcut for track {trackName}.'**
   String trackKeyboardKeyChangeInfo(Object trackName);
 
   /// No description provided for @trackKeyboardKeyChangeSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Setted new keyboard key to {trackName}.'**
+  /// **'Shortcut updated for track {trackName}.'**
   String trackKeyboardKeyChangeSuccess(Object trackName);
 
   /// No description provided for @trackRecordingMove.
@@ -608,7 +608,7 @@ abstract class AppLocalizations {
   /// No description provided for @rowTracksPlaybackModeSetSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Setted playback mode for tracks in {rowName} row to {value}.'**
+  /// **'Playback mode for tracks in row {rowName} updated to {value}.'**
   String rowTracksPlaybackModeSetSuccess(Object rowName, Object value);
 
   /// No description provided for @rowTracksPlaybackSpeedSet.
@@ -626,7 +626,7 @@ abstract class AppLocalizations {
   /// No description provided for @rowTracksPlaybackSpeedSuccessSet.
   ///
   /// In en, this message translates to:
-  /// **'Setted playback speed for tracks in {rowName} row to {value}.'**
+  /// **'Playback speed for tracks in row {rowName} updated to {value}.'**
   String rowTracksPlaybackSpeedSuccessSet(Object rowName, Object value);
 
   /// No description provided for @rowTracksPlaybackVolumeSet.
@@ -644,7 +644,7 @@ abstract class AppLocalizations {
   /// No description provided for @rowTracksPlaybackVolumeSuccessSet.
   ///
   /// In en, this message translates to:
-  /// **'Setted volume for tracks in {rowName} row to {value}.'**
+  /// **'Volume for tracks in row {rowName} updated to {value}.'**
   String rowTracksPlaybackVolumeSuccessSet(Object rowName, Object value);
 
   /// No description provided for @rowTracksPlaybackBalanceSet.
@@ -662,7 +662,7 @@ abstract class AppLocalizations {
   /// No description provided for @rowTracksPlaybackBalanceSuccessSet.
   ///
   /// In en, this message translates to:
-  /// **'Setted balance for tracks in {rowName} row to {value}.'**
+  /// **'Balance for tracks in row {rowName} updated to {value}.'**
   String rowTracksPlaybackBalanceSuccessSet(Object rowName, Object value);
 
   /// No description provided for @rowTracksPlaybackStartAtPositionReset.
@@ -686,7 +686,7 @@ abstract class AppLocalizations {
   /// No description provided for @rowTracksPlaybackStartAtPositionResetSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Resetted row tracks playback start at in {rowName} row.'**
+  /// **'Playback start reset for tracks in row {rowName}.'**
   String rowTracksPlaybackStartAtPositionResetSuccess(Object rowName);
 
   /// No description provided for @rowTracksPlaybackEndAtPositionReset.
@@ -710,7 +710,7 @@ abstract class AppLocalizations {
   /// No description provided for @rowTracksPlaybackEndAtPositionResetSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Resetted all tracks playback end at in {rowName} row.'**
+  /// **'Playback end reset for tracks in row {rowName}.'**
   String rowTracksPlaybackEndAtPositionResetSuccess(Object rowName);
 
   /// No description provided for @rowTracksRecordingsDelete.
@@ -920,7 +920,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpScreenMessageSettingsProfilesContent.
   ///
   /// In en, this message translates to:
-  /// **'Settings profiles allow you to save and quickly restore application configuration. You can create multiple profiles with different recording and screen settings, then switch between them.\n\nEach profile contains:\n• Recording settings (\$[recordingInputDevice]input device, \$[recordingAudioEncoder]codec, \$[recordingSampleRate]sample rate, \$[recordingBitRate]bit rate, \$[recordingAudioMode]audio mode, \$[recordingAutoGain]auto-gain, \$[recordingEchoCancel]echo cancel, \$[recordingNoiseSuppress]noise suppress)\n• Screen settings (\$[language]language, \$[screenThemeMode]theme, \$[screenThemeColor]accent color, \$[keepScreenOn]keep screen on)\n\nTo create a profile, use the \$[create]\"Create\" button in the profiles dialog. To load a profile, click on it. To delete a profile, \$[touchLong]long-press it and select the \$[deleteForever]delete option.'**
+  /// **'Settings profiles allow you to save and quickly restore application configuration. You can create multiple profiles with different recording and screen settings, then switch between them.\n\nEach profile contains:\n• Recording settings (\$[recordingInputDevice]input device, \$[recordingAudioEncoder]codec, \$[recordingSampleRate]sample rate, \$[recordingBitRate]bit rate, \$[recordingAudioMode]audio mode, \$[recordingAutoGain]automatic gain, \$[recordingEchoCancel]echo cancellation, \$[recordingNoiseSuppress]noise suppression)\n• Screen settings (\$[language]language, \$[screenThemeMode]theme, \$[screenThemeColor]accent color, \$[keepScreenOn]keep screen on)\n\nTo create a profile, use the \$[create]\"Create\" button in the profiles dialog. To load a profile, tap it. To delete a profile, \$[touchLong]long-press it and select the \$[deleteForever]delete option.'**
   String get helpScreenMessageSettingsProfilesContent;
 
   /// No description provided for @projectExportInfo.
@@ -932,7 +932,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsProfilesInfo.
   ///
   /// In en, this message translates to:
-  /// **'Save and restore application configuration. Click to load a profile, or long-press to see details.'**
+  /// **'Save and restore application configuration. Tap to load a profile, or long-press to see details.'**
   String get settingsProfilesInfo;
 
   /// No description provided for @moreSettings.
@@ -956,7 +956,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpScreenMessageAboutContent.
   ///
   /// In en, this message translates to:
-  /// **'This application allows you to record audio from a microphone or USB audio interface (your device must support USB OTG technology) to one of several tracks. You can also import an existing audio file.\n\nRecordings can be played synchronously or asynchronously, in a loop or not.\n\nRecordings and their settings, as well as the graphic mode and language, are remembered after the application is closed.'**
+  /// **'This application lets you record audio from a microphone or USB audio interface (your device must support USB OTG) to one of several tracks. You can also import an existing audio file.\n\nRecordings can play in sync (all tracks together) or independently, in a loop or once.\n\nRecordings and their settings, plus the UI theme and language, are remembered after you close the app.'**
   String get helpScreenMessageAboutContent;
 
   /// No description provided for @helpScreenMessageGridScreenTitle.
@@ -968,7 +968,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpScreenMessageGridScreenContent.
   ///
   /// In en, this message translates to:
-  /// **'Short press a colored track block or use a hotkey (visible at the top of the track) to perform one of the available actions.\n\nHold the track block or use the hotkey with the Control key \$[controlKey] to open the track details.'**
+  /// **'Short press a colored track block or use a hotkey (visible at the top of the track) to perform one of the available actions.\n\nHold the track block or use a hotkey with a modifier key (usually Control \$[controlKey], often Command on Mac) to open track details.\n\nIn the drawer you can choose the keyboard mode (standard or 24-key pad). Set each track’s hotkey in that track’s details.'**
   String get helpScreenMessageGridScreenContent;
 
   /// No description provided for @helpScreenMessageDetailsScreenTitle.
@@ -980,7 +980,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpScreenMessageDetailsScreenContent.
   ///
   /// In en, this message translates to:
-  /// **'There are several settings, such as: \$[recordingClip]recording trimming, \$[trackPlaybackMode]playback mode, \$[trackPlaybackVolume]playback volume value, \$[trackPlaybackBalance]audio balance, \$[trackPlaybackSpeed]playback speed, \$[trackName]track name, \$[trackKeyboardKey]track keyboard shortcut. You can also \$[trackRecordingMove]change the track location on the grid, \$[trackRecordingImport]import recording file, \$[trackRecordingShare]share or \$[deleteForever]delete recording.'**
+  /// **'Main track settings:\n• \$[recordingClip]recording trim\n• \$[trackPlaybackMode]playback mode\n• \$[trackPlaybackVolume]playback volume\n• \$[trackPlaybackBalance]audio balance\n• \$[trackPlaybackSpeed]playback speed\n• \$[trackName]track name\n• \$[trackKeyboardKey]keyboard shortcut\n\nYou can also \$[trackRecordingMove]move the track on the grid, \$[trackRecordingImport]import a recording file, \$[trackRecordingShare]share the recording, or \$[deleteForever]delete it.'**
   String get helpScreenMessageDetailsScreenContent;
 
   /// No description provided for @helpScreenMessageTrackStates.
@@ -992,7 +992,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpScreenMessageTrackStatesInfo.
   ///
   /// In en, this message translates to:
-  /// **'Each track can be in one of several states that determine available actions. Clicking on the track block performs an action depending on the current state.'**
+  /// **'Each track can be in one of several states that determine available actions. Tapping the track block runs the action for the current state.'**
   String get helpScreenMessageTrackStatesInfo;
 
   /// No description provided for @helpScreenMessageTrackIcons.
@@ -1007,10 +1007,52 @@ abstract class AppLocalizations {
   /// **'Icons displayed on the track block inform about its properties.'**
   String get helpScreenMessageTrackIconsInfo;
 
+  /// No description provided for @helpTrackIconBalanceLeftLegend.
+  ///
+  /// In en, this message translates to:
+  /// **'panned left; exact mix in track details'**
+  String get helpTrackIconBalanceLeftLegend;
+
+  /// No description provided for @helpTrackIconBalanceCenterLegend.
+  ///
+  /// In en, this message translates to:
+  /// **'balance centered'**
+  String get helpTrackIconBalanceCenterLegend;
+
+  /// No description provided for @helpTrackIconBalanceRightLegend.
+  ///
+  /// In en, this message translates to:
+  /// **'panned right; exact mix in track details'**
+  String get helpTrackIconBalanceRightLegend;
+
+  /// No description provided for @helpTrackIconPlaybackStartTrimLegend.
+  ///
+  /// In en, this message translates to:
+  /// **'trimmed at the start; exact time in track details'**
+  String get helpTrackIconPlaybackStartTrimLegend;
+
+  /// No description provided for @helpTrackIconPlaybackEndTrimLegend.
+  ///
+  /// In en, this message translates to:
+  /// **'trimmed at the end; exact time in track details'**
+  String get helpTrackIconPlaybackEndTrimLegend;
+
+  /// No description provided for @helpTrackIconSinglePlaybackModeLegend.
+  ///
+  /// In en, this message translates to:
+  /// **'plays once, then stops'**
+  String get helpTrackIconSinglePlaybackModeLegend;
+
+  /// No description provided for @helpTrackIconRepeatPlaybackModeLegend.
+  ///
+  /// In en, this message translates to:
+  /// **'loops back to the range start'**
+  String get helpTrackIconRepeatPlaybackModeLegend;
+
   /// No description provided for @helpScreenMessageSettingsInfo.
   ///
   /// In en, this message translates to:
-  /// **'You can set \$[recordingAudioEncoder]audio codec, \$[recordingSampleRate]sample rate, \$[recordingBitRate]bit rate, \$[recordingAudioMode]audio mode, \$[recordingAutoGain]auto gain, \$[recordingEchoCancel]echo cancel and \$[recordingNoiseSuppress]noise suppression.'**
+  /// **'Here you can set \$[recordingAudioEncoder]audio codec, \$[recordingSampleRate]sample rate, \$[recordingBitRate]bit rate, \$[recordingAudioMode]audio mode, \$[recordingAutoGain]automatic gain, \$[recordingEchoCancel]echo cancellation, and \$[recordingNoiseSuppress]noise suppression.'**
   String get helpScreenMessageSettingsInfo;
 
   /// No description provided for @helpScreenMessageProjectExportImportTitle.
@@ -1022,19 +1064,19 @@ abstract class AppLocalizations {
   /// No description provided for @helpScreenMessageProjectExportImportContent.
   ///
   /// In en, this message translates to:
-  /// **'You can \$[projectExport]save the entire project to a ZIP file, which contains grid settings, all tracks with their settings, and audio recordings. The file can later be \$[projectImport]loaded to restore the entire application state.\n\nThe exported file contains:\n• Grid settings (number of rows and columns)\n• All track settings (names, playback parameters, trimming, keyboard shortcuts)\n• All audio recordings with checksums\n• Project metadata (version, export date, statistics)\n\nBefore import, a project preview is displayed, and the application warns about overwriting the current session. Import performs full validation before modifying data.'**
+  /// **'You can \$[projectExport]save the entire project to a ZIP file, which contains grid settings, all tracks with their settings, and audio recordings. The file can later be \$[projectImport]loaded to restore the entire application state.\n\nThe exported file contains:\n• Grid settings (number of rows and columns)\n• All track settings (names, playback parameters, playback trim, keyboard shortcuts)\n• All audio recordings with checksums\n• Project metadata (version, export date, statistics)\n\nBefore import, a project preview is displayed, and the application warns about overwriting the current session. Import performs full validation before modifying data.'**
   String get helpScreenMessageProjectExportImportContent;
 
   /// No description provided for @stateEmpty.
   ///
   /// In en, this message translates to:
-  /// **'track empty (click on box to start recording)'**
+  /// **'track empty (tap the box to start recording)'**
   String get stateEmpty;
 
   /// No description provided for @stateRecording.
   ///
   /// In en, this message translates to:
-  /// **'recording in progress (click on box to stop recording)'**
+  /// **'recording in progress (tap the box to stop recording)'**
   String get stateRecording;
 
   /// No description provided for @stateProcessing.
@@ -1046,19 +1088,19 @@ abstract class AppLocalizations {
   /// No description provided for @stateIdle.
   ///
   /// In en, this message translates to:
-  /// **'idle: recording done/playing stopped (click on box to start playing)'**
+  /// **'idle: recording done/playing stopped (tap the box to start playing)'**
   String get stateIdle;
 
   /// No description provided for @statePlaying.
   ///
   /// In en, this message translates to:
-  /// **'playing started track (click on box to stop playing)'**
+  /// **'track is playing (tap the box to stop playback)'**
   String get statePlaying;
 
   /// No description provided for @statePaused.
   ///
   /// In en, this message translates to:
-  /// **'playing paused (click on box to unpause playing)'**
+  /// **'playing paused (tap the box to resume)'**
   String get statePaused;
 
   /// No description provided for @buttonAdd.
@@ -1238,7 +1280,7 @@ abstract class AppLocalizations {
   /// No description provided for @screenThemeColorSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Setted theme accent color to {name}.'**
+  /// **'Theme accent color updated to {name}.'**
   String screenThemeColorSuccess(Object name);
 
   /// No description provided for @keepScreenOn.
@@ -1292,7 +1334,7 @@ abstract class AppLocalizations {
   /// No description provided for @gridRowsAmountSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Setted grid rows amount to {value}.'**
+  /// **'Grid rows set to {value}.'**
   String gridRowsAmountSuccess(Object value);
 
   /// No description provided for @gridColsAmount.
@@ -1322,7 +1364,7 @@ abstract class AppLocalizations {
   /// No description provided for @gridColsAmountSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Setted grid columns amount to {value}.'**
+  /// **'Grid columns set to {value}.'**
   String gridColsAmountSuccess(Object value);
 
   /// No description provided for @keyboardLayoutPreset.
@@ -1460,7 +1502,7 @@ abstract class AppLocalizations {
   /// No description provided for @trackTitleEmojisSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Setted emojis that might be used as track title.'**
+  /// **'Saved emoji list for track titles.'**
   String get trackTitleEmojisSuccess;
 
   /// No description provided for @allTracksTitleReset.
@@ -1484,7 +1526,7 @@ abstract class AppLocalizations {
   /// No description provided for @allTracksTitleResetSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Resetted all tracks title.'**
+  /// **'All track titles reset.'**
   String get allTracksTitleResetSuccess;
 
   /// No description provided for @allTracksShortcutKeyReset.
@@ -1508,7 +1550,7 @@ abstract class AppLocalizations {
   /// No description provided for @allTracksShortcutKeyResetSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Resetted all tracks shortcut key.'**
+  /// **'All track shortcuts reset.'**
   String get allTracksShortcutKeyResetSuccess;
 
   /// No description provided for @allTracksPlaybackModeSet.
@@ -1526,13 +1568,13 @@ abstract class AppLocalizations {
   /// No description provided for @allTracksPlaybackModeInfoSet.
   ///
   /// In en, this message translates to:
-  /// **'Select playback mode to which all track will be setted.'**
+  /// **'Choose the playback mode to apply to all tracks.'**
   String get allTracksPlaybackModeInfoSet;
 
   /// No description provided for @allTracksPlaybackModeSuccessSet.
   ///
   /// In en, this message translates to:
-  /// **'Setted all tracks playback mode to {mode}.'**
+  /// **'Playback mode for all tracks updated to {mode}.'**
   String allTracksPlaybackModeSuccessSet(Object mode);
 
   /// No description provided for @singlePlaybackMode.
@@ -1562,13 +1604,13 @@ abstract class AppLocalizations {
   /// No description provided for @allTracksPlaybackVolumeInfoSet.
   ///
   /// In en, this message translates to:
-  /// **'Select volume to which all track will be setted.'**
+  /// **'Choose the volume to apply to all tracks.'**
   String get allTracksPlaybackVolumeInfoSet;
 
   /// No description provided for @allTracksPlaybackVolumeSuccessSet.
   ///
   /// In en, this message translates to:
-  /// **'Setted all tracks playback volume to {value}.'**
+  /// **'Volume for all tracks updated to {value}.'**
   String allTracksPlaybackVolumeSuccessSet(Object value);
 
   /// No description provided for @allTracksPlaybackBalanceSet.
@@ -1586,13 +1628,13 @@ abstract class AppLocalizations {
   /// No description provided for @allTracksPlaybackBalanceInfoSet.
   ///
   /// In en, this message translates to:
-  /// **'Select balance to which all track will be setted.'**
+  /// **'Choose the balance to apply to all tracks.'**
   String get allTracksPlaybackBalanceInfoSet;
 
   /// No description provided for @allTracksPlaybackBalanceSuccessSet.
   ///
   /// In en, this message translates to:
-  /// **'Setted all tracks playback balance to {value}.'**
+  /// **'Balance for all tracks updated to {value}.'**
   String allTracksPlaybackBalanceSuccessSet(Object value);
 
   /// No description provided for @allTracksPlaybackSpeedSet.
@@ -1610,13 +1652,13 @@ abstract class AppLocalizations {
   /// No description provided for @allTracksPlaybackSpeedInfoSet.
   ///
   /// In en, this message translates to:
-  /// **'Select track speed which all track will be setted.'**
+  /// **'Choose the playback speed to apply to all tracks.'**
   String get allTracksPlaybackSpeedInfoSet;
 
   /// No description provided for @allTracksPlaybackSpeedSuccessSet.
   ///
   /// In en, this message translates to:
-  /// **'Setted all tracks playback speed to {value}.'**
+  /// **'Playback speed for all tracks updated to {value}.'**
   String allTracksPlaybackSpeedSuccessSet(Object value);
 
   /// No description provided for @allTracksPlaybackStartAtPositionReset.
@@ -1640,7 +1682,7 @@ abstract class AppLocalizations {
   /// No description provided for @allTracksPlaybackStartAtPositionResetSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Resetted all tracks playback start at.'**
+  /// **'Playback start reset for all tracks.'**
   String get allTracksPlaybackStartAtPositionResetSuccess;
 
   /// No description provided for @allTracksPlaybackEndAtPositionReset.
@@ -1664,7 +1706,7 @@ abstract class AppLocalizations {
   /// No description provided for @allTracksPlaybackEndAtPositionResetSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Resetted all tracks playback end at.'**
+  /// **'Playback end reset for all tracks.'**
   String get allTracksPlaybackEndAtPositionResetSuccess;
 
   /// No description provided for @allTracksSettingsReset.
@@ -1682,13 +1724,13 @@ abstract class AppLocalizations {
   /// No description provided for @allTracksSettingsResetInfo.
   ///
   /// In en, this message translates to:
-  /// **'All all tracks settings will be restored to default. Continue?'**
+  /// **'All track settings will be restored to defaults. Continue?'**
   String get allTracksSettingsResetInfo;
 
   /// No description provided for @allTracksSettingsResetSuccess.
   ///
   /// In en, this message translates to:
-  /// **'All all tracks settings was restored to default.'**
+  /// **'All track settings were restored to defaults.'**
   String get allTracksSettingsResetSuccess;
 
   /// No description provided for @allTracksRecordingsDelete.
@@ -1706,7 +1748,7 @@ abstract class AppLocalizations {
   /// No description provided for @allTracksRecordingsDeleteInfo.
   ///
   /// In en, this message translates to:
-  /// **'Recordings for all track will be deleted permanently. Continue?'**
+  /// **'Recordings for all tracks will be deleted permanently. Continue?'**
   String get allTracksRecordingsDeleteInfo;
 
   /// No description provided for @allTracksRecordingsDeleteSuccess.
@@ -1766,7 +1808,7 @@ abstract class AppLocalizations {
   /// No description provided for @recordingInputDeviceSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Setted device to {value}.'**
+  /// **'Input device set to {value}.'**
   String recordingInputDeviceSuccess(Object value);
 
   /// No description provided for @recordingAudioEncoders.
@@ -1796,7 +1838,7 @@ abstract class AppLocalizations {
   /// No description provided for @recordingAudioEncoderSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Setted audio encoder to {value}.'**
+  /// **'Audio encoder set to {value}.'**
   String recordingAudioEncoderSuccess(Object value);
 
   /// No description provided for @audioRecorderAacHeName.
@@ -1922,7 +1964,7 @@ abstract class AppLocalizations {
   /// No description provided for @recordingSampleRateSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Setted recording sample rate to {value}.'**
+  /// **'Sample rate set to {value}.'**
   String recordingSampleRateSuccess(Object value);
 
   /// No description provided for @recordingBitRate.
@@ -1952,7 +1994,7 @@ abstract class AppLocalizations {
   /// No description provided for @recordingBitRateSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Setted recording bit rate to {value}.'**
+  /// **'Bit rate set to {value}.'**
   String recordingBitRateSuccess(Object value);
 
   /// No description provided for @recordingAudioMode.
@@ -1970,7 +2012,7 @@ abstract class AppLocalizations {
   /// No description provided for @recordingAudioModeSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Setted recording audio mode to {value}.'**
+  /// **'Audio mode set to {value}.'**
   String recordingAudioModeSuccess(Object value);
 
   /// No description provided for @recordingAudioModeOptionMono.
@@ -2006,7 +2048,7 @@ abstract class AppLocalizations {
   /// No description provided for @recordingAutoGainSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Setted auto gain to {value}.'**
+  /// **'Automatic gain set to {value}.'**
   String recordingAutoGainSuccess(Object value);
 
   /// No description provided for @recordingEchoCancel.
@@ -2030,7 +2072,7 @@ abstract class AppLocalizations {
   /// No description provided for @recordingEchoCancelSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Setted echo cancel to {value}.'**
+  /// **'Echo cancellation set to {value}.'**
   String recordingEchoCancelSuccess(Object value);
 
   /// No description provided for @recordingNoiseSuppress.
@@ -2048,13 +2090,13 @@ abstract class AppLocalizations {
   /// No description provided for @recordingNoiseSuppressInfo.
   ///
   /// In en, this message translates to:
-  /// **'The recorder will try to negates the input noise (if available on the device). Recording volume may be lowered by using this.'**
+  /// **'The recorder will try to reduce input noise (if available on the device). Recording volume may be lowered by using this.'**
   String get recordingNoiseSuppressInfo;
 
   /// No description provided for @recordingNoiseSuppressSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Setted noise suppress to {value}.'**
+  /// **'Noise suppression set to {value}.'**
   String recordingNoiseSuppressSuccess(Object value);
 
   /// No description provided for @yes.
@@ -2090,7 +2132,7 @@ abstract class AppLocalizations {
   /// No description provided for @screenSettingsResetSuccess.
   ///
   /// In en, this message translates to:
-  /// **'All screen settings was restored to default.'**
+  /// **'All screen settings were restored to defaults.'**
   String get screenSettingsResetSuccess;
 
   /// No description provided for @recordingSettingsReset.
@@ -2114,7 +2156,7 @@ abstract class AppLocalizations {
   /// No description provided for @recordingSettingsResetSuccess.
   ///
   /// In en, this message translates to:
-  /// **'All recording settings was restored to default.'**
+  /// **'All recording settings were restored to defaults.'**
   String get recordingSettingsResetSuccess;
 
   /// No description provided for @red.

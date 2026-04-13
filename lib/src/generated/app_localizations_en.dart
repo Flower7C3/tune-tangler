@@ -250,12 +250,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String trackNameChangeInfo(Object trackName) {
-    return 'Select icon to be setted as new name for $trackName track.';
+    return 'Select an icon to use as the new name for track $trackName.';
   }
 
   @override
   String trackNameChangeSuccess(Object trackName) {
-    return 'Setted new track name to $trackName.';
+    return 'Track name updated to $trackName.';
   }
 
   @override
@@ -268,12 +268,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String trackKeyboardKeyChangeInfo(Object trackName) {
-    return 'Select icon to be setted as new keyboard key for $trackName track.';
+    return 'Select an icon to use as the new keyboard shortcut for track $trackName.';
   }
 
   @override
   String trackKeyboardKeyChangeSuccess(Object trackName) {
-    return 'Setted new keyboard key to $trackName.';
+    return 'Shortcut updated for track $trackName.';
   }
 
   @override
@@ -372,7 +372,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String rowTracksPlaybackModeSetSuccess(Object rowName, Object value) {
-    return 'Setted playback mode for tracks in $rowName row to $value.';
+    return 'Playback mode for tracks in row $rowName updated to $value.';
   }
 
   @override
@@ -385,7 +385,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String rowTracksPlaybackSpeedSuccessSet(Object rowName, Object value) {
-    return 'Setted playback speed for tracks in $rowName row to $value.';
+    return 'Playback speed for tracks in row $rowName updated to $value.';
   }
 
   @override
@@ -398,7 +398,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String rowTracksPlaybackVolumeSuccessSet(Object rowName, Object value) {
-    return 'Setted volume for tracks in $rowName row to $value.';
+    return 'Volume for tracks in row $rowName updated to $value.';
   }
 
   @override
@@ -411,7 +411,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String rowTracksPlaybackBalanceSuccessSet(Object rowName, Object value) {
-    return 'Setted balance for tracks in $rowName row to $value.';
+    return 'Balance for tracks in row $rowName updated to $value.';
   }
 
   @override
@@ -428,7 +428,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String rowTracksPlaybackStartAtPositionResetSuccess(Object rowName) {
-    return 'Resetted row tracks playback start at in $rowName row.';
+    return 'Playback start reset for tracks in row $rowName.';
   }
 
   @override
@@ -445,7 +445,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String rowTracksPlaybackEndAtPositionResetSuccess(Object rowName) {
-    return 'Resetted all tracks playback end at in $rowName row.';
+    return 'Playback end reset for tracks in row $rowName.';
   }
 
   @override
@@ -559,7 +559,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get helpScreenMessageSettingsProfilesContent =>
-      'Settings profiles allow you to save and quickly restore application configuration. You can create multiple profiles with different recording and screen settings, then switch between them.\n\nEach profile contains:\n• Recording settings (\$[recordingInputDevice]input device, \$[recordingAudioEncoder]codec, \$[recordingSampleRate]sample rate, \$[recordingBitRate]bit rate, \$[recordingAudioMode]audio mode, \$[recordingAutoGain]auto-gain, \$[recordingEchoCancel]echo cancel, \$[recordingNoiseSuppress]noise suppress)\n• Screen settings (\$[language]language, \$[screenThemeMode]theme, \$[screenThemeColor]accent color, \$[keepScreenOn]keep screen on)\n\nTo create a profile, use the \$[create]\"Create\" button in the profiles dialog. To load a profile, click on it. To delete a profile, \$[touchLong]long-press it and select the \$[deleteForever]delete option.';
+      'Settings profiles allow you to save and quickly restore application configuration. You can create multiple profiles with different recording and screen settings, then switch between them.\n\nEach profile contains:\n• Recording settings (\$[recordingInputDevice]input device, \$[recordingAudioEncoder]codec, \$[recordingSampleRate]sample rate, \$[recordingBitRate]bit rate, \$[recordingAudioMode]audio mode, \$[recordingAutoGain]automatic gain, \$[recordingEchoCancel]echo cancellation, \$[recordingNoiseSuppress]noise suppression)\n• Screen settings (\$[language]language, \$[screenThemeMode]theme, \$[screenThemeColor]accent color, \$[keepScreenOn]keep screen on)\n\nTo create a profile, use the \$[create]\"Create\" button in the profiles dialog. To load a profile, tap it. To delete a profile, \$[touchLong]long-press it and select the \$[deleteForever]delete option.';
 
   @override
   String get projectExportInfo =>
@@ -567,7 +567,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsProfilesInfo =>
-      'Save and restore application configuration. Click to load a profile, or long-press to see details.';
+      'Save and restore application configuration. Tap to load a profile, or long-press to see details.';
 
   @override
   String get moreSettings => 'More settings...';
@@ -580,28 +580,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get helpScreenMessageAboutContent =>
-      'This application allows you to record audio from a microphone or USB audio interface (your device must support USB OTG technology) to one of several tracks. You can also import an existing audio file.\n\nRecordings can be played synchronously or asynchronously, in a loop or not.\n\nRecordings and their settings, as well as the graphic mode and language, are remembered after the application is closed.';
+      'This application lets you record audio from a microphone or USB audio interface (your device must support USB OTG) to one of several tracks. You can also import an existing audio file.\n\nRecordings can play in sync (all tracks together) or independently, in a loop or once.\n\nRecordings and their settings, plus the UI theme and language, are remembered after you close the app.';
 
   @override
   String get helpScreenMessageGridScreenTitle => 'Tracks grid screen';
 
   @override
   String get helpScreenMessageGridScreenContent =>
-      'Short press a colored track block or use a hotkey (visible at the top of the track) to perform one of the available actions.\n\nHold the track block or use the hotkey with the Control key \$[controlKey] to open the track details.';
+      'Short press a colored track block or use a hotkey (visible at the top of the track) to perform one of the available actions.\n\nHold the track block or use a hotkey with a modifier key (usually Control \$[controlKey], often Command on Mac) to open track details.\n\nIn the drawer you can choose the keyboard mode (standard or 24-key pad). Set each track’s hotkey in that track’s details.';
 
   @override
   String get helpScreenMessageDetailsScreenTitle => 'Track details screen';
 
   @override
   String get helpScreenMessageDetailsScreenContent =>
-      'There are several settings, such as: \$[recordingClip]recording trimming, \$[trackPlaybackMode]playback mode, \$[trackPlaybackVolume]playback volume value, \$[trackPlaybackBalance]audio balance, \$[trackPlaybackSpeed]playback speed, \$[trackName]track name, \$[trackKeyboardKey]track keyboard shortcut. You can also \$[trackRecordingMove]change the track location on the grid, \$[trackRecordingImport]import recording file, \$[trackRecordingShare]share or \$[deleteForever]delete recording.';
+      'Main track settings:\n• \$[recordingClip]recording trim\n• \$[trackPlaybackMode]playback mode\n• \$[trackPlaybackVolume]playback volume\n• \$[trackPlaybackBalance]audio balance\n• \$[trackPlaybackSpeed]playback speed\n• \$[trackName]track name\n• \$[trackKeyboardKey]keyboard shortcut\n\nYou can also \$[trackRecordingMove]move the track on the grid, \$[trackRecordingImport]import a recording file, \$[trackRecordingShare]share the recording, or \$[deleteForever]delete it.';
 
   @override
   String get helpScreenMessageTrackStates => 'Track states and actions';
 
   @override
   String get helpScreenMessageTrackStatesInfo =>
-      'Each track can be in one of several states that determine available actions. Clicking on the track block performs an action depending on the current state.';
+      'Each track can be in one of several states that determine available actions. Tapping the track block runs the action for the current state.';
 
   @override
   String get helpScreenMessageTrackIcons => 'Track info icons';
@@ -611,8 +611,34 @@ class AppLocalizationsEn extends AppLocalizations {
       'Icons displayed on the track block inform about its properties.';
 
   @override
+  String get helpTrackIconBalanceLeftLegend =>
+      'panned left; exact mix in track details';
+
+  @override
+  String get helpTrackIconBalanceCenterLegend => 'balance centered';
+
+  @override
+  String get helpTrackIconBalanceRightLegend =>
+      'panned right; exact mix in track details';
+
+  @override
+  String get helpTrackIconPlaybackStartTrimLegend =>
+      'trimmed at the start; exact time in track details';
+
+  @override
+  String get helpTrackIconPlaybackEndTrimLegend =>
+      'trimmed at the end; exact time in track details';
+
+  @override
+  String get helpTrackIconSinglePlaybackModeLegend => 'plays once, then stops';
+
+  @override
+  String get helpTrackIconRepeatPlaybackModeLegend =>
+      'loops back to the range start';
+
+  @override
   String get helpScreenMessageSettingsInfo =>
-      'You can set \$[recordingAudioEncoder]audio codec, \$[recordingSampleRate]sample rate, \$[recordingBitRate]bit rate, \$[recordingAudioMode]audio mode, \$[recordingAutoGain]auto gain, \$[recordingEchoCancel]echo cancel and \$[recordingNoiseSuppress]noise suppression.';
+      'Here you can set \$[recordingAudioEncoder]audio codec, \$[recordingSampleRate]sample rate, \$[recordingBitRate]bit rate, \$[recordingAudioMode]audio mode, \$[recordingAutoGain]automatic gain, \$[recordingEchoCancel]echo cancellation, and \$[recordingNoiseSuppress]noise suppression.';
 
   @override
   String get helpScreenMessageProjectExportImportTitle =>
@@ -620,28 +646,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get helpScreenMessageProjectExportImportContent =>
-      'You can \$[projectExport]save the entire project to a ZIP file, which contains grid settings, all tracks with their settings, and audio recordings. The file can later be \$[projectImport]loaded to restore the entire application state.\n\nThe exported file contains:\n• Grid settings (number of rows and columns)\n• All track settings (names, playback parameters, trimming, keyboard shortcuts)\n• All audio recordings with checksums\n• Project metadata (version, export date, statistics)\n\nBefore import, a project preview is displayed, and the application warns about overwriting the current session. Import performs full validation before modifying data.';
+      'You can \$[projectExport]save the entire project to a ZIP file, which contains grid settings, all tracks with their settings, and audio recordings. The file can later be \$[projectImport]loaded to restore the entire application state.\n\nThe exported file contains:\n• Grid settings (number of rows and columns)\n• All track settings (names, playback parameters, playback trim, keyboard shortcuts)\n• All audio recordings with checksums\n• Project metadata (version, export date, statistics)\n\nBefore import, a project preview is displayed, and the application warns about overwriting the current session. Import performs full validation before modifying data.';
 
   @override
-  String get stateEmpty => 'track empty (click on box to start recording)';
+  String get stateEmpty => 'track empty (tap the box to start recording)';
 
   @override
   String get stateRecording =>
-      'recording in progress (click on box to stop recording)';
+      'recording in progress (tap the box to stop recording)';
 
   @override
   String get stateProcessing => 'track processing in progress';
 
   @override
   String get stateIdle =>
-      'idle: recording done/playing stopped (click on box to start playing)';
+      'idle: recording done/playing stopped (tap the box to start playing)';
 
   @override
-  String get statePlaying =>
-      'playing started track (click on box to stop playing)';
+  String get statePlaying => 'track is playing (tap the box to stop playback)';
 
   @override
-  String get statePaused => 'playing paused (click on box to unpause playing)';
+  String get statePaused => 'playing paused (tap the box to resume)';
 
   @override
   String get buttonAdd => 'Add';
@@ -743,7 +768,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String screenThemeColorSuccess(Object name) {
-    return 'Setted theme accent color to $name.';
+    return 'Theme accent color updated to $name.';
   }
 
   @override
@@ -778,7 +803,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String gridRowsAmountSuccess(Object value) {
-    return 'Setted grid rows amount to $value.';
+    return 'Grid rows set to $value.';
   }
 
   @override
@@ -798,7 +823,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String gridColsAmountSuccess(Object value) {
-    return 'Setted grid columns amount to $value.';
+    return 'Grid columns set to $value.';
   }
 
   @override
@@ -881,8 +906,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Set emojis that might be used as track title.';
 
   @override
-  String get trackTitleEmojisSuccess =>
-      'Setted emojis that might be used as track title.';
+  String get trackTitleEmojisSuccess => 'Saved emoji list for track titles.';
 
   @override
   String get allTracksTitleReset => 'Reset tracks title';
@@ -895,7 +919,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'All tracks will have default title. Continue?';
 
   @override
-  String get allTracksTitleResetSuccess => 'Resetted all tracks title.';
+  String get allTracksTitleResetSuccess => 'All track titles reset.';
 
   @override
   String get allTracksShortcutKeyReset => 'Reset tracks shortcut key';
@@ -908,8 +932,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'All tracks will have default shortcut key. Continue?';
 
   @override
-  String get allTracksShortcutKeyResetSuccess =>
-      'Resetted all tracks shortcut key.';
+  String get allTracksShortcutKeyResetSuccess => 'All track shortcuts reset.';
 
   @override
   String get allTracksPlaybackModeSet => 'Set tracks playback mode';
@@ -919,11 +942,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get allTracksPlaybackModeInfoSet =>
-      'Select playback mode to which all track will be setted.';
+      'Choose the playback mode to apply to all tracks.';
 
   @override
   String allTracksPlaybackModeSuccessSet(Object mode) {
-    return 'Setted all tracks playback mode to $mode.';
+    return 'Playback mode for all tracks updated to $mode.';
   }
 
   @override
@@ -941,11 +964,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get allTracksPlaybackVolumeInfoSet =>
-      'Select volume to which all track will be setted.';
+      'Choose the volume to apply to all tracks.';
 
   @override
   String allTracksPlaybackVolumeSuccessSet(Object value) {
-    return 'Setted all tracks playback volume to $value.';
+    return 'Volume for all tracks updated to $value.';
   }
 
   @override
@@ -957,11 +980,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get allTracksPlaybackBalanceInfoSet =>
-      'Select balance to which all track will be setted.';
+      'Choose the balance to apply to all tracks.';
 
   @override
   String allTracksPlaybackBalanceSuccessSet(Object value) {
-    return 'Setted all tracks playback balance to $value.';
+    return 'Balance for all tracks updated to $value.';
   }
 
   @override
@@ -972,11 +995,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get allTracksPlaybackSpeedInfoSet =>
-      'Select track speed which all track will be setted.';
+      'Choose the playback speed to apply to all tracks.';
 
   @override
   String allTracksPlaybackSpeedSuccessSet(Object value) {
-    return 'Setted all tracks playback speed to $value.';
+    return 'Playback speed for all tracks updated to $value.';
   }
 
   @override
@@ -992,7 +1015,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get allTracksPlaybackStartAtPositionResetSuccess =>
-      'Resetted all tracks playback start at.';
+      'Playback start reset for all tracks.';
 
   @override
   String get allTracksPlaybackEndAtPositionReset => 'Reset playback end at';
@@ -1007,7 +1030,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get allTracksPlaybackEndAtPositionResetSuccess =>
-      'Resetted all tracks playback end at.';
+      'Playback end reset for all tracks.';
 
   @override
   String get allTracksSettingsReset => 'Reset tracks settings';
@@ -1017,11 +1040,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get allTracksSettingsResetInfo =>
-      'All all tracks settings will be restored to default. Continue?';
+      'All track settings will be restored to defaults. Continue?';
 
   @override
   String get allTracksSettingsResetSuccess =>
-      'All all tracks settings was restored to default.';
+      'All track settings were restored to defaults.';
 
   @override
   String get allTracksRecordingsDelete => 'Delete tracks recordings';
@@ -1031,7 +1054,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get allTracksRecordingsDeleteInfo =>
-      'Recordings for all track will be deleted permanently. Continue?';
+      'Recordings for all tracks will be deleted permanently. Continue?';
 
   @override
   String get allTracksRecordingsDeleteSuccess =>
@@ -1065,7 +1088,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String recordingInputDeviceSuccess(Object value) {
-    return 'Setted device to $value.';
+    return 'Input device set to $value.';
   }
 
   @override
@@ -1084,7 +1107,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String recordingAudioEncoderSuccess(Object value) {
-    return 'Setted audio encoder to $value.';
+    return 'Audio encoder set to $value.';
   }
 
   @override
@@ -1164,7 +1187,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String recordingSampleRateSuccess(Object value) {
-    return 'Setted recording sample rate to $value.';
+    return 'Sample rate set to $value.';
   }
 
   @override
@@ -1184,7 +1207,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String recordingBitRateSuccess(Object value) {
-    return 'Setted recording bit rate to $value.';
+    return 'Bit rate set to $value.';
   }
 
   @override
@@ -1197,7 +1220,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String recordingAudioModeSuccess(Object value) {
-    return 'Setted recording audio mode to $value.';
+    return 'Audio mode set to $value.';
   }
 
   @override
@@ -1220,7 +1243,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String recordingAutoGainSuccess(Object value) {
-    return 'Setted auto gain to $value.';
+    return 'Automatic gain set to $value.';
   }
 
   @override
@@ -1237,7 +1260,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String recordingEchoCancelSuccess(Object value) {
-    return 'Setted echo cancel to $value.';
+    return 'Echo cancellation set to $value.';
   }
 
   @override
@@ -1250,11 +1273,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recordingNoiseSuppressInfo =>
-      'The recorder will try to negates the input noise (if available on the device). Recording volume may be lowered by using this.';
+      'The recorder will try to reduce input noise (if available on the device). Recording volume may be lowered by using this.';
 
   @override
   String recordingNoiseSuppressSuccess(Object value) {
-    return 'Setted noise suppress to $value.';
+    return 'Noise suppression set to $value.';
   }
 
   @override
@@ -1275,7 +1298,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get screenSettingsResetSuccess =>
-      'All screen settings was restored to default.';
+      'All screen settings were restored to defaults.';
 
   @override
   String get recordingSettingsReset => 'Reset recording settings';
@@ -1289,7 +1312,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recordingSettingsResetSuccess =>
-      'All recording settings was restored to default.';
+      'All recording settings were restored to defaults.';
 
   @override
   String get red => 'red';
