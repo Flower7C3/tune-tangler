@@ -3,7 +3,7 @@
 ## 📋 Spis Treści
 
 - [🎯 Planowane prace](#planowane-prace)
-  - [3️⃣ Eksport i Import](#3-eksport-i-import-wysoki-priorytet)
+  - [3️⃣ Eksport i import projektu (zrealizowane)](#3-eksport-i-import-projektu-zrealizowane)
   - [4️⃣ Efekty Audio](#4-efekty-audio-odłożone--wymaga-dsp)
   - [5️⃣ System Licencji](#5-system-licencji-średni-priorytet)
   - [6️⃣ Funkcje Audio](#6-funkcje-audio-niski-priorytet)
@@ -13,21 +13,9 @@
 
 ## 🎯 Planowane prace
 
-### 3) Eksport i Import (Wysoki Priorytet)
+### 3) Eksport i import projektu (zrealizowane)
 
-#### Eksport wszystkich ścieżek
-- Kompletny backup: wszystkie ścieżki wraz z nagraniami
-- Ustawienia: profile konfiguracyjne, preferencje użytkownika
-- Metadane: nazwy, skróty klawiszowe, pozycje na siatce
-- Format: ZIP z zachowaniem struktury katalogów
-- Wersjonowanie: automatyczne tworzenie kopii zapasowych
-
-#### Import ścieżek
-- Przywracanie: pełne przywracanie z backupu
-- Merge: łączenie z istniejącymi ścieżkami
-- Konflikty: rozwiązywanie konfliktów nazw i ID
-- Walidacja: sprawdzanie integralności importowanych danych
-- Preview: podgląd przed importem
+Funkcja **zapisu i wczytywania całego projektu** (ZIP z siatką, ścieżkami, nagraniami, metadanymi, walidacją i podglądem przed importem) jest **wdrożona**. Szczegóły techniczne i lista zamkniętych elementów: [docs/COMPLETED.md](./COMPLETED.md), dokumentacja formatu: [docs/PROJECT_EXPORT_IMPORT.md](./PROJECT_EXPORT_IMPORT.md).
 
 ### 4) Efekty Audio (Odłożone – Wymaga DSP)
 - Podstawowe efekt: Reverb, Delay/Echo, Compression, EQ (LP/HP)
