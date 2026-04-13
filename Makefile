@@ -244,10 +244,21 @@ pub-outdated: ##MAINTENANCE## Check outdated packages
 	@echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Checking for outdated packages...$(FORMAT_RESET)"
 	@flutter pub outdated
 
-.PHONY: pub-upgrade
-pub-upgrade: ##MAINTENANCE## Upgrade dependencies
-	@echo "$(FORMAT_HIGHLIGHT)$(ICON_UPGRADE) Upgrading dependencies...$(FORMAT_RESET)"
+.PHONY: pub-update
+pub-update: ##MAINTENANCE## Safe upgrade: `flutter pub upgrade` (caret semver only, does not bump majors in pubspec)
+	@echo "$(FORMAT_HIGHLIGHT)$(ICON_UPGRADE) Upgrading dependencies within current pubspec constraints...$(FORMAT_RESET)"
 	@flutter pub upgrade
+
+.PHONY: pub-upgrade
+pub-upgrade: ##MAINTENANCE## Aggressive: `flutter pub upgrade --major-versions` (edits pubspec only if a newer graph still resolves)
+	@echo "$(FORMAT_HIGHLIGHT)$(ICON_UPGRADE) Upgrading dependencies (may bump majors in pubspec.yaml)...$(FORMAT_RESET)"
+	@out="$$(flutter pub upgrade --major-versions 2>&1)"; \
+	echo "$$out"; \
+	if echo "$$out" | grep -qF "No changes to pubspec.yaml"; then \
+		echo ""; \
+		echo "$(COLOR_YELLOW)$(ICON_WARN) Pub left pubspec unchanged: newer majors on pub.dev often conflict in one graph.$(FORMAT_RESET)"; \
+		echo "$(COLOR_CYAN)$(ICON_INFO) Compare Resolvable vs Latest: make pub-outdated$(FORMAT_RESET)"; \
+	fi
 
 .PHONY: sdk-upgrade
 sdk-upgrade: ##MAINTENANCE## Upgrade Flutter SDK
