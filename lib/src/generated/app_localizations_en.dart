@@ -559,7 +559,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get helpScreenMessageSettingsProfilesContent =>
-      'Settings profiles allow you to save and quickly restore application configuration. You can create multiple profiles with different recording and screen settings, then switch between them.\n\nEach profile contains:\n• Recording settings (\$[recordingInputDevice]input device, \$[recordingAudioEncoder]codec, \$[recordingSampleRate]sample rate, \$[recordingBitRate]bit rate, \$[recordingAudioMode]audio mode, \$[recordingAutoGain]automatic gain, \$[recordingEchoCancel]echo cancellation, \$[recordingNoiseSuppress]noise suppression)\n• Screen settings (\$[language]language, \$[screenThemeMode]theme, \$[screenThemeColor]accent color, \$[keepScreenOn]keep screen on)\n\nTo create a profile, use the \$[create]\"Create\" button in the profiles dialog. To load a profile, tap it. To delete a profile, \$[touchLong]long-press it and select the \$[deleteForever]delete option.';
+      'Think of settings profiles as saved recipes for how you like the app. Keep one for quiet practice and another for noisy rooms—then hop between them in a tap.\n\nEach recipe remembers:\n• Recording choices (\$[recordingInputDevice]where sound comes in, \$[recordingAudioEncoder]file format, \$[recordingSampleRate]time detail, \$[recordingBitRate]sound detail, \$[recordingAudioMode]mono or stereo feel, \$[recordingAutoGain]auto level, \$[recordingEchoCancel]less room echo, \$[recordingNoiseSuppress]less background hiss)\n• Screen comfort (\$[language]language, \$[screenThemeMode]light/dark look, \$[screenThemeColor]accent color, \$[keepScreenOn]keep the screen awake)\n\nTap \$[create]\"Create\" in the profiles dialog to save one. Tap a profile to switch to it. \$[touchLong]Press and hold, then choose \$[deleteForever]delete, to remove it.';
 
   @override
   String get projectExportInfo =>
@@ -580,65 +580,67 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get helpScreenMessageAboutContent =>
-      'This application lets you record audio from a microphone or USB audio interface (your device must support USB OTG) to one of several tracks. You can also import an existing audio file.\n\nRecordings can play in sync (all tracks together) or independently, in a loop or once.\n\nRecordings and their settings, plus the UI theme and language, are remembered after you close the app.';
+      'A simple grid for musical ideas. Record with the built-in mic or plug in a USB mic or interface—most phones that support USB accessories can handle it (you may see that called USB OTG). You can also bring in a clip you already have.\n\nWant everything in step? Play all tracks together. Prefer each line on its own timing? Let tracks go solo. Loop a phrase or play it once and stop.\n\nClose the app whenever you like—your takes, tweaks, theme, and language are still here when you return.';
 
   @override
   String get helpScreenMessageGridScreenTitle => 'Tracks grid screen';
 
   @override
   String get helpScreenMessageGridScreenContent =>
-      'Short press a colored track block or use a hotkey (visible at the top of the track) to perform one of the available actions.\n\nHold the track block or use a hotkey with a modifier key (usually Control \$[controlKey], often Command on Mac) to open track details.\n\nIn the drawer you can choose the keyboard mode (standard or 24-key pad). Set each track’s hotkey in that track’s details.';
+      'Each colored block is a quick control. Tap it—or use the little key hint above the track—for whatever fits the moment.\n\nWant sliders and finer options? Hold the block, or press your shortcut while holding Control \$[controlKey] (on many Macs, Command works instead) to open track details.\n\nIn the drawer, pick a keyboard layout: the familiar size or a larger 24-key pad. Hotkeys for tracks are set inside each track’s detail screen.';
 
   @override
   String get helpScreenMessageDetailsScreenTitle => 'Track details screen';
 
   @override
   String get helpScreenMessageDetailsScreenContent =>
-      'Main track settings:\n• \$[recordingClip]recording trim\n• \$[trackPlaybackMode]playback mode\n• \$[trackPlaybackVolume]playback volume\n• \$[trackPlaybackBalance]audio balance\n• \$[trackPlaybackSpeed]playback speed\n• \$[trackName]track name\n• \$[trackKeyboardKey]keyboard shortcut\n\nYou can also \$[trackRecordingMove]move the track on the grid, \$[trackRecordingImport]import a recording file, \$[trackRecordingShare]share the recording, or \$[deleteForever]delete it.';
+      'Shape how this track feels—the icons show what you’re editing:\n• \$[recordingClip]trim where the sound starts and ends\n• \$[trackPlaybackMode]loop or play once\n• \$[trackPlaybackVolume]how loud it plays\n• \$[trackPlaybackBalance]left/right balance\n• \$[trackPlaybackSpeed]speed up or slow down\n• \$[trackName]give the track a name\n• \$[trackKeyboardKey]pick a keyboard shortcut\n\nYou can also \$[trackRecordingMove]move it on the grid, \$[trackRecordingImport]bring in a file, \$[trackRecordingShare]share your work, or \$[deleteForever]delete it.';
 
   @override
   String get helpScreenMessageTrackStates => 'Track states and actions';
 
   @override
   String get helpScreenMessageTrackStatesInfo =>
-      'Each track can be in one of several states that determine available actions. Tapping the track block runs the action for the current state.';
+      'Tracks move through simple moods—empty, recording, catching their breath, playing, paused. A tap always does the friendly next step for where that track is right now.';
 
   @override
   String get helpScreenMessageTrackIcons => 'Track info icons';
 
   @override
   String get helpScreenMessageTrackIconsInfo =>
-      'Icons displayed on the track block inform about its properties.';
+      'Little symbols on the block are quiet reminders: shortcuts, where the audio came from, loudness, balance, trim, and whether it loops.';
 
   @override
   String get helpTrackIconBalanceLeftLegend =>
-      'panned left; exact mix in track details';
+      'leans a bit left—open details for the exact spot';
 
   @override
-  String get helpTrackIconBalanceCenterLegend => 'balance centered';
+  String get helpTrackIconBalanceCenterLegend =>
+      'sits in the middle of the stereo field';
 
   @override
   String get helpTrackIconBalanceRightLegend =>
-      'panned right; exact mix in track details';
+      'leans a bit right—open details for the exact spot';
 
   @override
   String get helpTrackIconPlaybackStartTrimLegend =>
-      'trimmed at the start; exact time in track details';
+      'the beginning is tucked in—details show the time';
 
   @override
   String get helpTrackIconPlaybackEndTrimLegend =>
-      'trimmed at the end; exact time in track details';
+      'the ending is tucked in—details show the time';
 
   @override
-  String get helpTrackIconSinglePlaybackModeLegend => 'plays once, then stops';
+  String get helpTrackIconSinglePlaybackModeLegend =>
+      'plays through once, then rests';
 
   @override
   String get helpTrackIconRepeatPlaybackModeLegend =>
-      'loops back to the range start';
+      'reaches the end, hops back, and keeps going';
 
   @override
   String get helpScreenMessageSettingsInfo =>
-      'Here you can set \$[recordingAudioEncoder]audio codec, \$[recordingSampleRate]sample rate, \$[recordingBitRate]bit rate, \$[recordingAudioMode]audio mode, \$[recordingAutoGain]automatic gain, \$[recordingEchoCancel]echo cancellation, and \$[recordingNoiseSuppress]noise suppression.';
+      'Dial in how captures feel on your device: \$[recordingAudioEncoder]file format, \$[recordingSampleRate]time detail, \$[recordingBitRate]sound detail, \$[recordingAudioMode]mono or stereo style, plus optional \$[recordingAutoGain]softer peaks, \$[recordingEchoCancel]less room echo, and \$[recordingNoiseSuppress]less background hiss—when the phone can help.';
 
   @override
   String get helpScreenMessageProjectExportImportTitle =>
@@ -646,27 +648,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get helpScreenMessageProjectExportImportContent =>
-      'You can \$[projectExport]save the entire project to a ZIP file, which contains grid settings, all tracks with their settings, and audio recordings. The file can later be \$[projectImport]loaded to restore the entire application state.\n\nThe exported file contains:\n• Grid settings (number of rows and columns)\n• All track settings (names, playback parameters, playback trim, keyboard shortcuts)\n• All audio recordings with checksums\n• Project metadata (version, export date, statistics)\n\nBefore import, a project preview is displayed, and the application warns about overwriting the current session. Import performs full validation before modifying data.';
+      'You can \$[projectExport]pack the whole session into one ZIP bundle—your layout, every track’s choices, and each recording. Later, \$[projectImport]open it to land exactly where you left off.\n\nInside the bundle you’ll find:\n• The grid shape (rows and columns)\n• Names, trim, playback choices, and shortcuts for every track\n• Your audio files, with a quick integrity check baked in\n• A small journal (version, export time, a few stats)\n\nBefore anything is replaced, you’ll see a preview and a heads-up if it would overwrite what’s on screen. The app double-checks the bundle so nothing half-broken sneaks in.';
 
   @override
-  String get stateEmpty => 'track empty (tap the box to start recording)';
+  String get stateEmpty => 'empty slot—tap to start recording';
 
   @override
-  String get stateRecording =>
-      'recording in progress (tap the box to stop recording)';
+  String get stateRecording => 'listening… tap again to stop';
 
   @override
-  String get stateProcessing => 'track processing in progress';
+  String get stateProcessing => 'finishing touches on the file';
 
   @override
-  String get stateIdle =>
-      'idle: recording done/playing stopped (tap the box to start playing)';
+  String get stateIdle => 'ready to play—tap to start';
 
   @override
-  String get statePlaying => 'track is playing (tap the box to stop playback)';
+  String get statePlaying => 'in the air—tap to stop';
 
   @override
-  String get statePaused => 'playing paused (tap the box to resume)';
+  String get statePaused => 'taking a breath—tap to resume';
 
   @override
   String get buttonAdd => 'Add';

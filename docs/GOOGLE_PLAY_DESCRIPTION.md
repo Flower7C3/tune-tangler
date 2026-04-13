@@ -1,79 +1,93 @@
 # Opisy do Google Play — Tune Tangler
 
-## Krótki opis (max 80 znaków)
+## Uwaga: co wklejasz w Konsoli Play
 
-**EN:**  
-Music looper: record, loop, trim, share. Multi-track grid, speed, pan, profiles.
-
-**PL:**  
-Looper muzyczny: nagrywaj, pętle, trim, udostępniaj. Siatka ścieżek, tempo, pan.
+W polu opisu sklepu Google Play działa zwykły tekst: bez Markdown (gwiazdki, nagłówki z krzyżykiem, linki w składni MD itd. się nie formatują). Poniżej są gotowe treści do skopiowania — bez pogrubień; nagłówki sekcji zapisane są jako zwykła linia tekstu (np. wielkimi literami).
 
 ---
 
-## Pełny opis (do ~4000 znaków)
+## aAngielski
 
-### English
+### Krótki opis (max 80 znaków)
 
-**Tune Tangler** is a music looper app for quick recording, layering, and playing back audio on multiple tracks. Whether you're sketching ideas, practicing with a backing track, or building loops on the go, the app gives you a simple grid of cells: record or import into any cell, then play, trim, and mix with volume, pan, and speed—all in one place.
+> Layer loops: record, import, grid, shortcuts, save whole sessions.
 
-**Record & import**
-- Record from the built-in microphone or a connected USB audio device (when supported).
-- Optional auto-gain, echo cancel, and noise suppression where the device supports it.
-- Import an audio file into any track cell and use it like a recorded clip.
+### Pełny opis (plain text, do ~4000 znaków)
 
-**Playback & editing**
-- Per-track play/pause, loop mode (single pass or repeat), and seek.
-- Set trim points (start/end) so only part of the clip plays.
-- Adjust playback speed from 0.5× to 2×, volume, and stereo pan per track.
-- Optional keyboard shortcuts (hotkeys) for each track for faster control.
-
-**Organization**
-- Configurable grid: choose how many rows and columns of tracks you need.
-- Name tracks (with emoji if you like), move or swap recordings between cells, and delete when you're done.
-- Keep the screen on during sessions; switch language (EN/PL), theme (light/dark/system), and accent color in settings.
-
-**Sharing & projects**
-- Share a track as the raw recording file or as a “processed” version with trim, volume, pan, and speed baked in (via FFmpeg).
-- Save and load settings profiles (recording options, grid size, theme, etc.) for different setups.
-- Export the whole project (grid layout, all tracks, and recordings) to a ZIP file and import it later on the same or another device—handy for backups or moving sessions.
-
-**Permissions**
-- Microphone (and optionally USB audio) for recording.
-- Storage/file access where needed for import, export, and sharing.
-- Optional notification permission on Android for recording in the background.
-
-Tune Tangler is “yet another” music looper: straightforward, no account required, and focused on getting from idea to loop without extra complexity.
+> Tune Tangler is a relaxed workspace for short musical ideas. Capture with the built-in mic or plug in a USB mic or interface when your phone or tablet is happy to host USB accessories (retail listings sometimes call that USB OTG). Drop in a file you already love, then nudge it into the grid.
+> 
+> Play every line in the same heartbeat, or let tracks breathe on their own. Loop a phrase when you're sketching, or play something once and let it land. When you walk away, your clips, mix choices, look of the app, and language are still there when you come back—no account, no fuss.
+> 
+> WORKING THE GRID
+> 
+> Colored blocks are meant to be tapped without thinking. Each one shows a tiny key hint if you like shortcuts. Need the deeper page? Hold the block, or hold Ctrl while firing the shortcut (Cmd on many Macs). The side drawer lets you pick a cozy keyboard layout or a wider 24-key pad; you choose each track's shortcut inside its own details.
+> 
+> INSIDE A TRACK
+> 
+> Trim the juicy part, pick loop or one-shot, set loudness and left/right tilt, speed things up or slow them down, name the lane, and wire up a hotkey. Move the track to a new cell, swap in another file, share a raw take or a "ready for friends" version with your trim and mix choices baked in, or clear the slot.
+> 
+> LITTLE HINTS ON THE BLOCK
+> 
+> Small icons whisper what's going on—balance, whether the ends are tucked in, loop vs single pass, and more. The Help screen inside the app walks through each symbol if you forget.
+> 
+> RECORDING QUALITY
+> 
+> Optional controls help recordings match your room and device: format, how finely time is captured, how rich the file sounds, mono or stereo flavor, plus gentle auto-level, echo taming, and hiss quieting when the hardware can help.
+> 
+> SAVED RECIPES (PROFILES)
+> 
+> Profiles remember whole setups—recording choices plus screen comfort like language, light or dark look, accent color, and keeping the display awake. Save a few moods, switch with a tap, delete with a long-press when you're tidying up.
+> 
+> WHOLE-SESSION BACKUP
+> 
+> Pack the entire session into one ZIP bundle: the grid, every track's settings, and the audio itself, with a light safety check and a small summary (version, time, a few stats). Import shows a preview first, warns before replacing what's on screen, and refuses half-broken bundles so you don't lose a good day's work by accident.
+> 
+> PERMISSIONS
+> 
+> Microphone (and USB audio when the OS allows), storage for imports and exports, and optional Android notifications if you record while the app sits in the background.
+> 
+> If you want the friendly tour that matches the app word for word, open Help from the menu—it's written in the same plain voice.
 
 ---
 
-### Polski
+## Polski
 
-**Tune Tangler** to aplikacja typu music looper do szybkiego nagrywania, nakładania i odtwarzania dźwięku na wielu ścieżkach. Czy szkicujesz pomysły, ćwiczysz z podkładem czy budujesz pętle w podróży—masz prostą siatkę komórek: nagraj lub zaimportuj plik do dowolnej komórki, a potem odtwarzaj, przycinaj i miksuj głośnością, panem i tempem w jednym miejscu.
+### Krótki opis (max 80 znaków)
 
-**Nagrywanie i import**
-- Nagrywanie z wbudowanego mikrofonu lub podłączonego urządzenia USB (gdy obsługiwane).
-- Opcjonalne auto-gain, echo cancel i tłumienie szumów tam, gdzie urządzenie to wspiera.
-- Import pliku audio do dowolnej ścieżki i używanie go jak nagranego clipu.
+> Pętle i warstwy: mikrofon lub USB, siatka, skróty, backup ZIP.
 
-**Odtwarzanie i edycja**
-- Odtwarzanie/pauza i tryb pętli (jednokrotnie lub w kółko) oraz przewijanie dla każdej ścieżki.
-- Ustawianie punktów trim (początek/koniec), żeby odtwarzać tylko fragment clipu.
-- Regulacja tempa od 0.5× do 2×, głośności i pana stereo dla każdej ścieżki.
-- Opcjonalne skróty klawiszowe (hotkey) dla ścieżek do szybszej kontroli.
+### Pełny opis (plain text, do ~4000 znaków)
 
-**Organizacja**
-- Konfigurowalna siatka: wybór liczby wierszy i kolumn ścieżek.
-- Nazywanie ścieżek (z emoji), przenoszenie i zamiana nagrań między komórkami, usuwanie.
-- Opcja „trzymaj ekran włączony”, zmiana języka (EN/PL), motywu (jasny/ciemny/system) i koloru akcentu w ustawieniach.
-
-**Udostępnianie i projekty**
-- Udostępnianie ścieżki jako surowy plik lub wersja „przetworzona” z trimem, głośnością, panem i tempem (przez FFmpeg).
-- Zapisywanie i wczytywanie profili ustawień (opcje nagrywania, rozmiar siatki, motyw itd.) pod różne zestawy.
-- Eksport całego projektu (układ siatki, wszystkie ścieżki i nagrania) do pliku ZIP i import później na tym samym lub innym urządzeniu—przydatne do backupów lub przenoszenia sesji.
-
-**Uprawnienia**
-- Mikrofon (oraz opcjonalnie audio USB) do nagrywania.
-- Dostęp do pamięci/plików tam, gdzie potrzebny do importu, eksportu i udostępniania.
-- Opcjonalne uprawnienie do powiadomień na Androidzie przy nagrywaniu w tle.
-
-Tune Tangler to „yet another” looper muzyczny: prosty, bez konta, skupiony na przejściu od pomysłu do pętli bez zbędnej złożoności.
+> Tune Tangler (w polskiej wersji aplikacji: Plątacz Melodii) to spokojne miejsce na krótkie muzyczne pomysły. Nagrasz wbudowanym mikrofonem albo podłączonym sprzętem USB, jeśli telefon czy tablet lubi takie akcesoria (w opisach sprzętu często pojawia się skrót USB OTG). Możesz też wgrać ulubiony plik i wpleść go w siatkę.
+> 
+> Puść ścieżki naraz, żeby trzymały się jednego tętna, albo zostaw każdą na własnym rytmie. Zapętl fragment, gdy szkicujesz, albo puść raz i przejdź dalej. Zamkniesz aplikację? Ścieżki, ustawienia miksów, wygląd i język dalej tu czekają—bez konta i zbędnych kroków.
+> 
+> SIATKA
+> 
+> Kolorowe bloki są do stukania intuicyjnie; nad ścieżką widać podpowiedź skrótu. Chcesz więcej opcji? Przytrzymaj blok albo użyj skrótu z Ctrl (na Macu często Cmd). W szufladzie wybierzesz wygodny układ klawiatury albo szerszą wersję z 24 klawiszami; skróty przypiszesz w szczegółach każdej ścieżki.
+> 
+> SZCZEGÓŁY ŚCIEŻKI
+> 
+> Przytniesz początek i koniec, wybierzesz pętlę albo jedno przejście, ustawisz głośność i balans lewo/prawo, przyspieszysz lub zwolnisz odtwarzanie, dasz nazwę i przypiszesz skrót. Możesz przenieść ścieżkę po siatce, wgrać inny plik, udostępnić surowy materiał albo wersję „pod ludzi” z uwzględnieniem przycięcia i ustawień odtwarzania, albo wyczyścić komórkę.
+> 
+> IKONY NA BLOKU
+> 
+> To dyskretne podpowiedzi: balans, podcięcia, tryb pętli i więcej. Pełna lista znaczeń jest w Pomocy w menu aplikacji—ten sam ludzki ton.
+> 
+> JAKOŚĆ NAGRYWANIA
+> 
+> Opcje pomagają dopasować dźwięk do pokoju i telefonu: format, dokładność w czasie, bogactwo pliku, stereo czy mono, a także—gdy sprzęt współpracuje—łagodniejsze szczyty, mniej echa i ciszej w tle.
+> 
+> PROFILE
+> 
+> To zapisane „przepisy” na całą aplikację: wybory nagrywania plus język, jasny lub ciemny motyw, kolor akcentu i trzymanie ekranu włączonego. Kilka profili, szybkie przełączanie, usuwanie przez przytrzymanie.
+> 
+> BACKUP CAŁEJ SESJI
+> 
+> Jeden plik ZIP zawiera siatkę, ustawienia ścieżek i nagrania, z lekką kontrolą spójności i krótką notatką (wersja, czas, kilka liczb). Przed importem jest podgląd i ostrzeżenie; aplikacja odrzuci uszkodzoną paczkę, żeby przypadkiem nie nadpisać dobrego dnia pracy.
+> 
+> UPRAWNIENIA
+> 
+> Mikrofon (oraz audio USB, gdy system pozwala), dostęp do plików przy imporcie i eksporcie, opcjonalne powiadomienia na Androidzie przy nagrywaniu w tle.
+> 
+> Szczegółowy przewodnik po tych samych funkcjach znajdziesz w Pomocy—tekst jest spójny z tym, co widzisz w aplikacji.
