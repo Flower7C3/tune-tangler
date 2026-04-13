@@ -13,19 +13,9 @@ import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Draw behind system bars; Flutter applies MediaQuery insets for layout.
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
-        applyContentAboveSystemNavBar()
-        // Flutter may reapply edge-to-edge after the first frame.
-        window.decorView.post { applyContentAboveSystemNavBar() }
-    }
-
-    override fun onPostResume() {
-        super.onPostResume()
-        applyContentAboveSystemNavBar()
-    }
-
-    private fun applyContentAboveSystemNavBar() {
-        WindowCompat.setDecorFitsSystemWindows(window, true)
     }
 
     companion object {

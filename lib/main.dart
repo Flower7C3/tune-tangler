@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:provider/provider.dart';
@@ -30,6 +32,9 @@ Future<void> main() async {
   //************************************
   // Initialize
   WidgetsFlutterBinding.ensureInitialized();
+  if (defaultTargetPlatform == TargetPlatform.android) {
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  }
   await Hive.initFlutter();
   Hive.registerAdapter(LocaleAdapter());
   Hive.registerAdapter(ThemeModeAdapter());
