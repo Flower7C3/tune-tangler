@@ -6,88 +6,102 @@ W polu opisu sklepu Google Play działa zwykły tekst: bez Markdown (gwiazdki, n
 
 ---
 
-## aAngielski
+## Angielski
 
-### Krótki opis (max 80 znaków)
+### Krótki opis (max. 80 znaków)
 
-> Layer loops: record, import, grid, shortcuts, save whole sessions.
+> Enjoy your music — record, refine, remix, share.
 
 ### Pełny opis (plain text, do ~4000 znaków)
 
-> Tune Tangler is a relaxed workspace for short musical ideas. Capture with the built-in mic or plug in a USB mic or interface when your phone or tablet is happy to host USB accessories (retail listings sometimes call that USB OTG). Drop in a file you already love, then nudge it into the grid.
+> Tune Tangler is a simple grid for short musical ideas. Record with the built-in microphone or USB-connected audio hardware if your phone or tablet supports it (accessory listings often mention USB OTG). You can also load a file from the device.
 > 
-> Play every line in the same heartbeat, or let tracks breathe on their own. Loop a phrase when you're sketching, or play something once and let it land. When you walk away, your clips, mix choices, look of the app, and language are still there when you come back—no account, no fuss.
+> Play tracks together so they stay in time, or run them independently. Use looping or a single pass — whatever you need. All recordings and settings are kept after you close the app. You can share tracks or save the whole project as a ZIP file.
+> 
+> NAVIGATION
+> 
+> The top bar shows the app title: the logo on the left opens the side menu; on the right, start/stop all tracks and a “⋮” menu for actions on every track at once — ZIP project export/import, shared playback tweaks, trim resets, and More settings…, which also opens the side menu.
+> The side menu lists Help, recording, tracks and grid (including keyboard shortcut presets), screen, permissions, the maintenance area, and profiles at the bottom.
 > 
 > WORKING THE GRID
 > 
-> Colored blocks are meant to be tapped without thinking. Each one shows a tiny key hint if you like shortcuts. Need the deeper page? Hold the block, or hold Ctrl while firing the shortcut (Cmd on many Macs). The side drawer lets you pick a cozy keyboard layout or a wider 24-key pad; you choose each track's shortcut inside its own details.
+> Each colored block is a quick control: tap it, or — with a keyboard connected — press the matching shortcut key. Want sliders and finer options? Hold the block — or, with an external keyboard connected, press your shortcut together with Ctrl. Set each track’s shortcut in its details.
+> Each grid row also has start/stop for that row and a “⋮” menu with bulk actions for every track in that row (playback mode, level, balance, speed, trim resets, delete that row’s recordings).
+> In the side menu, pick a preset shortcut map for your keyboard: standard (PC-style, flexible grid) or the 24-key 6×4 layout.
 > 
 > INSIDE A TRACK
 > 
-> Trim the juicy part, pick loop or one-shot, set loudness and left/right tilt, speed things up or slow them down, name the lane, and wire up a hotkey. Move the track to a new cell, swap in another file, share a raw take or a "ready for friends" version with your trim and mix choices baked in, or clear the slot.
+> Trim the start and end, choose loop or single pass, set level and left/right balance, change playback speed, name the track, and assign a shortcut. Move the track on the grid, replace the audio with another file, share a recording, or clear the slot.
 > 
-> LITTLE HINTS ON THE BLOCK
+> ICONS ON THE BLOCK
 > 
-> Small icons whisper what's going on—balance, whether the ends are tucked in, loop vs single pass, and more. The Help screen inside the app walks through each symbol if you forget.
+> Icons show shortcuts, audio source, level, balance, trim, and loop mode. Open Help from the side menu for a full legend.
 > 
 > RECORDING QUALITY
 > 
-> Optional controls help recordings match your room and device: format, how finely time is captured, how rich the file sounds, mono or stereo flavor, plus gentle auto-level, echo taming, and hiss quieting when the hardware can help.
+> Settings include file format, time resolution, bit rate (bitrate), mono or stereo, and — when the device supports it — automatic level control (AGC), less room echo, and quieter background noise.
 > 
-> SAVED RECIPES (PROFILES)
+> SETTINGS PROFILES
 > 
-> Profiles remember whole setups—recording choices plus screen comfort like language, light or dark look, accent color, and keeping the display awake. Save a few moods, switch with a tap, delete with a long-press when you're tidying up.
+> Profiles store full setups: recording options plus language, light or dark theme, accent color, and keeping the screen on. Save several profiles, switch with a tap, remove one with a long press.
 > 
-> WHOLE-SESSION BACKUP
+> PROJECT ZIP EXPORT
 > 
-> Pack the entire session into one ZIP bundle: the grid, every track's settings, and the audio itself, with a light safety check and a small summary (version, time, a few stats). Import shows a preview first, warns before replacing what's on screen, and refuses half-broken bundles so you don't lose a good day's work by accident.
+> One ZIP file holds the grid layout, every track’s settings, and the audio, with a short integrity check and a small summary (version, export time, a few numbers). Import shows a preview and a warning before overwriting. The app rejects damaged or incomplete files.
 > 
 > PERMISSIONS
 > 
-> Microphone (and USB audio when the OS allows), storage for imports and exports, and optional Android notifications if you record while the app sits in the background.
+> Microphone (and USB audio when the OS allows), storage for imports and exports, and optional Android notifications if you record while the app is in the background.
 > 
-> If you want the friendly tour that matches the app word for word, open Help from the menu—it's written in the same plain voice.
+> For a fuller guide to the icons and options, open Help in the side menu.
 
 ---
 
 ## Polski
 
-### Krótki opis (max 80 znaków)
+### Krótki opis (max. 80 znaków)
 
-> Pętle i warstwy: mikrofon lub USB, siatka, skróty, backup ZIP.
+> Baw się swoją muzyką — nagrywaj, importuj, poprawiaj, remiksuj, udostępniaj.
 
 ### Pełny opis (plain text, do ~4000 znaków)
 
-> Tune Tangler (w polskiej wersji aplikacji: Plątacz Melodii) to spokojne miejsce na krótkie muzyczne pomysły. Nagrasz wbudowanym mikrofonem albo podłączonym sprzętem USB, jeśli telefon czy tablet lubi takie akcesoria (w opisach sprzętu często pojawia się skrót USB OTG). Możesz też wgrać ulubiony plik i wpleść go w siatkę.
+> Tune Tangler (w polskiej wersji aplikacji: Plątacz Melodii) to prosta siatka na krótkie muzyczne pomysły. Nagrasz wbudowanym mikrofonem albo urządzeniem audio podłączonym przez USB — jeśli telefon lub tablet na to pozwala (w opisach akcesoriów często jest skrót USB OTG). Możesz też wczytać plik z urządzenia.
 > 
-> Puść ścieżki naraz, żeby trzymały się jednego tętna, albo zostaw każdą na własnym rytmie. Zapętl fragment, gdy szkicujesz, albo puść raz i przejdź dalej. Zamkniesz aplikację? Ścieżki, ustawienia miksów, wygląd i język dalej tu czekają—bez konta i zbędnych kroków.
+> Odtwarzaj ścieżki naraz, żeby szły w jednym tempie, albo niezależnie od siebie. Ustaw zapętlenie albo jednorazowe odtwarzanie — jak potrzebujesz. Nie martw się: wszystkie Twoje nagrania i ustawienia są zachowane po zamknięciu aplikacji. W razie potrzeby możesz je udostępnić albo zapisać cały projekt w pliku ZIP.
+> 
+> NAWIGACJA
+> 
+> Na górze jest pasek z tytułem aplikacji: logo po lewej otwiera menu boczne; po prawej uruchomienie i zatrzymanie wszystkich ścieżek oraz menu „⋮” z akcjami dla całej siatki naraz (m.in. eksport i import projektu ZIP, wspólne ustawienia odtwarzania, reset przycięć) i pozycja Więcej ustawień…, która też otwiera menu boczne.
+> Menu boczne: Pomoc, Nagrywanie, Ścieżki i siatka (m.in. gotowe zestawy skrótów na klawiaturę), Ekran, Uprawnienia, Strefa niebezpieczna; na dole Profile ustawień.
 > 
 > SIATKA
 > 
-> Kolorowe bloki są do stukania intuicyjnie; nad ścieżką widać podpowiedź skrótu. Chcesz więcej opcji? Przytrzymaj blok albo użyj skrótu z Ctrl (na Macu często Cmd). W szufladzie wybierzesz wygodny układ klawiatury albo szerszą wersję z 24 klawiszami; skróty przypiszesz w szczegółach każdej ścieżki.
+> Kolorowy blok to szybki przycisk: stuknij go lub (używając podłączonej klawiatury) wciśnij odpowiedni klawisz skrótu. Chcesz suwaków i drobniejszych opcji? Przytrzymaj blok albo — przy podłączonej klawiaturze zewnętrznej — użyj skrótu z klawiszem Ctrl. Skrót do ścieżki ustawisz w jej szczegółach.
+> Przy każdym wierszu siatki są przyciski startu i zatrzymania odtwarzania dla tego wiersza oraz menu „⋮” z opcjami dla wszystkich ścieżek w tym wierszu (m.in. tryb odtwarzania, głośność, balans, prędkość, reset przycięć, usunięcie nagrań z wiersza).
+> W menu bocznym wybierzesz gotowy zestaw skrótów na klawiaturę: standard (jak klawiatura PC, elastyczna siatka) albo 24 klawisze (6×4).
 > 
 > SZCZEGÓŁY ŚCIEŻKI
 > 
-> Przytniesz początek i koniec, wybierzesz pętlę albo jedno przejście, ustawisz głośność i balans lewo/prawo, przyspieszysz lub zwolnisz odtwarzanie, dasz nazwę i przypiszesz skrót. Możesz przenieść ścieżkę po siatce, wgrać inny plik, udostępnić surowy materiał albo wersję „pod ludzi” z uwzględnieniem przycięcia i ustawień odtwarzania, albo wyczyścić komórkę.
+> Przytniesz początek i koniec, wybierzesz pętlę albo jedno przejście, ustawisz głośność i balans lewo/prawo, przyspieszysz lub zwolnisz odtwarzanie, dasz nazwę i przypiszesz skrót. Możesz przenieść ścieżkę po siatce, wgrać inny plik, udostępnić nagranie albo wyczyścić pole.
 > 
 > IKONY NA BLOKU
 > 
-> To dyskretne podpowiedzi: balans, podcięcia, tryb pętli i więcej. Pełna lista znaczeń jest w Pomocy w menu aplikacji—ten sam ludzki ton.
+> Ikony pokazują m.in. skróty, źródło dźwięku, głośność, balans, przycięcia i tryb pętli. Pełna legenda jest w Pomocy w menu bocznym.
 > 
 > JAKOŚĆ NAGRYWANIA
 > 
-> Opcje pomagają dopasować dźwięk do pokoju i telefonu: format, dokładność w czasie, bogactwo pliku, stereo czy mono, a także—gdy sprzęt współpracuje—łagodniejsze szczyty, mniej echa i ciszej w tle.
+> Ustawienia obejmują format pliku, dokładność w czasie, przepływność bitową (bitrate), stereo czy mono oraz — gdy urządzenie to obsługuje — automatyczną regulację poziomu (AGC), mniej echa z pokoju i ciszej w tle.
 > 
-> PROFILE
+> PROFILE USTAWIEŃ
 > 
-> To zapisane „przepisy” na całą aplikację: wybory nagrywania plus język, jasny lub ciemny motyw, kolor akcentu i trzymanie ekranu włączonego. Kilka profili, szybkie przełączanie, usuwanie przez przytrzymanie.
+> Profil zapisuje pełną konfigurację: opcje nagrywania oraz język, jasny lub ciemny motyw, kolor akcentu i podtrzymywanie włączonego ekranu. Możesz mieć kilka profili, przełączać się jednym stuknięciem, usuwać przez przytrzymanie.
 > 
-> BACKUP CAŁEJ SESJI
+> EKSPORT PROJEKTU (ZIP)
 > 
-> Jeden plik ZIP zawiera siatkę, ustawienia ścieżek i nagrania, z lekką kontrolą spójności i krótką notatką (wersja, czas, kilka liczb). Przed importem jest podgląd i ostrzeżenie; aplikacja odrzuci uszkodzoną paczkę, żeby przypadkiem nie nadpisać dobrego dnia pracy.
+> Jeden plik ZIP zawiera układ siatki, ustawienia ścieżek i nagrania, z krótką kontrolą spójności i notatką (wersja, czas eksportu, kilka liczb). Przed importem zobaczysz podgląd i ostrzeżenie; aplikacja odrzuci uszkodzony lub niekompletny plik.
 > 
 > UPRAWNIENIA
 > 
 > Mikrofon (oraz audio USB, gdy system pozwala), dostęp do plików przy imporcie i eksporcie, opcjonalne powiadomienia na Androidzie przy nagrywaniu w tle.
 > 
-> Szczegółowy przewodnik po tych samych funkcjach znajdziesz w Pomocy—tekst jest spójny z tym, co widzisz w aplikacji.
+> Pełniejszy przewodnik po ikonach i opcjach znajdziesz w Pomocy w menu bocznym.

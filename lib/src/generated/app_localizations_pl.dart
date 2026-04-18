@@ -563,7 +563,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get helpScreenMessageSettingsProfilesContent =>
-      '\$[settingsProfiles]Profile to zapisane „przepisy” na to, jak lubisz mieć ustawioną aplikację—np. jeden do cichego pokoju, drugi na głośną próbę—i szybka zmiana między nimi.\n\nW każdym przepisie masz:\n• Ustawienia nagrywania (\$[recordingInputDevice]skąd wpływa dźwięk, \$[recordingAudioEncoder]format pliku, \$[recordingSampleRate]dokładność w czasie, \$[recordingBitRate]bogactwo dźwięku, \$[recordingAudioMode]tryb mono/stereo, \$[recordingAutoGain]automatyczny poziom, \$[recordingEchoCancel]mniej echa z pokoju, \$[recordingNoiseSuppress]mniej szumu w tle)\n• Ustawienia ekranu (\$[language]język, \$[screenThemeMode]jasny/ciemny wygląd, \$[screenThemeColor]kolor akcentu, \$[keepScreenOn]nie gasić ekranu)\n\nNowy profil: przycisk \$[create]„Utwórz” w oknie profili. Wczytanie: stuknij profil. Usunięcie: \$[touchLong]przytrzymaj i wybierz \$[deleteForever]usuń.';
+      '\$[settingsProfiles]Możesz zapisać kilka profili. Każdy profil to pełny zestaw ustawień aplikacji — np. jeden do cichego pokoju, drugi na głośną próbę — i możesz szybko przełączać się między profilami.\n\nW profilu masz:\n• Ustawienia nagrywania (\$[recordingInputDevice]skąd jest pobierany dźwięk, \$[recordingAudioEncoder]format pliku, \$[recordingSampleRate]dokładność w czasie, \$[recordingBitRate]bitrate, \$[recordingAudioMode]mono lub stereo, \$[recordingAutoGain]automatyczny poziom głośności, \$[recordingEchoCancel]mniej echa z pokoju, \$[recordingNoiseSuppress]ciszej w tle)\n• Ustawienia ekranu (\$[language]język, \$[screenThemeMode]jasny lub ciemny motyw, \$[screenThemeColor]kolor akcentu, \$[keepScreenOn]podtrzymywanie włączonego ekranu)\n\nNowy profil: przycisk \$[create]„Utwórz” w oknie profili. Wczytanie: stuknij profil na liście. Usunięcie: \$[touchLong]przytrzymaj profil i wybierz \$[deleteForever]usuń.';
 
   @override
   String get projectExportInfo =>
@@ -584,66 +584,68 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get helpScreenMessageAboutContent =>
-      'Prosta siatka na muzyczne pomysły. Nagrasz wbudowanym mikrofonem albo podłączonym mikrofonem lub interfejsem USB—jeśli telefon czy tablet lubi akcesoria USB, zwykle da radę (w opisach sprzętu często zobaczysz skrót USB OTG). Możesz też wgrać już gotowy plik.\n\nPuść ścieżki naraz, żeby trzymały się jednego pulsu, albo zostaw każdą na własnym liczeniu. Pętla albo jedno przejście—jak wolisz.\n\nZamkniesz aplikację? Ścieżki, ich ustawienia, motyw i język nadal tu czekają.';
+      'Prosta siatka na muzyczne pomysły. Nagrasz wbudowanym mikrofonem albo urządzeniem audio podłączonym przez USB — jeśli telefon lub tablet na to pozwala (w opisach akcesoriów często jest skrót USB OTG). Możesz też wczytać plik z urządzenia.\n\nOdtwarzaj ścieżki naraz, żeby szły w jednym tempie, albo niezależnie od siebie. Ustaw zapęlenie albo jednorazowe odtwarzenie — jak potrzebujesz.\n\nNie martw się: wszystkie Twoje nagrania i ustawienia są zachowane po zamknięciu aplikacji. W razie potrzeby możesz je udostępnić albo zapisać cały projekt w pliku ZIP.';
 
   @override
   String get helpScreenMessageGridScreenTitle => 'Ekran siatki ścieżek';
 
   @override
   String get helpScreenMessageGridScreenContent =>
-      'Kolorowy blok to szybki przycisk. Stuknij go albo użyj podpowiedzi klawisza nad ścieżką—dostaniesz akcję pasującą do tej chwili.\n\nChcesz suwaków i drobniejszych opcji? Przytrzymaj blok albo przytrzymaj Control \$[controlKey] (na Macu często Cmd) podczas skrótu—otworzą się szczegóły ścieżki.\n\nW szufladzie wybierzesz układ klawiatury: zwyczajny lub wygodniejszy z 24 klawiszami. Skróty przypiszesz w szczegółach każdej ścieżki.';
+      'Kolorowy blok to szybki przycisk: stuknij go lub (używając podłączonej klawiatury) wciśnij odpowiedni klawisz skrótu. Chcesz suwaków i drobniejszych opcji? Przytrzymaj blok albo — przy podłączonej klawiaturze zewnętrznej — naciśnij skrót razem z klawiszem Control \$[controlKey], aby otworzyć szczegóły ścieżki. Skrót do ścieżki ustawisz w jej szczegółach.\n\nPrzy każdym wierszu siatki są przyciski startu i zatrzymania odtwarzania dla tego wiersza oraz menu „⋮” z opcjami dla wszystkich ścieżek w tym wierszu (m.in. tryb odtwarzania, głośność, balans, prędkość, reset przycięć, usunięcie nagrań z wiersza).\n\nW menu bocznym wybierzesz gotowy zestaw skrótów na klawiaturę: standard (jak klawiatura PC, elastyczna siatka) albo 24 klawisze (6×4).';
 
   @override
   String get helpScreenMessageDetailsScreenTitle => 'Ekran szczegółów ścieżki';
 
   @override
   String get helpScreenMessageDetailsScreenContent =>
-      'Tu ustawisz charakter ścieżki—ikonki pokazują, co edytujesz:\n• \$[recordingClip]przycinanie początku i końca\n• \$[trackPlaybackMode]pętla albo jedno przejście\n• \$[trackPlaybackVolume]jak głośno gra\n• \$[trackPlaybackBalance]balans lewo/prawo\n• \$[trackPlaybackSpeed]szybciej lub wolniej\n• \$[trackName]własna nazwa\n• \$[trackKeyboardKey]skrót z klawiatury\n\nMożesz też \$[trackRecordingMove]przenieść ścieżkę po siatce, \$[trackRecordingImport]wgrać plik, \$[trackRecordingShare]podzielić się nagraniem lub \$[deleteForever]je usunąć.';
+      'Tu ustawiasz, jak ścieżka ma grać. Ikony przy opcjach pokazują, co edytujesz:\n• \$[recordingClip]przycinanie początku i końca\n• \$[trackPlaybackMode]pętla albo jedno przejście\n• \$[trackPlaybackVolume]jak głośno gra\n• \$[trackPlaybackBalance]balans lewo/prawo\n• \$[trackPlaybackSpeed]szybciej lub wolniej\n• \$[trackName]własna nazwa\n• \$[trackKeyboardKey]skrót z klawiatury\n\nMożesz też \$[trackRecordingMove]przenieść ścieżkę po siatce, \$[trackRecordingImport]wgrać plik, \$[trackRecordingShare]podzielić się nagraniem lub \$[deleteForever]je usunąć.';
 
   @override
-  String get helpScreenMessageTrackStates => 'Statusy i akcje ścieżki';
+  String get helpScreenMessageTrackStates =>
+      'Stany ścieżki i co robi stuknięcie';
 
   @override
   String get helpScreenMessageTrackStatesInfo =>
-      'Ścieżka przechodzi przez proste „humory”—pusta, nagrywa, odpoczywa, gra, stoi na pauzie. Jedno stuknięcie robi następny sensowny krok wobec tego, co właśnie robi.';
+      'Ścieżka jest zawsze w jednym z kilku prostych stanów. Jedno stuknięcie zwykle wykonuje kolejny sensowny krok względem tego, w jakim stanie jest teraz ścieżka.';
 
   @override
-  String get helpScreenMessageTrackIcons => 'Ikony informacji o ścieżce';
+  String get helpScreenMessageTrackIcons => 'Ikony na bloku ścieżki';
 
   @override
   String get helpScreenMessageTrackIconsInfo =>
-      'Małe ikonki na bloku to dyskretne podpowiedzi: skróty, skąd dźwięk, głośność, balans, przycięcie i czy leci w pętli.';
+      'Ikony na bloku pokazują skrócone informacje: skróty, skąd pochodzi dźwięk, głośność, balans, przycięcia oraz czy włączona jest pętla.';
 
   @override
   String get helpTrackIconBalanceLeftLegend =>
-      'lekko w lewo — dokładniej zobaczysz w szczegółach';
+      'Balans przesunięty w lewo — dokładną wartość zobaczysz w szczegółach ścieżki.';
 
   @override
-  String get helpTrackIconBalanceCenterLegend => 'siedzi pośrodku stereofonii';
+  String get helpTrackIconBalanceCenterLegend =>
+      'Balans na środku: lewy i prawy kanał grają tak samo głośno.';
 
   @override
   String get helpTrackIconBalanceRightLegend =>
-      'lekko w prawo — dokładniej zobaczysz w szczegółach';
+      'Balans przesunięty w prawo — dokładną wartość zobaczysz w szczegółach ścieżki.';
 
   @override
   String get helpTrackIconPlaybackStartTrimLegend =>
-      'początek jest podcięty—czas zobaczysz w szczegółach';
+      'Początek nagrania jest przycięty — czas przycięcia zobaczysz w szczegółach ścieżki.';
 
   @override
   String get helpTrackIconPlaybackEndTrimLegend =>
-      'koniec jest podcięty—czas zobaczysz w szczegółach';
+      'Koniec nagrania jest przycięty — czas przycięcia zobaczysz w szczegółach ścieżki.';
 
   @override
   String get helpTrackIconSinglePlaybackModeLegend =>
-      'jedno przejście i koniec';
+      'Odtwarzanie: jeden przebieg od początku do końca, potem stop.';
 
   @override
   String get helpTrackIconRepeatPlaybackModeLegend =>
-      'dojeżdża do końca i wraca na początek zakresu';
+      'Odtwarzanie w pętli: po dojściu do końca wraca na początek i gra dalej.';
 
   @override
   String get helpScreenMessageSettingsInfo =>
-      'Dopasuj nagrywanie do telefonu i otoczenia: \$[recordingAudioEncoder]format pliku, \$[recordingSampleRate]dokładność w czasie, \$[recordingBitRate]bogactwo dźwięku, \$[recordingAudioMode]stereo czy mono, a także—gdy sprzęt pozwala—\$[recordingAutoGain]łagodniejsze szczyty, \$[recordingEchoCancel]mniej echa z pokoju i \$[recordingNoiseSuppress]ciszej w tle.';
+      'Dopasuj nagrywanie do telefonu i otoczenia: \$[recordingAudioEncoder]format pliku, \$[recordingSampleRate]dokładność w czasie, \$[recordingBitRate]przepływność bitowa (bitrate), \$[recordingAudioMode]stereo czy mono, a także — gdy sprzęt pozwala — \$[recordingAutoGain]automatyczna regulacja poziomu (AGC), \$[recordingEchoCancel]mniej echa z pokoju i \$[recordingNoiseSuppress]ciszej w tle.';
 
   @override
   String get helpScreenMessageProjectExportImportTitle =>
@@ -651,25 +653,26 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get helpScreenMessageProjectExportImportContent =>
-      'Możesz \$[projectExport]spakować całą sesję do jednego pliku ZIP—siatkę, ustawienia ścieżek i nagrania. Później \$[projectImport]wczytasz go i wrócisz dokładnie tam, gdzie skończyłeś.\n\nW środku jest m.in.:\n• Rozmiar siatki (wiersze i kolumny)\n• Nazwy, przycięcia, wybory odtwarzania i skróty dla każdej ścieżki\n• Pliki audio z prostą kontrolą spójności\n• Krótka notatka (wersja, czas eksportu, kilka liczb)\n\nZanim cokolwiek nadpiszesz, zobaczysz podgląd i ostrzeżenie. Aplikacja najpierw sprawdza paczkę, żeby nic uszkodzonego nie wpadło do środka.';
+      'Możesz \$[projectExport]spakować całą sesję do jednego pliku ZIP — siatkę, ustawienia ścieżek i nagrania. Później \$[projectImport]wczytasz go i wrócisz dokładnie tam, gdzie skończyłeś.\n\nW archiwum ZIP jest m.in.:\n• rozmiar siatki (wiersze i kolumny),\n• nazwy, przycięcia, wybory odtwarzania i skróty dla każdej ścieżki,\n• pliki audio z krótką kontrolą spójności,\n• krótka notatka (wersja, czas eksportu, kilka liczb).\n\nZanim cokolwiek zostanie nadpisane, zobaczysz podgląd i ostrzeżenie. Aplikacja najpierw sprawdza plik, żeby nie wczytać uszkodzonego lub niekompletnego pliku.';
 
   @override
-  String get stateEmpty => 'puste miejsce—stuknij, żeby zacząć nagrywać';
+  String get stateEmpty => 'puste miejsce — stuknij, żeby zacząć nagrywać';
 
   @override
-  String get stateRecording => 'nagrywam… stuknij, żeby przerwać';
+  String get stateRecording =>
+      'nagrywam… stuknij, żeby zakończyć i zapisać nagranie';
 
   @override
   String get stateProcessing => 'dopinam szczegóły pliku';
 
   @override
-  String get stateIdle => 'gotowe do grania—stuknij, żeby ruszyć';
+  String get stateIdle => 'gotowe do grania — stuknij, żeby odtwarzać';
 
   @override
-  String get statePlaying => 'leci—stuknij, żeby zatrzymać';
+  String get statePlaying => 'leci — stuknij, żeby zatrzymać';
 
   @override
-  String get statePaused => 'pauza—stuknij, żeby iść dalej';
+  String get statePaused => 'pauza — stuknij, żeby iść dalej';
 
   @override
   String get buttonAdd => 'Dodaj';

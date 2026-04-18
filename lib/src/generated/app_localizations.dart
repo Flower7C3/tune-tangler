@@ -920,7 +920,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpScreenMessageSettingsProfilesContent.
   ///
   /// In en, this message translates to:
-  /// **'Think of settings profiles as saved recipes for how you like the app. Keep one for quiet practice and another for noisy rooms—then hop between them in a tap.\n\nEach recipe remembers:\n• Recording choices (\$[recordingInputDevice]where sound comes in, \$[recordingAudioEncoder]file format, \$[recordingSampleRate]time detail, \$[recordingBitRate]sound detail, \$[recordingAudioMode]mono or stereo feel, \$[recordingAutoGain]auto level, \$[recordingEchoCancel]less room echo, \$[recordingNoiseSuppress]less background hiss)\n• Screen comfort (\$[language]language, \$[screenThemeMode]light/dark look, \$[screenThemeColor]accent color, \$[keepScreenOn]keep the screen awake)\n\nTap \$[create]\"Create\" in the profiles dialog to save one. Tap a profile to switch to it. \$[touchLong]Press and hold, then choose \$[deleteForever]delete, to remove it.'**
+  /// **'\$[settingsProfiles]You can save several profiles. Each profile stores a full set of app settings — for example one for a quiet room and another for a loud rehearsal — and you can switch between them quickly.\n\nEach profile includes:\n• Recording settings (\$[recordingInputDevice]where audio is captured from, \$[recordingAudioEncoder]file format, \$[recordingSampleRate]time resolution, \$[recordingBitRate]bitrate, \$[recordingAudioMode]mono or stereo, \$[recordingAutoGain]automatic level, \$[recordingEchoCancel]less room echo, \$[recordingNoiseSuppress]quieter background noise)\n• Screen settings (\$[language]language, \$[screenThemeMode]light or dark theme, \$[screenThemeColor]accent color, \$[keepScreenOn]keep the screen on)\n\nNew profile: tap \$[create]\"Create\" in the profiles dialog. To load: tap a profile in the list. To remove: \$[touchLong]press and hold a profile, then choose \$[deleteForever]delete.'**
   String get helpScreenMessageSettingsProfilesContent;
 
   /// No description provided for @projectExportInfo.
@@ -956,7 +956,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpScreenMessageAboutContent.
   ///
   /// In en, this message translates to:
-  /// **'A simple grid for musical ideas. Record with the built-in mic or plug in a USB mic or interface—most phones that support USB accessories can handle it (you may see that called USB OTG). You can also bring in a clip you already have.\n\nWant everything in step? Play all tracks together. Prefer each line on its own timing? Let tracks go solo. Loop a phrase or play it once and stop.\n\nClose the app whenever you like—your takes, tweaks, theme, and language are still here when you return.'**
+  /// **'A simple grid for musical ideas. Record with the built-in microphone or with USB-connected audio hardware — if your phone or tablet supports it (accessory listings often mention USB OTG). You can also load a file from the device.\n\nPlay tracks together so they stay in time, or run them independently. Use looping or a single pass — whatever you need.\n\nDon’t worry: all your recordings and settings are kept after you close the app. If you need to, you can share them or save the whole project as a ZIP file.'**
   String get helpScreenMessageAboutContent;
 
   /// No description provided for @helpScreenMessageGridScreenTitle.
@@ -968,7 +968,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpScreenMessageGridScreenContent.
   ///
   /// In en, this message translates to:
-  /// **'Each colored block is a quick control. Tap it—or use the little key hint above the track—for whatever fits the moment.\n\nWant sliders and finer options? Hold the block, or press your shortcut while holding Control \$[controlKey] (on many Macs, Command works instead) to open track details.\n\nIn the drawer, pick a keyboard layout: the familiar size or a larger 24-key pad. Hotkeys for tracks are set inside each track’s detail screen.'**
+  /// **'Each colored block is a quick control: tap it, or — with a keyboard connected — press the matching shortcut key. Want sliders and finer options? Hold the block — or, with an external keyboard connected — press your shortcut together with Control \$[controlKey] to open track details. Set each track’s shortcut in its details.\n\nEach grid row also has start/stop for that row and a “⋮” menu with bulk actions for every track in that row (playback mode, level, balance, speed, trim resets, delete that row’s recordings).\n\nIn the side menu, pick a preset shortcut map for your keyboard: standard (PC-style, flexible grid) or the 24-key 6×4 layout.'**
   String get helpScreenMessageGridScreenContent;
 
   /// No description provided for @helpScreenMessageDetailsScreenTitle.
@@ -980,79 +980,79 @@ abstract class AppLocalizations {
   /// No description provided for @helpScreenMessageDetailsScreenContent.
   ///
   /// In en, this message translates to:
-  /// **'Shape how this track feels—the icons show what you’re editing:\n• \$[recordingClip]trim where the sound starts and ends\n• \$[trackPlaybackMode]loop or play once\n• \$[trackPlaybackVolume]how loud it plays\n• \$[trackPlaybackBalance]left/right balance\n• \$[trackPlaybackSpeed]speed up or slow down\n• \$[trackName]give the track a name\n• \$[trackKeyboardKey]pick a keyboard shortcut\n\nYou can also \$[trackRecordingMove]move it on the grid, \$[trackRecordingImport]bring in a file, \$[trackRecordingShare]share your work, or \$[deleteForever]delete it.'**
+  /// **'Here you choose how the track should sound. Icons by the options show what you are editing:\n• \$[recordingClip]trim where the sound starts and ends\n• \$[trackPlaybackMode]loop or play once\n• \$[trackPlaybackVolume]how loud it plays\n• \$[trackPlaybackBalance]left/right balance\n• \$[trackPlaybackSpeed]speed up or slow down\n• \$[trackName]give the track a name\n• \$[trackKeyboardKey]pick a keyboard shortcut\n\nYou can also \$[trackRecordingMove]move it on the grid, \$[trackRecordingImport]bring in a file, \$[trackRecordingShare]share your work, or \$[deleteForever]delete it.'**
   String get helpScreenMessageDetailsScreenContent;
 
   /// No description provided for @helpScreenMessageTrackStates.
   ///
   /// In en, this message translates to:
-  /// **'Track states and actions'**
+  /// **'Track states and what a tap does'**
   String get helpScreenMessageTrackStates;
 
   /// No description provided for @helpScreenMessageTrackStatesInfo.
   ///
   /// In en, this message translates to:
-  /// **'Tracks move through simple moods—empty, recording, catching their breath, playing, paused. A tap always does the friendly next step for where that track is right now.'**
+  /// **'A track is always in one of several simple states. One tap usually takes the next sensible step based on the track’s current state.'**
   String get helpScreenMessageTrackStatesInfo;
 
   /// No description provided for @helpScreenMessageTrackIcons.
   ///
   /// In en, this message translates to:
-  /// **'Track info icons'**
+  /// **'Icons on the track block'**
   String get helpScreenMessageTrackIcons;
 
   /// No description provided for @helpScreenMessageTrackIconsInfo.
   ///
   /// In en, this message translates to:
-  /// **'Little symbols on the block are quiet reminders: shortcuts, where the audio came from, loudness, balance, trim, and whether it loops.'**
+  /// **'Icons on the block show quick information: shortcuts, audio source, volume, balance, trim, and whether looping is enabled.'**
   String get helpScreenMessageTrackIconsInfo;
 
   /// No description provided for @helpTrackIconBalanceLeftLegend.
   ///
   /// In en, this message translates to:
-  /// **'leans a bit left—open details for the exact spot'**
+  /// **'Balance shifted left — the exact value is shown in track details.'**
   String get helpTrackIconBalanceLeftLegend;
 
   /// No description provided for @helpTrackIconBalanceCenterLegend.
   ///
   /// In en, this message translates to:
-  /// **'sits in the middle of the stereo field'**
+  /// **'Centered balance: left and right channels play at the same level.'**
   String get helpTrackIconBalanceCenterLegend;
 
   /// No description provided for @helpTrackIconBalanceRightLegend.
   ///
   /// In en, this message translates to:
-  /// **'leans a bit right—open details for the exact spot'**
+  /// **'Balance shifted right — the exact value is shown in track details.'**
   String get helpTrackIconBalanceRightLegend;
 
   /// No description provided for @helpTrackIconPlaybackStartTrimLegend.
   ///
   /// In en, this message translates to:
-  /// **'the beginning is tucked in—details show the time'**
+  /// **'The start of the recording is trimmed — see track details for the trim time.'**
   String get helpTrackIconPlaybackStartTrimLegend;
 
   /// No description provided for @helpTrackIconPlaybackEndTrimLegend.
   ///
   /// In en, this message translates to:
-  /// **'the ending is tucked in—details show the time'**
+  /// **'The end of the recording is trimmed — see track details for the trim time.'**
   String get helpTrackIconPlaybackEndTrimLegend;
 
   /// No description provided for @helpTrackIconSinglePlaybackModeLegend.
   ///
   /// In en, this message translates to:
-  /// **'plays through once, then rests'**
+  /// **'Playback: one pass from start to end, then stop.'**
   String get helpTrackIconSinglePlaybackModeLegend;
 
   /// No description provided for @helpTrackIconRepeatPlaybackModeLegend.
   ///
   /// In en, this message translates to:
-  /// **'reaches the end, hops back, and keeps going'**
+  /// **'Looping playback: when it reaches the end, it returns to the start and continues.'**
   String get helpTrackIconRepeatPlaybackModeLegend;
 
   /// No description provided for @helpScreenMessageSettingsInfo.
   ///
   /// In en, this message translates to:
-  /// **'Dial in how captures feel on your device: \$[recordingAudioEncoder]file format, \$[recordingSampleRate]time detail, \$[recordingBitRate]sound detail, \$[recordingAudioMode]mono or stereo style, plus optional \$[recordingAutoGain]softer peaks, \$[recordingEchoCancel]less room echo, and \$[recordingNoiseSuppress]less background hiss—when the phone can help.'**
+  /// **'Tune recording to your phone and environment: \$[recordingAudioEncoder]file format, \$[recordingSampleRate]time resolution, \$[recordingBitRate]bit rate (bitrate), \$[recordingAudioMode]stereo or mono, and — when the device supports it — \$[recordingAutoGain]automatic level control (AGC), \$[recordingEchoCancel]less room echo, and \$[recordingNoiseSuppress]quieter background noise.'**
   String get helpScreenMessageSettingsInfo;
 
   /// No description provided for @helpScreenMessageProjectExportImportTitle.
@@ -1064,19 +1064,19 @@ abstract class AppLocalizations {
   /// No description provided for @helpScreenMessageProjectExportImportContent.
   ///
   /// In en, this message translates to:
-  /// **'You can \$[projectExport]pack the whole session into one ZIP bundle—your layout, every track’s choices, and each recording. Later, \$[projectImport]open it to land exactly where you left off.\n\nInside the bundle you’ll find:\n• The grid shape (rows and columns)\n• Names, trim, playback choices, and shortcuts for every track\n• Your audio files, with a quick integrity check baked in\n• A small journal (version, export time, a few stats)\n\nBefore anything is replaced, you’ll see a preview and a heads-up if it would overwrite what’s on screen. The app double-checks the bundle so nothing half-broken sneaks in.'**
+  /// **'You can \$[projectExport]pack the whole session into one ZIP file — your grid layout, every track’s settings, and the recordings. Later, \$[projectImport]you can load it and pick up exactly where you left off.\n\nThe ZIP archive includes, among other things:\n• Grid size (rows and columns)\n• Names, trims, playback choices, and shortcuts for each track\n• Audio files with a short integrity check\n• A short note (version, export time, a few numbers)\n\nBefore anything is overwritten, you’ll see a preview and a warning. The app checks the file first so it does not load a damaged or incomplete file.'**
   String get helpScreenMessageProjectExportImportContent;
 
   /// No description provided for @stateEmpty.
   ///
   /// In en, this message translates to:
-  /// **'empty slot—tap to start recording'**
+  /// **'empty slot — tap to start recording'**
   String get stateEmpty;
 
   /// No description provided for @stateRecording.
   ///
   /// In en, this message translates to:
-  /// **'listening… tap again to stop'**
+  /// **'recording… tap to finish and save'**
   String get stateRecording;
 
   /// No description provided for @stateProcessing.
@@ -1088,19 +1088,19 @@ abstract class AppLocalizations {
   /// No description provided for @stateIdle.
   ///
   /// In en, this message translates to:
-  /// **'ready to play—tap to start'**
+  /// **'ready to play — tap to start'**
   String get stateIdle;
 
   /// No description provided for @statePlaying.
   ///
   /// In en, this message translates to:
-  /// **'in the air—tap to stop'**
+  /// **'in the air — tap to stop'**
   String get statePlaying;
 
   /// No description provided for @statePaused.
   ///
   /// In en, this message translates to:
-  /// **'taking a breath—tap to resume'**
+  /// **'taking a breath — tap to resume'**
   String get statePaused;
 
   /// No description provided for @buttonAdd.
