@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -587,7 +588,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get helpScreenMessageGridScreenContent =>
-      'Each colored block is a quick control: tap it, or — with a keyboard connected — press the matching shortcut key. Want sliders and finer options? Hold the block — or, with an external keyboard connected — press your shortcut together with Control \$[controlKey] to open track details. Set each track’s shortcut in its details.\n\nEach grid row also has start/stop for that row and a “⋮” menu with bulk actions for every track in that row (playback mode, level, balance, speed, trim resets, delete that row’s recordings).\n\nIn the side menu, pick a preset shortcut map for your keyboard: standard (PC-style, flexible grid) or the 24-key 6×4 layout.';
+      'Each colored block is a quick control. Tap it, or — with a keyboard connected — press the matching shortcut key. Want sliders and finer options? Hold the block — or, with an external keyboard connected — press your shortcut together with Control \$[controlKey] to open track details. Set each track’s shortcut in its details.\n\nEach grid row also has start/stop for that row and a “⋮” menu with bulk actions for every track in that row (playback mode, level, balance, speed, trim resets, delete that row’s recordings).\n\nIn the side menu, pick a preset shortcut map for your keyboard: standard (PC-style, flexible grid) or the 24-key 6×4 layout.';
 
   @override
   String get helpScreenMessageDetailsScreenTitle => 'Track details screen';
@@ -859,7 +860,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get keyboardLayoutChangeDetailGrid24 =>
-      'The 24-key layout matches a fixed 6×4 pad (physical rows: 1234, 8765, 90ab, fedc, ghij, nmlk). The track grid will always be 6 rows × 4 columns. Shortcuts you created for the full keyboard may not exist on this pad; keeping them can leave some tracks without a matching hardware key.';
+      'The 24-key layout matches a fixed 6×4 pad. The track grid will always be 6 rows × 4 columns. Shortcuts you created for the full keyboard may not exist on this pad; keeping them can leave some tracks without a matching hardware key.';
 
   @override
   String get keyboardLayoutChangeDetailQwerty =>
@@ -1514,9 +1515,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get projectMetadata => 'Project metadata';
-
-  @override
-  String get projectStatistics => 'Statistics';
 
   @override
   String get projectName => 'Project name';

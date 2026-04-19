@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -584,21 +585,21 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get helpScreenMessageAboutContent =>
-      'Prosta siatka na muzyczne pomysły. Nagrasz wbudowanym mikrofonem albo urządzeniem audio podłączonym przez USB — jeśli telefon lub tablet na to pozwala (w opisach akcesoriów często jest skrót USB OTG). Możesz też wczytać plik z urządzenia.\n\nOdtwarzaj ścieżki naraz, żeby szły w jednym tempie, albo niezależnie od siebie. Ustaw zapęlenie albo jednorazowe odtwarzenie — jak potrzebujesz.\n\nNie martw się: wszystkie Twoje nagrania i ustawienia są zachowane po zamknięciu aplikacji. W razie potrzeby możesz je udostępnić albo zapisać cały projekt w pliku ZIP.';
+      'Prosta siatka na muzyczne pomysły. Nagrasz wbudowanym mikrofonem albo urządzeniem audio podłączonym przez USB — jeśli telefon lub tablet na to pozwala (w opisach akcesoriów często jest skrót USB OTG). Możesz też wczytać plik z urządzenia.\n\nOdtwarzaj ścieżki naraz, żeby szły w jednym tempie, albo niezależnie od siebie. Ustaw zapętlanie albo jednorazowe odtwarzanie — jak potrzebujesz.\n\nNie martw się: wszystkie Twoje nagrania i ustawienia są zachowane po zamknięciu aplikacji. W razie potrzeby możesz je udostępnić albo zapisać cały projekt w pliku ZIP.';
 
   @override
   String get helpScreenMessageGridScreenTitle => 'Ekran siatki ścieżek';
 
   @override
   String get helpScreenMessageGridScreenContent =>
-      'Kolorowy blok to szybki przycisk: stuknij go lub (używając podłączonej klawiatury) wciśnij odpowiedni klawisz skrótu. Chcesz suwaków i drobniejszych opcji? Przytrzymaj blok albo — przy podłączonej klawiaturze zewnętrznej — naciśnij skrót razem z klawiszem Control \$[controlKey], aby otworzyć szczegóły ścieżki. Skrót do ścieżki ustawisz w jej szczegółach.\n\nPrzy każdym wierszu siatki są przyciski startu i zatrzymania odtwarzania dla tego wiersza oraz menu „⋮” z opcjami dla wszystkich ścieżek w tym wierszu (m.in. tryb odtwarzania, głośność, balans, prędkość, reset przycięć, usunięcie nagrań z wiersza).\n\nW menu bocznym wybierzesz gotowy zestaw skrótów na klawiaturę: standard (jak klawiatura PC, elastyczna siatka) albo 24 klawisze (6×4).';
+      'Kolorowy blok to szybki przycisk. Stuknij go lub , używając podłączonej klawiatury, wciśnij odpowiedni klawisz skrótu. Chcesz suwaków i bardziej szczegółowych opcji? Przytrzymaj blok albo — przy podłączonej klawiaturze zewnętrznej — naciśnij skrót razem z klawiszem Control \$[controlKey], aby otworzyć szczegóły ścieżki. Skrót do ścieżki ustawisz w jej szczegółach.\n\nPrzy każdym wierszu siatki są przyciski startu i zatrzymania odtwarzania dla tego wiersza oraz menu „⋮” z opcjami dla wszystkich ścieżek w tym wierszu (m.in. tryb odtwarzania, głośność, balans, prędkość, reset przycięć, usunięcie nagrań z wiersza).\n\nW menu bocznym wybierzesz gotowy zestaw skrótów na klawiaturę: standard (jak klawiatura PC, elastyczna siatka) albo 24 klawisze (6×4).';
 
   @override
   String get helpScreenMessageDetailsScreenTitle => 'Ekran szczegółów ścieżki';
 
   @override
   String get helpScreenMessageDetailsScreenContent =>
-      'Tu ustawiasz, jak ścieżka ma grać. Ikony przy opcjach pokazują, co edytujesz:\n• \$[recordingClip]przycinanie początku i końca\n• \$[trackPlaybackMode]pętla albo jedno przejście\n• \$[trackPlaybackVolume]jak głośno gra\n• \$[trackPlaybackBalance]balans lewo/prawo\n• \$[trackPlaybackSpeed]szybciej lub wolniej\n• \$[trackName]własna nazwa\n• \$[trackKeyboardKey]skrót z klawiatury\n\nMożesz też \$[trackRecordingMove]przenieść ścieżkę po siatce, \$[trackRecordingImport]wgrać plik, \$[trackRecordingShare]podzielić się nagraniem lub \$[deleteForever]je usunąć.';
+      'Tu ustawiasz, jak ścieżka ma grać. Ikony przy opcjach pokazują, co edytujesz:\n• \$[recordingClip]przycinanie początku i końca nagrania\n• \$[trackPlaybackMode]odtwarzanie w pętli albo jedno przejście\n• \$[trackPlaybackVolume]głośność\n• \$[trackPlaybackBalance]balans lewo/prawo\n• \$[trackPlaybackSpeed]prędkość odtwarzania\n• \$[trackName]własna nazwa\n• \$[trackKeyboardKey]skrót z klawiatury\n\nMożesz też \$[trackRecordingMove]przenieść ścieżkę po siatce, \$[trackRecordingImport]wgrać plik, \$[trackRecordingShare]podzielić się nagraniem lub \$[deleteForever]je usunąć.';
 
   @override
   String get helpScreenMessageTrackStates =>
@@ -866,7 +867,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get keyboardLayoutChangeDetailGrid24 =>
-      'Układ 24 klawiszy odpowiada stałemu blokowi 6×4 (wiersze fizyczne: 1234, 8765, 90ab, fedc, ghij, nmlk). Siatka ścieżek będzie zawsze miała 6 wierszy i 4 kolumny. Skróty ustawione pod pełną klawiaturę mogą nie mieć odpowiednika na tym bloku — ich zachowanie może sprawić, że części ścieżek nie da się już wygodnie wyzwolić z urządzenia.';
+      'Układ 24 klawiszy odpowiada stałemu blokowi 6×4. Siatka ścieżek będzie zawsze miała 6 wierszy i 4 kolumny. Skróty ustawione pod pełną klawiaturę mogą nie mieć odpowiednika na tym bloku — ich zachowanie może sprawić, że części ścieżek nie da się już wygodnie wyzwolić z urządzenia.';
 
   @override
   String get keyboardLayoutChangeDetailQwerty =>
@@ -1533,9 +1534,6 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get projectMetadata => 'Metadane projektu';
-
-  @override
-  String get projectStatistics => 'Statystyki';
 
   @override
   String get projectName => 'Nazwa projektu';
