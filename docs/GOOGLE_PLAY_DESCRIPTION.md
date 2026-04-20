@@ -24,14 +24,14 @@ literami).
 > NAVIGATION
 >
 > The top bar shows the app title: the logo on the left opens the side menu; on the right, start/stop all tracks and a “⋮” menu for actions
-> on every track at once — ZIP project export/import, shared playback tweaks, trim resets, and More settings…, which also opens the side menu.
-> The side menu lists Help, recording, tracks and grid (including keyboard shortcut presets), screen, permissions, the maintenance area, and
+> for the whole grid at once — ZIP project export/import, shared playback tweaks, trim resets, and More settings… (which also opens the side menu).
+> The side menu lists Help, Recording, Tracks & Grid (including keyboard shortcut presets), Screen, Permissions, the maintenance area, and
 > profiles at the bottom.
 >
 > WORKING THE GRID
 >
 > Each colored block is a quick control: tap it, or — with a keyboard connected — press the matching shortcut key. Want sliders and finer
-> options? Hold the block — or, with an external keyboard connected, press your shortcut together with Ctrl. Set each track’s shortcut in its
+> options? Hold the block — or, with an external keyboard connected, press your shortcut key together with Ctrl. Set each track’s shortcut in its
 > details.
 > Each grid row also has start/stop for that row and a “⋮” menu with bulk actions for every track in that row (playback mode, level,
 > balance, speed, trim resets, delete that row’s recordings).
@@ -59,7 +59,7 @@ literami).
 > PROJECT ZIP EXPORT
 >
 > One ZIP file holds the grid layout, every track’s settings, and the audio, with a short integrity check and a small summary (version,
-> export time, a few numbers). Import shows a preview and a warning before overwriting. The app rejects damaged or incomplete files.
+> export time, grid size, and recording statistics). Import shows a preview and a warning before overwriting. The app rejects damaged or incomplete files.
 >
 > PERMISSIONS
 >
@@ -115,7 +115,7 @@ literami).
 > JAKOŚĆ NAGRYWANIA
 >
 > Ustawienia obejmują format pliku, dokładność w czasie, przepływność bitową (bitrate), stereo czy mono oraz — gdy urządzenie to obsługuje —
-> automatyczną regulację poziomu (AGC), mniej echa z pokoju i ciszej w tle.
+> automatyczną regulację poziomu (AGC), mniej echa z pomieszczenia i ciszej w tle.
 >
 > PROFILE USTAWIEŃ
 >
@@ -124,8 +124,9 @@ literami).
 >
 > EKSPORT PROJEKTU (ZIP)
 >
-> Jeden plik ZIP zawiera układ siatki, ustawienia ścieżek i nagrania, z krótką kontrolą spójności i notatką (wersja, czas eksportu, kilka
-> liczb). Przed importem zobaczysz podgląd i ostrzeżenie; aplikacja odrzuci uszkodzony lub niekompletny plik.
+> Jeden plik ZIP zawiera układ siatki, ustawienia ścieżek i nagrania, z krótką kontrolą spójności oraz metadanymi projektu (wersja, czas
+> eksportu, rozmiar siatki i statystyki nagrań). Przed importem zobaczysz podgląd i ostrzeżenie; aplikacja odrzuci uszkodzony lub
+> niekompletny plik.
 >
 > UPRAWNIENIA
 >

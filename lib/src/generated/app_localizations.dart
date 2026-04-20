@@ -143,49 +143,49 @@ abstract class AppLocalizations {
   /// No description provided for @rowTracksPlayingStart.
   ///
   /// In en, this message translates to:
-  /// **'Start playing tracks in {rowName} row'**
+  /// **'Start playing tracks in row {rowName}'**
   String rowTracksPlayingStart(Object rowName);
 
   /// No description provided for @rowTracksPlayingStop.
   ///
   /// In en, this message translates to:
-  /// **'Stop playing tracks in {rowName} row'**
+  /// **'Stop playing tracks in row {rowName}'**
   String rowTracksPlayingStop(Object rowName);
 
   /// No description provided for @trackPlayingStart.
   ///
   /// In en, this message translates to:
-  /// **'Start playing {trackName} track'**
+  /// **'Start playing track {trackName}'**
   String trackPlayingStart(Object trackName);
 
   /// No description provided for @trackPlayingPause.
   ///
   /// In en, this message translates to:
-  /// **'Pause playing {trackName} track'**
+  /// **'Pause track {trackName}'**
   String trackPlayingPause(Object trackName);
 
   /// No description provided for @trackPlayingResume.
   ///
   /// In en, this message translates to:
-  /// **'Resume playing {trackName} track'**
+  /// **'Resume track {trackName}'**
   String trackPlayingResume(Object trackName);
 
   /// No description provided for @trackPlayingStop.
   ///
   /// In en, this message translates to:
-  /// **'Stop playing {trackName} track'**
+  /// **'Stop track {trackName}'**
   String trackPlayingStop(Object trackName);
 
   /// No description provided for @trackPlaybackModeToggle.
   ///
   /// In en, this message translates to:
-  /// **'Toggle playback mode for {trackName} track'**
+  /// **'Toggle playback mode for track {trackName}'**
   String trackPlaybackModeToggle(Object trackName);
 
   /// No description provided for @trackKeyboardKey.
   ///
   /// In en, this message translates to:
-  /// **'Keyboard key for {trackName} track'**
+  /// **'Keyboard shortcut for track {trackName}'**
   String trackKeyboardKey(Object trackName);
 
   /// No description provided for @thePlaybackPosition.
@@ -203,13 +203,13 @@ abstract class AppLocalizations {
   /// No description provided for @thePlaybackSpeed.
   ///
   /// In en, this message translates to:
-  /// **'Playback speed rate'**
+  /// **'Playback speed'**
   String get thePlaybackSpeed;
 
   /// No description provided for @thePlaybackVolume.
   ///
   /// In en, this message translates to:
-  /// **'Playback volume value'**
+  /// **'Playback volume'**
   String get thePlaybackVolume;
 
   /// No description provided for @thePlaybackBalance.
@@ -221,25 +221,25 @@ abstract class AppLocalizations {
   /// No description provided for @thePlaybackBalanceAt.
   ///
   /// In en, this message translates to:
-  /// **'Audio balance to {value}'**
+  /// **'Audio balance: {value}'**
   String thePlaybackBalanceAt(Object value);
 
   /// No description provided for @thePlaybackStartAtPosition.
   ///
   /// In en, this message translates to:
-  /// **'Start at position'**
+  /// **'Start position'**
   String get thePlaybackStartAtPosition;
 
   /// No description provided for @thePlaybackEndAtPosition.
   ///
   /// In en, this message translates to:
-  /// **'End at position'**
+  /// **'End position'**
   String get thePlaybackEndAtPosition;
 
   /// No description provided for @trackRecording.
   ///
   /// In en, this message translates to:
-  /// **'On air'**
+  /// **'Recording in progress'**
   String get trackRecording;
 
   /// No description provided for @theAudioSourceRecorded.
@@ -257,49 +257,49 @@ abstract class AppLocalizations {
   /// No description provided for @theKeyboardKey.
   ///
   /// In en, this message translates to:
-  /// **'Keyboard shortcut key'**
+  /// **'Keyboard shortcut'**
   String get theKeyboardKey;
 
   /// No description provided for @trackRecordingImport.
   ///
   /// In en, this message translates to:
-  /// **'Import file to {trackName} track'**
+  /// **'Import a file into track {trackName}'**
   String trackRecordingImport(Object trackName);
 
   /// No description provided for @trackRecordingImported.
   ///
   /// In en, this message translates to:
-  /// **'Imported file to {trackName} track.'**
+  /// **'Imported a file into track {trackName}.'**
   String trackRecordingImported(Object trackName);
 
   /// No description provided for @trackRecordingImportCancelled.
   ///
   /// In en, this message translates to:
-  /// **'Cancelled import file to {trackName} track.'**
+  /// **'Import cancelled for track {trackName}.'**
   String trackRecordingImportCancelled(Object trackName);
 
   /// No description provided for @trackRecordingImportNoPermissions.
   ///
   /// In en, this message translates to:
-  /// **'No permissions to import file to {trackName} track.'**
+  /// **'You don’t have permission to import a file into track {trackName}.'**
   String trackRecordingImportNoPermissions(Object trackName);
 
   /// No description provided for @trackRecordingInfo.
   ///
   /// In en, this message translates to:
-  /// **'Recording to {trackName} track'**
+  /// **'Recording to track {trackName}'**
   String trackRecordingInfo(Object trackName);
 
   /// No description provided for @clickToOpenApp.
   ///
   /// In en, this message translates to:
-  /// **'Touch to open app'**
+  /// **'Tap to open the app'**
   String get clickToOpenApp;
 
   /// No description provided for @trackRecordingStart.
   ///
   /// In en, this message translates to:
-  /// **'Start recording to {trackName} track'**
+  /// **'Start recording to track {trackName}'**
   String trackRecordingStart(Object trackName);
 
   /// No description provided for @trackRecordingAlreadyStarted.
@@ -311,67 +311,67 @@ abstract class AppLocalizations {
   /// No description provided for @trackRecordingStartNoAudioPermission.
   ///
   /// In en, this message translates to:
-  /// **'No permissions to audio recording.'**
+  /// **'You don’t have permission to record audio.'**
   String get trackRecordingStartNoAudioPermission;
 
   /// No description provided for @trackRecordingStartNoNotificationPermission.
   ///
   /// In en, this message translates to:
-  /// **'No permissions to recording notification.'**
+  /// **'You don’t have permission to show recording notifications.'**
   String get trackRecordingStartNoNotificationPermission;
 
   /// No description provided for @trackRecordingStartError.
   ///
   /// In en, this message translates to:
-  /// **'Error during start recording {trackName} track.\n{error}'**
+  /// **'An error occurred while starting recording for track {trackName}.\n{error}'**
   String trackRecordingStartError(Object error, Object trackName);
 
   /// No description provided for @trackRecordingCancel.
   ///
   /// In en, this message translates to:
-  /// **'Cancel recording to {trackName} track'**
+  /// **'Cancel recording for track {trackName}'**
   String trackRecordingCancel(Object trackName);
 
   /// No description provided for @trackRecordingCancelled.
   ///
   /// In en, this message translates to:
-  /// **'Canceled recording {trackName} track.'**
+  /// **'Cancelled recording for track {trackName}.'**
   String trackRecordingCancelled(Object trackName);
 
   /// No description provided for @trackRecordingStop.
   ///
   /// In en, this message translates to:
-  /// **'Stop recording to {trackName} track'**
+  /// **'Stop recording for track {trackName}'**
   String trackRecordingStop(Object trackName);
 
   /// No description provided for @trackRecordingStopSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Recording {trackName} track complete.'**
+  /// **'Recording completed for track {trackName}.'**
   String trackRecordingStopSuccess(Object trackName);
 
   /// No description provided for @trackRecordingStopError.
   ///
   /// In en, this message translates to:
-  /// **'Error during finalize recording {trackName} track.\n{error}'**
+  /// **'An error occurred while finishing recording for track {trackName}.\n{error}'**
   String trackRecordingStopError(Object error, Object trackName);
 
   /// No description provided for @trackPlaybackSpeedSet.
   ///
   /// In en, this message translates to:
-  /// **'Set track {trackName} playback speed'**
+  /// **'Set playback speed for track {trackName}'**
   String trackPlaybackSpeedSet(Object trackName);
 
   /// No description provided for @trackPlaybackVolumeSet.
   ///
   /// In en, this message translates to:
-  /// **'Set track {trackName} playback volume'**
+  /// **'Set playback volume for track {trackName}'**
   String trackPlaybackVolumeSet(Object trackName);
 
   /// No description provided for @trackPlaybackBalanceSet.
   ///
   /// In en, this message translates to:
-  /// **'Set track {trackName} playback balance'**
+  /// **'Set playback balance for track {trackName}'**
   String trackPlaybackBalanceSet(Object trackName);
 
   /// No description provided for @trackPlaybackStartAtPositionSub10.
@@ -956,7 +956,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpScreenMessageAboutContent.
   ///
   /// In en, this message translates to:
-  /// **'A simple grid for musical ideas. Record with the built-in microphone or with USB-connected audio hardware — if your phone or tablet supports it (accessory listings often mention USB OTG). You can also load a file from the device.\n\nPlay tracks together so they stay in time, or run them independently. Use looping or a single pass — whatever you need.\n\nDon’t worry: all your recordings and settings are kept after you close the app. If you need to, you can share them or save the whole project as a ZIP file.'**
+  /// **'A simple grid for musical ideas. Record with the built-in microphone or with USB-connected audio hardware. You can also load a file from the device.\n\nPlay tracks together so they stay in time, or run them independently. Use looping or a single pass — whatever you need.\n\nDon’t worry: all your recordings and settings are kept after you close the app. If you need to, you can share them or save the whole project as a ZIP file.'**
   String get helpScreenMessageAboutContent;
 
   /// No description provided for @helpScreenMessageGridScreenTitle.
@@ -980,7 +980,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpScreenMessageDetailsScreenContent.
   ///
   /// In en, this message translates to:
-  /// **'Here you choose how the track should sound. Icons by the options show what you are editing:\n• \$[recordingClip]trim where the sound starts and ends\n• \$[trackPlaybackMode]loop or play once\n• \$[trackPlaybackVolume]how loud it plays\n• \$[trackPlaybackBalance]left/right balance\n• \$[trackPlaybackSpeed]speed up or slow down\n• \$[trackName]give the track a name\n• \$[trackKeyboardKey]pick a keyboard shortcut\n\nYou can also \$[trackRecordingMove]move it on the grid, \$[trackRecordingImport]bring in a file, \$[trackRecordingShare]share your work, or \$[deleteForever]delete it.'**
+  /// **'Here you choose how the track should sound. Icons by the options show what you are editing:\n• \$[recordingClip]trim where the sound starts and ends\n• \$[trackPlaybackMode]loop or play once\n• \$[trackPlaybackVolume]volume\n• \$[trackPlaybackBalance]left/right balance\n• \$[trackPlaybackSpeed]speed up or slow down\n• \$[trackName]give the track a name\n• \$[trackKeyboardKey]pick a keyboard shortcut\n\nYou can also \$[trackRecordingMove]move it on the grid, \$[trackRecordingImport]bring in a file, \$[trackRecordingShare]share your work, or \$[deleteForever]delete it.'**
   String get helpScreenMessageDetailsScreenContent;
 
   /// No description provided for @helpScreenMessageTrackStates.
@@ -1178,7 +1178,7 @@ abstract class AppLocalizations {
   /// No description provided for @noRecents.
   ///
   /// In en, this message translates to:
-  /// **'No Recents'**
+  /// **'No recent items'**
   String get noRecents;
 
   /// No description provided for @screenSettings.
@@ -1220,7 +1220,7 @@ abstract class AppLocalizations {
   /// No description provided for @screenSystemThemeMode.
   ///
   /// In en, this message translates to:
-  /// **'device settings'**
+  /// **'System default'**
   String get screenSystemThemeMode;
 
   /// No description provided for @screenDarkThemeMode.
@@ -1250,7 +1250,7 @@ abstract class AppLocalizations {
   /// No description provided for @screenSystemThemeColor.
   ///
   /// In en, this message translates to:
-  /// **'device settings'**
+  /// **'System default'**
   String get screenSystemThemeColor;
 
   /// No description provided for @screenThemeColor.
@@ -1310,25 +1310,25 @@ abstract class AppLocalizations {
   /// No description provided for @gridRowsAmount.
   ///
   /// In en, this message translates to:
-  /// **'Grid rows amount'**
+  /// **'Number of rows'**
   String get gridRowsAmount;
 
   /// No description provided for @gridRowsAmountValue.
   ///
   /// In en, this message translates to:
-  /// **'Grid rows amount: {value}'**
+  /// **'Rows: {value}'**
   String gridRowsAmountValue(Object value);
 
   /// No description provided for @gridRowsAmountTitle.
   ///
   /// In en, this message translates to:
-  /// **'Grid rows amount'**
+  /// **'Number of rows'**
   String get gridRowsAmountTitle;
 
   /// No description provided for @gridRowsAmountInfo.
   ///
   /// In en, this message translates to:
-  /// **'Set grid rows amount, that will be visible on tracks list.'**
+  /// **'Choose how many rows are shown in the tracks grid.'**
   String get gridRowsAmountInfo;
 
   /// No description provided for @gridRowsAmountSuccess.
@@ -1340,25 +1340,25 @@ abstract class AppLocalizations {
   /// No description provided for @gridColsAmount.
   ///
   /// In en, this message translates to:
-  /// **'Grid columns amount'**
+  /// **'Number of columns'**
   String get gridColsAmount;
 
   /// No description provided for @gridColsAmountValue.
   ///
   /// In en, this message translates to:
-  /// **'Grid columns amount: {value}'**
+  /// **'Columns: {value}'**
   String gridColsAmountValue(Object value);
 
   /// No description provided for @gridColsAmountTitle.
   ///
   /// In en, this message translates to:
-  /// **'Grid columns amount'**
+  /// **'Number of columns'**
   String get gridColsAmountTitle;
 
   /// No description provided for @gridColsAmountInfo.
   ///
   /// In en, this message translates to:
-  /// **'Set grid columns amount, that will be visible on tracks list.'**
+  /// **'Choose how many columns are shown in the tracks grid.'**
   String get gridColsAmountInfo;
 
   /// No description provided for @gridColsAmountSuccess.
@@ -1508,61 +1508,61 @@ abstract class AppLocalizations {
   /// No description provided for @allTracksTitleReset.
   ///
   /// In en, this message translates to:
-  /// **'Reset tracks title'**
+  /// **'Reset track titles'**
   String get allTracksTitleReset;
 
   /// No description provided for @allTracksTitleResetTitle.
   ///
   /// In en, this message translates to:
-  /// **'Reset tracks title'**
+  /// **'Reset track titles'**
   String get allTracksTitleResetTitle;
 
   /// No description provided for @allTracksTitleResetInfo.
   ///
   /// In en, this message translates to:
-  /// **'All tracks will have default title. Continue?'**
+  /// **'All tracks will be reset to the default title. Continue?'**
   String get allTracksTitleResetInfo;
 
   /// No description provided for @allTracksTitleResetSuccess.
   ///
   /// In en, this message translates to:
-  /// **'All track titles reset.'**
+  /// **'All track titles have been reset.'**
   String get allTracksTitleResetSuccess;
 
   /// No description provided for @allTracksShortcutKeyReset.
   ///
   /// In en, this message translates to:
-  /// **'Reset tracks shortcut key'**
+  /// **'Reset track shortcuts'**
   String get allTracksShortcutKeyReset;
 
   /// No description provided for @allTracksShortcutKeyResetTitle.
   ///
   /// In en, this message translates to:
-  /// **'Reset all tracks shortcut key'**
+  /// **'Reset track shortcuts'**
   String get allTracksShortcutKeyResetTitle;
 
   /// No description provided for @allTracksShortcutKeyResetInfo.
   ///
   /// In en, this message translates to:
-  /// **'All tracks will have default shortcut key. Continue?'**
+  /// **'All tracks will be reset to the default shortcut. Continue?'**
   String get allTracksShortcutKeyResetInfo;
 
   /// No description provided for @allTracksShortcutKeyResetSuccess.
   ///
   /// In en, this message translates to:
-  /// **'All track shortcuts reset.'**
+  /// **'All track shortcuts have been reset.'**
   String get allTracksShortcutKeyResetSuccess;
 
   /// No description provided for @allTracksPlaybackModeSet.
   ///
   /// In en, this message translates to:
-  /// **'Set tracks playback mode'**
+  /// **'Set playback mode for all tracks'**
   String get allTracksPlaybackModeSet;
 
   /// No description provided for @allTracksPlaybackModeTitleSet.
   ///
   /// In en, this message translates to:
-  /// **'Set all tracks playback mode'**
+  /// **'Set playback mode for all tracks'**
   String get allTracksPlaybackModeTitleSet;
 
   /// No description provided for @allTracksPlaybackModeInfoSet.
@@ -1592,7 +1592,7 @@ abstract class AppLocalizations {
   /// No description provided for @allTracksPlaybackVolumeSet.
   ///
   /// In en, this message translates to:
-  /// **'Set tracks volume'**
+  /// **'Set volume for all tracks'**
   String get allTracksPlaybackVolumeSet;
 
   /// No description provided for @allTracksPlaybackVolumeTitleSet.
@@ -1616,7 +1616,7 @@ abstract class AppLocalizations {
   /// No description provided for @allTracksPlaybackBalanceSet.
   ///
   /// In en, this message translates to:
-  /// **'Set tracks balance'**
+  /// **'Set balance for all tracks'**
   String get allTracksPlaybackBalanceSet;
 
   /// No description provided for @allTracksPlaybackBalanceTitleSet.
@@ -1712,37 +1712,37 @@ abstract class AppLocalizations {
   /// No description provided for @allTracksSettingsReset.
   ///
   /// In en, this message translates to:
-  /// **'Reset tracks settings'**
+  /// **'Reset track settings'**
   String get allTracksSettingsReset;
 
   /// No description provided for @allTracksSettingsResetTitle.
   ///
   /// In en, this message translates to:
-  /// **'Reset all tracks settings'**
+  /// **'Reset track settings'**
   String get allTracksSettingsResetTitle;
 
   /// No description provided for @allTracksSettingsResetInfo.
   ///
   /// In en, this message translates to:
-  /// **'All track settings will be restored to defaults. Continue?'**
+  /// **'All track settings will be reset to defaults. Continue?'**
   String get allTracksSettingsResetInfo;
 
   /// No description provided for @allTracksSettingsResetSuccess.
   ///
   /// In en, this message translates to:
-  /// **'All track settings were restored to defaults.'**
+  /// **'All track settings have been reset to defaults.'**
   String get allTracksSettingsResetSuccess;
 
   /// No description provided for @allTracksRecordingsDelete.
   ///
   /// In en, this message translates to:
-  /// **'Delete tracks recordings'**
+  /// **'Delete all recordings'**
   String get allTracksRecordingsDelete;
 
   /// No description provided for @allTracksRecordingsDeleteTitle.
   ///
   /// In en, this message translates to:
-  /// **'Delete all tracks recordings'**
+  /// **'Delete all recordings'**
   String get allTracksRecordingsDeleteTitle;
 
   /// No description provided for @allTracksRecordingsDeleteInfo.
@@ -1802,7 +1802,7 @@ abstract class AppLocalizations {
   /// No description provided for @recordingInputDeviceInfo.
   ///
   /// In en, this message translates to:
-  /// **'Set device for sound recording.'**
+  /// **'Choose the input device for recording.'**
   String get recordingInputDeviceInfo;
 
   /// No description provided for @recordingInputDeviceSuccess.
@@ -1814,7 +1814,7 @@ abstract class AppLocalizations {
   /// No description provided for @recordingAudioEncoders.
   ///
   /// In en, this message translates to:
-  /// **'Audio encoders details'**
+  /// **'Audio encoder details'**
   String get recordingAudioEncoders;
 
   /// No description provided for @recordingAudioEncoder.
@@ -2006,7 +2006,7 @@ abstract class AppLocalizations {
   /// No description provided for @recordingAudioModeValue.
   ///
   /// In en, this message translates to:
-  /// **'Audio rate: {value}'**
+  /// **'Audio mode: {value}'**
   String recordingAudioModeValue(Object value);
 
   /// No description provided for @recordingAudioModeSuccess.
@@ -2030,13 +2030,13 @@ abstract class AppLocalizations {
   /// No description provided for @recordingAutoGain.
   ///
   /// In en, this message translates to:
-  /// **'Auto gain'**
+  /// **'Automatic gain'**
   String get recordingAutoGain;
 
   /// No description provided for @recordingAutoGainValue.
   ///
   /// In en, this message translates to:
-  /// **'Auto gain: {value}'**
+  /// **'Automatic gain: {value}'**
   String recordingAutoGainValue(Object value);
 
   /// No description provided for @recordingAutoGainInfo.
@@ -2054,13 +2054,13 @@ abstract class AppLocalizations {
   /// No description provided for @recordingEchoCancel.
   ///
   /// In en, this message translates to:
-  /// **'Echo cancel'**
+  /// **'Echo cancellation'**
   String get recordingEchoCancel;
 
   /// No description provided for @recordingEchoCancelValue.
   ///
   /// In en, this message translates to:
-  /// **'Echo cancel: {value}'**
+  /// **'Echo cancellation: {value}'**
   String recordingEchoCancelValue(Object value);
 
   /// No description provided for @recordingEchoCancelInfo.
@@ -2078,13 +2078,13 @@ abstract class AppLocalizations {
   /// No description provided for @recordingNoiseSuppress.
   ///
   /// In en, this message translates to:
-  /// **'Noise suppress'**
+  /// **'Noise suppression'**
   String get recordingNoiseSuppress;
 
   /// No description provided for @recordingNoiseSuppressValue.
   ///
   /// In en, this message translates to:
-  /// **'Noise suppress: {value}'**
+  /// **'Noise suppression: {value}'**
   String recordingNoiseSuppressValue(Object value);
 
   /// No description provided for @recordingNoiseSuppressInfo.
@@ -2126,7 +2126,7 @@ abstract class AppLocalizations {
   /// No description provided for @screenSettingsResetInfo.
   ///
   /// In en, this message translates to:
-  /// **'All screen settings will be restored to default. Continue?'**
+  /// **'All screen settings will be reset to defaults. Continue?'**
   String get screenSettingsResetInfo;
 
   /// No description provided for @screenSettingsResetSuccess.
@@ -2150,7 +2150,7 @@ abstract class AppLocalizations {
   /// No description provided for @recordingSettingsResetInfo.
   ///
   /// In en, this message translates to:
-  /// **'All recording settings will be restored to default. Continue?'**
+  /// **'All recording settings will be reset to defaults. Continue?'**
   String get recordingSettingsResetInfo;
 
   /// No description provided for @recordingSettingsResetSuccess.
@@ -2354,7 +2354,7 @@ abstract class AppLocalizations {
   /// No description provided for @audioWarningFileSizeVeryLarge.
   ///
   /// In en, this message translates to:
-  /// **'Very large file ({size} MB) - may slow down playback'**
+  /// **'Very large file ({size} MB) — may slow down playback'**
   String audioWarningFileSizeVeryLarge(Object size);
 
   /// No description provided for @audioWarningDurationLong.
@@ -2372,7 +2372,7 @@ abstract class AppLocalizations {
   /// No description provided for @audioWarningSampleRateNonStandard.
   ///
   /// In en, this message translates to:
-  /// **'Non-standard frequency: {sampleRate} Hz'**
+  /// **'Non-standard sample rate: {sampleRate} Hz'**
   String audioWarningSampleRateNonStandard(Object sampleRate);
 
   /// No description provided for @audioWarningBitRateHigh.
@@ -2492,7 +2492,7 @@ abstract class AppLocalizations {
   /// No description provided for @projectImportWarning.
   ///
   /// In en, this message translates to:
-  /// **'Loading project will overwrite current session. All recordings will be deleted and track settings will be overridden. Continue?'**
+  /// **'Loading a project will overwrite the current session. All recordings will be deleted and track settings will be replaced. Continue?'**
   String get projectImportWarning;
 
   /// No description provided for @projectImportWarningTitle.
