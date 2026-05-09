@@ -53,7 +53,6 @@ dependencies:
   provider: ^6.1.2
   flutter_svg_icons: ^0.0.1+4
   flutter_svg: ^2.0.17
-  ffmpeg_kit_flutter_new_min_gpl: ^2.1.1
   archive: ^4.0.9
   crypto: ^3.0.0
   dynamic_color: ^1.8.1

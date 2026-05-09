@@ -145,7 +145,15 @@ class Track {
         now.inMilliseconds - _lastDurationUpdate!.inMilliseconds >=
             _throttleInterval.inMilliseconds) {
       _lastDurationUpdate = now;
+      final oldDuration = duration.value;
       setDuration(value);
+      // When the decoder reports a slightly longer duration after load, keep the
+      // "play to end of file" marker aligned so trim/export logic does not treat
+      // this as an intentional end cut.
+      if (oldDuration.inMilliseconds > 0 &&
+          playbackEndAtPosition.value == oldDuration) {
+        setPlaybackEndAtPosition(value);
+      }
     }
   }
 

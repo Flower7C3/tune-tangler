@@ -13,7 +13,7 @@
 - **Odtwarzanie**: start/stop/pause/resume, tryby pętli (single/loop), seek, odtwarzanie zakresu (początek/koniec), czas/pozycja
 - **Sterowanie na żywo**: głośność, balans (pan), prędkość (0.5–2.0)
 - **Zarządzanie ścieżkami**: zmiana nazwy (emoji), klawisze skrótu, przenoszenie/zamiana nagrań, usuwanie nagrania
-- **Udostępnianie**: surowy plik lub „zmodyfikowany” (trim/vol/pan/speed wbudowane przez FFmpeg)
+- **Udostępnianie**: surowy plik lub „zmodyfikowany” (trim/vol/pan/speed) — eksport przetworzonego pliku **Android** (MediaCodec + Sonic); na innych platformach udostępniany jest surowy plik, gdy wymagana jest obróbka
 - **Układ**: konfigurowalna siatka (wiersze/kolumny), lazy‑loading dla wydajności
 - **Motywy**: jasny/ciemny/system, kolor akcentu
 - **Lokalizacja**: EN/PL (zmiana w runtime)

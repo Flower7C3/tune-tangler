@@ -49,10 +49,7 @@
 -dontwarn com.google.android.play.core.tasks.OnSuccessListener
 -dontwarn com.google.android.play.core.tasks.Task
 
-# FFmpegKit (new fork by Anton Karpenko) - keep JNI-bound classes/methods
--keep class com.antonkarpenko.ffmpegkit.** { *; }
--dontwarn com.antonkarpenko.ffmpegkit.**
+# Sonic (Apache 2.0) — time/pitch processing used by offline export
+-keep class sonic.Sonic { *; }
+-dontwarn sonic.**
 
-# (Safety) Old package name used by upstream artifacts
--keep class com.arthenica.ffmpegkit.** { *; }
--dontwarn com.arthenica.ffmpegkit.**

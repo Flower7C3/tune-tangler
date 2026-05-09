@@ -530,7 +530,7 @@ abstract class AppLocalizations {
   /// No description provided for @trackRecordingShare.
   ///
   /// In en, this message translates to:
-  /// **'Share {trackName} track recording'**
+  /// **'Share track {trackName}'**
   String trackRecordingShare(Object trackName);
 
   /// No description provided for @trackRecordingShareMessage.
@@ -548,13 +548,13 @@ abstract class AppLocalizations {
   /// No description provided for @trackRecordingShareRaw.
   ///
   /// In en, this message translates to:
-  /// **'Share raw recording ({trackTime})'**
+  /// **'Raw recording ({trackTime})'**
   String trackRecordingShareRaw(Object trackTime);
 
   /// No description provided for @trackRecordingShareProcessed.
   ///
   /// In en, this message translates to:
-  /// **'Share modified recording ({trackTime})'**
+  /// **'Modified recording ({trackTime})'**
   String trackRecordingShareProcessed(Object trackTime);
 
   /// No description provided for @trackRecordingShareSuccess.
@@ -568,6 +568,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to share recording for {trackName}.'**
   String trackRecordingShareFailed(Object trackName);
+
+  /// No description provided for @trackRecordingShareProcessedAndroidOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Sharing with trim, volume, balance, and speed is only available on Android. You can still share the raw recording.'**
+  String get trackRecordingShareProcessedAndroidOnly;
+
+  /// No description provided for @trackRecordingSharePreparingModified.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing modified recording…'**
+  String get trackRecordingSharePreparingModified;
+
+  /// No description provided for @trackRecordingShareExportCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Export cancelled.'**
+  String get trackRecordingShareExportCancelled;
 
   /// No description provided for @trackRecordingDelete.
   ///

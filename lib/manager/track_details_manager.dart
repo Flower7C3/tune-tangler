@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
-import 'package:ffmpeg_kit_flutter_new_min_gpl/ffmpeg_kit.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -23,6 +23,12 @@ import '../src/generated/app_localizations.dart';
 import '../src/warnings/audio_quality_checker.dart';
 import '../src/warnings/audio_warning.dart';
 import '../wrapper/hive_settings_provider.dart';
+
+const MethodChannel _kAudioExportChannel = MethodChannel('pro.kwiatek.tune_tangler/audio_export');
+const MethodChannel _kAudioExportProgressChannel = MethodChannel('pro.kwiatek.tune_tangler/audio_export_progress');
+
+bool _nativeProcessedShareAvailable() =>
+    !foundation.kIsWeb && foundation.defaultTargetPlatform == foundation.TargetPlatform.android;
 
 class TrackDetailsManager {
   final BuildContext _context;
@@ -61,18 +67,19 @@ class TrackDetailsManager {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => LayoutBuilder(
-        builder: (context, BoxConstraints constraints) {
-          final double h = constraints.maxHeight;
-          double maxChild = h > 0 ? (900 / h).clamp(0.3, 0.9) : 0.9;
-          double minChild = h > 0 ? (420 / h).clamp(0.3, 0.9) : 0.3;
-          if (minChild > maxChild) {
-            minChild = maxChild;
-          }
-          double initial = h > 0 ? (640 / h).clamp(0.3, 0.9) : 0.5;
-          if (initial < minChild) initial = minChild;
-          if (initial > maxChild) initial = maxChild;
-          return DraggableScrollableSheet(
+      builder: (BuildContext _) {
+        return LayoutBuilder(
+          builder: (context, BoxConstraints constraints) {
+            final double h = constraints.maxHeight;
+            double maxChild = h > 0 ? (900 / h).clamp(0.3, 0.9) : 0.9;
+            double minChild = h > 0 ? (420 / h).clamp(0.3, 0.9) : 0.3;
+            if (minChild > maxChild) {
+              minChild = maxChild;
+            }
+            double initial = h > 0 ? (640 / h).clamp(0.3, 0.9) : 0.5;
+            if (initial < minChild) initial = minChild;
+            if (initial > maxChild) initial = maxChild;
+            return DraggableScrollableSheet(
               expand: false,
               initialChildSize: initial,
               minChildSize: minChild,
@@ -86,8 +93,9 @@ class TrackDetailsManager {
                 ],
               ),
             );
-        },
-      ),
+          },
+        );
+      },
     );
   }
 
@@ -451,33 +459,21 @@ class TrackDetailsManager {
 
   List<Widget> _trackDetailsProgressText(Track track) => [
     ValueListenableBuilder(
-      valueListenable: CombinedNotifier([
-        track.positionAfterCut,
-        track.playbackSpeed,
-      ]),
+      valueListenable: track.positionAfterCut,
       builder: (context, _, _) => _uiHelper.statusIconRow(
         AppIcon.trackPosition,
         _uiHelper.formatTime(
-          (track.positionAfterCut.value.inMilliseconds *
-                  1 /
-                  track.playbackSpeed.value)
-              .toInt(),
+          track.positionAfterCut.value.inMilliseconds,
         ),
         wrapExpanded: false,
       ),
     ),
     ValueListenableBuilder(
-      valueListenable: CombinedNotifier([
-        track.durationAfterCut,
-        track.playbackSpeed,
-      ]),
+      valueListenable: track.durationAfterCut,
       builder: (context, _, _) => _uiHelper.statusIconRow(
         AppIcon.trackDuration,
         _uiHelper.formatTime(
-          (track.durationAfterCut.value.inMilliseconds *
-                  1 /
-                  track.playbackSpeed.value)
-              .toInt(),
+          track.durationAfterCut.value.inMilliseconds,
         ),
         wrapExpanded: false,
         iconAlignment: IconAlignment.end,
@@ -529,33 +525,21 @@ class TrackDetailsManager {
 
   List<Widget> _trackDetailsClipText(Track track) => [
     ValueListenableBuilder(
-      valueListenable: CombinedNotifier([
-        track.playbackStartAtPosition,
-        track.playbackSpeed,
-      ]),
+      valueListenable: track.playbackStartAtPosition,
       builder: (context, _, _) => _uiHelper.statusIconRow(
         AppIcon.trackPlaybackStartAtPosition,
         _uiHelper.formatTime(
-          (track.playbackStartAtPosition.value.inMilliseconds *
-                  1 /
-                  track.playbackSpeed.value)
-              .toInt(),
+          track.playbackStartAtPosition.value.inMilliseconds,
         ),
         wrapExpanded: false,
       ),
     ),
     ValueListenableBuilder(
-      valueListenable: CombinedNotifier([
-        track.playbackEndAtPosition,
-        track.playbackSpeed,
-      ]),
+      valueListenable: track.playbackEndAtPosition,
       builder: (context, _, _) => _uiHelper.statusIconRow(
         AppIcon.trackPlaybackEndAtPosition,
         _uiHelper.formatTime(
-          (track.playbackEndAtPosition.value.inMilliseconds *
-                  1 /
-                  track.playbackSpeed.value)
-              .toInt(),
+          track.playbackEndAtPosition.value.inMilliseconds,
         ),
         wrapExpanded: false,
         iconAlignment: IconAlignment.end,
@@ -1160,7 +1144,10 @@ class TrackDetailsManager {
       actions: [
         SimpleDialogOption(
           padding: EdgeInsets.zero,
-          child: _uiHelper.statusIconTile(AppIcon.trackRecordingShareRaw, _trans.trackRecordingShareRaw(track.duration.value)),
+          child: _uiHelper.statusIconTile(
+            track.audioSourceIcon ?? AppIcon.trackAudioSourceRecorded,
+            _trans.trackRecordingShareRaw(track.duration.value),
+          ),
           onPressed: () async {
             Navigator.pop(_context);
             await _shareRaw(track);
@@ -1168,23 +1155,49 @@ class TrackDetailsManager {
         ),
         SimpleDialogOption(
           padding: EdgeInsets.zero,
-          child: _uiHelper.statusIconTile(AppIcon.trackRecordingShareModified, _trans.trackRecordingShareProcessed(track.durationAfterCut.value)),
-          onPressed: () async {
+          child: _uiHelper.statusIconTile(
+            AppIcon.trackRecordingShareModified,
+            _trans.trackRecordingShareProcessed(_processedShareLabelDuration(track)),
+          ),
+          onPressed: () {
             Navigator.pop(_context);
-            await _shareProcessed(track);
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!_context.mounted) return;
+              if (_nativeProcessedShareAvailable()) {
+                _shareProcessed(track);
+              } else {
+                _uiHelper.toast(
+                  _trans.trackRecordingShareProcessedAndroidOnly,
+                  icon: AppIcon.trackRecordingShare,
+                  type: ToastType.success,
+                  duration: 5,
+                );
+              }
+            });
           },
         ),
       ],
     );
   }
 
+  /// Length label for the processed share: source segment time scaled by [Track.playbackSpeed]
+  /// (matches Android Sonic time-stretch, where output is shorter when speed > 1).
+  Duration _processedShareLabelDuration(Track track) {
+    final span = track.durationAfterCut.value;
+    final ms = span.inMilliseconds;
+    if (ms <= 0) return span;
+    final speed = track.playbackSpeed.value;
+    if (speed <= 0 || (speed - 1.0).abs() < 1e-6) return span;
+    final outMs = (ms / speed).round();
+    return Duration(milliseconds: outMs < 1 ? 1 : outMs);
+  }
+
   /// True when [_shareProcessed] would differ from the raw file (trim or non-default playback params).
   bool _trackHasProcessedExportModifications(Track track) {
     final durationMs = track.duration.value.inMilliseconds;
+    final endMs = track.playbackEndAtPosition.value.inMilliseconds;
     if (track.playbackStartAtPosition.value.inMilliseconds > 0) return true;
-    if (durationMs > 0 && track.playbackEndAtPosition.value.inMilliseconds < durationMs) {
-      return true;
-    }
+    if (durationMs > 0 && endMs != durationMs) return true;
     const eps = 1e-6;
     if ((track.playbackVolume.value - AppGlobalConfig.trackPlaybackVolume.defaultValue).abs() > eps) {
       return true;
@@ -1204,7 +1217,6 @@ class TrackDetailsManager {
         throw Exception(_trans.trackRecordingShareNoFile(track.name.value));
       }
       SharePlus.instance.share(ShareParams(files: [XFile(track.path!)]));
-      _uiHelper.toast(_trans.trackRecordingShareSuccess(track.name.value), icon: AppIcon.trackRecordingShare);
     } catch (e) {
       debugPrint('Error exporting raw: $e');
       _uiHelper.toast(_trans.trackRecordingShareFailed(track.name.value), icon: AppIcon.exception, type: ToastType.error);
@@ -1212,71 +1224,204 @@ class TrackDetailsManager {
   }
 
   Future<void> _shareProcessed(Track track) async {
+    if (!_nativeProcessedShareAvailable()) {
+      _uiHelper.toast(
+        _trans.trackRecordingShareProcessedAndroidOnly,
+        icon: AppIcon.trackRecordingShare,
+        type: ToastType.success,
+        duration: 5,
+      );
+      return;
+    }
+    String? outPath;
+    BuildContext? progressDialogContext;
+    final ValueNotifier<double> exportProgress = ValueNotifier<double>(0.0);
+
+    void closeProgressDialog() {
+      final c = progressDialogContext;
+      progressDialogContext = null;
+      if (c != null && c.mounted) {
+        Navigator.of(c, rootNavigator: true).pop();
+      }
+    }
+
     try {
-      if (track.path == null || !File(track.path!).existsSync()) {
+      if (track.path == null) {
         throw Exception(_trans.trackRecordingShareNoFile(track.name.value));
       }
-      final appDir = await getApplicationDocumentsDirectory();
-      final ts = DateTime.now().millisecondsSinceEpoch;
-      final outPath = "${appDir.path}/${track.id.toString()}-$ts-processed.m4a";
 
-      // Build filters
+      if (!_context.mounted) return;
+
+      // Show immediately — existsSync() can block the UI thread on slow storage; run it after the first paint.
+      showDialog<void>(
+        context: _context,
+        useRootNavigator: true,
+        barrierDismissible: false,
+        barrierColor: Colors.black54,
+        builder: (BuildContext dialogCtx) {
+          progressDialogContext = dialogCtx;
+          return ValueListenableBuilder<double>(
+            valueListenable: exportProgress,
+            builder: (BuildContext context, double value, _) {
+              final v = value.clamp(0.0, 1.0);
+              final pct = (v * 100).round().clamp(0, 100);
+              final theme = Theme.of(context);
+              final trackColor = theme.colorScheme.primary;
+              final trackBg = theme.colorScheme.surfaceContainerHighest;
+              return AlertDialog(
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SizedBox(
+                      height: 10,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            ColoredBox(color: trackBg),
+                            FractionallySizedBox(
+                              alignment: Alignment.centerLeft,
+                              widthFactor: v <= 0 ? 0.04 : v,
+                              child: ColoredBox(color: trackColor),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      '$pct%',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      _trans.trackRecordingSharePreparingModified,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyLarge,
+                    ),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      _kAudioExportChannel.invokeMethod<void>('cancelExportProcessed');
+                    },
+                    child: Text(_trans.buttonCancel),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      );
+
+      exportProgress.value = 0.0;
+
+      await WidgetsBinding.instance.endOfFrame;
+      await Future<void>.delayed(Duration.zero);
+      await WidgetsBinding.instance.endOfFrame;
+      await Future<void>.delayed(const Duration(milliseconds: 32));
+
+      if (!File(track.path!).existsSync()) {
+        throw Exception(_trans.trackRecordingShareNoFile(track.name.value));
+      }
+
+      final Directory appDir;
+      try {
+        appDir = await getApplicationDocumentsDirectory();
+      } catch (e, st) {
+        foundation.debugPrint('getApplicationDocumentsDirectory failed: $e\n$st');
+        if (_context.mounted) {
+          _uiHelper.toast(
+            _trans.trackRecordingShareFailed(track.name.value),
+            icon: AppIcon.exception,
+            type: ToastType.error,
+          );
+        }
+        return;
+      }
+      final ts = DateTime.now().millisecondsSinceEpoch;
+      outPath = "${appDir.path}/${track.id.toString()}-$ts-processed.m4a";
+
       final startMs = track.playbackStartAtPosition.value.inMilliseconds;
       final endMs = track.playbackEndAtPosition.value.inMilliseconds;
       final inPath = track.path!;
-      final vol = track.playbackVolume.value; // 0..1
-      final bal = track.playbackBalance.value; // -1..1 expected
-      final speed = track.playbackSpeed.value; // 0.5..2 recommended
+      final vol = track.playbackVolume.value;
+      final bal = track.playbackBalance.value;
+      final speed = track.playbackSpeed.value;
 
-      final leftGain = (bal <= 0) ? 1.0 : (1.0 - bal);
-      final rightGain = (bal >= 0) ? 1.0 : (1.0 + bal);
+      _kAudioExportProgressChannel.setMethodCallHandler((MethodCall call) async {
+        if (call.method == 'setProgress') {
+          final v = (call.arguments as num?)?.toDouble() ?? 0.0;
+          exportProgress.value = v.clamp(0.0, 1.0);
+        }
+      });
 
-      // atempo supports 0.5..2.0; chain if outside
-      List<double> atempos = [];
-      double remaining = speed;
-      if (remaining <= 0) remaining = 1.0;
-      while (remaining > 2.0) {
-        atempos.add(2.0);
-        remaining /= 2.0;
-      }
-      while (remaining < 0.5) {
-        atempos.add(0.5);
-        remaining *= 2.0;
-      }
-      atempos.add(remaining);
-      final atempoFilter = atempos.map((v) => "atempo=$v").join(',');
+      await _kAudioExportChannel.invokeMethod<void>('exportProcessed', <String, Object?>{
+        'inputPath': inPath,
+        'outputPath': outPath,
+        'startMs': startMs,
+        'endMs': endMs,
+        'volume': vol,
+        'balance': bal,
+        'speed': speed,
+      });
 
-      final panFilter = "pan=stereo|c0=${leftGain.toStringAsFixed(3)}*c0|c1=${rightGain.toStringAsFixed(3)}*c1";
-      final volumeFilter = "volume=${vol.toStringAsFixed(3)}";
+      closeProgressDialog();
 
-      final filterComplex = [panFilter, volumeFilter, atempoFilter].where((s) => s.isNotEmpty).join(',');
-
-      // ffmpeg command
-      final ss = (startMs / 1000.0);
-      final to = (endMs / 1000.0);
-      final cmd = [
-        "-y",
-        "-ss", ss.toStringAsFixed(3),
-        "-to", to.toStringAsFixed(3),
-        "-i", "'$inPath'",
-        "-vn",
-        "-filter:a", "'$filterComplex'",
-        "-c:a", "aac",
-        "-b:a", "192k",
-        "'$outPath'",
-      ].join(' ');
-
-      final session = await FFmpegKit.execute(cmd);
-      final returnCode = await session.getReturnCode();
-      if (!(returnCode?.isValueSuccess() ?? false)) {
-        throw Exception("ffmpeg failed");
-      }
-
+      if (!_context.mounted) return;
       SharePlus.instance.share(ShareParams(files: [XFile(outPath)]));
-      _uiHelper.toast(_trans.trackRecordingShareSuccess(track.name.value), icon: AppIcon.trackRecordingShare);
-    } catch (e) {
-      debugPrint('Error exporting processed: $e');
+    } on PlatformException catch (e, st) {
+      foundation.debugPrint('Error exporting processed: $e\n$st');
+      if (e.code == 'export_cancelled') {
+        try {
+          final p = outPath;
+          if (p != null) {
+            final f = File(p);
+            if (f.existsSync()) f.deleteSync();
+          }
+        } catch (_) {}
+        if (_context.mounted) {
+          _uiHelper.toast(
+            _trans.trackRecordingShareExportCancelled,
+            icon: AppIcon.trackRecordingShare,
+            type: ToastType.success,
+            duration: 2,
+          );
+        }
+        return;
+      }
+      final msg = e.message;
+      if (_context.mounted) {
+        if (msg != null && msg.isNotEmpty) {
+          _uiHelper.toast(
+            '${_trans.trackRecordingShareFailed(track.name.value)}: $msg',
+            icon: AppIcon.exception,
+            type: ToastType.error,
+          );
+        } else {
+          _uiHelper.toast(_trans.trackRecordingShareFailed(track.name.value), icon: AppIcon.exception, type: ToastType.error);
+        }
+      }
+    } catch (e, st) {
+      foundation.debugPrint('Error exporting processed: $e\n$st');
       _uiHelper.toast(_trans.trackRecordingShareFailed(track.name.value), icon: AppIcon.exception, type: ToastType.error);
+    } finally {
+      closeProgressDialog();
+      _kAudioExportProgressChannel.setMethodCallHandler(null);
+      exportProgress.dispose();
+      final p = outPath;
+      if (p != null) {
+        Future<void>.delayed(const Duration(seconds: 5), () {
+          try {
+            final f = File(p);
+            if (f.existsSync()) f.deleteSync();
+          } catch (_) {}
+        });
+      }
     }
   }
 

@@ -370,7 +370,6 @@ class TrackManager {
           track.state,
           track.clock,
           track.durationAfterCut,
-          track.playbackSpeed,
         ]),
         builder: (context, _, _) {
           if (track.state.value == TrackState.recording) {
@@ -389,10 +388,7 @@ class TrackManager {
             return _uiHelper.statusIconRow(
               AppIcon.trackPosition,
               _uiHelper.formatTime(
-                (track.durationAfterCut.value.inMilliseconds *
-                        1 /
-                        track.playbackSpeed.value)
-                    .toInt(),
+                track.durationAfterCut.value.inMilliseconds,
               ),
               iconColor: track.stateForegroundColor(context),
               iconSize:

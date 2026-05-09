@@ -40,7 +40,7 @@ Funkcja **zapisu i wczytywania całego projektu** (ZIP z siatką, ścieżkami, n
 - Głośność, prędkość, pętla/seek/zdarzenia, ClippingAudioSource, playlisty/gapless
 - Pan: wymaga pluginu; EQ: możliwy (Android) przez wtyczki
 #### Plan
-- Krótkoterminowo: pozostajemy przy audioplayers (render FFmpeg dla „zmodyfikowanych”)
+- Krótkoterminowo: pozostajemy przy audioplayers (eksport „zmodyfikowanych” tylko Android — natywny pipeline; odtwarzanie bez zmian)
 - Średni termin: prototyp ClippingAudioSource; rozpoznać pan plugin
 - Długi termin: EQ (Android) + AVAudioEngine (iOS) za flagą; rozważyć wspólną warstwę DSP
 

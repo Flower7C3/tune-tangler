@@ -312,7 +312,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String trackRecordingShare(Object trackName) {
-    return 'Udostępnij nagranie ścieżki $trackName';
+    return 'Udostępnij ścieżkę $trackName';
   }
 
   @override
@@ -327,12 +327,12 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String trackRecordingShareRaw(Object trackTime) {
-    return 'Udostępnij surowe nagranie ($trackTime)';
+    return 'Surowe nagranie ($trackTime)';
   }
 
   @override
   String trackRecordingShareProcessed(Object trackTime) {
-    return 'Udostępnij zmodyfikowane nagranie ($trackTime)';
+    return 'Zmodyfikowane nagranie ($trackTime)';
   }
 
   @override
@@ -344,6 +344,17 @@ class AppLocalizationsPl extends AppLocalizations {
   String trackRecordingShareFailed(Object trackName) {
     return 'Nie udało się wyeksportować nagrania ścieżki $trackName.';
   }
+
+  @override
+  String get trackRecordingShareProcessedAndroidOnly =>
+      'Udostępnianie z przycięciem, głośnością, balansem i prędkością jest dostępne tylko na Androidzie. Nadal możesz udostępnić surowe nagranie.';
+
+  @override
+  String get trackRecordingSharePreparingModified =>
+      'Przygotowywanie zmodyfikowanego nagrania…';
+
+  @override
+  String get trackRecordingShareExportCancelled => 'Anulowano eksport.';
 
   @override
   String get trackRecordingDelete => 'Usuń nagranie';

@@ -311,7 +311,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String trackRecordingShare(Object trackName) {
-    return 'Share $trackName track recording';
+    return 'Share track $trackName';
   }
 
   @override
@@ -326,12 +326,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String trackRecordingShareRaw(Object trackTime) {
-    return 'Share raw recording ($trackTime)';
+    return 'Raw recording ($trackTime)';
   }
 
   @override
   String trackRecordingShareProcessed(Object trackTime) {
-    return 'Share modified recording ($trackTime)';
+    return 'Modified recording ($trackTime)';
   }
 
   @override
@@ -343,6 +343,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String trackRecordingShareFailed(Object trackName) {
     return 'Failed to share recording for $trackName.';
   }
+
+  @override
+  String get trackRecordingShareProcessedAndroidOnly =>
+      'Sharing with trim, volume, balance, and speed is only available on Android. You can still share the raw recording.';
+
+  @override
+  String get trackRecordingSharePreparingModified =>
+      'Preparing modified recording…';
+
+  @override
+  String get trackRecordingShareExportCancelled => 'Export cancelled.';
 
   @override
   String get trackRecordingDelete => 'Delete recording';
