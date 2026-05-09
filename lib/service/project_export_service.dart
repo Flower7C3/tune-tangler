@@ -61,19 +61,47 @@ class ProjectExportService {
   ProjectExportService(this._settings, this._trackRepository);
 
   /// Eksportuje projekt do pliku ZIP
-  Future<File> exportProject(String? projectName) async {
+  Future<File> exportProject(
+    String? projectName, {
+    void Function(double progress)? onProgress,
+  }) async {
+    void report(double p) => onProgress?.call(p.clamp(0.0, 1.0));
+
     final archive = Archive();
     final checksums = <String, String>{};
 
+    report(0.02);
+    await Future<void>.delayed(Duration.zero);
+
     // 1. Eksportuj ustawienia siatki
     await _exportGridSettings(archive);
+    report(0.08);
 
     // 2. Eksportuj wszystkie ścieżki
     final allTracks = _trackRepository.allTracks();
-    await _exportTracks(archive, allTracks);
+    await _exportTracks(
+      archive,
+      allTracks,
+      onTrackProgress: (completed, total) {
+        if (total > 0) {
+          report(0.08 + 0.30 * completed / total);
+        }
+      },
+    );
+    report(0.40);
 
     // 3. Eksportuj nagrania i oblicz sumy kontrolne
-    await _exportRecordings(archive, allTracks, checksums);
+    await _exportRecordings(
+      archive,
+      allTracks,
+      checksums,
+      onRecordingProgress: (completed, total) {
+        if (total > 0) {
+          report(0.40 + 0.45 * completed / total);
+        }
+      },
+    );
+    report(0.88);
 
     // 4. Dodaj plik z sumami kontrolnymi
     if (checksums.isNotEmpty) {
@@ -139,9 +167,14 @@ class ProjectExportService {
       ),
     );
 
+    report(0.92);
+    await Future<void>.delayed(Duration.zero);
+
     // 6. Zapisz ZIP do pliku tymczasowego
     final encoder = ZipEncoder();
     final zipData = encoder.encode(archive);
+
+    report(0.97);
 
     // 7. Utwórz nazwę pliku
     final fileName = _generateFileName(projectName);
@@ -150,6 +183,7 @@ class ProjectExportService {
 
     await zipFile.writeAsBytes(zipData);
 
+    report(1.0);
     return zipFile;
   }
 
@@ -191,9 +225,14 @@ class ProjectExportService {
 
   Future<void> _exportTracks(
     Archive archive,
-    Set<Track> tracks,
-  ) async {
-    for (final track in tracks) {
+    Set<Track> tracks, {
+    void Function(int completed, int total)? onTrackProgress,
+  }) async {
+    final trackList = tracks.toList();
+    final total = trackList.length;
+    for (var i = 0; i < trackList.length; i++) {
+      final track = trackList[i];
+      try {
       final trackMap = track.toMap();
       final trackId = track.id;
       // Konwertuj Map<TrackAdapterKey, dynamic> na Map<String, dynamic> dla JSON
@@ -230,12 +269,12 @@ class ProjectExportService {
       try {
         trackJson = jsonEncode(trackMapJson);
         // Sprawdź czy są znaki kontrolne w JSON
-        for (int i = 0; i < trackJson.length; i++) {
-          final char = trackJson[i];
+        for (var ji = 0; ji < trackJson.length; ji++) {
+          final char = trackJson[ji];
           final code = char.codeUnitAt(0);
           if (code < 32 && code != 9 && code != 10 && code != 13) {
-            debugPrint('[ProjectExport] WARNING: Control character in JSON at position $i: code $code (0x${code.toRadixString(16)})');
-            debugPrint('[ProjectExport] JSON context around position $i: ${trackJson.substring(i > 20 ? i - 20 : 0, i + 20 < trackJson.length ? i + 20 : trackJson.length)}');
+            debugPrint('[ProjectExport] WARNING: Control character in JSON at position $ji: code $code (0x${code.toRadixString(16)})');
+            debugPrint('[ProjectExport] JSON context around position $ji: ${trackJson.substring(ji > 20 ? ji - 20 : 0, ji + 20 < trackJson.length ? ji + 20 : trackJson.length)}');
           }
         }
       } catch (e) {
@@ -260,34 +299,47 @@ class ProjectExportService {
           trackBytes,
         ),
       );
+      } finally {
+        if (total > 0) {
+          onTrackProgress?.call(i + 1, total);
+        }
+      }
     }
   }
 
   Future<void> _exportRecordings(
     Archive archive,
     Set<Track> tracks,
-    Map<String, String> checksums,
-  ) async {
-    for (final track in tracks) {
-      if (track.path == null) continue;
+    Map<String, String> checksums, {
+    void Function(int completed, int total)? onRecordingProgress,
+  }) async {
+    final withRecording = tracks.where((t) => t.path != null && File(t.path!).existsSync()).toList();
+    final total = withRecording.length;
 
-      final file = File(track.path!);
-      if (!file.existsSync()) continue;
+    for (var i = 0; i < withRecording.length; i++) {
+      final track = withRecording[i];
+      try {
+        final file = File(track.path!);
 
-      // Oblicz sumę kontrolną
-      final fileBytes = await file.readAsBytes();
-      final checksum = sha256.convert(fileBytes).toString();
-      final fileName = path.basename(file.path);
-      checksums[fileName] = checksum;
+        // Oblicz sumę kontrolną
+        final fileBytes = await file.readAsBytes();
+        final checksum = sha256.convert(fileBytes).toString();
+        final fileName = path.basename(file.path);
+        checksums[fileName] = checksum;
 
-      // Dodaj plik do archiwum
-      archive.addFile(
-        ArchiveFile(
-          'recordings/$fileName',
-          fileBytes.length,
-          fileBytes,
-        ),
-      );
+        // Dodaj plik do archiwum
+        archive.addFile(
+          ArchiveFile(
+            'recordings/$fileName',
+            fileBytes.length,
+            fileBytes,
+          ),
+        );
+      } finally {
+        if (total > 0) {
+          onRecordingProgress?.call(i + 1, total);
+        }
+      }
     }
   }
 
@@ -342,10 +394,10 @@ class ProjectExportService {
         'id': track.id.toString(),
         'name': cleanName,
         'hasRecording': hasRecording,
-        'recordingSize': ?recordingSize,
-        'recordingFormat': ?recordingFormat,
-        'recordingChecksum': ?recordingChecksum,
-        'recordingFileName': ?recordingFileName,
+        'recordingSize': recordingSize,
+        'recordingFormat': recordingFormat,
+        'recordingChecksum': recordingChecksum,
+        'recordingFileName': recordingFileName,
       });
       
       // Sprawdź czy recordingFileName zostało dodane

@@ -168,31 +168,59 @@ class ProjectImportService {
   }
 
   /// Imports project from ZIP file (only after successful validation)
-  Future<List<ProjectImportError>> importProject(String zipPath) async {
+  Future<List<ProjectImportError>> importProject(
+    String zipPath, {
+    void Function(double progress)? onProgress,
+  }) async {
+    void report(double p) => onProgress?.call(p.clamp(0.0, 1.0));
+
     final errors = <ProjectImportError>[];
 
     try {
+      report(0.02);
       final file = File(zipPath);
       final bytes = await file.readAsBytes();
+      report(0.08);
       final archive = ZipDecoder().decodeBytes(bytes);
+      report(0.12);
 
       // 1. Delete all current recordings BEFORE importing tracks
       // (to avoid conflicts with existing tracks)
       _trackRepository.deleteTracksRecordings(_trackRepository.allTracks());
+      report(0.16);
 
       // 2. Import grid settings
       await _importGridSettings(archive);
+      report(0.20);
 
       // 3. Reset tracks collection (cache)
       _trackRepository.resetTracksCollection();
 
       // 5. Import all tracks BEFORE recordings
       // (so tracks exist in repository when we assign recordings to them)
-      await _importTracks(archive, errors);
+      await _importTracks(
+        archive,
+        errors,
+        onTrackProgress: (completed, total) {
+          if (total > 0) {
+            report(0.20 + 0.38 * completed / total);
+          }
+        },
+      );
+      report(0.58);
 
       // 6. Import recordings with verification
       // (now tracks already exist, so we can find them and assign recordings to them)
-      await _importRecordings(archive, errors);
+      await _importRecordings(
+        archive,
+        errors,
+        onRecordingProgress: (completed, total) {
+          if (total > 0) {
+            report(0.58 + 0.40 * completed / total);
+          }
+        },
+      );
+      report(1.0);
     } catch (e, stackTrace) {
       debugPrint('[ProjectImport] Exception during import: $e');
       debugPrint('[ProjectImport] Stack trace: $stackTrace');
@@ -596,14 +624,20 @@ class ProjectImportService {
     await _settings.reload();
   }
 
-  Future<void> _importTracks(Archive archive, List<ProjectImportError> errors) async {
+  Future<void> _importTracks(
+    Archive archive,
+    List<ProjectImportError> errors, {
+    void Function(int completed, int total)? onTrackProgress,
+  }) async {
     // Map to store playback positions for each track (to be used in _importRecordings)
     final trackPlaybackPositions = <String, Map<String, Duration>>{};
     final tracksDir = archive.files
         .where((file) => file.name.startsWith('tracks/') && file.name.endsWith('.json'))
         .toList();
+    final totalTracks = tracksDir.length;
 
-    for (final trackFile in tracksDir) {
+    for (var i = 0; i < tracksDir.length; i++) {
+      final trackFile = tracksDir[i];
       try {
         final trackBytes = trackFile.content as List<int>;
 
@@ -685,6 +719,10 @@ class ProjectImportService {
         errors.add(
           ProjectImportError(message: 'Failed to import track: ${trackFile.name} - $e', fileName: trackFile.name),
         );
+      } finally {
+        if (totalTracks > 0) {
+          onTrackProgress?.call(i + 1, totalTracks);
+        }
       }
     }
 
@@ -692,7 +730,11 @@ class ProjectImportService {
     _trackPlaybackPositions = trackPlaybackPositions;
   }
 
-  Future<void> _importRecordings(Archive archive, List<ProjectImportError> errors) async {
+  Future<void> _importRecordings(
+    Archive archive,
+    List<ProjectImportError> errors, {
+    void Function(int completed, int total)? onRecordingProgress,
+  }) async {
     // Load checksums
     final checksumsFile = archive.findFile('recordings/checksums.json');
     final checksums = <String, String>{};
@@ -772,12 +814,15 @@ class ProjectImportService {
     final recordingsDir = archive.files
         .where((file) => file.name.startsWith('recordings/') && file.name != 'recordings/checksums.json')
         .toList();
+    final totalRecordings = recordingsDir.length;
 
     final appDir = await getApplicationDocumentsDirectory();
 
-    for (final recordingFile in recordingsDir) {
+    for (var i = 0; i < recordingsDir.length; i++) {
+      final recordingFile = recordingsDir[i];
       try {
-        final fileName = path.basename(recordingFile.name);
+        try {
+          final fileName = path.basename(recordingFile.name);
         final fileBytes = recordingFile.content as List<int>;
 
         // Verify checksum
@@ -975,6 +1020,11 @@ class ProjectImportService {
         // We must reset cache to force reloading tracks from Hive
         // But that's not enough - we must also refresh view through _settings.reload()
         // (which increments version and calls notifyListeners())
+        } finally {
+          if (totalRecordings > 0) {
+            onRecordingProgress?.call(i + 1, totalRecordings);
+          }
+        }
       } catch (e, stackTrace) {
         debugPrint('[ProjectImport] Exception importing recording ${recordingFile.name}: $e');
         debugPrint('[ProjectImport] Stack trace: $stackTrace');

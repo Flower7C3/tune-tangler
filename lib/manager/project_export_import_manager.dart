@@ -99,59 +99,111 @@ class ProjectExportImportManager {
     }
 
     BuildContext? progressContext;
+    final exportProgress = ValueNotifier<double>(0.0);
+
+    void closeProgress() {
+      final c = progressContext;
+      progressContext = null;
+      if (c != null && c.mounted) {
+        try {
+          final nav = Navigator.of(c, rootNavigator: true);
+          if (nav.canPop()) nav.pop();
+        } catch (e) {
+          debugPrint('[ProjectExport] Could not close progress dialog: $e');
+        }
+      }
+    }
+
     try {
-      // Show progress
       if (!_context.mounted) return;
-      showDialog(
+
+      showDialog<void>(
         context: _context,
+        useRootNavigator: true,
         barrierDismissible: false,
-        builder: (context) {
+        barrierColor: Colors.black54,
+        builder: (BuildContext context) {
           progressContext = context;
-          return AlertDialog(
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text(_trans.projectExporting),
-              ],
-            ),
+          return ValueListenableBuilder<double>(
+            valueListenable: exportProgress,
+            builder: (BuildContext ctx, double value, _) {
+              final v = value.clamp(0.0, 1.0);
+              final pct = (v * 100).round().clamp(0, 100);
+              final theme = Theme.of(ctx);
+              final trackColor = theme.colorScheme.primary;
+              final trackBg = theme.colorScheme.surfaceContainerHighest;
+              return AlertDialog(
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SizedBox(
+                      height: 10,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            ColoredBox(color: trackBg),
+                            FractionallySizedBox(
+                              alignment: Alignment.centerLeft,
+                              widthFactor: v <= 0 ? 0.04 : v,
+                              child: ColoredBox(color: trackColor),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      '$pct%',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      _trans.projectExporting,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyLarge,
+                    ),
+                  ],
+                ),
+              );
+            },
           );
         },
       );
 
-      // Export project
-      final zipFile = await _exportService.exportProject(projectName);
+      exportProgress.value = 0.0;
 
-      // Close progress dialog
-      if (progressContext != null &&
-          progressContext!.mounted &&
-          Navigator.of(progressContext!).canPop()) {
-        Navigator.pop(progressContext!);
-      }
+      await WidgetsBinding.instance.endOfFrame;
+      await Future<void>.delayed(Duration.zero);
+      await WidgetsBinding.instance.endOfFrame;
+      await Future<void>.delayed(const Duration(milliseconds: 32));
 
-      // Share file
+      final zipFile = await _exportService.exportProject(
+        projectName,
+        onProgress: (double p) => exportProgress.value = p,
+      );
+
+      closeProgress();
+
+      if (!_context.mounted) return;
       await SharePlus.instance.share(
         ShareParams(
           files: [XFile(zipFile.path)],
           subject: _trans.projectExport,
         ),
       );
-
-      _uiHelper.toast(_trans.projectExportSuccess, icon: AppIcon.projectExport);
     } catch (e) {
-      // Close progress dialog if it was open
-      if (progressContext != null &&
-          progressContext!.mounted &&
-          Navigator.of(progressContext!).canPop()) {
-        Navigator.pop(progressContext!);
-      }
-      if (progressContext != null && progressContext!.mounted) {
+      closeProgress();
+      debugPrint('[ProjectExport] Error during export: $e');
+      if (_context.mounted) {
         _uiHelper.alertDialog(
           AppIcon.exception,
           _trans.projectExportError,
           contentText: e.toString(),
-          parentContext: progressContext,
+          parentContext: _context,
           actions: [
             Builder(
               builder: (context) => TextButton(
@@ -162,6 +214,9 @@ class ProjectExportImportManager {
           ],
         );
       }
+    } finally {
+      closeProgress();
+      exportProgress.dispose();
     }
   }
 
@@ -188,6 +243,10 @@ class ProjectExportImportManager {
         );
         return;
       }
+
+      // Preview route just closed — yield so the progress dialog can paint (same pattern as track share).
+      await Future<void>.delayed(Duration.zero);
+      await WidgetsBinding.instance.endOfFrame;
 
       // 4. Perform import
       await _performImport(zipPath);
@@ -253,26 +312,43 @@ class ProjectExportImportManager {
       if (!_context.mounted) return [];
 
       // Show validation dialog
-      showDialog(
+      showDialog<void>(
         context: _context,
+        useRootNavigator: true,
         barrierDismissible: false,
-        builder: (context) {
+        barrierColor: Colors.black54,
+        builder: (BuildContext context) {
           validationContext = context;
+          final theme = Theme.of(context);
           return AlertDialog(
             content: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text(_trans.projectValidating),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    minHeight: 6,
+                    backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  _trans.projectValidating,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyLarge,
+                ),
               ],
             ),
           );
         },
       );
 
-      // Wait a moment for dialog to open
-      await Future.delayed(Duration(milliseconds: 100));
+      await WidgetsBinding.instance.endOfFrame;
+      await Future<void>.delayed(Duration.zero);
+      await WidgetsBinding.instance.endOfFrame;
+      await Future<void>.delayed(const Duration(milliseconds: 32));
 
       // Perform validation
       final validationErrors = await _importService.validateProject(zipPath);
@@ -333,58 +409,112 @@ class ProjectExportImportManager {
   /// Performs project import with progress dialog display
   Future<void> _performImport(String zipPath) async {
     BuildContext? progressContext;
+    final importProgress = ValueNotifier<double>(0.0);
+
+    void closeProgress() {
+      final c = progressContext;
+      progressContext = null;
+      if (c != null && c.mounted) {
+        try {
+          final nav = Navigator.of(c, rootNavigator: true);
+          if (nav.canPop()) nav.pop();
+        } catch (e) {
+          debugPrint('[ProjectImport] Could not close import dialog: $e');
+        }
+      }
+    }
 
     try {
       if (!_context.mounted) return;
 
-      // Show import dialog
-      showDialog(
+      showDialog<void>(
         context: _context,
+        useRootNavigator: true,
         barrierDismissible: false,
-        builder: (context) {
+        barrierColor: Colors.black54,
+        builder: (BuildContext context) {
           progressContext = context;
-          return AlertDialog(
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text(_trans.projectImporting),
-              ],
-            ),
+          return ValueListenableBuilder<double>(
+            valueListenable: importProgress,
+            builder: (BuildContext ctx, double value, _) {
+              final v = value.clamp(0.0, 1.0);
+              final pct = (v * 100).round().clamp(0, 100);
+              final theme = Theme.of(ctx);
+              final trackColor = theme.colorScheme.primary;
+              final trackBg = theme.colorScheme.surfaceContainerHighest;
+              return AlertDialog(
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SizedBox(
+                      height: 10,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            ColoredBox(color: trackBg),
+                            FractionallySizedBox(
+                              alignment: Alignment.centerLeft,
+                              widthFactor: v <= 0 ? 0.04 : v,
+                              child: ColoredBox(color: trackColor),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      '$pct%',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      _trans.projectImporting,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyLarge,
+                    ),
+                  ],
+                ),
+              );
+            },
           );
         },
       );
 
-      // Wait a moment for dialog to open
-      await Future.delayed(Duration(milliseconds: 100));
+      importProgress.value = 0.0;
 
-      // Perform import
-      final errors = await _importService.importProject(zipPath);
+      await WidgetsBinding.instance.endOfFrame;
+      await Future<void>.delayed(Duration.zero);
+      await WidgetsBinding.instance.endOfFrame;
+      await Future<void>.delayed(const Duration(milliseconds: 32));
 
-      // Close import dialog (check if still mounted)
-      if (progressContext != null && progressContext!.mounted) {
-        _closeDialog(progressContext, 'import');
-      }
+      final errors = await _importService.importProject(
+        zipPath,
+        onProgress: (double p) {
+          importProgress.value = p;
+        },
+      );
+
+      closeProgress();
 
       // Handle import results (use progressContext only if still mounted)
-      final contextForResult = (progressContext != null && progressContext!.mounted)
-          ? progressContext
-          : (_context.mounted ? _context : null);
+      final contextForResult = _context.mounted ? _context : null;
       if (contextForResult != null && contextForResult.mounted) {
         _handleImportResult(errors, contextForResult);
       }
     } catch (e) {
-      if (progressContext != null && progressContext!.mounted) {
-        _closeDialog(progressContext, 'import');
-      }
+      closeProgress();
       debugPrint('[ProjectImport] Error during import: $e');
-      final contextForError = (progressContext != null && progressContext!.mounted)
-          ? progressContext
-          : (_context.mounted ? _context : null);
+      final contextForError = _context.mounted ? _context : null;
       if (contextForError != null && contextForError.mounted) {
         _showImportError(e.toString(), contextForError);
       }
+    } finally {
+      closeProgress();
+      importProgress.dispose();
     }
   }
 
