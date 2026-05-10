@@ -81,7 +81,7 @@ jobs:
 
       - name: "🔐 Decode keystore"
         id: android_keystore
-        uses: timheuer/base64-to-file@v1.2
+        uses: timheuer/base64-to-file@v2
         with:
           fileName: tune-tangler-release-key.jks
           encodedString: ${{ secrets.KEYSTORE_BASE64 }}
@@ -214,7 +214,7 @@ jobs:
           echo "✅ Release body generated from template"
 
       - name: "🚀 Create GitHub Release"
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ needs.commit_tag.outputs.tag_name }}
           name: Release ${{ needs.commit_tag.outputs.tag_name }}
