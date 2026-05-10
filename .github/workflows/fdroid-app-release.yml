@@ -16,7 +16,7 @@ jobs:
     name: "STEP 1 — 🧪 Test"
     runs-on: ubuntu-latest
     steps:
-      - name: "🔧 Checkout"
+      - name: "🔧 Checkout code"
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
@@ -37,6 +37,10 @@ jobs:
       commit_sha: ${{ steps.ct.outputs.commit_sha }}
       tag_name: ${{ steps.ct.outputs.tag_name }}
     steps:
+      - name: "🔧 Checkout code"
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - name: "📝 Apply base+build to pubspec"
         id: suffix
         uses: ./.github/actions/pubspec-set-build-suffix
@@ -60,6 +64,10 @@ jobs:
       GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
       GITLAB_FORK_PROJECT_ID: ${{ vars.GITLAB_FORK_PROJECT_ID }}
     steps:
+      - name: "🔧 Checkout code"
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - name: "🦊 Publish fdroiddata MR"
         uses: ./.github/actions/fdroid-metadata-mr
         with:

@@ -42,7 +42,7 @@ jobs:
     name: "📦 Pubspec auto-patch (main)"
     runs-on: ubuntu-latest
     steps:
-      - name: "🔧 Checkout"
+      - name: "🔧 Checkout code"
         uses: actions/checkout@v6
         with:
           fetch-depth: 0

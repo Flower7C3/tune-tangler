@@ -46,7 +46,7 @@ jobs:
     name: "🧪 Test"
     runs-on: ubuntu-latest
     steps:
-      - name: "🔧 Checkout"
+      - name: "🔧 Checkout code"
         uses: actions/checkout@v6
         with:
           fetch-depth: 1

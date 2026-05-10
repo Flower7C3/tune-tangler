@@ -19,7 +19,7 @@ jobs:
     name: "STEP 1 — 🧪 Test"
     runs-on: ubuntu-latest
     steps:
-      - name: "🔧 Checkout"
+      - name: "🔧 Checkout code"
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
@@ -39,7 +39,7 @@ jobs:
       computed_version: ${{ steps.suffix.outputs.computed_version }}
       tag_name: ${{ steps.suffix.outputs.tag_name }}
     steps:
-      - name: "🔧 Checkout"
+      - name: "🔧 Checkout code"
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
@@ -146,7 +146,7 @@ jobs:
       tag_name: ${{ steps.ct.outputs.tag_name }}
       commit_sha: ${{ steps.ct.outputs.commit_sha }}
     steps:
-      - name: "🔧 Checkout"
+      - name: "🔧 Checkout code"
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
