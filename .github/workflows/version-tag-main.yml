@@ -26,6 +26,7 @@ on:
       - 'missing_translations.txt'
       - 'tools/**'
       - 'Makefile'
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
