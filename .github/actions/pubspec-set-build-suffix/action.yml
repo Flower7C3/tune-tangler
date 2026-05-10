@@ -1,15 +1,15 @@
 name: 'Pubspec: apply +build suffix'
-description: 'Read MAJOR.MINOR.PATCH from pubspec (strip any +suffix), set version to base+run_number, upload pubspec as an artifact. Does not commit or tag.'
+description: 'Read MAJOR.MINOR.PATCH from pubspec (strip any +suffix), set version to base+run_number; optionally upload pubspec as an artifact. Does not commit or tag.'
 inputs:
   run_number:
     description: 'Integer after + (e.g. github.run_number)'
     required: true
   github_token:
-    description: 'Optional token for checkout (use github.token with contents:write when a follow-up step commits/pushes in the same job without artifacts).'
+    description: 'Checkout token (use github.token with contents:write for same-job push without artifacts).'
     required: false
     default: ''
   with_artifacts:
-    description: 'If true, upload modified pubspec as an artifact. If false, only change the working tree (same job as pubspec-commit-tag-push with with_artifacts false).'
+    description: 'Upload modified pubspec as artifact; false = working tree only.'
     required: false
     default: 'true'
 

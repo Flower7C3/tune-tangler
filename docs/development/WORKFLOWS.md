@@ -39,7 +39,7 @@
 
 **Versioning policy:** merges to **`main`** run [`pubspec-auto-patch-main.yml`](../../.github/workflows/pubspec-auto-patch-main.yml) to **increment PATCH** in `pubspec` when that push **does not** edit the `version:` line (manual **minor/major** or release commits skip). **Release workflows** (F-Droid and legacy) only set **`{current base}+GITHUB_RUN_NUMBER`** in `pubspec` (no semver bump in CI); then they **commit** (if needed) and **tag** `v…+…`.
 
-**Recommended F-Droid release:** **`workflow_dispatch`** in [`fdroid-app-release.yml`](../../.github/workflows/fdroid-app-release.yml): **tests → set `pubspec` to `base+GITHUB_RUN_NUMBER` (artifact) → commit + tag + push → GitLab MR** (same run; no extra PAT).
+**Recommended F-Droid release:** **`workflow_dispatch`** in [`fdroid-app-release.yml`](../../.github/workflows/fdroid-app-release.yml): **tests → same job: set `pubspec` to `base+GITHUB_RUN_NUMBER` (working tree, no artifact) → commit + tag + push → GitLab MR** (same run; no extra PAT).
 
 **Legacy** uses the same **build-suffix** idea as F-Droid (no PATCH bump in the release workflow): **tests → `pubspec` `base+GITHUB_RUN_NUMBER` artifact → build signed APK/AAB → commit + push + changelog + tag → GitHub Release** — see [`release-legacy-github-play-apk-aab.yml`](../../.github/workflows/release-legacy-github-play-apk-aab.yml).
 
@@ -55,7 +55,7 @@
 
 **Triggers:** `pull_request` to `main`, `push` to `main`, `workflow_dispatch`.
 
-**What it does:** analyzer + tests via composite [`checkout-flutter-test`](../../.github/actions/checkout-flutter-test/action.yml) (shallow checkout by default).
+**What it does:** analyzer + tests via composite [`checkout-flutter-test`](../../.github/actions/checkout-flutter-test/action.yml): the workflow runs **`actions/checkout`** first (required for local composites), then the composite with **`skip_checkout: 'true'`** so checkout is not repeated; shallow **`fetch-depth: 1`** on `test.yml`, full history (`0`) on F-Droid test job.
 
 **What it does not do:** no APK/AAB build, no GitHub Release, no `pubspec` bump, no F-Droid MR.
 
@@ -77,10 +77,9 @@
 
 **Steps (jobs):**
 
-1. **STEP 1 — Test** — [`checkout-flutter-test`](../../.github/actions/checkout-flutter-test/action.yml) with `fetch_depth: 0`.
-2. **STEP 2 — Set pubspec +build** — [`pubspec-set-build-suffix`](../../.github/actions/pubspec-set-build-suffix/action.yml): write **`pubspec.yaml`** to **`base+GITHUB_RUN_NUMBER`**, upload artifact `modified-pubspec` (no git writes).
-3. **STEP 3 — Commit, tag, and push** — [`pubspec-commit-tag-push`](../../.github/actions/pubspec-commit-tag-push/action.yml): checkout, download artifact, commit if `pubspec` changed, push branch, **commits since last tag** (composite output `commits` + optional **job summary**), annotated tag `v…+…`, push tag. **STEP 4** only needs **`commit_sha`** and **`tag_name`** from this job (see [`fdroid-metadata-mr`](../../.github/actions/fdroid-metadata-mr/action.yml)); the commit list is for humans in the Actions UI, not the GitLab MR.
-4. **STEP 4 — F-Droid MR** — [`fdroid-metadata-mr`](../../.github/actions/fdroid-metadata-mr/action.yml) with that commit SHA and tag ref. With a tag like `v1.2.3+42`, F-Droid **`versionCode`** is the integer after **`+`** (here: `GITHUB_RUN_NUMBER`).
+1. **STEP 1 — Test** — `actions/checkout` (**`fetch-depth: 0`**) then [`checkout-flutter-test`](../../.github/actions/checkout-flutter-test/action.yml) with **`skip_checkout: 'true'`**.
+2. **STEP 2 — Version, commit & tag** — same job: [`pubspec-set-build-suffix`](../../.github/actions/pubspec-set-build-suffix/action.yml) with **`with_artifacts: false`** (edit `pubspec` in the workspace only), then [`pubspec-commit-tag-push`](../../.github/actions/pubspec-commit-tag-push/action.yml) with **`with_artifacts: false`**, **`with_description: false`**: commit if needed, push branch, **commits since last tag** (output `commits` + optional **job summary**), annotated tag `v…+…`, push tag. **STEP 3** needs **`commit_sha`** and **`tag_name`** from this job (see [`fdroid-metadata-mr`](../../.github/actions/fdroid-metadata-mr/action.yml)); the commit list is for humans in the Actions UI, not the GitLab MR.
+3. **STEP 3 — F-Droid MR** — [`fdroid-metadata-mr`](../../.github/actions/fdroid-metadata-mr/action.yml) with that commit SHA and tag ref. With a tag like `v1.2.3+42`, F-Droid **`versionCode`** is the integer after **`+`** (here: `GITHUB_RUN_NUMBER`).
 
 Requires on the MR job **`GITLAB_TOKEN`** (**job `env`** from a repository **secret**) and **`GITLAB_FORK_PROJECT_ID`** (**job `env`** from a repository **variable**). Optional **`FDROID_FLUTTER_VERSION`** variable (see [docs/release/FDROID.md](../release/FDROID.md)).
 
@@ -90,7 +89,7 @@ Requires on the MR job **`GITLAB_TOKEN`** (**job `env`** from a repository **sec
 
 **Trigger:** **`workflow_dispatch` only.**
 
-**What it does (jobs):** **STEP 1** — tests (`checkout-flutter-test`). **STEP 2** — set `pubspec` to **`base+GITHUB_RUN_NUMBER`** only (same as F-Droid; no PATCH bump); upload `modified-pubspec` artifact. **STEP 3** — download `pubspec`, Flutter + Java + keystore, APKs + AAB, verify, upload binaries. **STEP 4** — same **`commit_tag`** as F-Droid: [`pubspec-commit-tag-push`](../../.github/actions/pubspec-commit-tag-push/action.yml) with **`commit_suffix: ' [skip ci]'`**, **`pull_before_push`**, **`tag_push_force_with_lease`** on tag push (other inputs default). **STEP 5** — GitHub Release with renamed artifacts and template body.
+**What it does (jobs):** **STEP 1** — tests (`checkout-flutter-test` with **`skip_checkout`** after checkout). **STEP 2** — set `pubspec` to **`base+GITHUB_RUN_NUMBER`** only (same as F-Droid; no PATCH bump); upload `modified-pubspec` artifact. **STEP 3** — download `pubspec`, Flutter + Java + keystore, APKs + AAB, verify, upload binaries. **STEP 4** — [`pubspec-commit-tag-push`](../../.github/actions/pubspec-commit-tag-push/action.yml) with artifact (**default `with_artifacts`**) and **`with_description: 'true'`**, **`commit_suffix: ' [skip ci]'`**, **`pull_before_push`**, **`tag_push_force_with_lease`** on tag push. **STEP 5** — GitHub Release with renamed artifacts and template body.
 
 Requires keystore **secrets** (see below).
 
@@ -100,7 +99,7 @@ Requires keystore **secrets** (see below).
 
 **Triggers:** `push` of semver tags (`v1.2.3`, `1.2.3`, optional `+build`) and **`workflow_dispatch`** (optional `version_override` input — MR only, no `pubspec`/tag changes).
 
-**What it does:** same GitLab MR logic as STEP 3 above, using `github.sha` / `github.ref_name` from that event.
+**What it does:** same GitLab MR logic as **STEP 3** in [F-Droid release (`fdroid-app-release.yml`)](#fdroid-app-release), using `github.sha` / `github.ref_name` from that event.
 
 ## 📱 How to use <a name="how-to-use"></a>
 
@@ -111,7 +110,7 @@ Runs automatically when paths are not fully ignored.
 ### 2. F-Droid: one-click release <a name="fdroid-one-click"></a>
 
 1. **Actions** → **F-Droid release (test, tag, MR)** → **Run workflow** (no inputs).
-2. Wait for STEP 1–4; use the MR link in the STEP 4 log if needed.
+2. Wait for STEP 1–3; use the MR link in the STEP 3 log if needed.
 
 ### 3. Legacy: APK/AAB + GitHub Release <a name="manual-release-only-option"></a>
 
@@ -143,20 +142,20 @@ Reusable steps under [`.github/actions/`](../../.github/actions/):
 
 | Action | Role |
 |--------|------|
-| [`checkout-flutter-test`](../../.github/actions/checkout-flutter-test/action.yml) | `actions/checkout` (optional `fetch_depth`) → [`setup-flutter`](../../.github/actions/setup-flutter/action.yml) with `skip_checkout` → [`flutter-test`](../../.github/actions/flutter-test/action.yml). Used by **`test.yml`**, **F-Droid** and **legacy** test jobs. |
+| [`checkout-flutter-test`](../../.github/actions/checkout-flutter-test/action.yml) | Optional `actions/checkout` (unless **`skip_checkout: 'true'`** — then the workflow must checkout first) → [`setup-flutter`](../../.github/actions/setup-flutter/action.yml) with `skip_checkout` → [`flutter-test`](../../.github/actions/flutter-test/action.yml). Used by **`test.yml`**, **F-Droid** and **legacy** test jobs. |
 | [`setup-flutter`](../../.github/actions/setup-flutter/action.yml) | Flutter SDK, `pub get`, optional `gen-l10n`, cache. Set **`skip_checkout: 'true'`** when the job already ran `actions/checkout` (e.g. legacy **build** job). **`fetch_depth`** applies only when checkout runs inside this action. |
 | [`flutter-test`](../../.github/actions/flutter-test/action.yml) | `flutter analyze` + `flutter test` (+ optional `integration_test`). |
-| [`pubspec-set-build-suffix`](../../.github/actions/pubspec-set-build-suffix/action.yml) | Checkout, set `pubspec` to **`base+run_number`**, upload **`modified-pubspec`** artifact. Outputs `base`, `computed_version`, `tag_name`. |
-| [`pubspec-commit-tag-push`](../../.github/actions/pubspec-commit-tag-push/action.yml) | Checkout with token, download **`modified-pubspec`**, optional **`git_user_*`** (default **`github-actions[bot]`**), **`commit_suffix`**, **`pull_before_push`**, commit if changed, push branch, **`collect_commits_since_last_tag`** → **`commits`**, record outputs, optional annotated tag (**`tag_push_force_with_lease`** for legacy), optional **`write_job_summary`** (`GITHUB_STEP_SUMMARY`). |
+| [`pubspec-set-build-suffix`](../../.github/actions/pubspec-set-build-suffix/action.yml) | Checkout, set `pubspec` to **`base+run_number`**; optional upload **`modified-pubspec`** (**`with_artifacts`**). Optional **`github_token`** when skipping artifacts in the same job as a push. Outputs `base`, `computed_version`, `tag_name`. |
+| [`pubspec-commit-tag-push`](../../.github/actions/pubspec-commit-tag-push/action.yml) | With **`with_artifacts: true`**: checkout with token, download **`modified-pubspec`**. With **`false`**: reuse workspace from **`pubspec-set-build-suffix`**. Then optional **`git_user_*`**, **`commit_suffix`**, **`pull_before_push`**, commit if changed, push branch, **`collect_commits_since_last_tag`** → **`commits`**, record outputs, optional annotated tag (**`with_description`**, **`tag_push_force_with_lease`** for legacy), optional **`write_job_summary`**. |
 | [`git-config-github-actions-bot`](../../.github/actions/git-config-github-actions-bot/action.yml) | `git config` for **`github-actions[bot]`** (optional `user_name` / `user_email`). Used by **F-Droid tag** composite, **`pubspec-auto-patch-main.yml`**, and anywhere else commits run in CI. |
 | [`fdroid-metadata-mr`](../../.github/actions/fdroid-metadata-mr/action.yml) | GitLab MR to fdroiddata (see [FDROID.md](../release/FDROID.md)). |
-| [`setup-java`](../../.github/actions/setup-java/action.yml) | JDK for Android builds (**legacy** only). |
+| [`setup-java`](../../.github/actions/setup-java/action.yml) | JDK for Android builds (**legacy** only). Set **`skip_checkout: 'true'`** when the job already ran `actions/checkout` (otherwise this action checks out the repo by default). |
 
 ## 📦 Artifacts <a name="artifacts"></a>
 
 - **`test.yml`:** no release binaries (tests only).
 - **`pubspec-auto-patch-main.yml`:** PATCH bump commit on `main` only (no binaries).
-- **`fdroid-app-release.yml`:** no binaries; `pubspec` + tag + GitLab MR only.
+- **`fdroid-app-release.yml`:** no binaries; `pubspec` + tag + GitLab MR only (no `pubspec` artifact in Actions — same-job workspace between composites).
 - **Legacy workflow:** APKs, `.aab`, updated `pubspec` (retention per YAML).
 - **`fdroid-tag-publish.yml` + `fdroid-metadata-mr` action:** no app binaries in Actions (metadata MR only). GitLab secrets must be set as **job `env`** on the MR job (see [FDROID.md](../release/FDROID.md)).
 

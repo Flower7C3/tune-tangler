@@ -1,8 +1,12 @@
 name: 'Checkout + Flutter + tests'
-description: 'Checkout (configurable depth), setup Flutter/deps, run analyzer and tests.'
+description: 'Checkout (unless skip_checkout), Flutter, deps, analyzer and tests.'
 inputs:
+  skip_checkout:
+    description: 'Skip actions/checkout (caller must checkout first).'
+    required: false
+    default: 'false'
   fetch_depth:
-    description: 'actions/checkout fetch-depth (0 = full history; 1 = shallow)'
+    description: 'fetch-depth when checkout runs (ignored if skip_checkout).'
     required: false
     default: '1'
   flutter_version:
@@ -26,6 +30,7 @@ runs:
   using: composite
   steps:
     - name: Checkout
+      if: ${{ inputs.skip_checkout != 'true' }}
       uses: actions/checkout@v6
       with:
         fetch-depth: ${{ fromJSON(inputs.fetch_depth) }}

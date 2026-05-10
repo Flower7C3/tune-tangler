@@ -1,15 +1,11 @@
-name: 'Pubspec from artifact: commit, push branch, optional annotated tag'
-description: 'Checkout with token, download pubspec artifact, optionally commit, push branch, collect commits since the previous tag, optional annotated tag and push it, optional Actions job summary.'
+name: 'Pubspec: commit, push branch, optional annotated tag'
+description: 'Commit pubspec, push branch, optional tag; with_artifacts controls checkout+artifact vs same-job workspace.'
 inputs:
   github_token:
     description: 'Token with contents:write'
     required: true
   with_artifacts:
-    description: >-
-      If true, checkout then download modified-pubspec artifact (cross-job flow).
-      If false, skip checkout and download — reuse repo from the same job (e.g. run right after
-      pubspec-set-build-suffix with with_artifacts false); requires prior checkout with a token
-      that can push (e.g. github.token).
+    description: 'true: checkout + download modified-pubspec. false: reuse workspace (same job as suffix step).'
     required: false
     default: 'true'
   artifact_name:
@@ -37,7 +33,7 @@ inputs:
     required: false
     default: 'true'
   with_description:
-    description: 'If true, annotated tag message is "Release <tag>". If false, use an empty tag message (minimal annotation).'
+    description: 'Annotated tag message: "Release <tag>" vs empty.'
     required: false
     default: 'true'
   collect_commits_since_last_tag:

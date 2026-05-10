@@ -1,4 +1,4 @@
-# F-Droid: tests → set pubspec base+GITHUB_RUN_NUMBER → commit + tag + push → MR (semver base from main; patch bumps via pubspec-auto-patch-main).
+# F-Droid: test → pubspec +run → commit/tag → fdroiddata MR
 name: F-Droid release (test, tag, MR)
 
 on:
@@ -13,22 +13,23 @@ permissions:
 
 jobs:
   test:
-    name: "STEP 1 — Test"
+    name: "STEP 1 — 🧪 Test"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - name: "🔧 Checkout"
+        uses: actions/checkout@v6
         with:
-          fetch-depth: 1
-      - name: Checkout, Flutter, and tests
+          fetch-depth: 0
+      - name: "🧪 Flutter setup and tests"
         uses: ./.github/actions/checkout-flutter-test
         with:
-          fetch_depth: '0'
+          skip_checkout: 'true'
           flutter_channel: stable
           with_dependencies: 'true'
           with_localization: 'false'
 
   set_build_version_commit_tag:
-    name: "STEP 2 — Set pubspec +build, commit, tag and push"
+    name: "STEP 2 — 📝 Version, commit & tag"
     needs: [test]
     runs-on: ubuntu-latest
     outputs:
@@ -36,14 +37,14 @@ jobs:
       commit_sha: ${{ steps.ct.outputs.commit_sha }}
       tag_name: ${{ steps.ct.outputs.tag_name }}
     steps:
-      - name: Apply base+build to pubspec
+      - name: "📝 Apply base+build to pubspec"
         id: suffix
         uses: ./.github/actions/pubspec-set-build-suffix
         with:
           run_number: ${{ github.run_number }}
           with_artifacts: "false"
           github_token: ${{ github.token }}
-      - name: Commit, push branch, annotated tag
+      - name: "🏷️ Commit, push branch, annotated tag"
         id: ct
         uses: ./.github/actions/pubspec-commit-tag-push
         with:
@@ -52,14 +53,14 @@ jobs:
           github_token: ${{ github.token }}
 
   fdroid_metadata:
-    name: "STEP 3 — F-Droid MR (fdroiddata)"
+    name: "STEP 3 — 🦊 F-Droid MR (fdroiddata)"
     needs: [set_build_version_commit_tag]
     runs-on: ubuntu-latest
     env:
       GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
       GITLAB_FORK_PROJECT_ID: ${{ vars.GITLAB_FORK_PROJECT_ID }}
     steps:
-      - name: Publish fdroiddata MR
+      - name: "🦊 Publish fdroiddata MR"
         uses: ./.github/actions/fdroid-metadata-mr
         with:
           commit_sha: ${{ needs.set_build_version_commit_tag.outputs.commit_sha }}

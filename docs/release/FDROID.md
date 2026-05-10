@@ -13,7 +13,7 @@ F-Droid builds and signs binaries. This app repo holds **metadata templates** (`
 
 **Workflow:** [`.github/workflows/fdroid-app-release.yml`](../../.github/workflows/fdroid-app-release.yml) — **F-Droid release (test, tag, MR)**.
 
-**Steps:** tests → set **`pubspec`** to **`base+GITHUB_RUN_NUMBER`** (artifact) → [`pubspec-commit-tag-push`](../../.github/actions/pubspec-commit-tag-push/action.yml) (commit + tag + push + changelog in **job summary**) → **MR to fdroiddata**.
+**Steps:** tests → set **`pubspec`** to **`base+GITHUB_RUN_NUMBER`** in the job workspace (no Actions artifact) → [`pubspec-commit-tag-push`](../../.github/actions/pubspec-commit-tag-push/action.yml) (commit + tag + push + changelog in **job summary**) → **MR to fdroiddata**.
 
 **Trigger:** **`workflow_dispatch` only** (no inputs — semantic version comes from current `pubspec` on the branch).
 
@@ -92,7 +92,7 @@ The changelog list is **not** sent to GitLab or fdroiddata; the MR uses the tagg
 
 - [`test.yml`](../../.github/workflows/test.yml) — CI on PR and `push` to `main`.
 - [`pubspec-auto-patch-main.yml`](../../.github/workflows/pubspec-auto-patch-main.yml) — auto PATCH on `main` when `version:` is unchanged in that push.
-- [`fdroid-app-release.yml`](../../.github/workflows/fdroid-app-release.yml) — tests → `pubspec` `base+GITHUB_RUN_NUMBER` (artifact) → commit + tag + fdroiddata MR (recommended).
+- [`fdroid-app-release.yml`](../../.github/workflows/fdroid-app-release.yml) — tests → `pubspec` `base+GITHUB_RUN_NUMBER` (same job, no `pubspec` artifact) → commit + tag + fdroiddata MR (recommended).
 - [`release-legacy-github-play-apk-aab.yml`](../../.github/workflows/release-legacy-github-play-apk-aab.yml) — same `+build` `pubspec` policy, then signed APK/AAB + GitHub Release.
 
 Details: [../development/WORKFLOWS.md](../development/WORKFLOWS.md).

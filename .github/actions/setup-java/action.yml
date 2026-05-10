@@ -1,6 +1,10 @@
 name: 'Setup Java'
-description: 'Setup Java environment for TuneTangler'
+description: 'JDK for Android; optional checkout (skip_checkout if repo already checked out).'
 inputs:
+  skip_checkout:
+    description: 'Skip actions/checkout (caller already checked out).'
+    required: false
+    default: 'false'
   java_version:
     description: 'Java version to use'
     required: false
@@ -14,8 +18,9 @@ runs:
   using: 'composite'
   steps:
     - name: "🔧 Checkout code"
+      if: ${{ inputs.skip_checkout != 'true' }}
       uses: actions/checkout@v6
-        
+
     - name: "🔧 Setup Java"
       uses: actions/setup-java@v5
       with:

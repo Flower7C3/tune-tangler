@@ -2,46 +2,40 @@ name: Test Workflow
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths-ignore: &paths-ignore
-      # IDE and editor configuration
       - '.idea/**'
       - '.vscode/**'
       - '*.iml'
-      # CI/CD and git tooling
       - '.githooks/**'
       - '.github/**'
-      # Linter and metadata config
       - '.markdownlint.json'
       - '.metadata'
       - 'analysis_options.yaml'
       - 'devtools_options.yaml'
       - 'l10n.yaml'
-      # Documentation and assets not affecting the build
       - 'docs/**'
-      - 'assets/png/**'          # source logos for icon generation
-      - 'assets/svg/**'          # source SVGs for icon generation
-      - 'fastlane/metadata/**'   # Play / F-Droid listing text & screenshots
+      - 'assets/png/**'
+      - 'assets/svg/**'
+      - 'fastlane/metadata/**'
       - 'LICENSE'
       - 'README.md'
+      - 'AGENTS.md'
       - 'missing_translations.txt'
-      # Platforms not built in this workflow (Android only)
       - 'ios/**'
       - 'linux/**'
       - 'macos/**'
       - 'windows/**'
-      # Dev tooling
       - 'tools/**'
       - 'Makefile'
   push:
-    branches: [ main ]
+    branches: [main]
     paths-ignore: *paths-ignore
   workflow_dispatch:
 
 permissions:
   contents: read
 
-# Version variables for dependencies
 env:
   FLUTTER_CHANNEL: 'stable'
   JAVA_VERSION: '17'
@@ -49,16 +43,17 @@ env:
 
 jobs:
   test:
-    name: Test
+    name: "🧪 Test"
     runs-on: ubuntu-latest
     steps:
-      # Required before any ./.github/actions/* uses — the runner loads action.yml from the workspace.
-      - uses: actions/checkout@v6
+      - name: "🔧 Checkout"
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
-      - name: "🧪 Checkout, Flutter, tests"
+      - name: "🧪 Flutter setup and tests"
         uses: ./.github/actions/checkout-flutter-test
         with:
+          skip_checkout: 'true'
           flutter_channel: ${{ env.FLUTTER_CHANNEL }}
           with_dependencies: 'true'
           with_localization: 'false'
