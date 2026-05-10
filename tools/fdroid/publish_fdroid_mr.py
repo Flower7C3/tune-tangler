@@ -9,6 +9,7 @@ Required env:
 Optional:
   GITLAB_API_URL            — default https://gitlab.com/api/v4
   GITLAB_UPSTREAM_PATH      — default fdroid/fdroiddata (resolved to numeric ID)
+  FDROID_METADATA_SOURCE_BRANCH — default robot/tune-tangler (stable branch; reuse open MR)
   FDROID_METADATA_PATH      — default metadata/pro.kwiatek.tune_tangler.yml
   GITHUB_SHA                — commit the tag points to (CI sets automatically)
   GITHUB_REF_NAME           — tag name (CI sets automatically)
@@ -30,7 +31,6 @@ import re
 import urllib.error
 import urllib.parse
 import urllib.request
-import uuid
 from pathlib import Path
 from typing import Any
 
@@ -81,18 +81,19 @@ _BUILD_KEY_ORDER = (
 )
 
 
-def _normalize_subdir_value(sd: Any) -> str:
-    """F-Droid metadata.json: subdir must match ^\\./ (root is './'); bare '.' fails check-jsonschema."""
+def _normalize_subdir_value(sd: Any) -> str | None:
+    """schemas/metadata.json #/definitions/path: NOT (const '.' OR pattern '^\\./'). Omit key for repo root."""
     if sd is None:
-        return "./"
+        return None
     if not isinstance(sd, str):
-        return "./"
+        return None
     s = sd.strip()
-    if s in (".", ""):
-        return "./"
+    if s in (".", "", "./"):
+        return None
     if s.startswith("./"):
-        return s
-    return "./" + s.lstrip("/")
+        inner = s[2:].lstrip("/")
+        return inner or None
+    return s.lstrip("/") or None
 
 
 def _canonical_build(build: dict[str, Any]) -> dict[str, Any]:
@@ -103,7 +104,11 @@ def _canonical_build(build: dict[str, Any]) -> dict[str, Any]:
     for key, val in build.items():
         if key not in ordered:
             ordered[key] = val
-    ordered["subdir"] = _normalize_subdir_value(ordered.get("subdir"))
+    sub = _normalize_subdir_value(ordered.get("subdir"))
+    if sub is None:
+        ordered.pop("subdir", None)
+    else:
+        ordered["subdir"] = sub
     # Debian Trixie fdroid buildserver: no openjdk-17-jdk-headless; use 21.
     sudo = ordered.get("sudo")
     if isinstance(sudo, list):
@@ -206,9 +211,6 @@ def _postprocess_rewritemeta_yaml(text: str) -> str:
     body = "\n".join(_insert_rewritemeta_blank_lines(lines)) + "\n"
     body = re.sub(r"(?m)^AutoUpdateMode: ['\"]None['\"]\s*$", "AutoUpdateMode: None", body)
     body = re.sub(r"(?m)^UpdateCheckMode: ['\"]None['\"]\s*$", "UpdateCheckMode: None", body)
-    # Bare `subdir: .` is rejected by check-jsonschema (YAML/JSON edge cases); require `./`.
-    body = re.sub(r"(?m)^(\s+)subdir:\s*['\"]\.['\"]\s*$", r"\1subdir: ./", body)
-    body = re.sub(r"(?m)^(\s+)subdir:\s*\.\s*$", r"\1subdir: ./", body)
     return body
 
 
@@ -270,6 +272,56 @@ def _get_file(api_base: str, token: str, project_id: int, file_path: str, ref: s
         raise SystemExit(f"GitLab HTTP {e.code} GET {url}: {raw}") from e
     assert isinstance(data, dict)
     return base64.b64decode(data["content"]).decode("utf-8")
+
+
+def _branch_exists(api_base: str, token: str, project_id: int, branch: str) -> bool:
+    enc = urllib.parse.quote(branch, safe="")
+    url = f"{api_base}/projects/{project_id}/repository/branches/{enc}"
+    req = urllib.request.Request(url, headers={"PRIVATE-TOKEN": token})
+    try:
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            return resp.status == 200
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            return False
+        raw = e.read().decode("utf-8", errors="replace")
+        raise SystemExit(f"GitLab HTTP {e.code} GET {url}: {raw}") from e
+
+
+def _find_open_upstream_mr(
+    api_base: str, token: str, fork_id: int, upstream_id: int, source_branch: str
+) -> dict[str, Any] | None:
+    q = urllib.parse.urlencode(
+        {"state": "opened", "source_branch": source_branch, "target_branch": "master"}
+    )
+    _, data = _gitlab_request("GET", api_base, token, f"projects/{fork_id}/merge_requests?{q}")
+    if not isinstance(data, list):
+        return None
+    for mr in data:
+        if not isinstance(mr, dict):
+            continue
+        if mr.get("target_project_id") != upstream_id:
+            continue
+        if mr.get("source_branch") != source_branch:
+            continue
+        if mr.get("state") != "opened":
+            continue
+        return mr
+    return None
+
+
+def _dedupe_builds_keep_last(builds: list[Any]) -> list[Any]:
+    """One dict per versionCode; later entries in the list win."""
+    order: list[int] = []
+    by_vc: dict[int, dict[str, Any]] = {}
+    for b in builds:
+        if not isinstance(b, dict) or "versionCode" not in b:
+            continue
+        vc = int(b["versionCode"])
+        if vc not in by_vc:
+            order.append(vc)
+        by_vc[vc] = b
+    return [by_vc[vc] for vc in order]
 
 
 def _read_pubspec_version(root: Path) -> str:
@@ -407,26 +459,41 @@ def main() -> None:
         builds = doc.get("Builds")
         if not isinstance(builds, list):
             raise SystemExit("Remote metadata has no Builds list")
-        codes = {int(b["versionCode"]) for b in builds if isinstance(b, dict) and "versionCode" in b}
-        if vcode in codes:
-            print(f"Build with versionCode={vcode} already exists on master; nothing to do.", flush=True)
-            return
+        for b in builds:
+            if isinstance(b, dict) and int(b.get("versionCode", -1)) == vcode:
+                if str(b.get("commit", "")).lower() == commit_sha.lower():
+                    print(
+                        f"fork master already lists versionCode={vcode} for commit {commit_sha[:8]}; nothing to do.",
+                        flush=True,
+                    )
+                    return
+                break
+
+        builds = [
+            b
+            for b in builds
+            if not (isinstance(b, dict) and int(b.get("versionCode", -1)) == vcode)
+        ]
         builds.append(new_build)
         doc["Builds"] = builds
+
+    if isinstance(doc.get("Builds"), list):
+        doc["Builds"] = _dedupe_builds_keep_last(doc["Builds"])
 
     _strip_listing_fields_for_fastlane(doc)
     _normalize_metadata(doc, vname, vcode)
 
     body_yaml = _dump_metadata(doc)
-    safe_tag = re.sub(r"[^0-9A-Za-z._-]+", "-", f"{vname}-{commit_sha[:8]}")
-    branch = f"robot/tune-tangler-{safe_tag}-{uuid.uuid4().hex[:8]}"
 
     upstream_id = _project_id_for_path(api_base, token, upstream_path)
 
-    commit_payload = {
+    branch = (os.environ.get("FDROID_METADATA_SOURCE_BRANCH") or "robot/tune-tangler").strip()
+    if not branch:
+        branch = "robot/tune-tangler"
+
+    commit_payload: dict[str, Any] = {
         "branch": branch,
         "commit_message": f"Tune Tangler: {vname} ({vcode}) @ {commit_sha[:8]}",
-        "start_branch": "master",
         "actions": [
             {
                 "action": "update" if existing_yaml is not None else "create",
@@ -435,9 +502,16 @@ def main() -> None:
             }
         ],
     }
+    if not _branch_exists(api_base, token, fork_id, branch):
+        commit_payload["start_branch"] = "master"
 
     _gitlab_request("POST", api_base, token, f"projects/{fork_id}/repository/commits", commit_payload)
-    print(f"Created branch {branch} with metadata update.", flush=True)
+    print(f"Pushed metadata commit to branch {branch}.", flush=True)
+
+    existing_mr = _find_open_upstream_mr(api_base, token, fork_id, upstream_id, branch)
+    if existing_mr is not None:
+        print(f"Open MR already exists: {existing_mr.get('web_url')}", flush=True)
+        return
 
     mr_payload = {
         "source_branch": branch,

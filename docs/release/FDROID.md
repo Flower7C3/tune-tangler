@@ -51,7 +51,7 @@ The changelog list is **not** sent to GitLab or fdroiddata; the MR uses the tagg
 4. **Organization secrets / variables:** an org owner must grant **Repository access** to this repository for each item.
 5. Re-run the workflow after saving (no code change required beyond this repo’s workflow expecting a variable for the fork ID).
 
-**fdroiddata CI (schema / lint):** Merge requests are validated against [`schemas/metadata.json`](https://gitlab.com/fdroid/fdroiddata/-/blob/master/schemas/metadata.json) (`fdroid lint`, `fdroid rewritemeta`, etc.). `publish_fdroid_mr.py` normalizes YAML to that schema (integer `ArchivePolicy`, quoted `AutoUpdateMode` / `UpdateCheckMode`, `CurrentVersion` / `CurrentVersionCode`, **Categories** from the official enum — this repo uses **`Multimedia`**). **`UpdateCheckMode: 'None'`** avoids the GitLab `checkupdates` job failing on Flutter (F-Droid cannot infer versions from tags the way it does for plain AndroidManifest apps); new versions are still proposed via this repo’s metadata MRs. After changing templates or the script, open a **new** metadata MR or push an amended commit to your fdroiddata fork branch.
+**fdroiddata CI (schema / lint):** Merge requests are validated against [`schemas/metadata.json`](https://gitlab.com/fdroid/fdroiddata/-/blob/master/schemas/metadata.json) (`fdroid lint`, `fdroid rewritemeta`, etc.). `publish_fdroid_mr.py` normalizes YAML to that schema (integer `ArchivePolicy`, **Categories** enum — this repo uses **`Multimedia`**), `CurrentVersion` / `CurrentVersionCode`, quoted modes where needed, **no `subdir` key** for repo root (`path` forbids `.` and values matching `^\./`). **`UpdateCheckMode: 'None'`** avoids the GitLab `checkupdates` job failing on Flutter (F-Droid cannot infer versions from tags the way it does for plain AndroidManifest apps); new versions are still proposed via this repo’s metadata MRs. After changing templates or the script, push again from CI or amend the branch on your fdroiddata fork.
 
 **`metadata_static.yml` vs Fastlane**
 
@@ -66,9 +66,13 @@ The changelog list is **not** sent to GitLab or fdroiddata; the MR uses the tagg
 1. Verifies required Fastlane **`en-US`** files.
 2. Reads `versionName` / `versionCode` from the **tag name** (preferred) or from `pubspec.yaml` (`MAJOR.MINOR.PATCH` or `...+build`).
 3. Fetches `metadata/pro.kwiatek.tune_tangler.yml` from your fork on `master` (if missing — creates from `metadata_static.yml` + first Build).
-4. **Appends** a new entry to `Builds` (no duplicate `versionCode`).
+4. Merges the new **Build** into `Builds` (replaces same `versionCode` if present; dedupes by `versionCode`; skips if fork `master` already has that `versionCode` **and** `commit`).
 5. **Removes** `Name`, `AutoName`, `Summary`, `Description` from YAML (so Fastlane in source wins).
-6. Creates branch `robot/tune-tangler-…`, commits YAML, **MR to `fdroid/fdroiddata`** (`target_project_id` resolved from path `fdroid/fdroiddata`).
+6. Commits the full YAML to a **stable** branch on the fork (default **`robot/tune-tangler`**). If that branch does not exist yet, it is created from `master`. If an **open** MR from that branch to **`fdroid/fdroiddata`** `master` already exists, the script **does not** open another MR — it only pushes a new commit so the existing MR updates.
+
+Optional env: **`FDROID_METADATA_SOURCE_BRANCH`** (override the default `robot/tune-tangler`).
+
+**Cleaning up older spam on your fork:** close redundant open MRs to upstream and delete obsolete `robot/tune-tangler-*` branches if you no longer need them; keep one MR on `robot/tune-tangler` going forward.
 
 **Keep your fork in sync** with upstream (`fdroid/fdroiddata`) or the MR may conflict. First time: add a minimal metadata file in the fork manually or let the workflow create it from `metadata_static.yml` — F-Droid **buildbot** must still accept the recipe (`build` / `init`); if rejected, fix `tools/fdroid/build_template.yml` and push the tag again (or fix the MR manually).
 

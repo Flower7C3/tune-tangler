@@ -3,7 +3,6 @@
 versionName: __VERSION_NAME__
 versionCode: __VERSION_CODE__
 commit: __COMMIT_SHA__
-subdir: ./
 sudo:
   - apt-get update || apt-get update
   - apt-get install -y openjdk-21-jdk-headless curl ca-certificates
