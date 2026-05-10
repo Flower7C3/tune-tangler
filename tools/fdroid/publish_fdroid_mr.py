@@ -37,6 +37,105 @@ from typing import Any
 import yaml
 
 
+class _QuotedScalar:
+    """YAML scalar serialized quoted (AutoUpdateMode must not become a YAML null)."""
+
+    __slots__ = ("value",)
+
+    def __init__(self, value: str) -> None:
+        self.value = value
+
+
+class FdroidMetadataDumper(yaml.SafeDumper):
+    """Indent list items under mapping keys (fdroid lint / rewritemeta style)."""
+
+    def increase_indent(self, flow: bool = False, indentless: bool = False):
+        return super().increase_indent(flow, indentless=False)
+
+
+def _represent_quoted_scalar(dumper: yaml.SafeDumper, data: _QuotedScalar):
+    return dumper.represent_scalar("tag:yaml.org,2002:str", data.value, style="'")
+
+
+FdroidMetadataDumper.add_representer(_QuotedScalar, _represent_quoted_scalar)
+
+
+_BUILD_KEY_ORDER = (
+    "versionName",
+    "versionCode",
+    "commit",
+    "subdir",
+    "sudo",
+    "init",
+    "output",
+    "prebuild",
+    "build",
+)
+
+
+def _canonical_build(build: dict[str, Any]) -> dict[str, Any]:
+    ordered: dict[str, Any] = {}
+    for key in _BUILD_KEY_ORDER:
+        if key in build:
+            ordered[key] = build[key]
+    for key, val in build.items():
+        if key not in ordered:
+            ordered[key] = val
+    return ordered
+
+
+def _coerce_archive_policy(doc: dict[str, Any]) -> None:
+    ap = doc.get("ArchivePolicy")
+    if ap is None:
+        return
+    if isinstance(ap, int):
+        doc["ArchivePolicy"] = ap
+        return
+    if isinstance(ap, str):
+        s = ap.strip()
+        m = re.match(r"^(\d+)\s+versions?$", s, re.IGNORECASE)
+        if m:
+            doc["ArchivePolicy"] = int(m.group(1))
+            return
+        if s.isdigit():
+            doc["ArchivePolicy"] = int(s)
+            return
+
+
+def _fix_categories(doc: dict[str, Any]) -> None:
+    cats = doc.get("Categories")
+    if not isinstance(cats, list):
+        return
+    out: list[str] = []
+    for c in cats:
+        if c == "Music & Audio":
+            out.append("Multimedia")
+        else:
+            out.append(str(c))
+    doc["Categories"] = out
+
+
+def _normalize_metadata(doc: dict[str, Any], version_name: str, version_code: int) -> None:
+    """Match fdroiddata schemas/metadata.json and fdroid lint."""
+    _fix_categories(doc)
+    _coerce_archive_policy(doc)
+    doc["AutoUpdateMode"] = _QuotedScalar("None")
+    um = doc.get("UpdateCheckMode")
+    if um is None:
+        doc["UpdateCheckMode"] = _QuotedScalar("None")
+    elif isinstance(um, str):
+        doc["UpdateCheckMode"] = _QuotedScalar(um)
+    else:
+        doc["UpdateCheckMode"] = _QuotedScalar(str(um))
+    doc["CurrentVersion"] = version_name
+    doc["CurrentVersionCode"] = int(version_code)
+    builds = doc.get("Builds")
+    if isinstance(builds, list):
+        for i, b in enumerate(builds):
+            if isinstance(b, dict):
+                builds[i] = _canonical_build(b)
+
+
 def _env(name: str, default: str | None = None) -> str:
     v = os.environ.get(name, default)
     if v is None or v == "":
@@ -146,6 +245,7 @@ def _substitute_build_template(
 def _dump_metadata(doc: dict[str, Any]) -> str:
     return yaml.dump(
         doc,
+        Dumper=FdroidMetadataDumper,
         allow_unicode=True,
         default_flow_style=False,
         sort_keys=False,
@@ -238,6 +338,7 @@ def main() -> None:
         doc["Builds"] = builds
 
     _strip_listing_fields_for_fastlane(doc)
+    _normalize_metadata(doc, vname, vcode)
 
     body_yaml = _dump_metadata(doc)
     safe_tag = re.sub(r"[^0-9A-Za-z._-]+", "-", f"{vname}-{commit_sha[:8]}")

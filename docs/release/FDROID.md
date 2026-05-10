@@ -51,6 +51,8 @@ The changelog list is **not** sent to GitLab or fdroiddata; the MR uses the tagg
 4. **Organization secrets / variables:** an org owner must grant **Repository access** to this repository for each item.
 5. Re-run the workflow after saving (no code change required beyond this repo’s workflow expecting a variable for the fork ID).
 
+**fdroiddata CI (schema / lint):** Merge requests are validated against [`schemas/metadata.json`](https://gitlab.com/fdroid/fdroiddata/-/blob/master/schemas/metadata.json) (`fdroid lint`, `fdroid rewritemeta`, etc.). `publish_fdroid_mr.py` normalizes YAML to that schema (integer `ArchivePolicy`, quoted `AutoUpdateMode` / `UpdateCheckMode`, `CurrentVersion` / `CurrentVersionCode`, **Categories** from the official enum — this repo uses **`Multimedia`**). **`UpdateCheckMode: 'None'`** avoids the GitLab `checkupdates` job failing on Flutter (F-Droid cannot infer versions from tags the way it does for plain AndroidManifest apps); new versions are still proposed via this repo’s metadata MRs. After changing templates or the script, open a **new** metadata MR or push an amended commit to your fdroiddata fork branch.
+
 **`metadata_static.yml` vs Fastlane**
 
 - **Fastlane** (`fastlane/metadata/android/…`) — **source of listing text and graphics for F-Droid**: `title.txt`, `short_description.txt`, `full_description.txt`, `images/…` directories (**`en-US`** with short and full description is required). F-Droid copies these from the **tagged app commit** into the repo index (see [All About Descriptions…](https://f-droid.org/en/docs/All_About_Descriptions_Graphics_and_Screenshots/)).

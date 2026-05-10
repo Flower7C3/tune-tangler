@@ -1,4 +1,5 @@
-# Jeden wpis pod Builds — placeholdery __*__ zamieniane przez publish_fdroid_mr.py
+# One Build entry — __*__ placeholders replaced by publish_fdroid_mr.py
+# Key order matches fdroid rewritemeta / fdroid lint expectations.
 versionName: __VERSION_NAME__
 versionCode: __VERSION_CODE__
 commit: __COMMIT_SHA__
@@ -14,10 +15,10 @@ init:
   - flutter config --no-analytics
   - flutter precache --android
   - flutter --version
+output: build/app/outputs/flutter-apk/app-release-unsigned.apk
 prebuild:
   - export PATH="$HOME/flutter/bin:$PATH"
   - flutter pub get
 build:
   - export PATH="$HOME/flutter/bin:$PATH"
   - flutter build apk --release
-output: build/app/outputs/flutter-apk/app-release-unsigned.apk
