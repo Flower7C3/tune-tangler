@@ -24,10 +24,6 @@ on:
       - 'README.md'
       - 'AGENTS.md'
       - 'missing_translations.txt'
-      - 'ios/**'
-      - 'linux/**'
-      - 'macos/**'
-      - 'windows/**'
       - 'tools/**'
       - 'Makefile'
   workflow_dispatch:
