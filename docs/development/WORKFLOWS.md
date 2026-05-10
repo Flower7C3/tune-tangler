@@ -8,8 +8,8 @@
 - [🚀 Workflows](#workflows)
   - [1. Tests (PR to `main`)](#tests-pr-main)
   - [1b. Version & tag (`main` push)](#version-tag-main)
-  - [2. F-Droid release (MR)](#fdroid-app-release)
-  - [3. Legacy — GitHub APK/AAB + Release](#legacy-github-release)
+  - [2. F-Droid release (MR)](#release-fdroid-app)
+  - [3. Legacy — GitHub APK/AAB + Release](#release-apk-aab-google-play)
 - [📱 How to use](#how-to-use)
   - [1. CI on PR to `main`](#ci-on-main)
   - [2. F-Droid: one-click release](#fdroid-one-click)
@@ -34,13 +34,13 @@
 
 ## 🔄 Overview <a name="overview"></a>
 
-**Default path:** F-Droid builds and signs binaries upstream. **CI:** [`test.yml`](../../.github/workflows/test.yml) runs analyzer + tests on **pull requests to `main`** and on **`workflow_dispatch`**. **[`version-tag-main.yml`](../../.github/workflows/version-tag-main.yml)** runs on **`push` to `main`** (when paths are not ignored): **same tests**, then **`pubspec`** + tag (see below).
+**Default path:** F-Droid builds and signs binaries upstream. **CI:** [`test.yml`](../../.github/workflows/test.yml) runs analyzer + tests on **pull requests to `main`** and on **`workflow_dispatch`**. **[`version-tag-main.yml`](../../.github/workflows/version-tag-main.yml)** runs on **`push` to `main`** (when paths are not ignored): it **reuses** that same workflow via **`workflow_call`**, then **`pubspec`** + tag (see below).
 
-**Versioning policy:** on eligible **`push` to `main`**, [`version-tag-main.yml`](../../.github/workflows/version-tag-main.yml) runs **tests**, then sets **`pubspec`** to **`MAJOR.MINOR.PATCH+GITHUB_RUN_NUMBER`**: **PATCH** increments when that push **does not** edit the **`version:`** line; if **`version:`** did change, only **`base+GITHUB_RUN_NUMBER`** is applied (no extra PATCH bump). Bot commits use **`[skip ci]`** so this workflow **skips** the whole job on the next push (no duplicate test/tag loop).
+**Versioning policy:** on eligible **`push` to `main`**, [`version-tag-main.yml`](../../.github/workflows/version-tag-main.yml) runs **tests**, then sets **`pubspec`** to **`MAJOR.MINOR.PATCH+GITHUB_RUN_NUMBER`**: **PATCH** increments when that push **does not** edit the **`version:`** line; if **`version:`** did change, only **`base+GITHUB_RUN_NUMBER`** is applied (no extra PATCH bump). Bot commits use **`[skip ci]`** so **`version-tag-main`** **skips** both **`test`** and **`version_tag`** on the next push (no duplicate test/tag loop).
 
-**F-Droid:** [`fdroid-app-release.yml`](../../.github/workflows/fdroid-app-release.yml) — **`workflow_dispatch`** with required **`target_ref`**: checkout that ref → **GitLab MR** only (no `pubspec` changes, commits, or tags in CI).
+**F-Droid:** [`release-fdroid-app.yml`](../../.github/workflows/release-fdroid-app.yml) — **`workflow_dispatch`** with required **`target_ref`**: checkout that ref → **GitLab MR** only (no `pubspec` changes, commits, or tags in CI).
 
-**Legacy** ([`release-legacy-github-play-apk-aab.yml`](../../.github/workflows/release-legacy-github-play-apk-aab.yml)): **`workflow_dispatch`** with required **`tag`** (must already exist). **Build** signed APK/AAB at that tag (Flutter uses `pubspec` from the tree — no CI version step), **verify** the bundle, **GitHub Release** with artifact names derived from the **tag** (leading `v` stripped for filenames). Fails if a release for that tag **already exists**. **No** separate test job in this workflow.
+**Legacy** ([`release-apk-aab-google-play.yml`](../../.github/workflows/release-apk-aab-google-play.yml)): **`workflow_dispatch`** with required **`tag`** (must already exist). **Build** signed APK/AAB at that tag (Flutter uses `pubspec` from the tree — no CI version step), **verify** the bundle, **GitHub Release** with artifact names derived from the **tag** (leading `v` stripped for filenames). Fails if a release for that tag **already exists**. **No** separate test job in this workflow.
 
 **Triggers:** [`test.yml`](../../.github/workflows/test.yml) (`pull_request` YAML anchor) and [`version-tag-main.yml`](../../.github/workflows/version-tag-main.yml) (`push` to `main`) use the **same `paths-ignore` list** — keep them in sync when editing.
 
@@ -50,9 +50,9 @@
 
 **File:** [`test.yml`](../../.github/workflows/test.yml)
 
-**Triggers:** `pull_request` to `main`, `workflow_dispatch`.
+**Triggers:** `pull_request` to `main`, `workflow_dispatch`, and **`workflow_call`** (from [`version-tag-main.yml`](#version-tag-main)).
 
-**What it does:** analyzer + tests via composite [`checkout-flutter-test`](../../.github/actions/checkout-flutter-test/action.yml): the workflow runs **`actions/checkout`** first (required for local composites), then the composite with **`skip_checkout: 'true'`** so checkout is not repeated; shallow **`fetch-depth: 1`**. **[`version-tag-main.yml`](#version-tag-main)** uses the same test job shape, then a second job with **`fetch-depth: 0`** for history-aware **`pubspec`** + tag.
+**What it does:** **`actions/checkout`** (**`fetch-depth: 1`**) → [`setup-flutter`](../../.github/actions/setup-flutter/action.yml) → [`flutter-test`](../../.github/actions/flutter-test/action.yml) (analyzer + unit tests). **[`version-tag-main.yml`](#version-tag-main)** invokes this file as a reusable workflow for the test stage, then runs a second job with **`fetch-depth: 0`** for history-aware **`pubspec`** + tag.
 
 **What it does not do:** no APK/AAB build, no GitHub Release, no `pubspec` bump, no F-Droid MR.
 
@@ -62,13 +62,13 @@
 
 **Triggers:** `push` to **`main`**, with the same **`paths-ignore`** as [`test.yml`](../../.github/workflows/test.yml) (documented in both files — **keep in sync**).
 
-**What it does:** **Job `test`** — **`checkout`** (**`fetch-depth: 1`**) → same **`checkout-flutter-test`** composite as **`test.yml`**. **Job `version_tag`** (**`needs: test`**) — **`checkout`** (**`fetch-depth: 0`**, token for push and `git diff`) → bump **`pubspec`** logic → [`pubspec-commit-tag-push`](../../.github/actions/pubspec-commit-tag-push/action.yml) when the version changed (**`[skip ci]`**, no changelog collection) — push **`main`**, annotated tag **`v…+…`**. Both jobs honor **`[skip ci]`** on the pushed commit (whole workflow effectively skips).
+**What it does:** **Job `test`** — calls **[`test.yml`](../../.github/workflows/test.yml)** as a reusable workflow (**`uses: ./.github/workflows/test.yml`**) so PR and **`main`** share the same steps. **Job `version_tag`** (**`needs: test`**) — **`checkout`** (**`fetch-depth: 0`**, token for push and `git diff`) → bump **`pubspec`** logic → [`pubspec-commit-tag-push`](../../.github/actions/pubspec-commit-tag-push/action.yml) when the version changed (**`[skip ci]`**, no changelog collection) — push **`main`**, annotated tag **`v…+…`**. Both jobs honor **`[skip ci]`** on the pushed commit (the **`test`** call and **`version_tag`** are skipped).
 
-**What it does not do:** no F-Droid MR (use [`fdroid-app-release.yml`](#fdroid-app-release)).
+**What it does not do:** no F-Droid MR (use [`release-fdroid-app.yml`](#release-fdroid-app)).
 
-### 2. F-Droid release (MR) <a name="fdroid-app-release"></a>
+### 2. F-Droid release (MR) <a name="release-fdroid-app"></a>
 
-**File:** [`fdroid-app-release.yml`](../../.github/workflows/fdroid-app-release.yml)
+**File:** [`release-fdroid-app.yml`](../../.github/workflows/release-fdroid-app.yml)
 
 **Trigger:** **`workflow_dispatch`** — required **`target_ref`** (tag or branch).
 
@@ -76,9 +76,9 @@
 
 Requires **`GITLAB_TOKEN`** (**job `env`** from a repository **secret**) and **`GITLAB_FORK_PROJECT_ID`** (**job `env`** from a repository **variable**). Optional **`FDROID_FLUTTER_VERSION`** and **`FDROID_METADATA_SOURCE_BRANCH`** variables (see [docs/release/FDROID.md](../release/FDROID.md)) — both must be referenced in the workflow (`vars.…`) to reach the script.
 
-### 3. Legacy — GitHub APK/AAB + Release <a name="legacy-github-release"></a>
+### 3. Legacy — GitHub APK/AAB + Release <a name="release-apk-aab-google-play"></a>
 
-**File:** [`release-legacy-github-play-apk-aab.yml`](../../.github/workflows/release-legacy-github-play-apk-aab.yml)
+**File:** [`release-apk-aab-google-play.yml`](../../.github/workflows/release-apk-aab-google-play.yml)
 
 **Trigger:** **`workflow_dispatch`** — required input **`tag`** (an **existing** tag, e.g. `v1.7.0+12`).
 
@@ -108,7 +108,7 @@ Use **Actions** → pick the workflow → **Run workflow** when available.
 
 ### 🚫 Skip workflows <a name="skip-workflow"></a>
 
-Add **`[skip ci]`** to bot commit messages from **`version-tag-main`**: the **whole** `version_tag` job is skipped on the following **`push` to `main`** so you do not re-test / re-tag in a loop. **`test.yml`** does not run on **`push` to `main`**.
+Add **`[skip ci]`** to bot commit messages from **`version-tag-main`**: the **`test`** reusable call and **`version_tag`** job are skipped on the following **`push` to `main`** so you do not re-test / re-tag in a loop. **`test.yml`** does not run on **`push` to `main`** by itself (only via **`version-tag-main`** when paths match).
 
 ## ⚙️ Requirements <a name="requirements"></a>
 
@@ -126,20 +126,19 @@ Reusable steps under [`.github/actions/`](../../.github/actions/):
 
 | Action | Role |
 |--------|------|
-| [`checkout-flutter-test`](../../.github/actions/checkout-flutter-test/action.yml) | Optional `actions/checkout` (unless **`skip_checkout: 'true'`** — then the workflow must checkout first) → [`setup-flutter`](../../.github/actions/setup-flutter/action.yml) with `skip_checkout` → [`flutter-test`](../../.github/actions/flutter-test/action.yml). Used by **`test.yml`** and **`version-tag-main.yml`**. |
-| [`setup-flutter`](../../.github/actions/setup-flutter/action.yml) | Flutter SDK, `pub get`, optional `gen-l10n`, cache. Set **`skip_checkout: 'true'`** when the job already ran `actions/checkout` (e.g. legacy **build** job). **`fetch_depth`** applies only when checkout runs inside this action. |
+| [`setup-flutter`](../../.github/actions/setup-flutter/action.yml) | Flutter SDK (`subosito/flutter-action`), `flutter pub get`, optional `flutter gen-l10n`, dependency cache. Workflows run **`actions/checkout`** before this action when the tree must be present (e.g. **`test.yml`**, legacy **build**). |
 | [`flutter-test`](../../.github/actions/flutter-test/action.yml) | `flutter analyze` + `flutter test` (+ optional `integration_test`). |
 | [`pubspec-commit-tag-push`](../../.github/actions/pubspec-commit-tag-push/action.yml) | Caller must **`checkout`** the repo first (with a token if you need push). Expects **`pubspec.yaml`** already modified in the workspace → optional **`git_user_*`**, **`commit_suffix`**, **`pull_before_push`**, commit, push branch, **`collect_commits_since_last_tag`** → **`commits`**, record outputs, optional annotated tag (**`with_description`**, **`tag_push_force_with_lease`**), optional **`write_job_summary`**. Used by **`version-tag-main`**. |
 | [`git-config-github-actions-bot`](../../.github/actions/git-config-github-actions-bot/action.yml) | `git config` for **`github-actions[bot]`** (optional `user_name` / `user_email`). Used at the start of **`version-tag-main.yml`** and inside **`pubspec-commit-tag-push`**. |
 | [`fdroid-metadata-mr`](../../.github/actions/fdroid-metadata-mr/action.yml) | GitLab MR to fdroiddata; pass **`metadata_source_branch`** from **`vars.FDROID_METADATA_SOURCE_BRANCH`** when set (see [FDROID.md](../release/FDROID.md)). |
-| [`setup-java`](../../.github/actions/setup-java/action.yml) | JDK for Android builds (**legacy** only). Set **`skip_checkout: 'true'`** when the job already ran `actions/checkout` (otherwise this action checks out the repo by default). |
+| [`setup-java`](../../.github/actions/setup-java/action.yml) | JDK for Android builds (**legacy** only). Run **`actions/checkout`** in the job before this step (this action does not checkout the repo). |
 
 ## 📦 Artifacts <a name="artifacts"></a>
 
 - **`test.yml`:** no release binaries (tests only).
-- **`version-tag-main.yml`:** job **`test`** then job **`version_tag`** (`pubspec` + tag on `main`; no binaries).
-- **`fdroid-app-release.yml`:** GitLab MR only (no binaries in Actions).
-- **Legacy workflow:** APKs, `.aab`, GitHub Release for an **existing** tag (no `pubspec` artifact).
+- **`version-tag-main.yml`:** reusable **`test`** job (same as **`test.yml`**) then job **`version_tag`** (`pubspec` + tag on `main`; no binaries).
+- **`release-fdroid-app.yml`:** GitLab MR only (no binaries in Actions).
+- **`release-apk-aab-google-play.yml`:** APKs, `.aab`, GitHub Release for an **existing** tag (no `pubspec` artifact in CI).
 
 ## 🔐 Keystore (legacy workflow only) <a name="keystore-configuration"></a>
 

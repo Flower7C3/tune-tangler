@@ -13,7 +13,7 @@
   [92ee486](https://github.com/Flower7C3/tune-tangler/commit/92ee486)
 - i18n (ARB refresh + generated code, localized errors):  
   [129a95e](https://github.com/Flower7C3/tune-tangler/commit/129a95e)
-- CI on `main`: tests + F-Droid checklist (APK/AAB disabled in default workflow; legacy: `release-legacy-github-play-apk-aab.yml`); historical auto bump + tag:  
+- CI on `main`: tests + F-Droid checklist (APK/AAB disabled in default workflow; legacy: `release-apk-aab-google-play.yml`); historical auto bump + tag:  
   [3d8139d](https://github.com/Flower7C3/tune-tangler/commit/3d8139d)
 - Help screen: expandable sections with icons and descriptions (`Drawer` → Help)  
   (see UI commits above)

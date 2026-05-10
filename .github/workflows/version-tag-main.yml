@@ -1,5 +1,5 @@
-# On push to main: analyzer + tests, then set pubspec to MAJOR.MINOR.PATCH+GITHUB_RUN_NUMBER (PATCH bump when version: unchanged in that push), commit + tag.
-# `env` and paths-ignore: keep in sync with test.yml (PR workflow).
+# On push to main: run `test.yml` (reusable), then set pubspec to MAJOR.MINOR.PATCH+GITHUB_RUN_NUMBER (PATCH bump when version: unchanged in that push), commit + tag.
+# `paths-ignore`: keep in sync with `test.yml` (PR workflow).
 name: Version & tag (main)
 
 on:
@@ -38,27 +38,11 @@ concurrency:
 permissions:
   contents: write
 
-env:
-  FLUTTER_CHANNEL: 'stable'
-
 jobs:
   test:
     name: "🧪 Test"
     if: ${{ github.event.head_commit == null || !contains(github.event.head_commit.message, '[skip ci]') }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - name: "🔧 Checkout code"
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 1
-      - name: "🧪 Flutter setup and tests"
-        uses: ./.github/actions/checkout-flutter-test
-        with:
-          skip_checkout: 'true'
-          flutter_channel: ${{ env.FLUTTER_CHANNEL }}
-          with_dependencies: 'true'
-          with_localization: 'false'
+    uses: ./.github/workflows/test.yml
 
   version_tag:
     name: "📦 Version & tag"

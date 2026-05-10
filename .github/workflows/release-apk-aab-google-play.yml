@@ -37,7 +37,6 @@ jobs:
       - name: "📲 Setup Flutter"
         uses: ./.github/actions/setup-flutter
         with:
-          skip_checkout: 'true'
           flutter_channel: ${{ env.FLUTTER_CHANNEL }}
           with_dependencies: true
           with_localization: true
@@ -45,7 +44,6 @@ jobs:
       - name: "☕️ Setup Java"
         uses: ./.github/actions/setup-java
         with:
-          skip_checkout: 'true'
           java_version: ${{ env.JAVA_VERSION }}
           java_distribution: ${{ env.JAVA_DISTRIBUTION }}
 
