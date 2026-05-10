@@ -81,7 +81,7 @@
 2. **STEP 2 — Version, commit & tag** — same job: [`pubspec-set-build-suffix`](../../.github/actions/pubspec-set-build-suffix/action.yml) with **`with_artifacts: false`** (edit `pubspec` in the workspace only), then [`pubspec-commit-tag-push`](../../.github/actions/pubspec-commit-tag-push/action.yml) with **`with_artifacts: false`**, **`with_description: false`**: commit if needed, push branch, **commits since last tag** (output `commits` + optional **job summary**), annotated tag `v…+…`, push tag. **STEP 3** needs **`commit_sha`** and **`tag_name`** from this job (see [`fdroid-metadata-mr`](../../.github/actions/fdroid-metadata-mr/action.yml)); the commit list is for humans in the Actions UI, not the GitLab MR.
 3. **STEP 3 — F-Droid MR** — [`fdroid-metadata-mr`](../../.github/actions/fdroid-metadata-mr/action.yml) with that commit SHA and tag ref. With a tag like `v1.2.3+42`, F-Droid **`versionCode`** is the integer after **`+`** (here: `GITHUB_RUN_NUMBER`).
 
-Requires on the MR job **`GITLAB_TOKEN`** (**job `env`** from a repository **secret**) and **`GITLAB_FORK_PROJECT_ID`** (**job `env`** from a repository **variable**). Optional **`FDROID_FLUTTER_VERSION`** variable (see [docs/release/FDROID.md](../release/FDROID.md)).
+Requires on the MR job **`GITLAB_TOKEN`** (**job `env`** from a repository **secret**) and **`GITLAB_FORK_PROJECT_ID`** (**job `env`** from a repository **variable**). Optional **`FDROID_FLUTTER_VERSION`** and **`FDROID_METADATA_SOURCE_BRANCH`** variables (see [docs/release/FDROID.md](../release/FDROID.md)) — both must be referenced in the workflow (`vars.…`) to reach the script.
 
 ### 3. Legacy — GitHub APK/AAB + Release <a name="legacy-github-release"></a>
 
@@ -148,7 +148,7 @@ Reusable steps under [`.github/actions/`](../../.github/actions/):
 | [`pubspec-set-build-suffix`](../../.github/actions/pubspec-set-build-suffix/action.yml) | Checkout, set `pubspec` to **`base+run_number`**; optional upload **`modified-pubspec`** (**`with_artifacts`**). Optional **`github_token`** when skipping artifacts in the same job as a push. Outputs `base`, `computed_version`, `tag_name`. |
 | [`pubspec-commit-tag-push`](../../.github/actions/pubspec-commit-tag-push/action.yml) | With **`with_artifacts: true`**: checkout with token, download **`modified-pubspec`**. With **`false`**: reuse workspace from **`pubspec-set-build-suffix`**. Then optional **`git_user_*`**, **`commit_suffix`**, **`pull_before_push`**, commit if changed, push branch, **`collect_commits_since_last_tag`** → **`commits`**, record outputs, optional annotated tag (**`with_description`**, **`tag_push_force_with_lease`** for legacy), optional **`write_job_summary`**. |
 | [`git-config-github-actions-bot`](../../.github/actions/git-config-github-actions-bot/action.yml) | `git config` for **`github-actions[bot]`** (optional `user_name` / `user_email`). Used by **F-Droid tag** composite, **`pubspec-auto-patch-main.yml`**, and anywhere else commits run in CI. |
-| [`fdroid-metadata-mr`](../../.github/actions/fdroid-metadata-mr/action.yml) | GitLab MR to fdroiddata (see [FDROID.md](../release/FDROID.md)). |
+| [`fdroid-metadata-mr`](../../.github/actions/fdroid-metadata-mr/action.yml) | GitLab MR to fdroiddata; pass **`metadata_source_branch`** from **`vars.FDROID_METADATA_SOURCE_BRANCH`** when set (see [FDROID.md](../release/FDROID.md)). |
 | [`setup-java`](../../.github/actions/setup-java/action.yml) | JDK for Android builds (**legacy** only). Set **`skip_checkout: 'true'`** when the job already ran `actions/checkout` (otherwise this action checks out the repo by default). |
 
 ## 📦 Artifacts <a name="artifacts"></a>
@@ -173,7 +173,7 @@ The **legacy** workflow decodes `KEYSTORE_BASE64` and writes `android/key.proper
 
 ### Variables (non-sensitive) <a name="variables-non-sensitive"></a>
 
-**F-Droid MR:** **`GITLAB_FORK_PROJECT_ID`** (required — numeric GitLab project ID of your fdroiddata fork). Optional **`FDROID_FLUTTER_VERSION`** — see [FDROID.md](../release/FDROID.md).
+**F-Droid MR:** **`GITLAB_FORK_PROJECT_ID`** (required — numeric GitLab project ID of your fdroiddata fork). Optional **`FDROID_FLUTTER_VERSION`**, **`FDROID_METADATA_SOURCE_BRANCH`** — see [FDROID.md](../release/FDROID.md); use `vars.*` in the workflow so they reach the publish step.
 
 ## 🚨 Troubleshooting <a name="troubleshooting"></a>
 

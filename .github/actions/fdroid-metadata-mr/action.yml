@@ -16,6 +16,12 @@ inputs:
     description: 'Pin Flutter for the F-Droid recipe (e.g. from vars.FDROID_FLUTTER_VERSION in the caller workflow). Empty = latest stable from Flutter JSON.'
     required: false
     default: ''
+  metadata_source_branch:
+    description: >-
+      GitLab fork branch for metadata commits and MR source (publish_fdroid_mr.py). Pass
+      vars.FDROID_METADATA_SOURCE_BRANCH from the workflow; empty = robot/tune-tangler.
+    required: false
+    default: ''
 
 # GitLab: set on the *caller job* as env, e.g.
 #   env:
@@ -82,4 +88,5 @@ runs:
         GITHUB_SHA: ${{ inputs.commit_sha }}
         GITHUB_REF_NAME: ${{ inputs.ref_name }}
         FDROID_FLUTTER_VERSION: ${{ env.FDROID_FLUTTER_VERSION }}
+        FDROID_METADATA_SOURCE_BRANCH: ${{ inputs.metadata_source_branch }}
       run: python3 tools/fdroid/publish_fdroid_mr.py

@@ -39,3 +39,4 @@ jobs:
           ref_name: ${{ github.ref_name }}
           version_override: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version_override || '' }}
           flutter_version: ${{ vars.FDROID_FLUTTER_VERSION }}
+          metadata_source_branch: ${{ vars.FDROID_METADATA_SOURCE_BRANCH }}

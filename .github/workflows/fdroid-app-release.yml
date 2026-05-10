@@ -75,3 +75,4 @@ jobs:
           ref_name: ${{ needs.set_build_version_commit_tag.outputs.tag_name }}
           version_override: ''
           flutter_version: ${{ vars.FDROID_FLUTTER_VERSION }}
+          metadata_source_branch: ${{ vars.FDROID_METADATA_SOURCE_BRANCH }}

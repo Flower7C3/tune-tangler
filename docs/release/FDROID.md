@@ -42,6 +42,7 @@ The changelog list is **not** sent to GitLab or fdroiddata; the MR uses the tagg
 |----------|---------|
 | `GITLAB_FORK_PROJECT_ID` | **Numeric** project ID of your fdroiddata fork (GitLab → *fork* → Settings → General → Project ID). Not a secret; use a **variable**, not a secret. |
 | `FDROID_FLUTTER_VERSION` | *(Optional.)* Flutter version used in the `init` recipe (e.g. `3.29.0`). If empty, the workflow uses the **latest stable** from Flutter’s JSON (same idea as local `setup-flutter`). |
+| `FDROID_METADATA_SOURCE_BRANCH` | *(Optional.)* Branch **on your GitLab fork** where metadata commits and the MR `source_branch` live (default in script: `robot/tune-tangler`). Must be passed from the workflow as `vars.FDROID_METADATA_SOURCE_BRANCH` — defining the variable in GitHub alone is not enough until the workflow references it (see [`fdroid-metadata-mr`](../../.github/actions/fdroid-metadata-mr/action.yml)). |
 
 ### Token or fork ID missing in CI
 
