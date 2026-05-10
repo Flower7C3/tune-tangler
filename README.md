@@ -35,7 +35,7 @@
 - **[🎨 Icon generation](docs/development/ICON_GENERATION.md)** — PNGs from SVG via config
 - **[🎣 Git hooks](docs/development/GIT_HOOKS.md)** — optional `pre-commit`: `flutter analyze`
 - **[🚀 Workflows](docs/development/WORKFLOWS.md)** — GitHub Actions and CI/CD
-- **[📦 F-Droid](docs/release/FDROID.md)** — automatic fdroiddata MR after a tag (GitLab) + templates in `tools/fdroid/`
+- **[📦 F-Droid](docs/release/FDROID.md)** — one Actions workflow for fdroiddata MR (GitLab) + templates in `tools/fdroid/`
 
 ### 📋 Project <a name="project"></a>
 

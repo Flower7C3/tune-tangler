@@ -1,78 +1,44 @@
-# F-Droid: test → pubspec +run → commit/tag → fdroiddata MR
-name: F-Droid release (test, tag, MR)
+# F-Droid: open/update fdroiddata MR for an existing tag or branch (no pubspec edits, commits, or tags here — those come from main / your git client).
+name: F-Droid release (MR)
 
 on:
   workflow_dispatch:
+    inputs:
+      target_ref:
+        description: 'Existing tag or branch (e.g. v1.7.0+12) — commit must match what you want in the MR'
+        required: true
+        type: string
 
 concurrency:
-  group: fdroid-app-release
-  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.event.inputs.target_ref }}
+  cancel-in-progress: true
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  test:
-    name: "STEP 1 — 🧪 Test"
-    runs-on: ubuntu-latest
-    steps:
-      - name: "🔧 Checkout code"
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-      - name: "🧪 Flutter setup and tests"
-        uses: ./.github/actions/checkout-flutter-test
-        with:
-          skip_checkout: 'true'
-          flutter_channel: stable
-          with_dependencies: 'true'
-          with_localization: 'false'
-
-  set_build_version_commit_tag:
-    name: "STEP 2 — 📝 Version, commit & tag"
-    needs: [test]
-    runs-on: ubuntu-latest
-    outputs:
-      computed_version: ${{ steps.ct.outputs.computed_version }}
-      commit_sha: ${{ steps.ct.outputs.commit_sha }}
-      tag_name: ${{ steps.ct.outputs.tag_name }}
-    steps:
-      - name: "🔧 Checkout code"
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-      - name: "📝 Apply base+build to pubspec"
-        id: suffix
-        uses: ./.github/actions/pubspec-set-build-suffix
-        with:
-          run_number: ${{ github.run_number }}
-          with_artifacts: "false"
-          github_token: ${{ github.token }}
-      - name: "🏷️ Commit, push branch, annotated tag"
-        id: ct
-        uses: ./.github/actions/pubspec-commit-tag-push
-        with:
-          with_artifacts: "false"
-          with_description: "false"
-          github_token: ${{ github.token }}
-
   fdroid_metadata:
-    name: "STEP 3 — 🦊 F-Droid MR (fdroiddata)"
-    needs: [set_build_version_commit_tag]
+    name: "🦊 F-Droid MR (fdroiddata)"
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
       GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
       GITLAB_FORK_PROJECT_ID: ${{ vars.GITLAB_FORK_PROJECT_ID }}
     steps:
-      - name: "🔧 Checkout code"
+      - name: "🔧 Checkout ref"
         uses: actions/checkout@v6
         with:
+          ref: ${{ github.event.inputs.target_ref }}
           fetch-depth: 0
+      - name: "Resolve commit SHA"
+        id: meta
+        shell: bash
+        run: echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - name: "🦊 Publish fdroiddata MR"
         uses: ./.github/actions/fdroid-metadata-mr
         with:
-          commit_sha: ${{ needs.set_build_version_commit_tag.outputs.commit_sha }}
-          ref_name: ${{ needs.set_build_version_commit_tag.outputs.tag_name }}
+          commit_sha: ${{ steps.meta.outputs.commit_sha }}
+          ref_name: ${{ github.event.inputs.target_ref }}
           version_override: ''
           flutter_version: ${{ vars.FDROID_FLUTTER_VERSION }}
           metadata_source_branch: ${{ vars.FDROID_METADATA_SOURCE_BRANCH }}

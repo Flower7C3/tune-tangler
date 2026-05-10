@@ -1,17 +1,6 @@
 name: 'Pubspec: commit, push branch, optional annotated tag'
-description: 'Commit pubspec, push branch, optional tag; with_artifacts controls checkout+artifact vs same-job workspace.'
+description: 'Requires an existing git checkout in the job (e.g. actions/checkout with token for push). Commits changed pubspec.yaml, pushes branch, optional tag.'
 inputs:
-  github_token:
-    description: 'Token with contents:write'
-    required: true
-  with_artifacts:
-    description: 'true: checkout + download modified-pubspec. false: reuse workspace (same job as suffix step).'
-    required: false
-    default: 'true'
-  artifact_name:
-    description: 'Artifact name produced by pubspec-set-build-suffix'
-    required: false
-    default: 'modified-pubspec'
   git_user_name:
     description: 'git config user.name for commits/tags'
     required: false
@@ -41,7 +30,7 @@ inputs:
     required: false
     default: 'true'
   tag_push_force_with_lease:
-    description: 'If true, push the annotated tag with git push --force-with-lease (legacy)'
+    description: 'If true, push the annotated tag with git push --force-with-lease'
     required: false
     default: 'false'
   write_job_summary:
@@ -57,7 +46,7 @@ outputs:
     description: 'Tag name (v + version from pubspec)'
     value: ${{ steps.record.outputs.tag_name }}
   computed_version:
-    description: 'version: value from pubspec after download'
+    description: 'version: value from pubspec.yaml in workspace'
     value: ${{ steps.record.outputs.computed_version }}
   commits:
     description: 'Multiline bullet list (- hash subject) since last tag at push time; empty if collection disabled'
@@ -66,33 +55,18 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Checkout
-      if: ${{ inputs.with_artifacts == 'true' }}
-      uses: actions/checkout@v6
-      with:
-        fetch-depth: 0
-        token: ${{ inputs.github_token }}
-
-    - name: Expect in-tree pubspec change (no artifact mode)
-      if: ${{ inputs.with_artifacts == 'false' }}
+    - name: Expect changed pubspec in workspace
       shell: bash
       run: |
         set -euo pipefail
         if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-          echo "::error::with_artifacts=false requires an existing git checkout in the job workspace."
+          echo "::error::This action requires an existing git checkout in the job workspace."
           exit 1
         fi
         if git diff --quiet -- pubspec.yaml; then
-          echo "::error::pubspec.yaml is unchanged. Run pubspec-set-build-suffix in the same job before this action (with_artifacts false)."
+          echo "::error::pubspec.yaml is unchanged. Modify pubspec in this job before this action."
           exit 1
         fi
-
-    - name: Download pubspec artifact
-      if: ${{ inputs.with_artifacts == 'true' }}
-      uses: actions/download-artifact@v8
-      with:
-        name: ${{ inputs.artifact_name }}
-        path: ./
 
     - name: Configure Git identity
       uses: ./.github/actions/git-config-github-actions-bot

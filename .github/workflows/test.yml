@@ -1,9 +1,11 @@
+# Analyzer + tests on pull requests (and manual run). Push to `main` is covered by `version-tag-main.yml` (tests there before version/tag).
+# `env` and paths-ignore: keep in sync with `version-tag-main.yml`.
 name: Test Workflow
 
 on:
   pull_request:
     branches: [main]
-    paths-ignore: &paths-ignore
+    paths-ignore:
       - '.idea/**'
       - '.vscode/**'
       - '*.iml'
@@ -28,23 +30,23 @@ on:
       - 'windows/**'
       - 'tools/**'
       - 'Makefile'
-  push:
-    branches: [main]
-    paths-ignore: *paths-ignore
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
 
 env:
   FLUTTER_CHANNEL: 'stable'
-  JAVA_VERSION: '17'
-  JAVA_DISTRIBUTION: 'zulu'
 
 jobs:
   test:
     name: "🧪 Test"
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: "🔧 Checkout code"
         uses: actions/checkout@v6

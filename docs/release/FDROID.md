@@ -6,29 +6,18 @@ F-Droid builds and signs binaries. This app repo holds **metadata templates** (`
 
 ## Versioning on `main`
 
-- **[`pubspec-auto-patch-main.yml`](../../.github/workflows/pubspec-auto-patch-main.yml)** — on **`push` to `main`** (same `paths-ignore` as `test.yml`): if that push **does not** change the `version:` line in `pubspec`, **PATCH** is incremented (`1.6.5` → `1.6.6`, no `+` suffix). A **minor/major** change or a release commit that edits `version:` **skips** auto-patch.
-- **F-Droid release** (below) sets **`{base from pubspec before +} + GITHUB_RUN_NUMBER`** when tagging — build number equals the workflow run number.
+- **[`version-tag-main.yml`](../../.github/workflows/version-tag-main.yml)** — on **`push` to `main`** (same `paths-ignore` as `test.yml` for PRs): runs **tests**, then updates `pubspec`:
+  - If that push **does not** change the `version:` line: **increment PATCH** and set **`version:`** to **`NEW_PATCH+GITHUB_RUN_NUMBER`**.
+  - If the push **does** change `version:`: keep the semantic **`MAJOR.MINOR.PATCH`** from the file and set **`version:`** to **`base+GITHUB_RUN_NUMBER`** (no extra PATCH bump).
+- Commits from this workflow use **`[skip ci]`** so the next **`push` to `main`** skips **`version-tag-main`** (no test/tag loop).
 
-## Recommended release (one click)
+## F-Droid MR (single workflow)
 
-**Workflow:** [`.github/workflows/fdroid-app-release.yml`](../../.github/workflows/fdroid-app-release.yml) — **F-Droid release (test, tag, MR)**.
+**Workflow:** [`.github/workflows/fdroid-app-release.yml`](../../.github/workflows/fdroid-app-release.yml) — **F-Droid release (MR)**.
 
-**Steps:** tests → set **`pubspec`** to **`base+GITHUB_RUN_NUMBER`** in the job workspace (no Actions artifact) → [`pubspec-commit-tag-push`](../../.github/actions/pubspec-commit-tag-push/action.yml) (commit + tag + push + changelog in **job summary**) → **MR to fdroiddata**.
+**Trigger:** **`workflow_dispatch` only** — required input **`target_ref`** (existing **tag or branch**, e.g. `v1.7.0+12`). The job checks out that ref and opens / updates the **fdroiddata** MR for the resolved commit. **No** `pubspec` edits, **no** commits, **no** new tags in GitHub from this workflow (version + tag are expected from **`main`** / [`version-tag-main.yml`](../../.github/workflows/version-tag-main.yml) or from your own git flow). Version metadata for the MR comes from the **checked-out tree** (tag / `pubspec` at that commit), not from extra workflow inputs.
 
-**Trigger:** **`workflow_dispatch` only** (no inputs — semantic version comes from current `pubspec` on the branch).
-
-The changelog list is **not** sent to GitLab or fdroiddata; the MR uses the tagged commit only.
-
-## Metadata MR from a tag only (no version bump in Actions)
-
-**Workflow:** [`.github/workflows/fdroid-tag-publish.yml`](../../.github/workflows/fdroid-tag-publish.yml) — calls composite [`.github/actions/fdroid-metadata-mr`](../../.github/actions/fdroid-metadata-mr/action.yml).
-
-**When it runs**
-
-- `push` of tags matching: `v1.2.3`, `v1.2.3+4`, `1.2.3`, `1.2.3+4`, etc. (e.g. a tag created locally).
-- Optionally manually: **Actions → F-Droid metadata (GitLab MR) → Run workflow** — input **`version_override`** overrides version from the tag / `pubspec` for the MR script only (**does not** change `pubspec` or GitHub tags).
-
-**GitHub Actions — Secrets and variables** (Settings → Secrets and variables → Actions)
+## GitHub Actions — Secrets and variables
 
 *Repository secrets*
 
@@ -60,7 +49,7 @@ The changelog list is **not** sent to GitLab or fdroiddata; the MR uses the tagg
 - **`tools/fdroid/metadata_static.yml`** — skeleton **YAML in fdroiddata** (`License`, `Repo`, `Categories`, `Builds`, …). **Without** `Summary` / `Description` / `Name` / `AutoName`, because those keys in the fdroiddata `.yml` **override** Fastlane in the app source.
 - **`publish_fdroid_mr.py`** strips those keys from existing YAML before writing the MR (if they were left from older edits) so F-Droid can take descriptions from the GitHub repo. The script also checks for `fastlane/metadata/android/en-US/{short_description,full_description}.txt`.
 
-**Version alignment:** semantic version on `main` comes from **auto-patch + manual edits**; release appends **`+build`** from CI and a tag that matches `pubspec`.
+**Version alignment:** semantic **base** on `main` comes from **auto workflow + manual edits**; every automated bump uses **`+GITHUB_RUN_NUMBER`** as the build suffix. Release workflow tags **`v…+…`** aligned with `pubspec`.
 
 **What the script does** (`tools/fdroid/publish_fdroid_mr.py`)
 
@@ -75,7 +64,7 @@ Optional env: **`FDROID_METADATA_SOURCE_BRANCH`** (override the default `robot/t
 
 **Cleaning up older spam on your fork:** close redundant open MRs to upstream and delete obsolete `robot/tune-tangler-*` branches if you no longer need them; keep one MR on `robot/tune-tangler` going forward.
 
-**Keep your fork in sync** with upstream (`fdroid/fdroiddata`) or the MR may conflict. First time: add a minimal metadata file in the fork manually or let the workflow create it from `metadata_static.yml` — F-Droid **buildbot** must still accept the recipe (`build` / `init`); if rejected, fix `tools/fdroid/build_template.yml` and push the tag again (or fix the MR manually).
+**Keep your fork in sync** with upstream (`fdroid/fdroiddata`) or the MR may conflict. First time: add a minimal metadata file in the fork manually or let the workflow create it from `metadata_static.yml` — F-Droid **buildbot** must still accept the recipe (`build` / `init`); if rejected, fix `tools/fdroid/build_template.yml` and re-run the workflow or fix the MR manually.
 
 ## Manual path (no workflow)
 
@@ -95,9 +84,9 @@ Optional env: **`FDROID_METADATA_SOURCE_BRANCH`** (override the default `robot/t
 
 ## Other workflows in this repo
 
-- [`test.yml`](../../.github/workflows/test.yml) — CI on PR and `push` to `main`.
-- [`pubspec-auto-patch-main.yml`](../../.github/workflows/pubspec-auto-patch-main.yml) — auto PATCH on `main` when `version:` is unchanged in that push.
-- [`fdroid-app-release.yml`](../../.github/workflows/fdroid-app-release.yml) — tests → `pubspec` `base+GITHUB_RUN_NUMBER` (same job, no `pubspec` artifact) → commit + tag + fdroiddata MR (recommended).
-- [`release-legacy-github-play-apk-aab.yml`](../../.github/workflows/release-legacy-github-play-apk-aab.yml) — same `+build` `pubspec` policy, then signed APK/AAB + GitHub Release.
+- [`test.yml`](../../.github/workflows/test.yml) — CI on PR and `push` to `main` (skips when the pushed commit message contains **`[skip ci]`**).
+- [`version-tag-main.yml`](../../.github/workflows/version-tag-main.yml) — on **`push` to `main`**: tests, then `pubspec` **semver + `GITHUB_RUN_NUMBER`**, commit + tag (with **`[skip ci]`**).
+- [`fdroid-app-release.yml`](../../.github/workflows/fdroid-app-release.yml) — **MR to fdroiddata** for a **ref you choose** (no `pubspec`/commit/tag in Actions).
+- [`release-legacy-github-play-apk-aab.yml`](../../.github/workflows/release-legacy-github-play-apk-aab.yml) — build + verify + GitHub Release for an **existing** tag (no test job; names from tag); fails if a release for that tag already exists.
 
 Details: [../development/WORKFLOWS.md](../development/WORKFLOWS.md).

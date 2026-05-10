@@ -1,0 +1,136 @@
+# On push to main: analyzer + tests, then set pubspec to MAJOR.MINOR.PATCH+GITHUB_RUN_NUMBER (PATCH bump when version: unchanged in that push), commit + tag.
+# `env` and paths-ignore: keep in sync with test.yml (PR workflow).
+name: Version & tag (main)
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '.idea/**'
+      - '.vscode/**'
+      - '*.iml'
+      - '.githooks/**'
+      - '.github/**'
+      - '.markdownlint.json'
+      - '.metadata'
+      - 'analysis_options.yaml'
+      - 'devtools_options.yaml'
+      - 'l10n.yaml'
+      - 'docs/**'
+      - 'assets/png/**'
+      - 'assets/svg/**'
+      - 'fastlane/metadata/**'
+      - 'LICENSE'
+      - 'README.md'
+      - 'AGENTS.md'
+      - 'missing_translations.txt'
+      - 'ios/**'
+      - 'linux/**'
+      - 'macos/**'
+      - 'windows/**'
+      - 'tools/**'
+      - 'Makefile'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+env:
+  FLUTTER_CHANNEL: 'stable'
+
+jobs:
+  test:
+    name: "🧪 Test"
+    if: ${{ github.event.head_commit == null || !contains(github.event.head_commit.message, '[skip ci]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: "🔧 Checkout code"
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+      - name: "🧪 Flutter setup and tests"
+        uses: ./.github/actions/checkout-flutter-test
+        with:
+          skip_checkout: 'true'
+          flutter_channel: ${{ env.FLUTTER_CHANNEL }}
+          with_dependencies: 'true'
+          with_localization: 'false'
+
+  version_tag:
+    name: "📦 Version & tag"
+    needs: [test]
+    if: ${{ github.event.head_commit == null || !contains(github.event.head_commit.message, '[skip ci]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: "🔧 Checkout code"
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ github.token }}
+
+      - name: "👤 Configure Git identity"
+        uses: ./.github/actions/git-config-github-actions-bot
+
+      - name: "📈 Set version (PATCH bump or normalize) + build suffix"
+        id: bump
+        shell: bash
+        env:
+          BEFORE: ${{ github.event.before }}
+          RUN_NO: ${{ github.run_number }}
+        run: |
+          set -euo pipefail
+          echo "do_tag=false" >> "$GITHUB_OUTPUT"
+          if [ -z "${BEFORE:-}" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            echo "No usable before-SHA; skip."
+            exit 0
+          fi
+          if ! git cat-file -e "${BEFORE}^{commit}" 2>/dev/null; then
+            echo "before SHA not found; skip."
+            exit 0
+          fi
+          cur=$(grep '^version:' pubspec.yaml | head -1 | sed -E 's/^version:[[:space:]]+//; s/[[:space:]]+$//')
+          if git diff "$BEFORE" "${GITHUB_SHA}" -- pubspec.yaml | grep -E '^[+-]version:' >/dev/null; then
+            echo "pubspec version: line changed in this push — set base+build only (no PATCH bump)."
+            base="${cur%%+*}"
+          else
+            echo "pubspec version: unchanged in push diff — bump PATCH, then +build."
+            base="${cur%%+*}"
+            if ! [[ "$base" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "::error::pubspec version base must be MAJOR.MINOR.PATCH (got: ${cur})"
+              exit 1
+            fi
+            IFS=. read -r MAJOR MINOR PATCH <<< "$base"
+            PATCH=$((PATCH + 1))
+            base="${MAJOR}.${MINOR}.${PATCH}"
+          fi
+          if ! [[ "$base" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::pubspec version base must be MAJOR.MINOR.PATCH (got base from: ${cur})"
+            exit 1
+          fi
+          NEW="${base}+${RUN_NO}"
+          if [ "$cur" = "$NEW" ]; then
+            echo "pubspec already ${NEW}; nothing to commit."
+            exit 0
+          fi
+          sed -i.bak -E "s/^version:.*/version: ${NEW}/" pubspec.yaml
+          rm -f pubspec.yaml.bak
+          if git diff --quiet pubspec.yaml; then
+            echo "No pubspec change; exit."
+            exit 0
+          fi
+          echo "do_tag=true" >> "$GITHUB_OUTPUT"
+
+      - name: "🏷️ Commit, push, annotated tag"
+        if: steps.bump.outputs.do_tag == 'true'
+        uses: ./.github/actions/pubspec-commit-tag-push
+        with:
+          commit_suffix: ' [skip ci]'
+          create_annotated_git_tag: "true"
+          with_description: "false"
+          collect_commits_since_last_tag: "false"
+          write_job_summary: "false"

@@ -20,7 +20,7 @@ This file in the repository root is the canonical place for rules used by AI cod
 - Commit messages: [Conventional Commits](https://www.conventionalcommits.org/).
 - Localization: `lib/l10n/*.arb`, then `flutter gen-l10n`.
 - Default branch: **`main`** (as in this repository).
-- CI / release: see [docs/development/WORKFLOWS.md](docs/development/WORKFLOWS.md) (shared **composite actions** under `.github/actions/`; tests on PR + `main`, **pubspec auto PATCH** on `main` when `version:` unchanged, **F-Droid release** = test → set `pubspec` `base+run` (artifact) → commit + tag + MR, tag-only MR workflow, **legacy** = same `+build` policy then build + commit/tag + GitHub Release on demand).
+- CI / release: see [docs/development/WORKFLOWS.md](docs/development/WORKFLOWS.md) (shared **composite actions** under `.github/actions/`; **`test.yml`** runs on **PR** to `main` (and manual dispatch); **`version-tag-main`** on **push** to `main` runs **tests then** updates `pubspec` + tag; **F-Droid** (`fdroid-app-release`) only opens the fdroiddata **MR** for a **ref you choose**; **legacy** builds from an **existing tag** + **GitHub Release** — no extra commits/tags in those workflows).
 
 ## How assistants should work
 
