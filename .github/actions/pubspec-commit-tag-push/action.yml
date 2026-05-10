@@ -4,6 +4,14 @@ inputs:
   github_token:
     description: 'Token with contents:write'
     required: true
+  with_artifacts:
+    description: >-
+      If true, checkout then download modified-pubspec artifact (cross-job flow).
+      If false, skip checkout and download — reuse repo from the same job (e.g. run right after
+      pubspec-set-build-suffix with with_artifacts false); requires prior checkout with a token
+      that can push (e.g. github.token).
+    required: false
+    default: 'true'
   artifact_name:
     description: 'Artifact name produced by pubspec-set-build-suffix'
     required: false
@@ -26,6 +34,10 @@ inputs:
     default: 'false'
   create_annotated_git_tag:
     description: 'If true, create annotated tag from pubspec version and push it after recording outputs'
+    required: false
+    default: 'true'
+  with_description:
+    description: 'If true, annotated tag message is "Release <tag>". If false, use an empty tag message (minimal annotation).'
     required: false
     default: 'true'
   collect_commits_since_last_tag:
@@ -59,12 +71,28 @@ runs:
   using: composite
   steps:
     - name: Checkout
+      if: ${{ inputs.with_artifacts == 'true' }}
       uses: actions/checkout@v6
       with:
         fetch-depth: 0
         token: ${{ inputs.github_token }}
 
+    - name: Expect in-tree pubspec change (no artifact mode)
+      if: ${{ inputs.with_artifacts == 'false' }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+          echo "::error::with_artifacts=false requires an existing git checkout in the job workspace."
+          exit 1
+        fi
+        if git diff --quiet -- pubspec.yaml; then
+          echo "::error::pubspec.yaml is unchanged. Run pubspec-set-build-suffix in the same job before this action (with_artifacts false)."
+          exit 1
+        fi
+
     - name: Download pubspec artifact
+      if: ${{ inputs.with_artifacts == 'true' }}
       uses: actions/download-artifact@v8
       with:
         name: ${{ inputs.artifact_name }}
@@ -154,6 +182,8 @@ runs:
     - name: Annotated tag and push tag
       if: ${{ inputs.create_annotated_git_tag == 'true' }}
       shell: bash
+      env:
+        WITH_DESCRIPTION: ${{ inputs.with_description }}
       run: |
         set -euo pipefail
         if git rev-parse "$TAG" >/dev/null 2>&1; then
@@ -164,7 +194,11 @@ runs:
           echo "::error::Tag ${TAG} already exists on origin."
           exit 1
         fi
-        git tag -a "$TAG" -m "Release ${TAG}"
+        if [ "$WITH_DESCRIPTION" = "true" ]; then
+          git tag -a "$TAG" -m "Release ${TAG}"
+        else
+          git tag -a "$TAG" -m ""
+        fi
         if [ "${{ inputs.tag_push_force_with_lease }}" = "true" ]; then
           git push --force-with-lease origin "$TAG"
         else

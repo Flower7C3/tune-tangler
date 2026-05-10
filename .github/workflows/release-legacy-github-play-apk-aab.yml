@@ -152,6 +152,7 @@ jobs:
         uses: ./.github/actions/pubspec-commit-tag-push
         with:
           github_token: ${{ github.token }}
+          with_description: "true"
           commit_suffix: ' [skip ci]'
           pull_before_push: 'true'
           tag_push_force_with_lease: 'true'

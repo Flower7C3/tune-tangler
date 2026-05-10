@@ -9,7 +9,7 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   test:
@@ -27,57 +27,42 @@ jobs:
           with_dependencies: 'true'
           with_localization: 'false'
 
-  set_build_version:
-    name: "STEP 2 — Set pubspec +build"
+  set_build_version_commit_tag:
+    name: "STEP 2 — Set pubspec +build, commit, tag and push"
     needs: [test]
     runs-on: ubuntu-latest
     outputs:
-      computed_version: ${{ steps.suffix.outputs.computed_version }}
-      tag_name: ${{ steps.suffix.outputs.tag_name }}
+      computed_version: ${{ steps.ct.outputs.computed_version }}
+      commit_sha: ${{ steps.ct.outputs.commit_sha }}
+      tag_name: ${{ steps.ct.outputs.tag_name }}
     steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 1
-      - name: Apply base+build to pubspec and upload artifact
+      - name: Apply base+build to pubspec
         id: suffix
         uses: ./.github/actions/pubspec-set-build-suffix
         with:
           run_number: ${{ github.run_number }}
-
-  commit_tag:
-    name: "STEP 3 — Commit, tag, and push"
-    needs: [test, set_build_version]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    outputs:
-      commit_sha: ${{ steps.ct.outputs.commit_sha }}
-      tag_name: ${{ steps.ct.outputs.tag_name }}
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 1
+          with_artifacts: "false"
+          github_token: ${{ github.token }}
       - name: Commit, push branch, annotated tag
         id: ct
         uses: ./.github/actions/pubspec-commit-tag-push
         with:
+          with_artifacts: "false"
+          with_description: "false"
           github_token: ${{ github.token }}
 
   fdroid_metadata:
-    name: "STEP 4 — F-Droid MR (fdroiddata)"
-    needs: [commit_tag]
+    name: "STEP 3 — F-Droid MR (fdroiddata)"
+    needs: [set_build_version_commit_tag]
     runs-on: ubuntu-latest
     env:
       GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
       GITLAB_FORK_PROJECT_ID: ${{ vars.GITLAB_FORK_PROJECT_ID }}
     steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 1
       - name: Publish fdroiddata MR
         uses: ./.github/actions/fdroid-metadata-mr
         with:
-          commit_sha: ${{ needs.commit_tag.outputs.commit_sha }}
-          ref_name: ${{ needs.commit_tag.outputs.tag_name }}
+          commit_sha: ${{ needs.set_build_version_commit_tag.outputs.commit_sha }}
+          ref_name: ${{ needs.set_build_version_commit_tag.outputs.tag_name }}
           version_override: ''
           flutter_version: ${{ vars.FDROID_FLUTTER_VERSION }}
