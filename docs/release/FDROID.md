@@ -13,7 +13,7 @@ F-Droid builds and signs binaries. This app repo holds **metadata templates** (`
 
 ## F-Droid MR (single workflow)
 
-**Workflow:** [`.github/workflows/release-fdroid-app.yml`](../../.github/workflows/release-fdroid-app.yml) — **F-Droid release (MR)**.
+**Workflow:** [`.github/workflows/release-fdroid-app.yml`](../../.github/workflows/release-fdroid-app.yml) — **Release on F-Droid (via MR)**.
 
 **Trigger:** **`workflow_dispatch` only** — required input **`target_ref`** (existing **tag or branch**, e.g. `v1.7.0+12`). The job checks out that ref and opens / updates the **fdroiddata** MR for the resolved commit. **No** `pubspec` edits, **no** commits, **no** new tags in GitHub from this workflow (version + tag are expected from **`main`** / [`version-tag-main.yml`](../../.github/workflows/version-tag-main.yml) or from your own git flow). Version metadata for the MR comes from the **checked-out tree** (tag / `pubspec` at that commit), not from extra workflow inputs.
 

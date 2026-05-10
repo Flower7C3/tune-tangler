@@ -29,8 +29,15 @@ on:
   workflow_dispatch:
   workflow_call:
 
+# Avoid deadlock when called via `workflow_call`: `github.workflow` in a reusable workflow can match the
+# caller's name, duplicating the parent's concurrency group (see actions/runner#3205).
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: >-
+    ${{
+      github.event_name == 'workflow_call'
+      && format('test-reuse-{0}-{1}', github.run_id, github.run_attempt)
+      || format('test-{0}', github.event.pull_request.number || github.ref)
+    }}
   cancel-in-progress: true
 
 permissions:

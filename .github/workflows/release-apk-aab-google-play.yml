@@ -1,5 +1,5 @@
 # Legacy: checkout an existing tag → build signed APK/AAB → verify → GitHub Release (no tests, no pubspec reads/edits in CI).
-name: Legacy — GitHub APK/AAB + Release
+name: Release on GitHub (APK/AAB files)
 
 on:
   workflow_dispatch:

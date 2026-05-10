@@ -8,8 +8,8 @@
 - [🚀 Workflows](#workflows)
   - [1. Tests (PR to `main`)](#tests-pr-main)
   - [1b. Version & tag (`main` push)](#version-tag-main)
-  - [2. F-Droid release (MR)](#release-fdroid-app)
-  - [3. Legacy — GitHub APK/AAB + Release](#release-apk-aab-google-play)
+  - [2. Release on F-Droid (via MR)](#release-fdroid-app)
+  - [3. Release on GitHub (APK/AAB files)](#release-apk-aab-google-play)
 - [📱 How to use](#how-to-use)
   - [1. CI on PR to `main`](#ci-on-main)
   - [2. F-Droid: one-click release](#fdroid-one-click)
@@ -48,6 +48,8 @@
 
 ### 1. Tests (PR to `main`) <a name="tests-pr-main"></a>
 
+**Status:** <a href="https://github.com/Flower7C3/tune-tangler/actions/workflows/test.yml"><img alt="CI" src="https://github.com/Flower7C3/tune-tangler/actions/workflows/test.yml/badge.svg"/></a>
+
 **File:** [`test.yml`](../../.github/workflows/test.yml)
 
 **Triggers:** `pull_request` to `main`, `workflow_dispatch`, and **`workflow_call`** (from [`version-tag-main.yml`](#version-tag-main)).
@@ -58,6 +60,8 @@
 
 ### 1b. Version & tag (`main` push) <a name="version-tag-main"></a>
 
+**Status:** <a href="https://github.com/Flower7C3/tune-tangler/actions/workflows/version-tag-main.yml"><img alt="CI" src="https://github.com/Flower7C3/tune-tangler/actions/workflows/version-tag-main.yml/badge.svg"/></a>
+
 **File:** [`version-tag-main.yml`](../../.github/workflows/version-tag-main.yml)
 
 **Triggers:** `push` to **`main`**, with the same **`paths-ignore`** as [`test.yml`](../../.github/workflows/test.yml) (documented in both files — **keep in sync**).
@@ -66,7 +70,9 @@
 
 **What it does not do:** no F-Droid MR (use [`release-fdroid-app.yml`](#release-fdroid-app)).
 
-### 2. F-Droid release (MR) <a name="release-fdroid-app"></a>
+### 2. Release on F-Droid (via MR) <a name="release-fdroid-app"></a>
+
+**Status:** <a href="https://github.com/Flower7C3/tune-tangler/actions/workflows/release-fdroid-app.yml"><img alt="CI" src="https://github.com/Flower7C3/tune-tangler/actions/workflows/release-fdroid-app.yml/badge.svg"/></a>
 
 **File:** [`release-fdroid-app.yml`](../../.github/workflows/release-fdroid-app.yml)
 
@@ -76,7 +82,9 @@
 
 Requires **`GITLAB_TOKEN`** (**job `env`** from a repository **secret**) and **`GITLAB_FORK_PROJECT_ID`** (**job `env`** from a repository **variable**). Optional **`FDROID_FLUTTER_VERSION`** and **`FDROID_METADATA_SOURCE_BRANCH`** variables (see [docs/release/FDROID.md](../release/FDROID.md)) — both must be referenced in the workflow (`vars.…`) to reach the script.
 
-### 3. Legacy — GitHub APK/AAB + Release <a name="release-apk-aab-google-play"></a>
+### 3. Release on GitHub (APK/AAB files) <a name="release-apk-aab-google-play"></a>
+
+**Status:** <a href="https://github.com/Flower7C3/tune-tangler/actions/workflows/release-apk-aab-google-play.yml"><img alt="CI" src="https://github.com/Flower7C3/tune-tangler/actions/workflows/release-apk-aab-google-play.yml/badge.svg"/></a>
 
 **File:** [`release-apk-aab-google-play.yml`](../../.github/workflows/release-apk-aab-google-play.yml)
 
@@ -95,11 +103,11 @@ Requires keystore **secrets** (see below).
 ### 2. F-Droid: MR to fdroiddata <a name="fdroid-one-click"></a>
 
 1. Ensure the **tag** (or branch) you want is already on GitHub (usually from **`main`** / [`version-tag-main.yml`](../../.github/workflows/version-tag-main.yml)).
-2. **Actions** → **F-Droid release (MR)** → **Run workflow** → set **`target_ref`** (e.g. `v1.7.0+12`).
+2. **Actions** → **Release on F-Droid (via MR)** → **Run workflow** → set **`target_ref`** (e.g. `v1.7.0+12`).
 
 ### 3. Legacy: APK/AAB + GitHub Release <a name="manual-release-only-option"></a>
 
-1. **Actions** → **Legacy — GitHub APK/AAB + Release** → **Run workflow** → required **`tag`** (must already exist, e.g. `v1.7.0+12`).
+1. **Actions** → **Release on GitHub (APK/AAB files)** → **Run workflow** → required **`tag`** (must already exist, e.g. `v1.7.0+12`).
 2. Configure keystore secrets if needed.
 
 ### 4. Testing the build <a name="testing-build-process"></a>

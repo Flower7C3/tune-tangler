@@ -1,5 +1,5 @@
 # F-Droid: open/update fdroiddata MR for an existing tag or branch (no pubspec edits, commits, or tags here — those come from main / your git client).
-name: F-Droid release (MR)
+name: Release on F-Droid (via MR)
 
 on:
   workflow_dispatch:
