@@ -2,8 +2,6 @@
 
 > Yet another music looper app
 
-<a href="https://github.com/Flower7C3/tune-tangler/actions/workflows/test.yml"><img alt="CI" src="https://github.com/Flower7C3/tune-tangler/actions/workflows/test.yml/badge.svg"/></a>
-
 ## 📚 Documentation <a name="documentation"></a>
 
 ### 🧩 App capabilities <a name="capabilities"></a>

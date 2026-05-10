@@ -2,17 +2,32 @@
 
 This document describes the automated icon generation system for TuneTangler.
 
-## Overview
+## 📋 Table of contents
+
+- [📖 Overview](#overview)
+- [📁 Files](#files)
+- [⚙️ Configuration format](#configuration-format)
+  - [🧩 Configuration parameters](#configuration-parameters)
+- [🛠️ Usage](#usage)
+  - [✨ Generate all icons](#generate-all-icons)
+  - [🖼️ Generate all images (including app icons and splash)](#generate-all-images)
+- [📦 Dependencies](#dependencies)
+- [⚡ How it works](#how-it-works)
+- [➕ Adding new icon variants](#adding-new-icon-variants)
+- [💡 Benefits](#benefits)
+- [🔐 Security and best practices](#security-and-best-practices)
+
+## 📖 Overview <a name="overview"></a>
 
 The system generates multiple PNG variants from a single SVG source file (`logo-rgb.svg`) using configuration-driven approach with JSON files. The source SVG contains clipPath masks and uses fill attributes for Flutter compatibility.
 
-## Files
+## 📁 Files <a name="files"></a>
 
 - **Source**: Defined in `assets/icon-config.json` (`svg_source` field) - Master SVG file with clipPath masks and fill attributes
 - **Configuration**: `assets/icon-config.json` - JSON configuration defining source SVG and all icon variants
 - **Output**: `assets/png/logo-*.png` - Generated PNG files (ignored by git)
 
-## Configuration Format
+## ⚙️ Configuration format <a name="configuration-format"></a>
 
 The `assets/icon-config.json` file contains source SVG path and an array of icon configurations:
 
@@ -39,7 +54,7 @@ The `assets/icon-config.json` file contains source SVG path and an array of icon
 }
 ```
 
-### Configuration Parameters
+### 🧩 Configuration parameters <a name="configuration-parameters"></a>
 
 - **svg_source**: Path to the source SVG file
 - **name**: Output filename (without extension)
@@ -50,19 +65,21 @@ The `assets/icon-config.json` file contains source SVG path and an array of icon
 - **shape_color**: Background shape color (#00ff00 in source)
 - **text_color**: Detail elements color (#0000ff in source, used for wave, mic, sliders, text)
 
-## Usage
+## 🛠️ Usage <a name="usage"></a>
 
-### Generate All Icons
+### ✨ Generate all icons <a name="generate-all-icons"></a>
+
 ```bash
 make gen-png-logos
 ```
 
-### Generate All Images (including app icons and splash)
+### 🖼️ Generate all images (including app icons and splash) <a name="generate-all-images"></a>
+
 ```bash
 make gen-images
 ```
 
-## Dependencies
+## 📦 Dependencies <a name="dependencies"></a>
 
 - **rsvg-convert**: SVG to PNG conversion
   - Ubuntu/Debian: `sudo apt-get install librsvg2-bin`
@@ -74,7 +91,7 @@ make gen-images
   - macOS: `brew install jq`
   - Windows: Download from [jqlang.github.io](https://jqlang.github.io/jq/download/)
 
-## How It Works
+## ⚡ How it works <a name="how-it-works"></a>
 
 1. **Configuration Parsing**: Reads `assets/icon-config.json` and processes each icon definition
 2. **Temporary Directory**: Creates a unique temporary directory using `mktemp -d -t tunetangler-icons-XXXXXX`
@@ -85,7 +102,7 @@ make gen-images
 4. **PNG Conversion**: Converts temporary SVG files to PNG using `rsvg-convert`
 5. **Cleanup**: Automatically removes the entire temporary directory and all files
 
-## Adding New Icon Variants
+## ➕ Adding new icon variants <a name="adding-new-icon-variants"></a>
 
 To add a new icon variant:
 
@@ -93,7 +110,7 @@ To add a new icon variant:
 2. Run `make gen-png-logos`
 3. The new PNG file will be generated as `assets/png/logo-{name}.png`
 
-## Benefits
+## 💡 Benefits <a name="benefits"></a>
 
 - **Configuration-driven**: Easy to add/modify icon variants
 - **Consistent**: All variants use the same source SVG
@@ -104,7 +121,7 @@ To add a new icon variant:
 - **Efficient**: No temporary files left in the project directory
 - **Robust**: Uses `mktemp` for unique temporary directory creation
 
-## Security and Best Practices
+## 🔐 Security and best practices <a name="security-and-best-practices"></a>
 
 - **Temporary Files**: Uses system temporary directory (`/tmp/`) with unique names
 - **Automatic Cleanup**: No temporary files are left behind after execution

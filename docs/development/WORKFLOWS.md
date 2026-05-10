@@ -8,6 +8,10 @@
 - [💾 Cache](#cache)
 - [🔄 Overview](#overview)
   - [Workflows at a glance](#workflow-reference)
+    - [Test Workflow (`test.yml`)](#tests-pr-main)
+    - [Version & tag (`version-tag-main.yml`)](#version-tag-main)
+    - [Release on F-Droid (`release-fdroid-app.yml`)](#release-fdroid-app)
+    - [Release on GitHub APK/AAB (`release-apk-aab-google-play.yml`)](#release-apk-aab-google-play)
   - [Operator runbook](#operator-runbook)
   - [Versioning policy](#versioning-policy)
   - [Shared `paths-ignore`](#shared-paths-ignore)
@@ -37,23 +41,60 @@ Workflows may cache `~/.pub-cache` and `~/.gradle/caches` (see each YAML).
 
 ## 🔄 Overview <a name="overview"></a>
 
-Exact workflow titles in GitHub come from each file’s top-level `name:`. **[Requirements](#requirements)** and **[Cache](#cache)** above are what the runners assume; the **workflows at a glance** table below is the single place for triggers, outcomes, checkout/jobs, composites, and CI badges; the **operator runbook** then lists common tasks.
+Exact workflow titles in GitHub come from each file’s top-level `name:`. **[Requirements](#requirements)** and **[Cache](#cache)** above are what the runners assume. Each workflow below has its **own status badge**, **trigger summary**, and **implementation notes** (no wide table). The **[operator runbook](#operator-runbook)** lists common tasks.
 
-### Workflows at a glance <a name="workflow-reference"></a><a name="quick-reference"></a><a name="implementation-checkout-jobs"></a><a name="ci-status-badges"></a><a name="workflows"></a>
+### Workflows at a glance <a name="workflow-reference"></a><a name="quick-reference"></a><a name="implementation-checkout-jobs"></a><a name="workflows"></a><a name="ci-status-badges"></a>
 
-| CI | In Actions (approx.) | Workflow file | When · inputs · output | Checkout / jobs | Composites & wiring |
-|----|------------------------|---------------|------------------------|-----------------|---------------------|
-| <a href="https://github.com/Flower7C3/tune-tangler/actions/workflows/test.yml"><img alt="test.yml" src="https://github.com/Flower7C3/tune-tangler/actions/workflows/test.yml/badge.svg"/></a> | **Test Workflow** | [`test.yml`](../../.github/workflows/test.yml) <a name="tests-pr-main"></a> | **When:** PR to `main`, **`workflow_call`** from version-tag, or manual.<br>**Inputs:** —<br>**Output:** Analyzer + unit tests | Single job; **`actions/checkout`** **`fetch-depth: 1`** | **[`setup-flutter`](../../.github/actions/setup-flutter/action.yml)** → **[`flutter-test`](../../.github/actions/flutter-test/action.yml)**. Invoked from **`version-tag-main`** via **`workflow_call`**; the parent workflow runs a **separate** job with full history for `pubspec`/tag work. |
-| <a href="https://github.com/Flower7C3/tune-tangler/actions/workflows/version-tag-main.yml"><img alt="version-tag-main.yml" src="https://github.com/Flower7C3/tune-tangler/actions/workflows/version-tag-main.yml/badge.svg"/></a> | **Version & tag (main)** | [`version-tag-main.yml`](../../.github/workflows/version-tag-main.yml) <a name="version-tag-main"></a> | **When:** `push` to `main` unless every touched path is under shared **`paths-ignore`** ([details](#shared-paths-ignore)).<br>**Inputs:** —<br>**Output:** Same tests as PRs, then `pubspec` bump + annotated tag | **`run_tests`**: `uses: ./.github/workflows/test.yml` (UI **`run_tests / 🧪 Test`**). **`version_tag`** (`needs: run_tests`): **`fetch-depth: 0`**. | Bump **`pubspec`** ([Versioning policy](#versioning-policy)) → **[`pubspec-commit-tag-push`](../../.github/actions/pubspec-commit-tag-push/action.yml)** when the version line changes → bot commit **`[skip ci]`** ([Skip / push behavior](#skip-and-push-behavior)), push **`main`**, tag **`v…+…`**. |
-| <a href="https://github.com/Flower7C3/tune-tangler/actions/workflows/release-fdroid-app.yml"><img alt="release-fdroid-app.yml" src="https://github.com/Flower7C3/tune-tangler/actions/workflows/release-fdroid-app.yml/badge.svg"/></a> | **Release on F-Droid (via MR)** | [`release-fdroid-app.yml`](../../.github/workflows/release-fdroid-app.yml) <a name="release-fdroid-app"></a> | **When:** Manual only.<br>**Inputs:** **`target_ref`** (tag or branch on GitHub).<br>**Output:** Opens/updates **fdroiddata** MR (no commits/tags in this repo) | Resolves **`target_ref`**, then checks out that tree. | **[`fdroid-metadata-mr`](../../.github/actions/fdroid-metadata-mr/action.yml)**. Secrets / variables: [below](#secrets-and-variables) and [FDROID.md](../release/FDROID.md). |
-| <a href="https://github.com/Flower7C3/tune-tangler/actions/workflows/release-apk-aab-google-play.yml"><img alt="release-apk-aab-google-play.yml" src="https://github.com/Flower7C3/tune-tangler/actions/workflows/release-apk-aab-google-play.yml/badge.svg"/></a> | **Release on GitHub (APK/AAB files)** | [`release-apk-aab-google-play.yml`](../../.github/workflows/release-apk-aab-google-play.yml) <a name="release-apk-aab-google-play"></a> | **When:** Manual only.<br>**Inputs:** **`tag`** (must already exist, e.g. `v1.7.0+12`).<br>**Output:** Signed APK + `.aab` + GitHub Release; build artifacts uploaded before the release is created | Two jobs: **build & verify** → **GitHub Release**. | Build: Flutter, Java, keystore, **`flutter build`**, signature check, artifact upload. Release: rename artifacts, optional changelog, duplicate guard. [Keystore](#keystore-configuration). |
+#### 🧪 Test Workflow — [`test.yml`](../../.github/workflows/test.yml) <a name="tests-pr-main"></a>
+
+<p><a href="https://github.com/Flower7C3/tune-tangler/actions/workflows/test.yml"><img  alt="test.yml CI" src="https://github.com/Flower7C3/tune-tangler/actions/workflows/test.yml/badge.svg"></a></p>
+
+- **In Actions (approx.):** **Test Workflow**
+- **When:** PR to `main`, **`workflow_call`** from version-tag, or manual
+- **Manual / inputs:** —
+- **Output:** Analyzer + unit tests
+- **Checkout / jobs:** Single job; **`actions/checkout`** **`fetch-depth: 1`**
+- **Composites & wiring:** **[`setup-flutter`](../../.github/actions/setup-flutter/action.yml)** → **[`flutter-test`](../../.github/actions/flutter-test/action.yml)**. Invoked from **`version-tag-main`** via **`workflow_call`**; the parent workflow runs a **separate** job with full history for `pubspec`/tag work.
+
+#### 📦 Version & tag (main) — [`version-tag-main.yml`](../../.github/workflows/version-tag-main.yml) <a name="version-tag-main"></a>
+
+<p><a href="https://github.com/Flower7C3/tune-tangler/actions/workflows/version-tag-main.yml"><img  alt="version-tag-main.yml CI" src="https://github.com/Flower7C3/tune-tangler/actions/workflows/version-tag-main.yml/badge.svg"></a></p>
+
+- **In Actions (approx.):** **Version & tag (main)**
+- **When:** `push` to `main` unless every touched path is under shared **`paths-ignore`** ([details](#shared-paths-ignore))
+- **Manual / inputs:** —
+- **Output:** Same tests as PRs, then `pubspec` bump + annotated tag
+- **Checkout / jobs:** **`run_tests`**: `uses: ./.github/workflows/test.yml` (UI **`run_tests / 🧪 Test`**). **`version_tag`** (`needs: run_tests`): **`fetch-depth: 0`**
+- **Composites & wiring:** Bump **`pubspec`** ([Versioning policy](#versioning-policy)) → **[`pubspec-commit-tag-push`](../../.github/actions/pubspec-commit-tag-push/action.yml)** when the version line changes → bot commit **`[skip ci]`** ([Skip / push behavior](#skip-and-push-behavior)), push **`main`**, tag **`v…+…`**
+
+#### 📱 Release on F-Droid (via MR) — [`release-fdroid-app.yml`](../../.github/workflows/release-fdroid-app.yml) <a name="release-fdroid-app"></a>
+
+<p><a href="https://github.com/Flower7C3/tune-tangler/actions/workflows/release-fdroid-app.yml"><img  alt="release-fdroid-app.yml CI" src="https://github.com/Flower7C3/tune-tangler/actions/workflows/release-fdroid-app.yml/badge.svg"></a></p>
+
+- **In Actions (approx.):** **Release on F-Droid (via MR)**
+- **When:** Manual only
+- **Manual / inputs:** **`target_ref`** (tag or branch on GitHub)
+- **Output:** Opens/updates **fdroiddata** MR (no commits/tags in this repo)
+- **Checkout / jobs:** Resolves **`target_ref`**, then checks out that tree
+- **Composites & wiring:** **[`fdroid-metadata-mr`](../../.github/actions/fdroid-metadata-mr/action.yml)**. Secrets / variables: [below](#secrets-and-variables) and [FDROID.md](../release/FDROID.md)
+
+#### 🚀 Release on GitHub (APK/AAB files) — [`release-apk-aab-google-play.yml`](../../.github/workflows/release-apk-aab-google-play.yml) <a name="release-apk-aab-google-play"></a>
+
+<p><a href="https://github.com/Flower7C3/tune-tangler/actions/workflows/release-apk-aab-google-play.yml"><img  alt="release-apk-aab-google-play.yml CI" src="https://github.com/Flower7C3/tune-tangler/actions/workflows/release-apk-aab-google-play.yml/badge.svg"></a></p>
+
+- **In Actions (approx.):** **Release on GitHub (APK/AAB files)**
+- **When:** Manual only
+- **Manual / inputs:** **`tag`** (must already exist, e.g. `v1.7.0+12`)
+- **Output:** Signed APK + `.aab` + GitHub Release; build artifacts uploaded before the release is created
+- **Checkout / jobs:** Two jobs: **build & verify** → **GitHub Release**
+- **Composites & wiring:** Build: Flutter, Java, keystore, **`flutter build`**, signature check, artifact upload. Release: rename artifacts, optional changelog, duplicate guard. [Keystore](#keystore-configuration)
 
 ### Operator runbook <a name="operator-runbook"></a><a name="how-to-use"></a><a name="ci-on-main"></a><a name="fdroid-one-click"></a><a name="manual-release-only-option"></a><a name="testing-build-process"></a>
 
 | Goal | Do this |
 |------|---------|
 | **CI on a PR to `main`** | Open/update the PR; [`test.yml`](../../.github/workflows/test.yml) runs ([`paths-ignore`](#shared-paths-ignore) still applies to changed files). |
-| **Version bump + tag after merge** | Push/merge to `main`; [`version-tag-main.yml`](../../.github/workflows/version-tag-main.yml) runs when paths are not all ignored ([reference table](#workflow-reference)). |
+| **Version bump + tag after merge** | Push/merge to `main`; [`version-tag-main.yml`](../../.github/workflows/version-tag-main.yml) runs when paths are not all ignored ([workflow summaries](#workflow-reference)). |
 | **F-Droid metadata MR** | Ensure the tag or branch exists on GitHub → **Actions** → **Release on F-Droid (via MR)** → **Run workflow** → set **`target_ref`**. |
 | **GitHub Release (APK / AAB)** | **Actions** → **Release on GitHub (APK/AAB files)** → **Run workflow** → set **`tag`** → configure keystore secrets if needed ([Keystore](#keystore-configuration)). |
 | **Ad-hoc / manual test run** | **Actions** → pick a workflow that exposes **Run workflow** → run (e.g. [`test.yml`](../../.github/workflows/test.yml)). |
