@@ -52,7 +52,7 @@ The changelog list is **not** sent to GitLab or fdroiddata; the MR uses the tagg
 4. **Organization secrets / variables:** an org owner must grant **Repository access** to this repository for each item.
 5. Re-run the workflow after saving (no code change required beyond this repo’s workflow expecting a variable for the fork ID).
 
-**fdroiddata CI (schema / lint):** Merge requests are validated against [`schemas/metadata.json`](https://gitlab.com/fdroid/fdroiddata/-/blob/master/schemas/metadata.json) (`fdroid lint`, `fdroid rewritemeta`, etc.). `publish_fdroid_mr.py` normalizes YAML to that schema (integer `ArchivePolicy`, **Categories** enum — this repo uses **`Multimedia`**), `CurrentVersion` / `CurrentVersionCode`, quoted modes where needed, **no `subdir` key** for repo root (`path` forbids `.` and values matching `^\./`). **`UpdateCheckMode: 'None'`** avoids the GitLab `checkupdates` job failing on Flutter (F-Droid cannot infer versions from tags the way it does for plain AndroidManifest apps); new versions are still proposed via this repo’s metadata MRs. After changing templates or the script, push again from CI or amend the branch on your fdroiddata fork.
+**fdroiddata CI (schema / lint):** Merge requests are validated against [`schemas/metadata.json`](https://gitlab.com/fdroid/fdroiddata/-/blob/master/schemas/metadata.json) (`fdroid lint`, `fdroid rewritemeta`, etc.). Field meanings follow the [F-Droid build metadata reference](https://f-droid.org/en/docs/Build_Metadata_Reference/). `publish_fdroid_mr.py` normalizes YAML to that schema (integer `ArchivePolicy`, **Categories** enum — this repo uses **`Multimedia`**), `CurrentVersion` / `CurrentVersionCode`, quoted modes where needed, **no `subdir` key** for repo root (`path` forbids `.` and values matching `^\./`). **`UpdateCheckMode: 'None'`** avoids the GitLab `checkupdates` job failing on Flutter (F-Droid cannot infer versions from tags the way it does for plain AndroidManifest apps); new versions are still proposed via this repo’s metadata MRs. After changing templates or the script, push again from CI or amend the branch on your fdroiddata fork.
 
 **`metadata_static.yml` vs Fastlane**
 
@@ -80,8 +80,8 @@ Optional env: **`FDROID_METADATA_SOURCE_BRANCH`** (override the default `robot/t
 ## Manual path (no workflow)
 
 1. Fork [`fdroiddata`](https://gitlab.com/fdroid/fdroiddata).
-2. File: `metadata/pro.kwiatek.tune_tangler.yml` — patterns in `tools/fdroid/metadata_static.yml` and `tools/fdroid/build_template.yml`.
-3. Open MR to upstream fdroiddata.
+2. File: **`metadata/pro.kwiatek.tune_tangler.yml`** (path is `metadata/<applicationId>.yml`; see [Build metadata reference](https://f-droid.org/en/docs/Build_Metadata_Reference/)) — patterns in `tools/fdroid/metadata_static.yml` and `tools/fdroid/build_template.yml`.
+3. Open an MR **to upstream** [`fdroid/fdroiddata`](https://gitlab.com/fdroid/fdroiddata): target branch **`master`**, source branch on **your fork** (CI defaults to `robot/tune-tangler` unless you set **`FDROID_METADATA_SOURCE_BRANCH`**).
 
 ## Official references
 
