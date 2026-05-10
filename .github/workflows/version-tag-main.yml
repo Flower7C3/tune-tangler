@@ -37,7 +37,6 @@ permissions:
 
 jobs:
   test:
-    name: "🧪 Test"
     if: ${{ github.event.head_commit == null || !contains(github.event.head_commit.message, '[skip ci]') }}
     uses: ./.github/workflows/test.yml
 
@@ -66,16 +65,24 @@ jobs:
         run: |
           set -euo pipefail
           echo "do_tag=false" >> "$GITHUB_OUTPUT"
-          if [ -z "${BEFORE:-}" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+          # `github.event.before` is only set for `push`. Manual runs (`workflow_dispatch`) leave it empty —
+          # use parent of checked-out HEAD so PATCH/build logic matches a one-commit window.
+          BEFORE_EFFECTIVE="${BEFORE:-}"
+          if [ -z "$BEFORE_EFFECTIVE" ] || [ "$BEFORE_EFFECTIVE" = "0000000000000000000000000000000000000000" ]; then
+            if [ "${GITHUB_EVENT_NAME:-}" = "workflow_dispatch" ]; then
+              BEFORE_EFFECTIVE=$(git rev-parse HEAD^ 2>/dev/null || true)
+            fi
+          fi
+          if [ -z "$BEFORE_EFFECTIVE" ] || [ "$BEFORE_EFFECTIVE" = "0000000000000000000000000000000000000000" ]; then
             echo "No usable before-SHA; skip."
             exit 0
           fi
-          if ! git cat-file -e "${BEFORE}^{commit}" 2>/dev/null; then
+          if ! git cat-file -e "${BEFORE_EFFECTIVE}^{commit}" 2>/dev/null; then
             echo "before SHA not found; skip."
             exit 0
           fi
           cur=$(grep '^version:' pubspec.yaml | head -1 | sed -E 's/^version:[[:space:]]+//; s/[[:space:]]+$//')
-          if git diff "$BEFORE" "${GITHUB_SHA}" -- pubspec.yaml | grep -E '^[+-]version:' >/dev/null; then
+          if git diff "$BEFORE_EFFECTIVE" "${GITHUB_SHA}" -- pubspec.yaml | grep -E '^[+-]version:' >/dev/null; then
             echo "pubspec version: line changed in this push — set base+build only (no PATCH bump)."
             base="${cur%%+*}"
           else
