@@ -18,6 +18,10 @@ inputs:
   gitlab_fork_project_id:
     description: 'Pass secrets.GITLAB_FORK_PROJECT_ID from the workflow (masked in logs).'
     required: true
+  flutter_version:
+    description: 'Pin Flutter for the F-Droid recipe (e.g. from vars.FDROID_FLUTTER_VERSION in the caller workflow). Empty = latest stable from Flutter JSON.'
+    required: false
+    default: ''
 
 runs:
   using: composite
@@ -39,9 +43,11 @@ runs:
 
     - name: "📌 Flutter version for metadata recipe"
       shell: bash
+      env:
+        PINNED_FLUTTER: ${{ inputs.flutter_version }}
       run: |
         set -euo pipefail
-        V="${{ vars.FDROID_FLUTTER_VERSION }}"
+        V="${PINNED_FLUTTER:-}"
         if [ -z "${V:-}" ]; then
           V=$(curl -fsSL "https://storage.googleapis.com/flutter_infra_release/releases/releases_linux.json" \
             | jq -r '.releases[] | select(.channel=="stable") | .version' | head -1)

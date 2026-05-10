@@ -77,5 +77,6 @@ jobs:
           commit_sha: ${{ needs.commit_tag.outputs.commit_sha }}
           ref_name: ${{ needs.commit_tag.outputs.tag_name }}
           version_override: ''
+          flutter_version: ${{ vars.FDROID_FLUTTER_VERSION }}
           gitlab_token: ${{ secrets.GITLAB_TOKEN }}
           gitlab_fork_project_id: ${{ secrets.GITLAB_FORK_PROJECT_ID }}

@@ -34,5 +34,6 @@ jobs:
           commit_sha: ${{ github.sha }}
           ref_name: ${{ github.ref_name }}
           version_override: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version_override || '' }}
+          flutter_version: ${{ vars.FDROID_FLUTTER_VERSION }}
           gitlab_token: ${{ secrets.GITLAB_TOKEN }}
           gitlab_fork_project_id: ${{ secrets.GITLAB_FORK_PROJECT_ID }}
