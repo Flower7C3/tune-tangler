@@ -59,12 +59,23 @@ def _represent_quoted_scalar(dumper: yaml.SafeDumper, data: _QuotedScalar):
 
 FdroidMetadataDumper.add_representer(_QuotedScalar, _represent_quoted_scalar)
 
+
+class _MaintainerNotesLiteral(str):
+    """Serialize as YAML literal block (|) like `fdroid rewritemeta`."""
+
+
+def _represent_maintainer_notes_literal(dumper: yaml.SafeDumper, data: _MaintainerNotesLiteral):
+    return dumper.represent_scalar("tag:yaml.org,2002:str", str(data), style="|")
+
+
+FdroidMetadataDumper.add_representer(_MaintainerNotesLiteral, _represent_maintainer_notes_literal)
+
 # Literal block text must match `fdroid rewritemeta` (fdroiddata CI on trixie).
 _MAINTAINER_NOTES_REWRITEMETA = (
     "MIT. Sonic (Apache 2.0) in android/app/src/main/java/sonic/.\n\n"
     "Build: Flutter stable (version from CI / FDROID_FLUTTER_VERSION variable).\n\n"
     "Listings (Summary/Description/screenshots): Fastlane layout in the app repo\n"
-    "(fastlane/metadata/android/) — do not duplicate those keys in this YAML.\n"
+    "(fastlane/metadata/android/) — do not duplicate those keys in this YAML.\n\n"
 )
 
 
@@ -154,7 +165,7 @@ def _fix_categories(doc: dict[str, Any]) -> None:
 
 def _normalize_maintainer_notes(doc: dict[str, Any]) -> None:
     """rewritemeta emits MaintainerNotes as a literal block (|), not folded single quotes."""
-    doc["MaintainerNotes"] = _MAINTAINER_NOTES_REWRITEMETA
+    doc["MaintainerNotes"] = _MaintainerNotesLiteral(_MAINTAINER_NOTES_REWRITEMETA)
 
 
 def _normalize_update_check_mode(doc: dict[str, Any]) -> None:
@@ -211,6 +222,25 @@ def _postprocess_rewritemeta_yaml(text: str) -> str:
     body = "\n".join(_insert_rewritemeta_blank_lines(lines)) + "\n"
     body = re.sub(r"(?m)^AutoUpdateMode: ['\"]None['\"]\s*$", "AutoUpdateMode: None", body)
     body = re.sub(r"(?m)^UpdateCheckMode: ['\"]None['\"]\s*$", "UpdateCheckMode: None", body)
+    # Long init lines: rewritemeta wraps curl+URL; PyYAML keeps them on one line (width=120).
+    body = re.sub(
+        r'^      - curl -fsSL -o /tmp/flutter-sdk\.tar\.xz "'
+        r"(https://storage\.googleapis\.com/flutter_infra_release/releases/stable/linux/"
+        r'flutter_linux_\$\{FLUTTER_VERSION\}-stable\.tar\.xz)"$',
+        "      - curl -fsSL -o /tmp/flutter-sdk.tar.xz \n"
+        r'        "\1"',
+        body,
+        flags=re.MULTILINE,
+    )
+    # Blank line after last build: command before MaintainerNotes (rewritemeta style).
+    body = re.sub(
+        r"^(      - flutter build apk --release)\n(MaintainerNotes:)",
+        r"\1\n\n\2",
+        body,
+        flags=re.MULTILINE,
+    )
+    # PyYAML uses |+ for trailing newlines in literal blocks; fdroid rewritemeta uses |.
+    body = body.replace("MaintainerNotes: |+\n", "MaintainerNotes: |\n")
     return body
 
 
