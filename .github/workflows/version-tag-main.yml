@@ -36,13 +36,14 @@ permissions:
   contents: write
 
 jobs:
-  test:
+  # Job id is the left segment in Actions UI: `<this id> / …` for reusable workflows (see `test.yml` job `test`).
+  run_tests:
     if: ${{ github.event.head_commit == null || !contains(github.event.head_commit.message, '[skip ci]') }}
     uses: ./.github/workflows/test.yml
 
   version_tag:
     name: "📦 Version & tag"
-    needs: [test]
+    needs: [run_tests]
     if: ${{ github.event.head_commit == null || !contains(github.event.head_commit.message, '[skip ci]') }}
     runs-on: ubuntu-latest
     timeout-minutes: 15

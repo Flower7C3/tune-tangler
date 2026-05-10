@@ -4,34 +4,9 @@
 
 F-Droid builds and signs binaries. This app repo holds **metadata templates** (`tools/fdroid/`) and GitHub workflows.
 
-## Versioning on `main`
+**GitHub Actions:** when the MR workflow runs, what it needs from the repo (**`GITLAB_TOKEN`**, **`GITLAB_FORK_PROJECT_ID`**, optional **`FDROID_*`** variables), and how to invoke it are documented in **[`docs/development/WORKFLOWS.md`](../development/WORKFLOWS.md)** — see the **F-Droid** rows in [Workflow reference](../development/WORKFLOWS.md#workflow-reference), [Implementation](../development/WORKFLOWS.md#implementation-checkout-jobs), [Operator runbook](../development/WORKFLOWS.md#operator-runbook), and [Secrets and variables](../development/WORKFLOWS.md#secrets-and-variables). Versioning on **`main`** and **`[skip ci]`** behavior live there too.
 
-- **[`version-tag-main.yml`](../../.github/workflows/version-tag-main.yml)** — on **`push` to `main`** (same `paths-ignore` as `test.yml` for PRs): runs **tests**, then updates `pubspec`:
-  - If that push **does not** change the `version:` line: **increment PATCH** and set **`version:`** to **`NEW_PATCH+GITHUB_RUN_NUMBER`**.
-  - If the push **does** change `version:`: keep the semantic **`MAJOR.MINOR.PATCH`** from the file and set **`version:`** to **`base+GITHUB_RUN_NUMBER`** (no extra PATCH bump).
-- Commits from this workflow use **`[skip ci]`** so the next **`push` to `main`** skips **`version-tag-main`** (no test/tag loop).
-
-## F-Droid MR (single workflow)
-
-**Workflow:** [`.github/workflows/release-fdroid-app.yml`](../../.github/workflows/release-fdroid-app.yml) — **Release on F-Droid (via MR)**.
-
-**Trigger:** **`workflow_dispatch` only** — required input **`target_ref`** (existing **tag or branch**, e.g. `v1.7.0+12`). The job checks out that ref and opens / updates the **fdroiddata** MR for the resolved commit. **No** `pubspec` edits, **no** commits, **no** new tags in GitHub from this workflow (version + tag are expected from **`main`** / [`version-tag-main.yml`](../../.github/workflows/version-tag-main.yml) or from your own git flow). Version metadata for the MR comes from the **checked-out tree** (tag / `pubspec` at that commit), not from extra workflow inputs.
-
-## GitHub Actions — Secrets and variables
-
-*Repository secrets*
-
-| Secret | Purpose |
-|--------|---------|
-| `GITLAB_TOKEN` | GitLab personal access token with `api` scope (write to your fdroiddata fork). |
-
-*Repository variables*
-
-| Variable | Purpose |
-|----------|---------|
-| `GITLAB_FORK_PROJECT_ID` | **Numeric** project ID of your fdroiddata fork (GitLab → *fork* → Settings → General → Project ID). Not a secret; use a **variable**, not a secret. |
-| `FDROID_FLUTTER_VERSION` | *(Optional.)* Flutter version used in the `init` recipe (e.g. `3.29.0`). If empty, the workflow uses the **latest stable** from Flutter’s JSON (same idea as local `setup-flutter`). |
-| `FDROID_METADATA_SOURCE_BRANCH` | *(Optional.)* Branch **on your GitLab fork** where metadata commits and the MR `source_branch` live (default in script: `robot/tune-tangler`). Must be passed from the workflow as `vars.FDROID_METADATA_SOURCE_BRANCH` — defining the variable in GitHub alone is not enough until the workflow references it (see [`fdroid-metadata-mr`](../../.github/actions/fdroid-metadata-mr/action.yml)). |
+The sections below cover **fdroiddata** metadata shape, **`publish_fdroid_mr.py`**, GitLab MR CI quirks, and the **manual MR path**.
 
 ### Token or fork ID missing in CI
 
@@ -49,8 +24,6 @@ F-Droid builds and signs binaries. This app repo holds **metadata templates** (`
 - **`tools/fdroid/metadata_static.yml`** — skeleton **YAML in fdroiddata** (`License`, `Repo`, `Categories`, `Builds`, …). **Without** `Summary` / `Description` / `Name` / `AutoName`, because those keys in the fdroiddata `.yml` **override** Fastlane in the app source.
 - **`publish_fdroid_mr.py`** strips those keys from existing YAML before writing the MR (if they were left from older edits) so F-Droid can take descriptions from the GitHub repo. The script also checks for `fastlane/metadata/android/en-US/{short_description,full_description}.txt`.
 
-**Version alignment:** semantic **base** on `main` comes from **auto workflow + manual edits**; every automated bump uses **`+GITHUB_RUN_NUMBER`** as the build suffix. Release workflow tags **`v…+…`** aligned with `pubspec`.
-
 **What the script does** (`tools/fdroid/publish_fdroid_mr.py`)
 
 1. Verifies required Fastlane **`en-US`** files.
@@ -60,7 +33,7 @@ F-Droid builds and signs binaries. This app repo holds **metadata templates** (`
 5. **Removes** `Name`, `AutoName`, `Summary`, `Description` from YAML (so Fastlane in source wins).
 6. Commits the full YAML to a **stable** branch on the fork (default **`robot/tune-tangler`**). If that branch does not exist yet, it is created from `master`. If an **open** MR from that branch to **`fdroid/fdroiddata`** `master` already exists, the script **does not** open another MR — it only pushes a new commit so the existing MR updates.
 
-Optional env: **`FDROID_METADATA_SOURCE_BRANCH`** (override the default `robot/tune-tangler`).
+Optional env **`FDROID_METADATA_SOURCE_BRANCH`** overrides the default `robot/tune-tangler` branch name on the fork; mirror the GitHub **variable** of the same name ([WORKFLOWS](../development/WORKFLOWS.md#secrets-and-variables), [`fdroid-metadata-mr`](../../.github/actions/fdroid-metadata-mr/action.yml)).
 
 **Cleaning up older spam on your fork:** close redundant open MRs to upstream and delete obsolete `robot/tune-tangler-*` branches if you no longer need them; keep one MR on `robot/tune-tangler` going forward.
 
@@ -70,7 +43,7 @@ Optional env: **`FDROID_METADATA_SOURCE_BRANCH`** (override the default `robot/t
 
 1. Fork [`fdroiddata`](https://gitlab.com/fdroid/fdroiddata).
 2. File: **`metadata/pro.kwiatek.tune_tangler.yml`** (path is `metadata/<applicationId>.yml`; see [Build metadata reference](https://f-droid.org/en/docs/Build_Metadata_Reference/)) — patterns in `tools/fdroid/metadata_static.yml` and `tools/fdroid/build_template.yml`.
-3. Open an MR **to upstream** [`fdroid/fdroiddata`](https://gitlab.com/fdroid/fdroiddata): target branch **`master`**, source branch on **your fork** (CI defaults to `robot/tune-tangler` unless you set **`FDROID_METADATA_SOURCE_BRANCH`**).
+3. Open an MR **to upstream** [`fdroid/fdroiddata`](https://gitlab.com/fdroid/fdroiddata): target branch **`master`**, source branch on **your fork** (CI defaults to `robot/tune-tangler` unless you set **`FDROID_METADATA_SOURCE_BRANCH`** as in [WORKFLOWS](../development/WORKFLOWS.md#secrets-and-variables)).
 
 ## Official references
 
@@ -81,12 +54,3 @@ Optional env: **`FDROID_METADATA_SOURCE_BRANCH`** (override the default `robot/t
 ## Native dependencies (Android)
 
 “Modified” audio export: **MediaCodec** + **Sonic** (`android/app/src/main/java/sonic/`, Apache 2.0).
-
-## Other workflows in this repo
-
-- [`test.yml`](../../.github/workflows/test.yml) — CI on PR and `push` to `main` (skips when the pushed commit message contains **`[skip ci]`**).
-- [`version-tag-main.yml`](../../.github/workflows/version-tag-main.yml) — on **`push` to `main`**: tests, then `pubspec` **semver + `GITHUB_RUN_NUMBER`**, commit + tag (with **`[skip ci]`**).
-- [`release-fdroid-app.yml`](../../.github/workflows/release-fdroid-app.yml) — **MR to fdroiddata** for a **ref you choose** (no `pubspec`/commit/tag in Actions).
-- [`release-apk-aab-google-play.yml`](../../.github/workflows/release-apk-aab-google-play.yml) — build + verify + GitHub Release for an **existing** tag (no test job; names from tag); fails if a release for that tag already exists.
-
-Details: [../development/WORKFLOWS.md](../development/WORKFLOWS.md).

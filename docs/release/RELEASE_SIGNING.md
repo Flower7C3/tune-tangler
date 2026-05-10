@@ -31,7 +31,7 @@ Without a shared release keystore, each build machine may use a different debug 
 ## Solution <a name="solution"></a>
 
 Use one keystore stored as GitHub Actions secrets for CI/CD builds.  
-The **legacy** workflow produces an **App Bundle (`.aab`)** as well as APKs.
+The **APK/AAB release** workflow ([`release-apk-aab-google-play.yml`](../../.github/workflows/release-apk-aab-google-play.yml)) produces an **App Bundle (`.aab`)** as well as APKs.
 
 ## One-time setup <a name="one-time-configuration-steps"></a>
 
@@ -77,7 +77,7 @@ Add these **Actions** secrets: **Settings → Secrets and variables → Actions*
 | `KEY_ALIAS` | from `keyAlias` |
 | `KEY_PASSWORD` | from `keyPassword` |
 
-The legacy workflow generates `key.properties` during the job; do not commit production passwords to the repo.
+That workflow generates `key.properties` during the job; do not commit production passwords to the repo.
 
 ### 4. Verify configuration <a name="verify-configuration"></a>
 
@@ -87,7 +87,7 @@ The legacy workflow generates `key.properties` during the job; do not commit pro
 
 ### 5. Build and test <a name="build-and-test"></a>
 
-1. **Actions** → legacy release workflow  
+1. **Actions** → **Release on GitHub (APK/AAB files)** (`release-apk-aab-google-play.yml`)  
 2. **Run workflow**  
 3. Confirm signed artifacts and `jarsigner` verification in the log
 
@@ -121,4 +121,4 @@ The legacy workflow generates `key.properties` during the job; do not commit pro
 - Consistent signatures across CI builds
 - Fewer user-facing upgrade conflicts
 - Credentials live in GitHub secrets, not in the tree
-- Automated signing in the legacy pipeline
+- Automated signing in the APK/AAB release workflow
