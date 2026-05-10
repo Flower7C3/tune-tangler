@@ -52,6 +52,10 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
+      # Required before any ./.github/actions/* uses — the runner loads action.yml from the workspace.
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
       - name: "🧪 Checkout, Flutter, tests"
         uses: ./.github/actions/checkout-flutter-test
         with:

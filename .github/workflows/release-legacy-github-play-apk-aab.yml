@@ -21,6 +21,9 @@ jobs:
     name: "STEP 1 — Test"
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
       - name: "🧪 Checkout, Flutter, tests"
         uses: ./.github/actions/checkout-flutter-test
         with:
@@ -36,6 +39,9 @@ jobs:
       computed_version: ${{ steps.suffix.outputs.computed_version }}
       tag_name: ${{ steps.suffix.outputs.tag_name }}
     steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
       - name: Apply base+build to pubspec and upload artifact
         id: suffix
         uses: ./.github/actions/pubspec-set-build-suffix
@@ -49,7 +55,7 @@ jobs:
 
     steps:
       - name: "🔧 Checkout code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -138,6 +144,9 @@ jobs:
       tag_name: ${{ steps.ct.outputs.tag_name }}
       commit_sha: ${{ steps.ct.outputs.commit_sha }}
     steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
       - name: Commit, push branch, annotated tag
         id: ct
         uses: ./.github/actions/pubspec-commit-tag-push
@@ -154,7 +163,7 @@ jobs:
 
     steps:
       - name: "🔧 Checkout code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: "📥 Download build artifacts"
         uses: actions/download-artifact@v4

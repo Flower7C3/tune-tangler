@@ -32,7 +32,7 @@ runs:
   steps:
     - name: "🔧 Checkout code"
       if: ${{ inputs.skip_checkout != 'true' }}
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         fetch-depth: ${{ fromJSON(inputs.fetch_depth) }}
 
