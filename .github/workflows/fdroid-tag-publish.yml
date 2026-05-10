@@ -1,5 +1,5 @@
 # Tag push or manual run → GitLab MR on fdroiddata (composite action).
-name: F-Droid metadata (GitLab MR)
+name: F-Droid metadata (MR)
 
 on:
   push:
@@ -24,6 +24,9 @@ jobs:
   fdroid-metadata:
     name: F-Droid metadata (GitLab MR)
     runs-on: ubuntu-latest
+    env:
+      GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+      GITLAB_FORK_PROJECT_ID: ${{ vars.GITLAB_FORK_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -35,5 +38,3 @@ jobs:
           ref_name: ${{ github.ref_name }}
           version_override: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version_override || '' }}
           flutter_version: ${{ vars.FDROID_FLUTTER_VERSION }}
-          gitlab_token: ${{ secrets.GITLAB_TOKEN }}
-          gitlab_fork_project_id: ${{ secrets.GITLAB_FORK_PROJECT_ID }}

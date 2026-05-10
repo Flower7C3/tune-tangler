@@ -28,18 +28,28 @@ The changelog list is **not** sent to GitLab or fdroiddata; the MR uses the tagg
 - `push` of tags matching: `v1.2.3`, `v1.2.3+4`, `1.2.3`, `1.2.3+4`, etc. (e.g. a tag created locally).
 - Optionally manually: **Actions → F-Droid metadata (GitLab MR) → Run workflow** — input **`version_override`** overrides version from the tag / `pubspec` for the MR script only (**does not** change `pubspec` or GitHub tags).
 
-**GitHub repository secrets** (Settings → Secrets and variables → Actions)
+**GitHub Actions — Secrets and variables** (Settings → Secrets and variables → Actions)
+
+*Repository secrets*
 
 | Secret | Purpose |
 |--------|---------|
 | `GITLAB_TOKEN` | GitLab personal access token with `api` scope (write to your fdroiddata fork). |
-| `GITLAB_FORK_PROJECT_ID` | **Numeric** project ID of the fork (GitLab → *your fdroiddata fork* → Settings → General → Project ID). |
 
-**Optional variable** — *Repository variables*
+*Repository variables*
 
 | Variable | Purpose |
 |----------|---------|
-| `FDROID_FLUTTER_VERSION` | Flutter version used in the `init` recipe (e.g. `3.29.0`). If empty, the workflow uses the **latest stable** from Flutter’s JSON (same idea as local `setup-flutter`). |
+| `GITLAB_FORK_PROJECT_ID` | **Numeric** project ID of your fdroiddata fork (GitLab → *fork* → Settings → General → Project ID). Not a secret; use a **variable**, not a secret. |
+| `FDROID_FLUTTER_VERSION` | *(Optional.)* Flutter version used in the `init` recipe (e.g. `3.29.0`). If empty, the workflow uses the **latest stable** from Flutter’s JSON (same idea as local `setup-flutter`). |
+
+### Token or fork ID missing in CI
+
+1. Open the failed run and check the **repository** in the header — secrets and variables exist **per repo**. If you use a **fork**, configure them **on that fork**, not only on the upstream repository.
+2. **`GITLAB_TOKEN`:** create as an **Actions** repository **secret** (not only Dependabot). Name exactly `GITLAB_TOKEN`.
+3. **`GITLAB_FORK_PROJECT_ID`:** create as an **Actions** repository **variable** (same settings page → **Variables** tab). Name exactly `GITLAB_FORK_PROJECT_ID` (digits only, no spaces).
+4. **Organization secrets / variables:** an org owner must grant **Repository access** to this repository for each item.
+5. Re-run the workflow after saving (no code change required beyond this repo’s workflow expecting a variable for the fork ID).
 
 **`metadata_static.yml` vs Fastlane**
 

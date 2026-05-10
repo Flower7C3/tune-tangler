@@ -67,6 +67,9 @@ jobs:
     name: "STEP 4 — F-Droid MR (fdroiddata)"
     needs: [commit_tag]
     runs-on: ubuntu-latest
+    env:
+      GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+      GITLAB_FORK_PROJECT_ID: ${{ vars.GITLAB_FORK_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -78,5 +81,3 @@ jobs:
           ref_name: ${{ needs.commit_tag.outputs.tag_name }}
           version_override: ''
           flutter_version: ${{ vars.FDROID_FLUTTER_VERSION }}
-          gitlab_token: ${{ secrets.GITLAB_TOKEN }}
-          gitlab_fork_project_id: ${{ secrets.GITLAB_FORK_PROJECT_ID }}

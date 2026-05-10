@@ -82,7 +82,7 @@
 3. **STEP 3 — Commit, tag, and push** — [`pubspec-commit-tag-push`](../../.github/actions/pubspec-commit-tag-push/action.yml): checkout, download artifact, commit if `pubspec` changed, push branch, **commits since last tag** (composite output `commits` + optional **job summary**), annotated tag `v…+…`, push tag. **STEP 4** only needs **`commit_sha`** and **`tag_name`** from this job (see [`fdroid-metadata-mr`](../../.github/actions/fdroid-metadata-mr/action.yml)); the commit list is for humans in the Actions UI, not the GitLab MR.
 4. **STEP 4 — F-Droid MR** — [`fdroid-metadata-mr`](../../.github/actions/fdroid-metadata-mr/action.yml) with that commit SHA and tag ref. With a tag like `v1.2.3+42`, F-Droid **`versionCode`** is the integer after **`+`** (here: `GITHUB_RUN_NUMBER`).
 
-Requires **`GITLAB_TOKEN`** and **`GITLAB_FORK_PROJECT_ID`**. Optional **`FDROID_FLUTTER_VERSION`** variable (see [docs/release/FDROID.md](../release/FDROID.md)).
+Requires on the MR job **`GITLAB_TOKEN`** (**job `env`** from a repository **secret**) and **`GITLAB_FORK_PROJECT_ID`** (**job `env`** from a repository **variable**). Optional **`FDROID_FLUTTER_VERSION`** variable (see [docs/release/FDROID.md](../release/FDROID.md)).
 
 ### 3. Legacy — GitHub APK/AAB + Release <a name="legacy-github-release"></a>
 
@@ -158,7 +158,7 @@ Reusable steps under [`.github/actions/`](../../.github/actions/):
 - **`pubspec-auto-patch-main.yml`:** PATCH bump commit on `main` only (no binaries).
 - **`fdroid-app-release.yml`:** no binaries; `pubspec` + tag + GitLab MR only.
 - **Legacy workflow:** APKs, `.aab`, updated `pubspec` (retention per YAML).
-- **`fdroid-tag-publish.yml` + `fdroid-metadata-mr` action:** no app binaries in Actions (metadata MR only).
+- **`fdroid-tag-publish.yml` + `fdroid-metadata-mr` action:** no app binaries in Actions (metadata MR only). GitLab secrets must be set as **job `env`** on the MR job (see [FDROID.md](../release/FDROID.md)).
 
 ## 🔐 Keystore (legacy workflow only) <a name="keystore-configuration"></a>
 
@@ -170,11 +170,11 @@ The **legacy** workflow decodes `KEYSTORE_BASE64` and writes `android/key.proper
 
 **Legacy workflow:** `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_PASSWORD`, `KEY_ALIAS`.
 
-**F-Droid MR (reusable + tag workflow):** `GITLAB_TOKEN`, `GITLAB_FORK_PROJECT_ID` (see [docs/release/FDROID.md](../release/FDROID.md)).
+**F-Droid MR (reusable + tag workflow):** `GITLAB_TOKEN` on the MR job as **job `env`** from a repository secret (see [docs/release/FDROID.md](../release/FDROID.md)).
 
 ### Variables (non-sensitive) <a name="variables-non-sensitive"></a>
 
-Optional **`FDROID_FLUTTER_VERSION`** (repository variable) for the F-Droid MR workflow — see [FDROID.md](../release/FDROID.md).
+**F-Droid MR:** **`GITLAB_FORK_PROJECT_ID`** (required — numeric GitLab project ID of your fdroiddata fork). Optional **`FDROID_FLUTTER_VERSION`** — see [FDROID.md](../release/FDROID.md).
 
 ## 🚨 Troubleshooting <a name="troubleshooting"></a>
 
