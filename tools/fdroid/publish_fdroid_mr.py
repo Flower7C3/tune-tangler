@@ -179,6 +179,20 @@ def _normalize_update_check_mode(doc: dict[str, Any]) -> None:
         doc["UpdateCheckMode"] = _QuotedScalar(str(um))
 
 
+def _canonical_github_repo_url(repo: str) -> str:
+    """fdroiddata MR pipeline `git redirect` uses `git ls-remote` with http.followRedirects=false.
+
+    GitHub smart-HTTP without the `.git` suffix can fail or redirect from GitLab CI; upstream
+    `tools/rewrite-git-redirects.py` rewrites to the `.git` URL — MRs must already match.
+    """
+    s = repo.strip().rstrip("/")
+    if s.endswith(".git") or "github.com/" not in s:
+        return repo.strip()
+    if re.match(r"^https://github\.com/[^/]+/[^/]+/?$", s):
+        return s + ".git"
+    return repo.strip()
+
+
 def _normalize_metadata(doc: dict[str, Any], version_name: str, version_code: int) -> None:
     """Match fdroiddata schemas/metadata.json, fdroid lint, and `fdroid rewritemeta` output."""
     _fix_categories(doc)
@@ -186,6 +200,9 @@ def _normalize_metadata(doc: dict[str, Any], version_name: str, version_code: in
     doc["AutoUpdateMode"] = "None"
     _normalize_update_check_mode(doc)
     _normalize_maintainer_notes(doc)
+    r = doc.get("Repo")
+    if isinstance(r, str) and r.strip():
+        doc["Repo"] = _canonical_github_repo_url(r)
     doc["CurrentVersion"] = version_name
     doc["CurrentVersionCode"] = int(version_code)
     builds = doc.get("Builds")
