@@ -15,7 +15,7 @@ init:
   - flutter config --no-analytics
   - flutter precache --android
   - flutter --version
-output: build/app/outputs/flutter-apk/app-release-unsigned.apk
+output: build/app/outputs/flutter-apk/app-release.apk
 prebuild:
   - export PATH="$HOME/flutter/bin:$PATH"
   - flutter pub get
