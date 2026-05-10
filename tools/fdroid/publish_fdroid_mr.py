@@ -59,6 +59,14 @@ def _represent_quoted_scalar(dumper: yaml.SafeDumper, data: _QuotedScalar):
 
 FdroidMetadataDumper.add_representer(_QuotedScalar, _represent_quoted_scalar)
 
+# Literal block text must match `fdroid rewritemeta` (fdroiddata CI on trixie).
+_MAINTAINER_NOTES_REWRITEMETA = (
+    "MIT. Sonic (Apache 2.0) in android/app/src/main/java/sonic/.\n\n"
+    "Build: Flutter stable (version from CI / FDROID_FLUTTER_VERSION variable).\n\n"
+    "Listings (Summary/Description/screenshots): Fastlane layout in the app repo\n"
+    "(fastlane/metadata/android/) — do not duplicate those keys in this YAML.\n"
+)
+
 
 _BUILD_KEY_ORDER = (
     "versionName",
@@ -73,6 +81,20 @@ _BUILD_KEY_ORDER = (
 )
 
 
+def _normalize_subdir_value(sd: Any) -> str:
+    """F-Droid metadata.json: subdir must match ^\\./ (root is './'); bare '.' fails check-jsonschema."""
+    if sd is None:
+        return "./"
+    if not isinstance(sd, str):
+        return "./"
+    s = sd.strip()
+    if s in (".", ""):
+        return "./"
+    if s.startswith("./"):
+        return s
+    return "./" + s.lstrip("/")
+
+
 def _canonical_build(build: dict[str, Any]) -> dict[str, Any]:
     ordered: dict[str, Any] = {}
     for key in _BUILD_KEY_ORDER:
@@ -81,6 +103,16 @@ def _canonical_build(build: dict[str, Any]) -> dict[str, Any]:
     for key, val in build.items():
         if key not in ordered:
             ordered[key] = val
+    ordered["subdir"] = _normalize_subdir_value(ordered.get("subdir"))
+    # Debian Trixie fdroid buildserver: no openjdk-17-jdk-headless; use 21.
+    sudo = ordered.get("sudo")
+    if isinstance(sudo, list):
+        ordered["sudo"] = [
+            line.replace("openjdk-17-jdk-headless", "openjdk-21-jdk-headless")
+            if isinstance(line, str)
+            else line
+            for line in sudo
+        ]
     return ordered
 
 
@@ -115,18 +147,29 @@ def _fix_categories(doc: dict[str, Any]) -> None:
     doc["Categories"] = out
 
 
-def _normalize_metadata(doc: dict[str, Any], version_name: str, version_code: int) -> None:
-    """Match fdroiddata schemas/metadata.json and fdroid lint."""
-    _fix_categories(doc)
-    _coerce_archive_policy(doc)
-    doc["AutoUpdateMode"] = _QuotedScalar("None")
+def _normalize_maintainer_notes(doc: dict[str, Any]) -> None:
+    """rewritemeta emits MaintainerNotes as a literal block (|), not folded single quotes."""
+    doc["MaintainerNotes"] = _MAINTAINER_NOTES_REWRITEMETA
+
+
+def _normalize_update_check_mode(doc: dict[str, Any]) -> None:
+    """Store modes as strings; _postprocess_rewritemeta_yaml emits plain `None` like rewritemeta."""
     um = doc.get("UpdateCheckMode")
-    if um is None:
-        doc["UpdateCheckMode"] = _QuotedScalar("None")
+    if um is None or (isinstance(um, str) and um.strip() == "None"):
+        doc["UpdateCheckMode"] = "None"
     elif isinstance(um, str):
         doc["UpdateCheckMode"] = _QuotedScalar(um)
     else:
         doc["UpdateCheckMode"] = _QuotedScalar(str(um))
+
+
+def _normalize_metadata(doc: dict[str, Any], version_name: str, version_code: int) -> None:
+    """Match fdroiddata schemas/metadata.json, fdroid lint, and `fdroid rewritemeta` output."""
+    _fix_categories(doc)
+    _coerce_archive_policy(doc)
+    doc["AutoUpdateMode"] = "None"
+    _normalize_update_check_mode(doc)
+    _normalize_maintainer_notes(doc)
     doc["CurrentVersion"] = version_name
     doc["CurrentVersionCode"] = int(version_code)
     builds = doc.get("Builds")
@@ -134,6 +177,39 @@ def _normalize_metadata(doc: dict[str, Any], version_name: str, version_code: in
         for i, b in enumerate(builds):
             if isinstance(b, dict):
                 builds[i] = _canonical_build(b)
+
+
+def _insert_rewritemeta_blank_lines(lines: list[str]) -> list[str]:
+    """Blank line after IssueTracker before RepoType; after Repo before Builds (rewritemeta style)."""
+    out: list[str] = []
+    for i, line in enumerate(lines):
+        prev_non_empty = ""
+        j = i - 1
+        while j >= 0:
+            if lines[j].strip():
+                prev_non_empty = lines[j]
+                break
+            j -= 1
+        if line.startswith("RepoType:") and prev_non_empty.startswith("IssueTracker:"):
+            if out and out[-1].strip():
+                out.append("")
+        if line.startswith("Builds:") and prev_non_empty.startswith("Repo:"):
+            if out and out[-1].strip():
+                out.append("")
+        out.append(line)
+    return out
+
+
+def _postprocess_rewritemeta_yaml(text: str) -> str:
+    """PyYAML differs from `fdroid rewritemeta` on None quoting and section spacing."""
+    lines = text.splitlines()
+    body = "\n".join(_insert_rewritemeta_blank_lines(lines)) + "\n"
+    body = re.sub(r"(?m)^AutoUpdateMode: ['\"]None['\"]\s*$", "AutoUpdateMode: None", body)
+    body = re.sub(r"(?m)^UpdateCheckMode: ['\"]None['\"]\s*$", "UpdateCheckMode: None", body)
+    # Bare `subdir: .` is rejected by check-jsonschema (YAML/JSON edge cases); require `./`.
+    body = re.sub(r"(?m)^(\s+)subdir:\s*['\"]\.['\"]\s*$", r"\1subdir: ./", body)
+    body = re.sub(r"(?m)^(\s+)subdir:\s*\.\s*$", r"\1subdir: ./", body)
+    return body
 
 
 def _env(name: str, default: str | None = None) -> str:
@@ -243,7 +319,7 @@ def _substitute_build_template(
 
 
 def _dump_metadata(doc: dict[str, Any]) -> str:
-    return yaml.dump(
+    raw = yaml.dump(
         doc,
         Dumper=FdroidMetadataDumper,
         allow_unicode=True,
@@ -251,6 +327,7 @@ def _dump_metadata(doc: dict[str, Any]) -> str:
         sort_keys=False,
         width=120,
     )
+    return _postprocess_rewritemeta_yaml(raw)
 
 
 # If present in fdroiddata metadata YAML, these override Fastlane/Triple-T files in the app
