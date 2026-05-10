@@ -1,66 +1,66 @@
-# 🔧 Setup Środowiska Developerskiego
+# 🔧 Developer environment setup
 
-> Szczegółowy przewodnik konfiguracji środowiska dla TuneTangler
+> Detailed environment setup for Tune Tangler
 
-## 📋 Spis Treści
+## 📋 Table of contents
 
-- [📋 Wymagania](#requirements)
-  - [💻 System Operacyjny](#operating-system)
-  - [🛠️ Wymagane Narzędzia](#required-tools)
-- [🚀 Instalacja Flutter](#flutter-installation)
-  - [📥 Oficjalne Instrukcje](#official-instructions)
-  - [⚙️ Po Instalacji](#after-installation)
-  - [🔍 Weryfikacja Flutter](#flutter-verification)
-- [🤖 Instalacja Android Studio](#android-studio-installation)
-  - [📥 Oficjalne Instrukcje](#official-instructions-1)
-  - [⚙️ Po Instalacji](#after-installation-1)
-  - [📱 Emulator Android](#android-emulator)
-- [🍎 Instalacja Xcode (macOS)](#xcode-installation)
-  - [📥 Oficjalne Instrukcje](#official-instructions-2)
-  - [⚙️ Po Instalacji](#after-installation-2)
-  - [📱 Simulator iOS](#ios-simulator)
-- [⚙️ Konfiguracja](#configuration)
-  - [🔑 Licencje Android](#android-licenses)
-  - [📱 Urządzenia](#devices)
-  - [🎯 Flutter Doctor](#flutter-doctor)
-- [🔍 Weryfikacja](#verification)
-  - [✅ Checklist](#checklist)
-  - [🧪 Test Instalacji](#installation-test)
-- [🚨Jeśli coś nie działa](#troubleshooting)
-  - [❌ Flutter not found](#flutter-not-found)
-  - [❌ Android SDK not found](#android-sdk-not-found)
-  - [❌ Java not found](#java-not-found)
-  - [❌ Emulator not starting](#emulator-not-starting)
-  - [❌ Xcode issues](#xcode-issues)
-- [📚 Dodatkowe Zasoby](#additional-resources)
+- [Requirements](#requirements)
+  - [Operating system](#operating-system)
+  - [Required tools](#required-tools)
+- [Flutter installation](#flutter-installation)
+  - [Official instructions](#official-instructions)
+  - [After installation](#after-installation)
+  - [Verify Flutter](#flutter-verification)
+- [Android Studio](#android-studio-installation)
+  - [Official instructions](#official-instructions-1)
+  - [After installation](#after-installation-1)
+  - [Android emulator](#android-emulator)
+- [Xcode (macOS)](#xcode-installation)
+  - [Official instructions](#official-instructions-2)
+  - [After installation](#after-installation-2)
+  - [iOS Simulator](#ios-simulator)
+- [Configuration](#configuration)
+  - [Android licenses](#android-licenses)
+  - [Devices](#devices)
+  - [Flutter doctor](#flutter-doctor)
+- [Verification](#verification)
+  - [Checklist](#checklist)
+  - [Installation smoke test](#installation-test)
+- [Troubleshooting](#troubleshooting)
+  - [Flutter not found](#flutter-not-found)
+  - [Android SDK not found](#android-sdk-not-found)
+  - [Java not found](#java-not-found)
+  - [Emulator not starting](#emulator-not-starting)
+  - [Xcode issues](#xcode-issues)
+- [Additional resources](#additional-resources)
 
-## 📋 Wymagania <a name="requirements"></a>
+## ✅ Requirements <a name="requirements"></a>
 
-### 💻 System Operacyjny <a name="operating-system"></a>
+### Operating system <a name="operating-system"></a>
 
 - **Windows:** 10/11 (64-bit)
 - **macOS:** 10.15+ (Catalina)
 - **Linux:** Ubuntu 18.04+ / Debian 10+
 
-### 🛠️ Wymagane Narzędzia <a name="required-tools"></a>
+### Required tools <a name="required-tools"></a>
 
 - **Flutter:** 3.35.1+
 - **Dart:** 3.6.1+
 - **Git:** 2.30+
-- **Java:** 17 (dla Android)
+- **Java:** 17 (for Android)
 
-## 🚀 Instalacja Flutter <a name="flutter-installation"></a>
+## 🚀 Flutter installation <a name="flutter-installation"></a>
 
-### 📥 Oficjalne Instrukcje <a name="official-instructions"></a>
+### Official instructions <a name="official-instructions"></a>
 
-- **[Flutter Installation](https://docs.flutter.dev/get-started/install)** – Oficjalny przewodnik instalacji
-- **[Flutter Setup](https://docs.flutter.dev/get-started/install)** – Konfiguracja środowiska
+- **[Install Flutter](https://docs.flutter.dev/get-started/install)**
+- **[Flutter setup](https://docs.flutter.dev/get-started/install)**
 
-### ⚙️ Po Instalacji <a name="after-installation"></a>
+### After installation <a name="after-installation"></a>
 
-Dodaj Flutter do PATH i uruchom `flutter doctor` aby sprawdzić konfigurację.
+Add Flutter to `PATH` and run `flutter doctor`.
 
-### 🔍 Weryfikacja Flutter <a name="flutter-verification"></a>
+### Verify Flutter <a name="flutter-verification"></a>
 
 ```bash
 flutter --version
@@ -69,94 +69,76 @@ flutter channel
 flutter upgrade
 ```
 
-**Sprawdź:**
+## 🤖 Android Studio <a name="android-studio-installation"></a>
 
-- Instalację
-- Środowisko
-- Kanał
+### Official instructions <a name="official-instructions-1"></a>
 
-## 🤖 Instalacja Android Studio <a name="android-studio-installation"></a>
+- **[Install Android Studio](https://developer.android.com/studio/install)**
+- **[Configure the SDK](https://developer.android.com/studio/intro/studio-config)**
 
-### 📥 Oficjalne Instrukcje <a name="official-instructions-1"></a>
+### After installation <a name="after-installation-1"></a>
 
-- **[Android Studio Installation](https://developer.android.com/studio/install)** – Oficjalny przewodnik instalacji
-- **[Android SDK Setup](https://developer.android.com/studio/intro/studio-config)** – Konfiguracja SDK
+Install the Android SDK and set `ANDROID_HOME` (or `ANDROID_SDK_ROOT`) in your environment.
 
-### ⚙️ Po Instalacji <a name="after-installation-1"></a>
+### Android emulator <a name="android-emulator"></a>
 
-Zainstaluj Android SDK i ustaw zmienną `ANDROID_HOME` w zmiennych środowiskowych.
+#### 1. Create an AVD
 
-### 📱 Emulator Android <a name="android-emulator"></a>
-
-#### 1. Tworzenie AVD
-
-**W Android Studio:**
+In **Android Studio:**  
 Tools → AVD Manager → Create Virtual Device
 
-**Wybierz:**
+Suggested:
 
-- Device: Pixel 7 (lub inny)
-- System Image: API 34 (Android 14.0)
+- Device: Pixel 7 (or similar)
+- System image: API 34 (Android 14)
 - RAM: 4GB+
-- Internal Storage: 8GB+
+- Internal storage: 8GB+
 
-#### 2. Uruchomienie
+#### 2. Launch
 
-Z **terminala**:
+From a **terminal**:
 
 ```bash
 flutter emulators --launch <emulator_name>
 ```
 
-Lub z **Android Studio:**
-AVD Manager → Start (▶️)
+Or from **Android Studio:** AVD Manager → Start (▶️)
 
-## 🍎 Instalacja Xcode (macOS) <a name="xcode-installation"></a>
+## 🍎 Xcode (macOS) <a name="xcode-installation"></a>
 
-### 📥 Oficjalne Instrukcje <a name="official-instructions-2"></a>
+### Official instructions <a name="official-instructions-2"></a>
 
-- **[Xcode Installation](https://developer.apple.com/xcode/)** – Pobierz z App Store
-- **[Command Line Tools](https://developer.apple.com/library/archive/technotes/tn2339/_index.html)** – Instalacja
-  narzędzi wiersza poleceń
+- **[Xcode](https://developer.apple.com/xcode/)** — App Store
+- **[Command Line Tools](https://developer.apple.com/library/archive/technotes/tn2339/_index.html)**
 
-### ⚙️ Po Instalacji <a name="after-installation-2"></a>
+### After installation <a name="after-installation-2"></a>
 
-Uruchom `xcode-select --install` aby zainstalować Command Line Tools.
+Run `xcode-select --install` for the command-line tools if needed.
 
-### 📱 Simulator iOS <a name="ios-simulator"></a>
+### iOS Simulator <a name="ios-simulator"></a>
 
 ```bash
 open -a Simulator
 flutter emulators --launch <simulator_name>
 ```
 
-## ⚙️ Konfiguracja <a name="configuration"></a>
+## ⚙️ Configuration <a name="configuration"></a>
 
-### 🔑 Licencje Android <a name="android-licenses"></a>
+### Android licenses <a name="android-licenses"></a>
 
 ```bash
 flutter doctor --android-licenses
 flutter doctor
 ```
 
-**Sprawdź:**
-
-- Akceptuj licencje
-- Status
-
-### 📱 Urządzenia <a name="devices"></a>
+### Devices <a name="devices"></a>
 
 ```bash
 flutter devices
 adb devices
 ```
 
-**Sprawdź:**
-
-- Dostępne urządzenia
-- Połączenie USB
-
-### 🎯 Flutter Doctor <a name="flutter-doctor"></a>
+### Flutter doctor <a name="flutter-doctor"></a>
 
 ```bash
 flutter doctor -v
@@ -164,24 +146,19 @@ flutter doctor --android
 flutter doctor --ios
 ```
 
-**Sprawdź:**
+## 🔍 Verification <a name="verification"></a>
 
-- Pełna diagnostyka
-- Konkretne platformy
+### Checklist <a name="checklist"></a>
 
-## 🔍 Weryfikacja <a name="verification"></a>
+- [ ] Flutter installed and on `PATH`
+- [ ] Android Studio with SDK
+- [ ] Android emulator or physical device
+- [ ] Xcode (macOS) with Command Line Tools
+- [ ] iOS Simulator (macOS)
+- [ ] All Android licenses accepted
+- [ ] `flutter doctor` clean
 
-### ✅ Checklist <a name="checklist"></a>
-
-- [ ] Flutter zainstalowany i w PATH
-- [ ] Android Studio z SDK
-- [ ] Emulator Android lub urządzenie
-- [ ] Xcode (macOS) z Command Line Tools
-- [ ] Simulator iOS (macOS)
-- [ ] Wszystkie licencje zaakceptowane
-- [ ] `flutter doctor` bez błędów
-
-### 🧪 Test Instalacji <a name="installation-test"></a>
+### Installation smoke test <a name="installation-test"></a>
 
 ```bash
 flutter --version
@@ -192,42 +169,35 @@ cd test_app
 flutter run
 ```
 
-**Sprawdź:**
+## 🚨 Troubleshooting <a name="troubleshooting"></a>
 
-1. Flutter
-2. Środowisko
-3. Urządzenia
-4. Test build
+### Flutter not found <a name="flutter-not-found"></a>
 
-## 🚨Jeśli coś nie działa <a name="troubleshooting"></a>
+[Update your PATH](https://docs.flutter.dev/get-started/install#update-your-path)
 
-### ❌ Flutter not found <a name="flutter-not-found"></a>
+### Android SDK not found <a name="android-sdk-not-found"></a>
 
-Sprawdź [Flutter Installation Guide](https://docs.flutter.dev/get-started/install#update-your-path)
+[SDK location in Android Studio](https://developer.android.com/studio/intro/studio-config#sdk-location)
 
-### ❌ Android SDK not found <a name="android-sdk-not-found"></a>
+### Java not found <a name="java-not-found"></a>
 
-Sprawdź [Android Studio Setup](https://developer.android.com/studio/intro/studio-config#sdk-location)
-
-### ❌ Java not found <a name="java-not-found"></a>
-
-Sprawdź [Java Installation](https://adoptium.net/) lub użyj:
+[Temurin / Adoptium](https://adoptium.net/) or:
 
 - macOS: `brew install openjdk@17`
 - Linux: `sudo apt install openjdk-17-jdk`
 
-### ❌ Emulator not starting <a name="emulator-not-starting"></a>
+### Emulator not starting <a name="emulator-not-starting"></a>
 
-Sprawdź [AVD Manager](https://developer.android.com/studio/run/managing-avds) lub uruchom z Android Studio
+[AVD Manager](https://developer.android.com/studio/run/managing-avds) or start from Android Studio.
 
-### ❌ Xcode issues <a name="xcode-issues"></a>
+### Xcode issues <a name="xcode-issues"></a>
 
-Sprawdź [Xcode Troubleshooting](https://developer.apple.com/library/archive/technotes/tn2339/_index.html)
+[Xcode troubleshooting](https://developer.apple.com/library/archive/technotes/tn2339/_index.html)
 
-## 📚 Dodatkowe Zasoby <a name="additional-resources"></a>
+## 📚 Additional resources <a name="additional-resources"></a>
 
-- **[📖 Development Guide](../../README.md)** – Główny przewodnik
-- **[⚡ Quick Start](QUICKSTART.md)** – Szybkie uruchomienie
-- **[🔨 Makefile](QUICKSTART.md#makefile)** – Komendy i narzędzia
-- **[Flutter Docs](https://docs.flutter.dev/)** – Oficjalna dokumentacja
-- **[Android Docs](https://developer.android.com/)** – Dokumentacja Android
+- **[Development guide](../../README.md)**
+- **[Quick start](QUICKSTART.md)**
+- **[Makefile](QUICKSTART.md#makefile)**
+- **[Flutter docs](https://docs.flutter.dev/)**
+- **[Android docs](https://developer.android.com/)**

@@ -1,0 +1,56 @@
+Tune Tangler (w polskiej wersji aplikacji: Plątacz Melodii) to prosta siatka na krótkie muzyczne pomysły. Nagrasz wbudowanym mikrofonem
+albo urządzeniem audio podłączonym przez USB.
+Możesz też wczytać plik z urządzenia.
+
+Odtwarzaj ścieżki naraz, żeby szły w jednym tempie, albo niezależnie od siebie. Ustaw zapętlenie albo jednorazowe odtwarzanie — jak
+potrzebujesz. Nie martw się: wszystkie Twoje nagrania i ustawienia są zachowane po zamknięciu aplikacji. W razie potrzeby możesz je
+udostępnić albo zapisać cały projekt w pliku ZIP.
+
+NAWIGACJA
+
+Na górze jest pasek z tytułem aplikacji: logo po lewej otwiera menu boczne; po prawej uruchomienie i zatrzymanie wszystkich ścieżek oraz
+menu „⋮” z akcjami dla całej siatki naraz (m.in. eksport i import projektu ZIP, wspólne ustawienia odtwarzania, reset przycięć) i pozycja
+Więcej ustawień…, która też otwiera menu boczne.
+Menu boczne: Pomoc, Nagrywanie, Ścieżki i siatka (m.in. gotowe zestawy skrótów na klawiaturę), Ekran, Uprawnienia, Strefa niebezpieczna;
+na dole Profile ustawień.
+
+SIATKA
+
+Kolorowy blok to szybki przycisk. Stuknij go lub – używając podłączonej klawiatury – wciśnij odpowiedni klawisz skrótu. Chcesz suwaków i
+bardziej szczegółowych opcji? Przytrzymaj blok albo — przy podłączonej klawiaturze zewnętrznej — użyj skrótu z klawiszem Ctrl. Skrót do
+ścieżki ustawisz w jej szczegółach.
+Przy każdym wierszu siatki są przyciski startu i zatrzymania odtwarzania dla tego wiersza oraz menu „⋮” z opcjami dla wszystkich ścieżek w
+tym wierszu (m.in. tryb odtwarzania, głośność, balans, prędkość, reset przycięć, usunięcie nagrań z wiersza).
+W menu bocznym wybierzesz gotowy zestaw skrótów na klawiaturę: standard (jak klawiatura PC, elastyczna siatka) albo 24 klawisze (6×4).
+
+SZCZEGÓŁY ŚCIEŻKI
+
+Przytniesz początek i koniec, wybierzesz pętlę albo jedno przejście, ustawisz głośność i balans lewo/prawo, przyspieszysz lub zwolnisz
+odtwarzanie, dasz nazwę i przypiszesz skrót. Możesz przenieść ścieżkę po siatce, wgrać inny plik, udostępnić nagranie albo wyczyścić pole.
+
+IKONY NA BLOKU
+
+Ikony pokazują m.in. skróty, źródło dźwięku, głośność, balans, przycięcia i tryb pętli. Pełna legenda jest w Pomocy w menu bocznym.
+
+JAKOŚĆ NAGRYWANIA
+
+Ustawienia obejmują format pliku, dokładność w czasie, przepływność bitową (bitrate), stereo czy mono oraz — gdy urządzenie to obsługuje —
+automatyczną regulację poziomu (AGC), mniej echa z pomieszczenia i ciszej w tle.
+
+PROFILE USTAWIEŃ
+
+Profil zapisuje pełną konfigurację: opcje nagrywania oraz język, jasny lub ciemny motyw, kolor akcentu i podtrzymywanie włączonego ekranu.
+Możesz mieć kilka profili, przełączać się jednym stuknięciem, usuwać przez przytrzymanie.
+
+EKSPORT PROJEKTU (ZIP)
+
+Jeden plik ZIP zawiera układ siatki, ustawienia ścieżek i nagrania, z krótką kontrolą spójności oraz metadanymi projektu (wersja, czas
+eksportu, rozmiar siatki i statystyki nagrań). Przed importem zobaczysz podgląd i ostrzeżenie; aplikacja odrzuci uszkodzony lub
+niekompletny plik.
+
+UPRAWNIENIA
+
+Mikrofon (oraz audio USB, gdy system pozwala), dostęp do plików przy imporcie i eksporcie, opcjonalne powiadomienia na Androidzie przy
+nagrywaniu w tle.
+
+Pełniejszy przewodnik po ikonach i opcjach znajdziesz w Pomocy w menu bocznym.

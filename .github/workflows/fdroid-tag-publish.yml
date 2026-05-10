@@ -1,0 +1,35 @@
+# Tag push or manual run → GitLab MR on fdroiddata (composite action).
+name: F-Droid metadata (GitLab MR)
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+      - '[0-9]+.[0-9]+.[0-9]+*'
+  workflow_dispatch:
+    inputs:
+      version_override:
+        description: 'Optional MAJOR.MINOR.PATCH or MAJOR.MINOR.PATCH+code (empty = from tag / pubspec)'
+        required: false
+        default: ''
+
+concurrency:
+  group: fdroid-metadata-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  fdroid-metadata:
+    name: F-Droid metadata (GitLab MR)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish fdroiddata MR
+        uses: ./.github/actions/fdroid-metadata-mr
+        with:
+          commit_sha: ${{ github.sha }}
+          ref_name: ${{ github.ref_name }}
+          version_override: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version_override || '' }}
+          gitlab_token: ${{ secrets.GITLAB_TOKEN }}
+          gitlab_fork_project_id: ${{ secrets.GITLAB_FORK_PROJECT_ID }}

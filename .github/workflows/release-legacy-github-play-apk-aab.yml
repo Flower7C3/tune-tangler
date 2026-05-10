@@ -1,0 +1,219 @@
+# Legacy pipeline: self-built APK/AAB, Play signing, GitHub Releases.
+# Semver base comes from main (e.g. pubspec-auto-patch-main); this workflow sets pubspec to base+GITHUB_RUN_NUMBER only, then commits and tags after a successful build.
+name: Legacy — GitHub APK/AAB + Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+# Version variables for dependencies
+env:
+  FLUTTER_CHANNEL: 'stable'
+  JAVA_VERSION: '17'
+  JAVA_DISTRIBUTION: 'zulu'
+
+jobs:
+
+  test:
+    name: "STEP 1 — Test"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "🧪 Checkout, Flutter, tests"
+        uses: ./.github/actions/checkout-flutter-test
+        with:
+          flutter_channel: ${{ env.FLUTTER_CHANNEL }}
+          with_dependencies: 'true'
+          with_localization: 'false'
+
+  set_build_version:
+    name: "STEP 2 — Set pubspec +build"
+    needs: [test]
+    runs-on: ubuntu-latest
+    outputs:
+      computed_version: ${{ steps.suffix.outputs.computed_version }}
+      tag_name: ${{ steps.suffix.outputs.tag_name }}
+    steps:
+      - name: Apply base+build to pubspec and upload artifact
+        id: suffix
+        uses: ./.github/actions/pubspec-set-build-suffix
+        with:
+          run_number: ${{ github.run_number }}
+
+  build:
+    name: "STEP 3 — Build"
+    needs: [test, set_build_version]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "🔧 Checkout code"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "📥 Download modified pubspec.yaml"
+        uses: actions/download-artifact@v4
+        with:
+          name: modified-pubspec
+          path: ./
+
+      - name: "📲 Setup Flutter"
+        uses: ./.github/actions/setup-flutter
+        with:
+          skip_checkout: 'true'
+          flutter_channel: ${{ env.FLUTTER_CHANNEL }}
+          with_dependencies: true
+          with_localization: true
+
+      - name: "☕️ Setup Java"
+        uses: ./.github/actions/setup-java
+        with:
+          java_version: ${{ env.JAVA_VERSION }}
+          java_distribution: ${{ env.JAVA_DISTRIBUTION }}
+
+      - name: "🔐 Decode keystore"
+        id: android_keystore
+        uses: timheuer/base64-to-file@v1.2
+        with:
+          fileName: tune-tangler-release-key.jks
+          encodedString: ${{ secrets.KEYSTORE_BASE64 }}
+
+      - name: "🔐 Create key.properties"
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          echo "storeFile=${{ steps.android_keystore.outputs.filePath }}" > android/key.properties
+          echo "storePassword=$KEYSTORE_PASSWORD" >> android/key.properties
+          echo "keyPassword=$KEY_PASSWORD" >> android/key.properties
+          echo "keyAlias=$KEY_ALIAS" >> android/key.properties
+
+      - name: "🏗️ Build APK"
+        run: flutter build apk --split-per-abi --no-tree-shake-icons --build-number=${{ github.run_number }}
+
+      - name: "🏗️ Build App Bundle"
+        run: |
+          export GRADLE_OPTS="-Dorg.gradle.daemon=true -Dorg.gradle.parallel=true -Dorg.gradle.jvmargs=-Xmx4g"
+          flutter build appbundle --no-tree-shake-icons --build-number=${{ github.run_number }}
+
+      - name: "🔐 Verify build"
+        run: |
+          echo "🔍 Verifying app bundle signature..."
+          if [ ! -f "build/app/outputs/bundle/release/app-release.aab" ]; then
+            echo "❌ App bundle not found!"
+            exit 1
+          fi
+          jarsigner -verify -verbose -certs build/app/outputs/bundle/release/app-release.aab
+          if [ $? -eq 0 ]; then
+            echo "✅ App bundle signature verified successfully!"
+          else
+            echo "❌ App bundle signature verification failed!"
+            exit 1
+          fi
+          echo "📱 App bundle size: $(du -h build/app/outputs/bundle/release/app-release.aab | cut -f1)"
+          echo "🔐 Build verification completed successfully!"
+
+      - name: "📤 Upload app bundle artifact"
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-bundle
+          path: |
+            build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+            build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+            build/app/outputs/flutter-apk/app-x86_64-release.apk
+            build/app/outputs/bundle/release/app-release.aab
+          retention-days: 1
+
+  commit_tag:
+    name: "STEP 4 — Commit, tag, and push"
+    needs: [test, build, set_build_version]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      commits: ${{ steps.ct.outputs.commits }}
+      tag_name: ${{ steps.ct.outputs.tag_name }}
+      commit_sha: ${{ steps.ct.outputs.commit_sha }}
+    steps:
+      - name: Commit, push branch, annotated tag
+        id: ct
+        uses: ./.github/actions/pubspec-commit-tag-push
+        with:
+          github_token: ${{ github.token }}
+          commit_suffix: ' [skip ci]'
+          pull_before_push: 'true'
+          tag_push_force_with_lease: 'true'
+
+  release:
+    name: "STEP 5 — Release"
+    needs: [test, build, commit_tag, set_build_version]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "🔧 Checkout code"
+        uses: actions/checkout@v4
+
+      - name: "📥 Download build artifacts"
+        uses: actions/download-artifact@v4
+        with:
+          name: app-release-bundle
+          path: ./
+
+      - name: "🏷️ Rename app bundle for release"
+        run: |
+          V="${{ needs.set_build_version.outputs.computed_version }}"
+          mv flutter-apk/app-arm64-v8a-release.apk "tune-tangler-${V}-arm64-v8a.apk"
+          mv flutter-apk/app-armeabi-v7a-release.apk "tune-tangler-${V}-armeabi-v7a.apk"
+          mv flutter-apk/app-x86_64-release.apk "tune-tangler-${V}-x86_64.apk"
+          mv bundle/release/app-release.aab "tune-tangler-${V}.aab"
+          echo "✅ App bundle renamed to: tune-tangler-${V}.aab"
+
+      - name: "📝 Generate release body from template"
+        id: generate_release_body
+        run: |
+          awk -v github_repository="${{ github.repository }}" \
+              -v github_run_id="${{ github.run_id }}" \
+              -v github_run_number="${{ github.run_number }}" \
+              -v repository_tag_name="${{ needs.commit_tag.outputs.tag_name }}" \
+              -v proj_name="$(echo "${{ github.repository }}" | sed 's/.*\///' | sed 's/-/ /g' | sed 's/\b\w/\U&/g')" \
+              -v build_version="${{ needs.set_build_version.outputs.computed_version }}" \
+              -v flutter_version="$(curl -s https://storage.googleapis.com/flutter_infra_release/releases/releases_linux.json | jq -r '.releases[] | select(.channel=="stable") | .version' | head -1)" \
+              -v java_version="${{ env.JAVA_VERSION }}" \
+              -v java_distribution="${{ env.JAVA_DISTRIBUTION }}" \
+              '{gsub(/{{ GITHUB_REPOSITORY }}/, github_repository);
+                gsub(/{{ GITHUB_RUN_ID }}/, github_run_id);
+                gsub(/{{ GITHUB_RUN_NUMBER }}/, github_run_number);
+                gsub(/{{ REPOSITORY_TAG_NAME }}/, repository_tag_name);
+                gsub(/{{ PROJECT_NAME }}/, proj_name);
+                gsub(/{{ APP_BUILD_VERSION }}/, build_version);
+                gsub(/{{ REPOSITORY_COMMITS }}/, "");
+                gsub(/{{ FLUTTER_VERSION }}/, flutter_version);
+                gsub(/{{ JAVA_VERSION }}/, java_version);
+                gsub(/{{ JAVA_DISTRIBUTION }}/, java_distribution);
+                print}' .github/templates/release.md > RELEASE_NOTE.md
+
+          if grep -q "{{ REPOSITORY_COMMITS }}" .github/templates/release.md; then
+            echo "📝 Template contains {{ REPOSITORY_COMMITS }} placeholder - adding commits at the end"
+            echo "${{ needs.commit_tag.outputs.commits }}" >> RELEASE_NOTE.md
+          else
+            echo "📝 Template does not contain {{ REPOSITORY_COMMITS }} placeholder - keeping as is"
+          fi
+
+          echo "✅ Release body generated from template"
+
+      - name: "🚀 Create GitHub Release"
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.commit_tag.outputs.tag_name }}
+          name: Release ${{ needs.commit_tag.outputs.tag_name }}
+          body_path: RELEASE_NOTE.md
+          files: |
+            tune-tangler-${{ needs.set_build_version.outputs.computed_version }}-arm64-v8a.apk
+            tune-tangler-${{ needs.set_build_version.outputs.computed_version }}-armeabi-v7a.apk
+            tune-tangler-${{ needs.set_build_version.outputs.computed_version }}-x86_64.apk
+            tune-tangler-${{ needs.set_build_version.outputs.computed_version }}.aab
+          draft: false
+          prerelease: false

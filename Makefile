@@ -276,11 +276,11 @@ gen-l10n: ##UTILITIES## Generate l10n files
 
 .PHONY: gen-assets
 gen-assets: ##UTILITIES## Generate all icons and splash screens from SVG. Requires: `rsvg-convert` `jq` `sips`
-	@bash bin/generate-icons.sh
+	@bash tools/generate-icons.sh
 
 .PHONY: screenshots
 screenshots: ##QA## Capture screenshot sets. Options: `DEVICE_ID=` `DEVICE_NAME=` `SCREEN=`
-	@bash bin/screenshots.sh \
+	@bash tools/screenshots.sh \
 		$(if $(DEVICE_ID),--device-id "$(DEVICE_ID)") \
 		$(if $(DEVICE_NAME),--device-name "$(DEVICE_NAME)") \
 		$(if $(SCREEN),--screen "$(SCREEN)")

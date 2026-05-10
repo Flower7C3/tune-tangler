@@ -1,0 +1,95 @@
+# After each merge to main, bump PATCH in pubspec when the version line was not edited in that push
+# (manual minor/major or release commits skip). Keep paths-ignore in sync with test.yml.
+name: Pubspec auto patch (main)
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      # IDE and editor configuration
+      - '.idea/**'
+      - '.vscode/**'
+      - '*.iml'
+      # CI/CD and git tooling
+      - '.githooks/**'
+      - '.github/**'
+      # Linter and metadata config
+      - '.markdownlint.json'
+      - '.metadata'
+      - 'analysis_options.yaml'
+      - 'devtools_options.yaml'
+      - 'l10n.yaml'
+      # Documentation and assets not affecting the build
+      - 'docs/**'
+      - 'assets/png/**'
+      - 'assets/svg/**'
+      - 'fastlane/metadata/**'
+      - 'LICENSE'
+      - 'README.md'
+      - 'AGENTS.md'
+      - 'missing_translations.txt'
+      # Platforms not built in this workflow (Android only)
+      - 'ios/**'
+      - 'linux/**'
+      - 'macos/**'
+      - 'windows/**'
+      # Dev tooling
+      - 'tools/**'
+      - 'Makefile'
+
+concurrency:
+  group: pubspec-auto-patch-main
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  bump-patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "🔧 Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ github.token }}
+
+      - name: "Configure Git identity"
+        uses: ./.github/actions/git-config-github-actions-bot
+
+      - name: "Bump PATCH if version line unchanged in this push"
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          if [ -z "${BEFORE:-}" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            echo "No usable before-SHA; skip."
+            exit 0
+          fi
+          if ! git cat-file -e "${BEFORE}^{commit}" 2>/dev/null; then
+            echo "before SHA not found; skip."
+            exit 0
+          fi
+          if git diff "$BEFORE" "${GITHUB_SHA}" -- pubspec.yaml | grep -E '^[+-]version:' >/dev/null; then
+            echo "pubspec version: line changed in this push — skip auto PATCH (manual or release commit)."
+            exit 0
+          fi
+          cur=$(grep '^version:' pubspec.yaml | head -1 | sed -E 's/^version:[[:space:]]+//; s/[[:space:]]+$//')
+          base="${cur%%+*}"
+          if ! [[ "$base" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::pubspec version base must be MAJOR.MINOR.PATCH (got: ${cur})"
+            exit 1
+          fi
+          IFS=. read -r MAJOR MINOR PATCH <<< "$base"
+          PATCH=$((PATCH + 1))
+          NEW="${MAJOR}.${MINOR}.${PATCH}"
+          sed -i.bak -E "s/^version:.*/version: ${NEW}/" pubspec.yaml
+          rm -f pubspec.yaml.bak
+          if git diff --quiet pubspec.yaml; then
+            echo "No pubspec change; exit."
+            exit 0
+          fi
+          git add pubspec.yaml
+          git commit -m "chore(auto): bump patch to ${NEW}"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

@@ -17,14 +17,25 @@ inputs:
     description: 'Generate localization files'
     required: false
     default: 'true'
+  skip_checkout:
+    description: 'If true, skip checkout (caller already checked out the repo)'
+    required: false
+    default: 'false'
+  fetch_depth:
+    description: 'When checkout runs: actions/checkout fetch-depth (0 = full history)'
+    required: false
+    default: '1'
 
 
 runs:
   using: 'composite'
   steps:
     - name: "🔧 Checkout code"
+      if: ${{ inputs.skip_checkout != 'true' }}
       uses: actions/checkout@v4
-      
+      with:
+        fetch-depth: ${{ fromJSON(inputs.fetch_depth) }}
+
     - name: "📲 Get Flutter version"
       id: get_flutter_version
       shell: bash

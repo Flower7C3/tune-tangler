@@ -1,0 +1,69 @@
+# F-Droid: tests → set pubspec base+GITHUB_RUN_NUMBER → commit + tag + push → MR (semver base from main; patch bumps via pubspec-auto-patch-main).
+name: F-Droid release (test, tag, MR)
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: fdroid-app-release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: "STEP 1 — Test"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout, Flutter, and tests
+        uses: ./.github/actions/checkout-flutter-test
+        with:
+          fetch_depth: '0'
+          flutter_channel: stable
+          with_dependencies: 'true'
+          with_localization: 'false'
+
+  set_build_version:
+    name: "STEP 2 — Set pubspec +build"
+    needs: [test]
+    runs-on: ubuntu-latest
+    outputs:
+      computed_version: ${{ steps.suffix.outputs.computed_version }}
+      tag_name: ${{ steps.suffix.outputs.tag_name }}
+    steps:
+      - name: Apply base+build to pubspec and upload artifact
+        id: suffix
+        uses: ./.github/actions/pubspec-set-build-suffix
+        with:
+          run_number: ${{ github.run_number }}
+
+  commit_tag:
+    name: "STEP 3 — Commit, tag, and push"
+    needs: [test, set_build_version]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      commit_sha: ${{ steps.ct.outputs.commit_sha }}
+      tag_name: ${{ steps.ct.outputs.tag_name }}
+    steps:
+      - name: Commit, push branch, annotated tag
+        id: ct
+        uses: ./.github/actions/pubspec-commit-tag-push
+        with:
+          github_token: ${{ github.token }}
+
+  fdroid_metadata:
+    name: "STEP 4 — F-Droid MR (fdroiddata)"
+    needs: [commit_tag]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish fdroiddata MR
+        uses: ./.github/actions/fdroid-metadata-mr
+        with:
+          commit_sha: ${{ needs.commit_tag.outputs.commit_sha }}
+          ref_name: ${{ needs.commit_tag.outputs.tag_name }}
+          version_override: ''
+          gitlab_token: ${{ secrets.GITLAB_TOKEN }}
+          gitlab_fork_project_id: ${{ secrets.GITLAB_FORK_PROJECT_ID }}

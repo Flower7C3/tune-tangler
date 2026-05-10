@@ -1,0 +1,188 @@
+name: 'Pubspec from artifact: commit, push branch, optional annotated tag'
+description: 'Checkout with token, download pubspec artifact, optionally commit, push branch, collect commits since the previous tag, optional annotated tag and push it, optional Actions job summary.'
+inputs:
+  github_token:
+    description: 'Token with contents:write'
+    required: true
+  artifact_name:
+    description: 'Artifact name produced by pubspec-set-build-suffix'
+    required: false
+    default: 'modified-pubspec'
+  git_user_name:
+    description: 'git config user.name for commits/tags'
+    required: false
+    default: 'github-actions[bot]'
+  git_user_email:
+    description: 'git config user.email'
+    required: false
+    default: '41898282+github-actions[bot]@users.noreply.github.com'
+  commit_suffix:
+    description: 'Appended to commit message (e.g. " [skip ci]")'
+    required: false
+    default: ''
+  pull_before_push:
+    description: 'If true, run git pull origin $GITHUB_REF_NAME --no-rebase -n before pushing the branch'
+    required: false
+    default: 'false'
+  create_annotated_git_tag:
+    description: 'If true, create annotated tag from pubspec version and push it after recording outputs'
+    required: false
+    default: 'true'
+  collect_commits_since_last_tag:
+    description: 'If true, run git log from previous reachable tag to HEAD and expose as commits output (after branch push, before new tag)'
+    required: false
+    default: 'true'
+  tag_push_force_with_lease:
+    description: 'If true, push the annotated tag with git push --force-with-lease (legacy)'
+    required: false
+    default: 'false'
+  write_job_summary:
+    description: 'If true, append commits-since-last-tag section to GITHUB_STEP_SUMMARY'
+    required: false
+    default: 'true'
+
+outputs:
+  commit_sha:
+    description: 'HEAD SHA after branch push (before optional new tag)'
+    value: ${{ steps.record.outputs.commit_sha }}
+  tag_name:
+    description: 'Tag name (v + version from pubspec)'
+    value: ${{ steps.record.outputs.tag_name }}
+  computed_version:
+    description: 'version: value from pubspec after download'
+    value: ${{ steps.record.outputs.computed_version }}
+  commits:
+    description: 'Multiline bullet list (- hash subject) since last tag at push time; empty if collection disabled'
+    value: ${{ steps.collect_commits.outputs.commits }}
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ inputs.github_token }}
+
+    - name: Download pubspec artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ inputs.artifact_name }}
+        path: ./
+
+    - name: Configure Git identity
+      uses: ./.github/actions/git-config-github-actions-bot
+      with:
+        user_name: ${{ inputs.git_user_name }}
+        user_email: ${{ inputs.git_user_email }}
+
+    - name: Detect pubspec change and version
+      id: pubspec
+      shell: bash
+      run: |
+        set -euo pipefail
+        VERSION=$(grep '^version:' pubspec.yaml | head -1 | sed -E 's/^version:[[:space:]]+//; s/[[:space:]]+$//')
+        TAG="v${VERSION}"
+        echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+        echo "TAG=$TAG" >> "$GITHUB_ENV"
+        if git diff --quiet pubspec.yaml; then
+          echo "changed=false" >> "$GITHUB_OUTPUT"
+        else
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Commit pubspec
+      if: steps.pubspec.outputs.changed == 'true'
+      shell: bash
+      env:
+        COMMIT_SUFFIX: ${{ inputs.commit_suffix }}
+      run: |
+        set -euo pipefail
+        git add pubspec.yaml
+        git commit -m "chore: release ${VERSION}${COMMIT_SUFFIX}"
+
+    - name: Pull latest branch
+      if: ${{ inputs.pull_before_push == 'true' }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        git pull origin "${GITHUB_REF_NAME}" --no-rebase -n
+
+    - name: Push branch
+      shell: bash
+      run: |
+        set -euo pipefail
+        git push origin "HEAD:${GITHUB_REF_NAME}"
+
+    - name: Collect commits since last tag
+      id: collect_commits
+      shell: bash
+      env:
+        DO_COLLECT: ${{ inputs.collect_commits_since_last_tag }}
+      run: |
+        set -euo pipefail
+        if [ "$DO_COLLECT" != "true" ]; then
+          echo "commits<<EOF" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+        git fetch origin --tags --quiet || true
+        LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+        if [ -n "$LAST_TAG" ]; then
+          echo "Last tag for changelog: $LAST_TAG"
+          git log --oneline --no-merges "${LAST_TAG}..HEAD" | sed 's/^/- /' > commits.txt
+        else
+          echo "No previous tag; listing all commits"
+          git log --oneline --no-merges | sed 's/^/- /' > commits.txt
+        fi
+        echo "commits<<EOF" >> "$GITHUB_OUTPUT"
+        cat commits.txt >> "$GITHUB_OUTPUT"
+        echo "EOF" >> "$GITHUB_OUTPUT"
+        rm -f commits.txt
+
+    - name: Record outputs
+      id: record
+      shell: bash
+      run: |
+        set -euo pipefail
+        VERSION=$(grep '^version:' pubspec.yaml | head -1 | sed -E 's/^version:[[:space:]]+//; s/[[:space:]]+$//')
+        TAG="v${VERSION}"
+        echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+        echo "tag_name=${TAG}" >> "$GITHUB_OUTPUT"
+        echo "computed_version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+    - name: Annotated tag and push tag
+      if: ${{ inputs.create_annotated_git_tag == 'true' }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        if git rev-parse "$TAG" >/dev/null 2>&1; then
+          echo "::error::Tag ${TAG} already exists locally."
+          exit 1
+        fi
+        if git ls-remote --tags origin "refs/tags/${TAG}" | grep -q .; then
+          echo "::error::Tag ${TAG} already exists on origin."
+          exit 1
+        fi
+        git tag -a "$TAG" -m "Release ${TAG}"
+        if [ "${{ inputs.tag_push_force_with_lease }}" = "true" ]; then
+          git push --force-with-lease origin "$TAG"
+        else
+          git push origin "$TAG"
+        fi
+
+    - name: Job summary (commits since last tag)
+      if: ${{ inputs.write_job_summary == 'true' }}
+      shell: bash
+      env:
+        COMMITS: ${{ steps.collect_commits.outputs.commits }}
+        TAG: ${{ steps.record.outputs.tag_name }}
+      run: |
+        set -euo pipefail
+        {
+          echo "## Commits since last tag"
+          echo ""
+          echo "**Tag:** \`${TAG}\`"
+          echo ""
+          printf '%s\n' "${COMMITS:-}"
+        } >> "${GITHUB_STEP_SUMMARY}"

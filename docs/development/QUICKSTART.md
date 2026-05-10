@@ -1,30 +1,28 @@
-# ⚡ Quick Start
+# ⚡ Quick start
 
-> Szybkie uruchomienie projektu TuneTangler w 5 minut
+> Run Tune Tangler locally in a few minutes
 
-## 📋 Spis Treści
+## 📋 Table of contents
 
-- [🚀 W 5 Kroków](#5-steps)
-  - [1️⃣ Klonowanie Projektu](#clone-project)
-  - [2️⃣ Setup Środowiska](#setup-environment)
-  - [3️⃣ Sprawdź Urządzenia](#check-devices)
-  - [4️⃣ Uruchom Aplikację](#run-app)
-  - [5️⃣ Gotowe! 🎉](#ready)
-- [🚨Jeśli coś nie działa](#troubleshooting)
+- [🚀 Five steps](#5-steps)
+  - [1️⃣ Clone the project](#clone-project)
+  - [2️⃣ Set up the environment](#setup-environment)
+  - [3️⃣ Check devices](#check-devices)
+  - [4️⃣ Run the app](#run-app)
+  - [5️⃣ Done 🎉](#ready)
+- [🚨 Troubleshooting](#troubleshooting)
   - [❌ Flutter not found](#flutter-not-found)
   - [❌ No devices found](#no-devices-found)
-  - [❌ Dependencies issues](#dependencies-issues)
-- [📱 Hot Reload](#hot-reload)
-- [🔄 Codzienny Workflow](#daily-workflow)
+  - [❌ Dependency issues](#dependencies-issues)
+- [📱 Hot reload](#hot-reload)
+- [🔄 Daily workflow](#daily-workflow)
 - [🔨 Makefile](#makefile)
-- [📚 Co Dalej?](#what-next)
-- [🆘 Szybka Pomoc](#quick-help)
+- [📚 What’s next](#what-next)
+- [🆘 Quick help](#quick-help)
 
-## 🚀 W 5 Kroków <a name="5-steps"></a>
+## 🚀 Five steps <a name="5-steps"></a>
 
-### 1️⃣ Klonowanie Projektu <a name="clone-project"></a>
-
-Sklonuj repozytorium i sprawdź branch
+### 1️⃣ Clone the project <a name="clone-project"></a>
 
 ```bash
 git clone https://github.com/Flower7C3/tune-tangler.git
@@ -32,150 +30,144 @@ cd tune-tangler
 git branch
 ```
 
-Powinno być: `* main`
+You should see: `* main`
 
-### 2️⃣ Setup Środowiska <a name="setup-environment"></a>
-
-Użyj Makefile do szybkiego setupu
+### 2️⃣ Set up the environment <a name="setup-environment"></a>
 
 ```bash
 make dev-setup
 ```
 
-**To automatycznie:**
-✅ Sprawdzi Flutter (flutter doctor)  
-✅ Pobierze zależności (flutter pub get)  
-✅ Zainstaluje pre-commit hook
+**This will:**
+- Check Flutter (`flutter doctor`)
+- Fetch dependencies (`flutter pub get`)
+- Install the optional `pre-commit` hook
 
-### 3️⃣ Sprawdź Urządzenia <a name="check-devices"></a>
-
-Lista dostępnych urządzeń
+### 3️⃣ Check devices <a name="check-devices"></a>
 
 ```bash
 make list-devices
 ```
 
-Lista emulatorów
+Emulators:
 
 ```bash
 make list-emulators
 ```
 
-### 4️⃣ Uruchom Aplikację <a name="run-app"></a>
+### 4️⃣ Run the app <a name="run-app"></a>
 
 ```bash
 make run
 ```
 
-### 5️⃣ Gotowe! 🎉 <a name="ready"></a>
+### 5️⃣ Done 🎉 <a name="ready"></a>
 
-Aplikacja powinna się uruchomić na wybranym urządzeniu/emulatorze.
+The app should launch on the selected device or emulator.
 
-## 🚨Jeśli coś nie działa <a name="troubleshooting"></a>
+## 🚨 Troubleshooting <a name="troubleshooting"></a>
 
 ### ❌ Flutter not found <a name="flutter-not-found"></a>
 
-Sprawdź [Flutter Installation Guide](https://docs.flutter.dev/get-started/install)
+See the [Flutter install guide](https://docs.flutter.dev/get-started/install).
 
 ### ❌ No devices found <a name="no-devices-found"></a>
 
-Sprawdź [Flutter Device Management](https://docs.flutter.dev/get-started/flutter-for/install-and-setup#device-setup)
+See [Flutter device setup](https://docs.flutter.dev/get-started/flutter-for/install-and-setup#device-setup).
 
-### ❌ Dependencies issues <a name="dependencies-issues"></a>
+### ❌ Dependency issues <a name="dependencies-issues"></a>
 
-**Wyczyść cache:**
+**Clean:**
 
 ```bash
 flutter clean
 ```
 
-**Pobierz ponownie:**
+**Fetch again:**
 
 ```bash
 flutter pub get
 ```
 
-**Sprawdź Flutter:**
+**Check Flutter:**
 
 ```bash
 flutter doctor
 ```
 
-## 📱 Hot Reload <a name="hot-reload"></a>
+## 📱 Hot reload <a name="hot-reload"></a>
 
-Podczas działania aplikacji:
+While the app is running:
 
 ```bash
-r - Hot reload (zachowuje stan)
-R - Hot restart (resetuje stan)
-q - Wyjście
-h - Pokaż pomoc
+r - Hot reload (keeps state)
+R - Hot restart (resets state)
+q - Quit
+h - Help
 ```
 
-## 🔄 Codzienny Workflow <a name="daily-workflow"></a>
+## 🔄 Daily workflow <a name="daily-workflow"></a>
 
-Użyj [Makefile](QUICKSTART.md#makefile) do codziennych zadań:
+Use the [Makefile](QUICKSTART.md#makefile) for routine tasks:
 
 ```bash
-make dev-setup    # Setup środowiska
-make analyze      # Analiza kodu
-make test         # Testy
-make run          # Uruchomienie
+make dev-setup    # Environment setup
+make analyze      # Static analysis
+make test         # Tests
+make run          # Run the app
 ```
 
 ## 🔨 Makefile <a name="makefile"></a>
 
-Główne komendy do codziennej pracy:
+Common commands:
 
 ```bash
-# Setup środowiska
-make dev-setup          # Pełna konfiguracja
-make quick-start        # Szybki start z listą urządzeń
+# Environment
+make dev-setup          # Full setup
+make quick-start        # Quick start with device list
 
 # Code quality
-make analyze            # Analiza kodu
-make test               # Uruchomienie testów
-make format             # Formatowanie kodu
+make analyze            # Analyzer
+make test               # Tests
+make format             # Format
 
-# Build & Run
-make run                # Uruchomienie aplikacji
-make build-apk          # Budowanie APK
-make install-apk        # Budowanie i instalacja APK
+# Build & run
+make run                # Run the app
+make build-apk          # Build APK
+make install-apk        # Build and install APK
 
 # Git hooks
-make install-pre-commit-hook    # Instalacja pre-commit hooka
-make remove-pre-commit-hook     # Usunięcie pre-commit hooka
+make install-pre-commit-hook
+make remove-pre-commit-hook
 ```
 
-**Wszystkie komendy:** `make help`
+**All targets:** `make help`
 
-## 📚 Co Dalej? <a name="what-next"></a>
+## 📚 What’s next <a name="what-next"></a>
 
-- **[🔧 Setup](SETUP.md)** – Szczegółowa konfiguracja
-- **[🎣 Git Hooks](GIT_HOOKS.md)** – Automatyzacja wersjonowania
-- **[🚀 Workflows](WORKFLOWS.md)** – CI/CD i deployment
+- **[🔧 Setup](SETUP.md)** — deeper environment notes
+- **[🎣 Git hooks](GIT_HOOKS.md)** — optional `pre-commit`: `flutter analyze`
+- **[🚀 Workflows](WORKFLOWS.md)** — CI/CD
 
-## 🆘 Szybka Pomoc <a name="quick-help"></a>
-
-Sprawdź status
+## 🆘 Quick help <a name="quick-help"></a>
 
 ```bash
 make help
 ```
 
-Diagnostyka
+Diagnostics:
 
 ```bash
 flutter doctor -v
 ```
 
-Logi
+Logs:
 
 ```bash
 flutter logs
 ```
 
-Reset
+Reset:
 
 ```bash
 flutter clean && flutter pub get

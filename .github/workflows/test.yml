@@ -3,7 +3,7 @@ name: Test Workflow
 on:
   pull_request:
     branches: [ main ]
-    paths-ignore:
+    paths-ignore: &paths-ignore
       # IDE and editor configuration
       - '.idea/**'
       - '.vscode/**'
@@ -14,12 +14,14 @@ on:
       # Linter and metadata config
       - '.markdownlint.json'
       - '.metadata'
+      - 'analysis_options.yaml'
       - 'devtools_options.yaml'
+      - 'l10n.yaml'
       # Documentation and assets not affecting the build
       - 'docs/**'
       - 'assets/png/**'          # source logos for icon generation
       - 'assets/svg/**'          # source SVGs for icon generation
-      - 'assets/screenshots/**'  # Google Play screenshots
+      - 'fastlane/metadata/**'   # Play / F-Droid listing text & screenshots
       - 'LICENSE'
       - 'README.md'
       - 'missing_translations.txt'
@@ -29,7 +31,15 @@ on:
       - 'macos/**'
       - 'windows/**'
       # Dev tooling
+      - 'tools/**'
       - 'Makefile'
+  push:
+    branches: [ main ]
+    paths-ignore: *paths-ignore
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 # Version variables for dependencies
 env:
@@ -42,15 +52,9 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - name: "🔧 Checkout code"
-        uses: actions/checkout@v4
-
-      - name: "📲 Setup Flutter"
-        uses: ./.github/actions/setup-flutter
+      - name: "🧪 Checkout, Flutter, tests"
+        uses: ./.github/actions/checkout-flutter-test
         with:
           flutter_channel: ${{ env.FLUTTER_CHANNEL }}
-          with_dependencies: true
-          with_localization: false
-
-      - name: "🧪 Run tests"
-        uses: ./.github/actions/flutter-test
+          with_dependencies: 'true'
+          with_localization: 'false'

@@ -1,0 +1,79 @@
+name: 'F-Droid metadata MR'
+description: 'Checkout ref, run tools/fdroid/publish_fdroid_mr.py (GitLab MR to fdroiddata).'
+
+inputs:
+  commit_sha:
+    description: 'Full 40-char commit SHA for Builds[].commit and validation'
+    required: true
+  ref_name:
+    description: 'Git ref to checkout (branch or tag, e.g. main or v1.2.3)'
+    required: true
+  version_override:
+    description: 'Optional MAJOR.MINOR.PATCH or MAJOR.MINOR.PATCH+code (empty uses tag / pubspec)'
+    required: false
+    default: ''
+  gitlab_token:
+    description: 'Pass secrets.GITLAB_TOKEN from the workflow (masked in logs).'
+    required: true
+  gitlab_fork_project_id:
+    description: 'Pass secrets.GITLAB_FORK_PROJECT_ID from the workflow (masked in logs).'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: "🔧 Checkout"
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.ref_name }}
+        fetch-depth: 1
+
+    - name: "🐍 Setup Python"
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: "📦 PyYAML"
+      shell: bash
+      run: pip install pyyaml
+
+    - name: "📌 Flutter version for metadata recipe"
+      shell: bash
+      run: |
+        set -euo pipefail
+        V="${{ vars.FDROID_FLUTTER_VERSION }}"
+        if [ -z "${V:-}" ]; then
+          V=$(curl -fsSL "https://storage.googleapis.com/flutter_infra_release/releases/releases_linux.json" \
+            | jq -r '.releases[] | select(.channel=="stable") | .version' | head -1)
+        fi
+        echo "FDROID_FLUTTER_VERSION=$V" >> "$GITHUB_ENV"
+        echo "Using Flutter $V in F-Droid build recipe"
+
+    - name: "🔐 Validate GitLab secrets"
+      shell: bash
+      env:
+        GITLAB_TOKEN: ${{ inputs.gitlab_token }}
+        GITLAB_FORK_PROJECT_ID: ${{ inputs.gitlab_fork_project_id }}
+      run: |
+        if [ -z "${GITLAB_TOKEN:-}" ] || [ -z "${GITLAB_FORK_PROJECT_ID:-}" ]; then
+          echo "::error::Set repository secrets GITLAB_TOKEN and GITLAB_FORK_PROJECT_ID (see docs/release/FDROID.md)."
+          exit 1
+        fi
+
+    - name: "📝 VERSION_OVERRIDE"
+      shell: bash
+      env:
+        VO: ${{ inputs.version_override }}
+      run: echo "VERSION_OVERRIDE=$VO" >> "$GITHUB_ENV"
+
+    - name: "🚀 Publish metadata + MR"
+      shell: bash
+      env:
+        GITLAB_TOKEN: ${{ inputs.gitlab_token }}
+        GITLAB_FORK_PROJECT_ID: ${{ inputs.gitlab_fork_project_id }}
+        GITLAB_UPSTREAM_PATH: fdroid/fdroiddata
+        FDROID_METADATA_PATH: metadata/pro.kwiatek.tune_tangler.yml
+        GITHUB_SHA: ${{ inputs.commit_sha }}
+        GITHUB_REF_NAME: ${{ inputs.ref_name }}
+        FDROID_FLUTTER_VERSION: ${{ env.FDROID_FLUTTER_VERSION }}
+      run: python3 tools/fdroid/publish_fdroid_mr.py

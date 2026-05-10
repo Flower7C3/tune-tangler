@@ -1,0 +1,29 @@
+# F-Droid fdroiddata bootstrap (Builds, Repo, License, …).
+#
+# Do NOT put Summary / Description / Name / AutoName here: those fields in the fdroiddata
+# metadata YAML override Fastlane/Triple-T text from the app repo. Store copy lives under
+# fastlane/metadata/android/<locale>/ (title, short_description, full_description, images/).
+# This file is used only when metadata/pro.kwiatek.tune_tangler.yml does not exist on the fork yet.
+#
+# Uzupełnij Repo / linki, jeśli forkujesz pod inny URL niż poniżej.
+Categories:
+  - Music & Audio
+License: MIT
+AuthorName: Bartłomiej Jakub Kwiatek
+WebSite: https://github.com/Flower7C3/tune-tangler
+SourceCode: https://github.com/Flower7C3/tune-tangler
+IssueTracker: https://github.com/Flower7C3/tune-tangler/issues
+
+RepoType: git
+Repo: https://github.com/Flower7C3/tune-tangler
+
+Builds: []
+
+MaintainerNotes: |
+  MIT. Sonic (Apache 2.0) w android/app/src/main/java/sonic/.
+  Build: Flutter z kanału stable (wersja z workflow / zmiennej FDROID_FLUTTER_VERSION).
+  Listings (Summary/Description/screenshots): Fastlane layout w repo aplikacji
+  (fastlane/metadata/android/) — nie duplikuj ich w tym pliku YAML.
+
+ArchivePolicy: 6 versions
+UpdateCheckMode: Tags

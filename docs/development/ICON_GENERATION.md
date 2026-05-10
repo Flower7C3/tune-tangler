@@ -1,4 +1,4 @@
-# Icon Generation System
+# 🎨 Icon Generation System
 
 This document describes the automated icon generation system for TuneTangler.
 

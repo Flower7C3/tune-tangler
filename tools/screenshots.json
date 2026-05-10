@@ -1,7 +1,10 @@
 {
-  "output_dir": "assets/screenshots",
+  "fastlane_metadata_root": "fastlane/metadata/android",
+  "locale_map": {
+    "en": "en-US",
+    "pl": "pl-PL"
+  },
   "file_prefix": "tune-tangler",
-  "languages": ["en", "pl"],
   "themes": ["light", "dark"],
   "delays": {
     "short": 0.3,

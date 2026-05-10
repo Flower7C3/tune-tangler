@@ -2,71 +2,72 @@
 
 > Yet another music looper app
 
-<a href="https://github.com/Flower7C3/tune-tangler/releases/"><img alt="Latest build" src="https://github.com/Flower7C3/tune-tangler/actions/workflows/release.yml/badge.svg"/></a>
+<a href="https://github.com/Flower7C3/tune-tangler/actions/workflows/test.yml"><img alt="CI" src="https://github.com/Flower7C3/tune-tangler/actions/workflows/test.yml/badge.svg"/></a>
 
-## 📚 Dokumentacja <a name="documentation"></a>
+## 📚 Documentation <a name="documentation"></a>
 
-### 🧩 Zdolności aplikacji <a name="capabilities"></a>
+### 🧩 App capabilities <a name="capabilities"></a>
 
-- **Nagrywanie**: mikrofon/USB (zależnie od urządzenia), auto‑gain/echo‑cancel/noise‑suppress (jeśli wspierane)
-- **Import**: wybór pliku audio do ścieżki
-- **Odtwarzanie**: start/stop/pause/resume, tryby pętli (single/loop), seek, odtwarzanie zakresu (początek/koniec), czas/pozycja
-- **Sterowanie na żywo**: głośność, balans (pan), prędkość (0.5–2.0)
-- **Zarządzanie ścieżkami**: zmiana nazwy (emoji), klawisze skrótu, przenoszenie/zamiana nagrań, usuwanie nagrania
-- **Udostępnianie**: surowy plik lub „zmodyfikowany” (trim/vol/pan/speed) — eksport przetworzonego pliku **Android** (MediaCodec + Sonic); na innych platformach udostępniany jest surowy plik, gdy wymagana jest obróbka
-- **Układ**: konfigurowalna siatka (wiersze/kolumny), lazy‑loading dla wydajności
-- **Motywy**: jasny/ciemny/system, kolor akcentu
-- **Lokalizacja**: EN/PL (zmiana w runtime)
-- **Uprawnienia**: mikrofon, powiadomienia (Android), dostęp do plików (gdzie dotyczy)
-- **Profile**: zapisz/wczytaj/usuń profile ustawień
-- **Eksport/Import projektu**: zapisz cały projekt (ustawienia siatki, wszystkie ścieżki, nagrania) do ZIP i wczytaj go później z pełną walidacją
+- **Recording**: microphone/USB (device-dependent), auto-gain/echo-cancel/noise-suppress when supported
+- **Import**: pick an audio file for a track
+- **Playback**: start/stop/pause/resume, loop modes (single/loop), seek, range playback (start/end), time/position
+- **Live control**: volume, balance (pan), speed (0.5–2.0)
+- **Track management**: rename (including emoji), shortcut keys, move/swap recordings, delete recording
+- **Sharing**: raw file or “processed” (trim/vol/pan/speed)—processed export on **Android** (MediaCodec + Sonic); on other platforms the raw file is shared when processing would be required
+- **Layout**: configurable grid (rows/columns), lazy loading for performance
+- **Themes**: light/dark/system, accent color
+- **Localization**: EN/PL (switch at runtime)
+- **Permissions**: microphone, notifications (Android), file access where applicable
+- **Profiles**: save/load/delete setting profiles
+- **Project export/import**: save the whole project (grid, all tracks, recordings) to ZIP and load it later with full validation
 
-### 🚀 Szybki Start <a name="quick-start"></a>
+### 🚀 Quick start <a name="quick-start"></a>
 
-- **[📱 Instalacja](docs/INSTALLATION.md)** – Przewodnik instalacji i konfiguracji
-- **[🔧 Setup](docs/development/SETUP.md)** – Konfiguracja środowiska developerskiego
-- **[⚡ Quick Start](docs/development/QUICKSTART.md)** – Szybkie uruchomienie projektu
+- **[📱 Installation](docs/release/INSTALLATION.md)** — install the app and pick the right ABI
+- **[🔧 Setup](docs/development/SETUP.md)** — developer toolchain and environment
+- **[⚡ Quick start](docs/development/QUICKSTART.md)** — run the project quickly
 
 ### 🛠️ Development <a name="development"></a>
 
-- **[🔧 Setup](docs/development/SETUP.md)** – Konfiguracja środowiska developerskiego
-- **[⚡ Quick Start](docs/development/QUICKSTART.md)** – Szybkie uruchomienie projektu
-- **[🔨 Makefile](docs/development/QUICKSTART.md#makefile)** – Komendy i narzędzia
-- **[🎨 Icon Generation](docs/development/ICON_GENERATION.md)** – Generowanie ikon z SVG
-- **[🎣 Git Hooks](docs/development/GIT_HOOKS.md)** – Pre-commit hooks i automatyzacja
-- **[🚀 Workflows](docs/development/WORKFLOWS.md)** – GitHub Actions i CI/CD
+- **[🔧 Setup](docs/development/SETUP.md)** — detailed environment configuration
+- **[⚡ Quick start](docs/development/QUICKSTART.md)** — first run
+- **[🔨 Makefile](docs/development/QUICKSTART.md#makefile)** — daily commands
+- **[🎨 Icon generation](docs/development/ICON_GENERATION.md)** — PNGs from SVG via config
+- **[🎣 Git hooks](docs/development/GIT_HOOKS.md)** — optional `pre-commit`: `flutter analyze`
+- **[🚀 Workflows](docs/development/WORKFLOWS.md)** — GitHub Actions and CI/CD
+- **[📦 F-Droid](docs/release/FDROID.md)** — automatic fdroiddata MR after a tag (GitLab) + templates in `tools/fdroid/`
 
-### 📋 Projekt <a name="project"></a>
+### 📋 Project <a name="project"></a>
 
-- **[🗺️ Roadmap](docs/ROADMAP.md)** – Plan rozwoju (przyszłe prace)
-- **[✅ Zrealizowane](docs/COMPLETED.md)** – Ukończone elementy z commitami
-- **[🔐 Release Signing](docs/RELEASE_SIGNING.md)** – Konfiguracja podpisywania
-- **[🤖 Assistant Rules](docs/ASSISTANT_RULES.md)** – Reguły dla AI asystentów
+- **[🗺️ Roadmap](docs/features/ROADMAP.md)** — planned work
+- **[✅ Completed](docs/features/COMPLETED.md)** — shipped items with commit links
+- **[🔐 Release signing](docs/release/RELEASE_SIGNING.md)** — keystore / CI signing notes
+- **[🤖 Agent (AI)](AGENTS.md)** — rules for assistants / Cursor
 
-## 🔍 Jak Znaleźć Informacje <a name="how-to-find-information"></a>
+## 🔍 How to find things <a name="how-to-find-information"></a>
 
-### 🆕 Nowy Developer <a name="new-developer"></a>
+### 🆕 New developer <a name="new-developer"></a>
 
-1. **[📱 Instalacja](docs/INSTALLATION.md)** – podstawowa konfiguracja
-2. **[🔧 Setup](docs/development/SETUP.md)** – środowisko developerskie
-3. **[⚡ Quick Start](docs/development/QUICKSTART.md)** – pierwsze uruchomienie
+1. **[📱 Installation](docs/release/INSTALLATION.md)** — basics
+2. **[🔧 Setup](docs/development/SETUP.md)** — environment
+3. **[⚡ Quick start](docs/development/QUICKSTART.md)** — first successful run
 
-### 🔧 Codzienny Development <a name="daily-development"></a>
+### 🔧 Day-to-day development <a name="daily-development"></a>
 
-1. **[🔨 Makefile](docs/development/QUICKSTART.md#makefile)** – komendy do codziennej pracy
-2. **[🎨 Icon Generation](docs/ICON_GENERATION.md)** – generowanie ikon z SVG
-3. **[🎣 Git Hooks](docs/development/GIT_HOOKS.md)** – automatyzacja wersjonowania
+1. **[🔨 Makefile](docs/development/QUICKSTART.md#makefile)** — analyze, test, run
+2. **[🎨 Icon generation](docs/development/ICON_GENERATION.md)** — regenerate assets
+3. **[🎣 Git hooks](docs/development/GIT_HOOKS.md)** — optional local checks
 
-### 🚀 Release i Deployment <a name="release-and-deployment"></a>
+### 🚀 Release and deployment <a name="release-and-deployment"></a>
 
-1. **[🚀 Workflows](docs/development/WORKFLOWS.md)** – GitHub Actions
-2. **[🔐 Release Signing](docs/RELEASE_SIGNING.md)** – podpisywanie aplikacji
+1. **[🚀 Workflows](docs/development/WORKFLOWS.md)** — what runs on `main` and manual release
+2. **[🔐 Release signing](docs/release/RELEASE_SIGNING.md)** — signing for the release workflow
+3. **[📝 Store listings & screenshots](docs/release/STORE_LISTINGS.md)** — Fastlane text + `make screenshots` → `metadata/android/…/images/`
 
 ---
 
-*📚 Potrzebujesz pomocy? Sprawdź [Issues](https://github.com/Flower7C3/tune-tangler/issues) lub [Discussions](https://github.com/Flower7C3/tune-tangler/discussions)*
+*📚 Need help? See [Issues](https://github.com/Flower7C3/tune-tangler/issues) or [Discussions](https://github.com/Flower7C3/tune-tangler/discussions).*
 
-## 📄 Licencja <a name="license"></a>
+## 📄 License <a name="license"></a>
 
-**[Licencja MIT](LICENSE)**
-
+**[MIT License](LICENSE)**
