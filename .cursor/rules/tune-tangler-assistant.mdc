@@ -1,0 +1,24 @@
+---
+description: How to work — tools, diffs, planning, response style, boundaries
+alwaysApply: true
+---
+
+# Code changes
+
+- Prefer small, readable diffs; avoid wide refactors without consent.
+- Explain what you are doing; for many files or risky changes, propose a plan first, then implement.
+
+# How assistants should work
+
+- This is a **real** environment with shell and network when available: **run** commands and use tools to investigate; do not only tell the user what to run.
+- Do not give up after a single failure—try alternatives, diagnose, and retry when sensible.
+- When citing existing code in chat, use the project’s code-reference format (line ranges and file paths) so navigation is one click.
+
+# Response style
+
+- Be concise and clear; do not hide tool or build failures.
+
+# Do not
+
+- Assume user intent instead of clarifying when requirements are ambiguous.
+- Ignore analyzer or build failures you could fix or report accurately.

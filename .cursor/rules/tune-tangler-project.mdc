@@ -1,0 +1,32 @@
+---
+description: Tune Tangler — conventions, repo layout, doc links
+alwaysApply: true
+---
+
+# Project conventions
+
+- Commit messages: [Conventional Commits](https://www.conventionalcommits.org/).
+- Localization: `lib/l10n/*.arb`, then `flutter gen-l10n`.
+- Default branch: **`main`** (as in this repository).
+- CI / release: see [docs/development/WORKFLOWS.md](../../docs/development/WORKFLOWS.md) (shared **composite actions** under `.github/actions/`; **`test.yml`** runs on **PR** to `main` (and manual dispatch); **`version-tag-main`** on **push** to `main` runs **tests then** updates `pubspec` + tag; **F-Droid** (`release-fdroid-app.yml`) pushes metadata to a **versioned branch** on your **fdroiddata** fork and prints the GitLab branch link (**`target_ref`** optional — empty means latest tag on the default branch); you open the fdroiddata **merge request** in GitLab manually; **`release-apk-aab-google-play.yml`** builds signed **APK/AAB** from an **existing tag** and publishes a **GitHub Release** — no extra commits/tags in those workflows).
+
+# Repository layout (short)
+
+- `.github/workflows/` — CI/CD entry workflows
+- `.github/actions/` — composite actions used by workflows (e.g. `setup-flutter`, `flutter-test`)
+- `android/`, `ios/`, … — platform projects
+- `lib/` — Flutter app code
+- `docs/` — documentation (`docs/development/`, `docs/release/`, `docs/features/`)
+- `tools/` — scripts and config (`fdroid/`, `screenshots.sh` + `screenshots.json`, `generate-icons.sh`, …)
+- `Makefile` — helpers, including `pre-commit` hook install/remove targets
+- `.githooks/pre-commit` — source for the optional local hook (copied to `.git/hooks/pre-commit` when installed)
+- `.cursor/rules/` — AI assistant rules (this directory)
+
+# Links
+
+- [Git hooks](../../docs/development/GIT_HOOKS.md)
+- [GitHub workflows](../../docs/development/WORKFLOWS.md)
+- [F-Droid / fdroiddata](../../docs/release/FDROID.md)
+- [Store listings & screenshots](../../docs/release/STORE_LISTINGS.md)
+- [Conventional Commits](https://www.conventionalcommits.org/)
+- [Flutter documentation](https://docs.flutter.dev/development)

@@ -23,6 +23,7 @@ on:
       - 'LICENSE'
       - 'README.md'
       - 'AGENTS.md'
+      - '.cursor/**'
       - 'missing_translations.txt'
       - 'tools/**'
       - 'Makefile'

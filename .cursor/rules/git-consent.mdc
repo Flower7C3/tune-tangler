@@ -1,0 +1,13 @@
+---
+description: Git — consent for commits/push; amend; context before risky git ops
+alwaysApply: true
+---
+
+# Git
+
+- Do **not** commit, push, tag, reset, or force-push without **explicit** user consent (e.g. “make a commit”, “push to origin”, “run git commit”, “zrób commit”). Finishing implementation, closing a task, or proposing a commit message is **not** consent — **ask** before any git write if the user did not spell it out.
+- Phrases like “make it ready”, “finish”, or “done” are **not** consent unless they explicitly mention committing or pushing.
+- A **Conventional Commits** message suggestion, “conv commit”, or similar is **not** consent unless the user clearly authorizes the git write.
+- Verbatim consent examples that **do** authorize the matching action: “zrób commit”, “commit”, “push na origin”, “run git commit”, “push to GitHub”.
+- Do **not** amend commits that have already been pushed to `origin` unless the user explicitly requests it.
+- Before non-trivial git operations, show reasonable context (for example `git status`).

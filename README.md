@@ -40,7 +40,7 @@
 - **[🗺️ Roadmap](docs/features/ROADMAP.md)** — planned work
 - **[✅ Completed](docs/features/COMPLETED.md)** — shipped items with commit links
 - **[🔐 Release signing](docs/release/RELEASE_SIGNING.md)** — keystore / CI signing notes
-- **[🤖 Agent (AI)](AGENTS.md)** — rules for assistants / Cursor
+- **[🤖 Agent (AI)](AGENTS.md)** — index of Cursor rules in **[`.cursor/rules/`](.cursor/rules/)** (`*.mdc`)
 
 ## 🔍 How to find things <a name="how-to-find-information"></a>
 
