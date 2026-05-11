@@ -19,6 +19,7 @@ Optional:
   VERSION_OVERRIDE          — optional MAJOR.MINOR.PATCH[+CODE]
   FDROID_GITLAB_BRANCH      — if set, exact Git branch name on the fork (overrides auto name)
   FDROID_ROBOT_BRANCH_PREFIX — default robot/tune-tangler (automation namespace on the fork, not required by F-Droid); auto branch = prefix-versionName
+  FDROID_GITLAB_COMPARE_BASE_REF — optional left-hand side of GitLab compare URL vs robot branch (default master)
 
 Repo paths (under GITHUB_WORKSPACE):
   tools/fdroid/metadata_static.yml  — fdroiddata bootstrap (no Summary/Description/Name; see F-Droid docs)
@@ -382,6 +383,16 @@ def _fork_project_tree_url(api_base: str, token: str, fork_id: int, branch: str)
     return f"{web}/-/tree/{enc_br}"
 
 
+def _fork_compare_url(tree_url: str, branch: str, fork_id: int, base_ref: str) -> str:
+    """GitLab UI: compare default branch (usually ``master`` on fdroiddata) to the robot branch."""
+    if "/-/tree/" not in tree_url:
+        raise SystemExit(f"Unexpected tree URL (no /-/tree/): {tree_url!r}")
+    web_base = tree_url.split("/-/tree/", 1)[0]
+    enc_br = urllib.parse.quote(branch, safe="")
+    enc_base = urllib.parse.quote(base_ref, safe="")
+    return f"{web_base}/-/compare/{enc_base}...{enc_br}?from_project_id={fork_id}"
+
+
 def _write_github_output(name: str, value: str) -> None:
     outp = os.environ.get("GITHUB_OUTPUT")
     if not outp:
@@ -606,9 +617,13 @@ def main() -> None:
         print(f"Pushed metadata commit to branch {branch}.", flush=True)
 
     tree_url = _fork_project_tree_url(api_base, token, fork_id, branch)
+    compare_base = (os.environ.get("FDROID_GITLAB_COMPARE_BASE_REF") or "master").strip() or "master"
+    compare_url = _fork_compare_url(tree_url, branch, fork_id, compare_base)
     print(f"::notice::GitLab fork branch (pipelines): {tree_url}", flush=True)
+    print(f"::notice::GitLab compare vs {compare_base}: {compare_url}", flush=True)
     _write_github_output("gitlab_tree_url", tree_url)
     _write_github_output("gitlab_branch", branch)
+    _write_github_output("gitlab_compare_url", compare_url)
 
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary:
@@ -616,6 +631,7 @@ def main() -> None:
             sf.write("\n## fdroiddata fork branch\n\n")
             sf.write(f"- **branch:** `{branch}`\n")
             sf.write(f"- **tree (watch CI):** [{tree_url}]({tree_url})\n")
+            sf.write(f"- **compare vs `{compare_base}`:** [{compare_url}]({compare_url})\n")
             sf.write(
                 "\nCreate a merge request to [`fdroid/fdroiddata`](https://gitlab.com/fdroid/fdroiddata) "
                 "from this branch in GitLab when you are ready.\n"

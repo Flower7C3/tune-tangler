@@ -29,6 +29,10 @@ jobs:
     env:
       GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
       GITLAB_FORK_PROJECT_ID: ${{ vars.GITLAB_FORK_PROJECT_ID }}
+    outputs:
+      gitlab_tree_url: ${{ steps.publish.outputs.gitlab_tree_url }}
+      gitlab_branch: ${{ steps.publish.outputs.gitlab_branch }}
+      gitlab_compare_url: ${{ steps.publish.outputs.gitlab_compare_url }}
     steps:
       - name: "🔧 Checkout default branch (resolve ref)"
         uses: actions/checkout@v6
@@ -55,9 +59,6 @@ jobs:
           fi
           echo "resolved_ref=$TAG" >> "$GITHUB_OUTPUT"
           echo "**target_ref** empty — using latest reachable tag: \`$TAG\`" >> "$GITHUB_STEP_SUMMARY"
-      # Resolve target SHA without checking out the tag in this job: old tags lack `.github/actions/...`.
-      # Reference the composite via `repo/path@default_branch` so GitHub loads `action.yml` from the
-      # default branch, not from `$GITHUB_WORKSPACE` (see ./ path + checkout tag).
       - name: "Resolve commit SHA"
         id: meta
         shell: bash
@@ -67,18 +68,64 @@ jobs:
           set -euo pipefail
           git fetch origin "$RESOLVED_REF" --depth=1
           echo "commit_sha=$(git rev-parse 'FETCH_HEAD^{commit}')" >> "$GITHUB_OUTPUT"
-      - name: "🦊 Push fdroiddata fork branch"
-        id: fdroid
-        uses: ${{ github.repository }}/.github/actions/fdroid-gitlab-branch@${{ github.event.repository.default_branch }}
+      - name: "🔧 Checkout release tree"
+        uses: actions/checkout@v6
         with:
-          commit_sha: ${{ steps.meta.outputs.commit_sha }}
-          ref_name: ${{ steps.resolve.outputs.resolved_ref }}
-          version_override: ''
-          flutter_version: ${{ vars.FDROID_FLUTTER_VERSION }}
-          robot_branch_prefix: ${{ vars.FDROID_ROBOT_BRANCH_PREFIX }}
-          gitlab_branch: ${{ vars.FDROID_GITLAB_BRANCH }}
-      - name: "🔗 GitLab branch link"
+          ref: ${{ steps.resolve.outputs.resolved_ref }}
+          fetch-depth: 1
+      - name: "📌 publish_fdroid_gitlab_branch.py from default branch"
+        shell: bash
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+          DB="${DEFAULT_BRANCH}"
+          git fetch --depth=1 origin "$DB"
+          git checkout FETCH_HEAD -- tools/fdroid/publish_fdroid_gitlab_branch.py
+          echo "Using \`tools/fdroid/publish_fdroid_gitlab_branch.py\` from \`origin/${DB}\` (app tree still \`${{ steps.resolve.outputs.resolved_ref }}\`)." >> "$GITHUB_STEP_SUMMARY"
+      - name: "🐍 Setup Python"
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: "📦 PyYAML"
+        shell: bash
+        run: pip install pyyaml
+      - name: "📌 Flutter version for metadata recipe"
+        shell: bash
+        env:
+          PINNED_FLUTTER: ${{ vars.FDROID_FLUTTER_VERSION }}
+        run: |
+          set -euo pipefail
+          V="${PINNED_FLUTTER:-}"
+          if [ -z "${V:-}" ]; then
+            V=$(curl -fsSL "https://storage.googleapis.com/flutter_infra_release/releases/releases_linux.json" \
+              | jq -r '.releases[] | select(.channel=="stable") | .version' | head -1)
+          fi
+          echo "FDROID_FLUTTER_VERSION=$V" >> "$GITHUB_ENV"
+          echo "Using Flutter $V in F-Droid build recipe"
+      - name: "🔐 Validate GitLab secrets"
         shell: bash
         run: |
-          echo "**Branch URL:** ${{ steps.fdroid.outputs.gitlab_tree_url }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "::notice::fdroiddata fork branch:: ${{ steps.fdroid.outputs.gitlab_tree_url }}"
+          set -euo pipefail
+          if [ -z "${GITLAB_TOKEN:-}" ]; then
+            echo "::error::GITLAB_TOKEN is unset or empty. Define it on the workflow job as env from secrets (see docs/release/FDROID.md)."
+            exit 1
+          fi
+          if [ -z "${GITLAB_FORK_PROJECT_ID:-}" ]; then
+            echo "::error::GITLAB_FORK_PROJECT_ID is unset or empty. Set repository variable GITLAB_FORK_PROJECT_ID (numeric GitLab project ID)."
+            exit 1
+          fi
+      - name: "📝 VERSION_OVERRIDE"
+        shell: bash
+        run: echo "VERSION_OVERRIDE=" >> "$GITHUB_ENV"
+      - name: "🚀 Push fdroiddata fork branch"
+        id: publish
+        shell: bash
+        env:
+          FDROID_METADATA_PATH: metadata/pro.kwiatek.tune_tangler.yml
+          GITHUB_SHA: ${{ steps.meta.outputs.commit_sha }}
+          GITHUB_REF_NAME: ${{ steps.resolve.outputs.resolved_ref }}
+          FDROID_ROBOT_BRANCH_PREFIX: ${{ vars.FDROID_ROBOT_BRANCH_PREFIX }}
+          FDROID_GITLAB_BRANCH: ${{ vars.FDROID_GITLAB_BRANCH }}
+          FDROID_GITLAB_COMPARE_BASE_REF: ${{ vars.FDROID_GITLAB_COMPARE_BASE_REF }}
+        run: python3 tools/fdroid/publish_fdroid_gitlab_branch.py

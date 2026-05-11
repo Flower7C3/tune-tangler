@@ -4,7 +4,7 @@
 
 F-Droid builds and signs binaries. This app repo holds **metadata templates** (`tools/fdroid/`) and GitHub workflows.
 
-**GitHub Actions:** the **F-Droid fork branch** workflow needs **`GITLAB_TOKEN`**, **`GITLAB_FORK_PROJECT_ID`**, optional **`FDROID_FLUTTER_VERSION`**, **`FDROID_ROBOT_BRANCH_PREFIX`**, **`FDROID_GITLAB_BRANCH`**. Details are in **[`docs/development/WORKFLOWS.md`](../development/WORKFLOWS.md)** — see the **F-Droid** rows and [Operator runbook](../development/WORKFLOWS.md#operator-runbook). Versioning on **`main`** and **`[skip ci]`** behavior live there too.
+**GitHub Actions:** the **F-Droid fork branch** workflow needs **`GITLAB_TOKEN`**, **`GITLAB_FORK_PROJECT_ID`**, optional **`FDROID_FLUTTER_VERSION`**, **`FDROID_ROBOT_BRANCH_PREFIX`**, **`FDROID_GITLAB_BRANCH`**, **`FDROID_GITLAB_COMPARE_BASE_REF`**. Details are in **[`docs/development/WORKFLOWS.md`](../development/WORKFLOWS.md)** — see the **F-Droid** rows and [Operator runbook](../development/WORKFLOWS.md#operator-runbook). Versioning on **`main`** and **`[skip ci]`** behavior live there too.
 
 The sections below cover **fdroiddata** metadata shape, **`publish_fdroid_gitlab_branch.py`**, GitLab CI on your fork branch, and **manually opening a merge request to upstream** after the fork pipeline is green.
 
@@ -32,9 +32,9 @@ The sections below cover **fdroiddata** metadata shape, **`publish_fdroid_gitlab
 4. Merges the new **Build** into `Builds` (replaces same `versionCode` if present; dedupes by `versionCode`; if fork `master` already lists the same `versionCode` **and** `commit`, reuses that YAML as the base).
 5. **Removes** `Name`, `AutoName`, `Summary`, `Description` from YAML (so Fastlane in source wins).
 6. Pushes the full YAML to a **per-release branch** on your fork: **`{prefix}-{versionName}`** (default prefix `robot/tune-tangler` — a separate namespace for CI-created branches; not required by F-Droid). Override with **`FDROID_GITLAB_BRANCH`** (full name) or **`FDROID_ROBOT_BRANCH_PREFIX`**. Branch is created from **`master`** when it does not exist yet.
-7. Prints the **GitLab tree URL** for that branch (CI / pipelines). It does **not** create an upstream merge request to `fdroid/fdroiddata` — you do that in GitLab when ready.
+7. Prints the **GitLab tree URL** and a **compare link** (fork branch vs `master` by default) for that branch. It does **not** create an upstream merge request to `fdroid/fdroiddata` — you do that in GitLab when ready.
 
-Optional GitHub **variables** **`FDROID_ROBOT_BRANCH_PREFIX`**, **`FDROID_GITLAB_BRANCH`** — see [WORKFLOWS](../development/WORKFLOWS.md#secrets-and-variables) and [`fdroid-gitlab-branch`](../../.github/actions/fdroid-gitlab-branch/action.yml). The composite checks out **`target_ref`** for app sources but replaces only **`tools/fdroid/publish_fdroid_gitlab_branch.py`** from the repo **default branch** so old tags still run the current script; **`metadata_static.yml`** / **`build_template.yml`** stay from the tag. **`target_ref`** may be left empty to use the **latest tag** on the default branch.
+Optional GitHub **variables** **`FDROID_ROBOT_BRANCH_PREFIX`**, **`FDROID_GITLAB_BRANCH`**, **`FDROID_GITLAB_COMPARE_BASE_REF`** (left side of the compare URL, default **`master`**) — see [WORKFLOWS](../development/WORKFLOWS.md#secrets-and-variables) and **[`release-fdroid-app.yml`](../../.github/workflows/release-fdroid-app.yml)**. The workflow checks out **`target_ref`** for app sources but replaces only **`tools/fdroid/publish_fdroid_gitlab_branch.py`** from the repo **default branch** so old tags still run the current script; **`metadata_static.yml`** / **`build_template.yml`** stay from the tag. **`target_ref`** may be left empty to use the **latest tag** on the default branch.
 
 **Cleaning up on your fork:** delete obsolete `robot/tune-tangler-*` branches when you no longer need them.
 

@@ -40,7 +40,7 @@ This file in the repository root is the canonical place for rules used by AI cod
 ## Repository layout (short)
 
 - `.github/workflows/` — CI/CD entry workflows
-- `.github/actions/` — composite actions used by workflows (e.g. `fdroid-gitlab-branch`)
+- `.github/actions/` — composite actions used by workflows (e.g. `setup-flutter`, `flutter-test`)
 - `android/`, `ios/`, … — platform projects
 - `lib/` — Flutter app code
 - `docs/` — documentation (`docs/development/`, `docs/release/`, `docs/features/`)
