@@ -55,15 +55,18 @@ jobs:
           fi
           echo "resolved_ref=$TAG" >> "$GITHUB_OUTPUT"
           echo "**target_ref** empty — using latest reachable tag: \`$TAG\`" >> "$GITHUB_STEP_SUMMARY"
-      - name: "🔧 Checkout target tree"
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ steps.resolve.outputs.resolved_ref }}
-          fetch-depth: 0
+      # Stay on the default-branch checkout so `.github/actions/fdroid-gitlab-branch/action.yml` exists
+      # when resolving the local composite. Release tags often predate that action; the composite checks
+      # out `ref_name` itself for the F-Droid publish step.
       - name: "Resolve commit SHA"
         id: meta
         shell: bash
-        run: echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+        env:
+          RESOLVED_REF: ${{ steps.resolve.outputs.resolved_ref }}
+        run: |
+          set -euo pipefail
+          git fetch origin "$RESOLVED_REF" --depth=1
+          echo "commit_sha=$(git rev-parse 'FETCH_HEAD^{commit}')" >> "$GITHUB_OUTPUT"
       - name: "🦊 Push fdroiddata fork branch"
         id: fdroid
         uses: ./.github/actions/fdroid-gitlab-branch
