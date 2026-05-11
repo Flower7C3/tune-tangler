@@ -31,7 +31,7 @@ The sections below cover **fdroiddata** metadata shape, **`publish_fdroid_gitlab
 3. Fetches `metadata/pro.kwiatek.tune_tangler.yml` from your fork on **`master`** (if missing — bootstraps from `metadata_static.yml` + first Build).
 4. Merges the new **Build** into `Builds` (replaces same `versionCode` if present; dedupes by `versionCode`; if fork `master` already lists the same `versionCode` **and** `commit`, reuses that YAML as the base).
 5. **Removes** `Name`, `AutoName`, `Summary`, `Description` from YAML (so Fastlane in source wins).
-6. Pushes the full YAML to a **per-release branch** on your fork: **`{prefix}-{versionName}-{versionCode}`** (default prefix `robot/tune-tangler`). Override with **`FDROID_GITLAB_BRANCH`** (full name) or **`FDROID_ROBOT_BRANCH_PREFIX`** (prefix only). Branch is created from **`master`** when it does not exist yet.
+6. Pushes the full YAML to a **per-release branch** on your fork: **`{prefix}-{versionName}`** (default prefix `robot/tune-tangler` — a separate namespace for CI-created branches; not required by F-Droid). Override with **`FDROID_GITLAB_BRANCH`** (full name) or **`FDROID_ROBOT_BRANCH_PREFIX`**. Branch is created from **`master`** when it does not exist yet.
 7. Prints the **GitLab tree URL** for that branch (CI / pipelines). It does **not** create an upstream merge request to `fdroid/fdroiddata` — you do that in GitLab when ready.
 
 Optional GitHub **variables** **`FDROID_ROBOT_BRANCH_PREFIX`**, **`FDROID_GITLAB_BRANCH`** — see [WORKFLOWS](../development/WORKFLOWS.md#secrets-and-variables) and [`fdroid-gitlab-branch`](../../.github/actions/fdroid-gitlab-branch/action.yml). The composite checks out **`target_ref`** for app sources but replaces only **`tools/fdroid/publish_fdroid_gitlab_branch.py`** from the repo **default branch** so old tags still run the current script; **`metadata_static.yml`** / **`build_template.yml`** stay from the tag. **`target_ref`** may be left empty to use the **latest tag** on the default branch.
@@ -44,7 +44,7 @@ Optional GitHub **variables** **`FDROID_ROBOT_BRANCH_PREFIX`**, **`FDROID_GITLAB
 
 1. Fork [`fdroiddata`](https://gitlab.com/fdroid/fdroiddata).
 2. File: **`metadata/pro.kwiatek.tune_tangler.yml`** (path is `metadata/<applicationId>.yml`; see [Build metadata reference](https://f-droid.org/en/docs/Build_Metadata_Reference/)) — patterns in `tools/fdroid/metadata_static.yml` and `tools/fdroid/build_template.yml`.
-3. Open a **merge request to upstream** [`fdroid/fdroiddata`](https://gitlab.com/fdroid/fdroiddata): target branch **`master`**, source branch on **your fork** (the branch created by Actions, e.g. `robot/tune-tangler-1.7.1-3`).
+3. Open a **merge request to upstream** [`fdroid/fdroiddata`](https://gitlab.com/fdroid/fdroiddata): target branch **`master`**, source branch on **your fork** (the branch created by Actions, e.g. `robot/tune-tangler-1.7.1`).
 
 ### After Actions: upstream merge request (manual in GitLab)
 

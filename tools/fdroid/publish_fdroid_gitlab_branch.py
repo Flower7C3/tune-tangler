@@ -2,7 +2,7 @@
 """
 Push F-Droid metadata YAML to a **versioned branch** on your GitLab fork of fdroiddata.
 
-Creates `robot/tune-tangler-<versionName>-<versionCode>` (prefix configurable). This script
+Creates `robot/tune-tangler-<versionName>` (prefix configurable). This script
 only updates the fork branch; opening a merge request to `fdroid/fdroiddata` is a separate manual step in GitLab.
 
 Required env:
@@ -18,7 +18,7 @@ Optional:
   GITHUB_WORKSPACE          — repo root (CI sets automatically)
   VERSION_OVERRIDE          — optional MAJOR.MINOR.PATCH[+CODE]
   FDROID_GITLAB_BRANCH      — if set, exact Git branch name on the fork (overrides auto name)
-  FDROID_ROBOT_BRANCH_PREFIX — default robot/tune-tangler; auto branch is prefix-versionName-versionCode
+  FDROID_ROBOT_BRANCH_PREFIX — default robot/tune-tangler (automation namespace on the fork, not required by F-Droid); auto branch = prefix-versionName
 
 Repo paths (under GITHUB_WORKSPACE):
   tools/fdroid/metadata_static.yml  — fdroiddata bootstrap (no Summary/Description/Name; see F-Droid docs)
@@ -360,14 +360,15 @@ def _branch_exists(api_base: str, token: str, project_id: int, branch: str) -> b
         raise SystemExit(f"GitLab HTTP {e.code} GET {url}: {raw}") from e
 
 
-def _resolved_robot_branch(vname: str, vcode: int) -> str:
+def _resolved_robot_branch(vname: str) -> str:
     override = (os.environ.get("FDROID_GITLAB_BRANCH") or "").strip()
     if override:
         return override
+    # Default `robot/…` groups CI-created branches under a clear namespace (not required by F-Droid).
     prefix = (os.environ.get("FDROID_ROBOT_BRANCH_PREFIX") or "robot/tune-tangler").strip()
     if not prefix:
         prefix = "robot/tune-tangler"
-    return f"{prefix}-{vname}-{vcode}"
+    return f"{prefix}-{vname}"
 
 
 def _fork_project_tree_url(api_base: str, token: str, fork_id: int, branch: str) -> str:
@@ -570,7 +571,7 @@ def main() -> None:
 
     body_yaml = _dump_metadata(doc)
 
-    branch = _resolved_robot_branch(vname, vcode)
+    branch = _resolved_robot_branch(vname)
     print(f"Target fork branch: {branch}", flush=True)
 
     skip_commit = False

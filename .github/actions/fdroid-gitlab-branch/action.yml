@@ -20,7 +20,7 @@ inputs:
     default: ''
   robot_branch_prefix:
     description: >-
-      Prefix for auto branch name: prefix-versionName-versionCode. Pass vars.FDROID_ROBOT_BRANCH_PREFIX;
+      Prefix for auto branch name: prefix-versionName. Pass vars.FDROID_ROBOT_BRANCH_PREFIX;
       empty = robot/tune-tangler.
     required: false
     default: ''
