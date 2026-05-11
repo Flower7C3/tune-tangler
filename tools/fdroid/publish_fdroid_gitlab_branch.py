@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """
-Create or update F-Droid metadata on a GitLab fork of fdroiddata and open an MR to upstream.
+Push F-Droid metadata YAML to a **versioned branch** on your GitLab fork of fdroiddata.
+
+Creates `robot/tune-tangler-<versionName>-<versionCode>-<sha8>` (prefix configurable). This script
+only updates the fork branch; opening a merge request to `fdroid/fdroiddata` is a separate manual step in GitLab.
 
 Required env:
   GITLAB_TOKEN              — GitLab PAT with api scope (repo write on fork)
@@ -8,17 +11,14 @@ Required env:
 
 Optional:
   GITLAB_API_URL            — default https://gitlab.com/api/v4
-  GITLAB_UPSTREAM_PATH      — default fdroid/fdroiddata (resolved to numeric ID)
-  FDROID_METADATA_SOURCE_BRANCH — default robot/tune-tangler (stable branch; reuse open MR)
   FDROID_METADATA_PATH      — default metadata/pro.kwiatek.tune_tangler.yml
-  GITHUB_SHA                — commit the tag points to (CI sets automatically)
-  GITHUB_REF_NAME           — tag name (CI sets automatically)
-  FDROID_FLUTTER_VERSION    — Flutter SDK version string for the build recipe (e.g. 3.29.0)
+  GITHUB_SHA                — full 40-char app commit for Builds[].commit
+  GITHUB_REF_NAME           — tag or branch (for version inference)
+  FDROID_FLUTTER_VERSION    — Flutter SDK version for the build recipe (e.g. 3.29.0)
   GITHUB_WORKSPACE          — repo root (CI sets automatically)
-  VERSION_OVERRIDE          — optional; workflow_dispatch MAJOR.MINOR.PATCH[+CODE]
-  FDROID_GITLAB_STAGE       — push | mr | both (default both). push = metadata commit only;
-                              mr = open Draft MR + checklist if missing (branch must match);
-                              both = push then open Draft MR when no MR exists yet.
+  VERSION_OVERRIDE          — optional MAJOR.MINOR.PATCH[+CODE]
+  FDROID_GITLAB_BRANCH      — if set, exact Git branch name on the fork (overrides auto name)
+  FDROID_ROBOT_BRANCH_PREFIX — default robot/tune-tangler; auto branch is prefix-versionName-versionCode-sha8
 
 Repo paths (under GITHUB_WORKSPACE):
   tools/fdroid/metadata_static.yml  — fdroiddata bootstrap (no Summary/Description/Name; see F-Droid docs)
@@ -183,10 +183,10 @@ def _normalize_update_check_mode(doc: dict[str, Any]) -> None:
 
 
 def _canonical_github_repo_url(repo: str) -> str:
-    """fdroiddata MR pipeline `git redirect` uses `git ls-remote` with http.followRedirects=false.
+    """fdroiddata CI `git redirect` (e.g. on merge requests) uses `git ls-remote` with http.followRedirects=false.
 
     GitHub smart-HTTP without the `.git` suffix can fail or redirect from GitLab CI; upstream
-    `tools/rewrite-git-redirects.py` rewrites to the `.git` URL — MRs must already match.
+    `tools/rewrite-git-redirects.py` rewrites to the `.git` URL — metadata must already match.
     """
     s = repo.strip().rstrip("/")
     if s.endswith(".git") or "github.com/" not in s:
@@ -330,13 +330,6 @@ def _repository_commit_with_retry(
         raise
 
 
-def _project_id_for_path(api_base: str, token: str, project_path: str) -> int:
-    enc = urllib.parse.quote(project_path, safe="")
-    _, data = _gitlab_request("GET", api_base, token, f"projects/{enc}")
-    assert isinstance(data, dict)
-    return int(data["id"])
-
-
 def _get_file(api_base: str, token: str, project_id: int, file_path: str, ref: str) -> str | None:
     enc = urllib.parse.quote(file_path, safe="")
     url = f"{api_base}/projects/{project_id}/repository/files/{enc}?ref={urllib.parse.quote(ref)}"
@@ -367,21 +360,33 @@ def _branch_exists(api_base: str, token: str, project_id: int, branch: str) -> b
         raise SystemExit(f"GitLab HTTP {e.code} GET {url}: {raw}") from e
 
 
-def _parse_gitlab_stage(raw: str | None) -> str:
-    """Return one of push, mr, both."""
-    if raw is None or not str(raw).strip():
-        return "both"
-    s = str(raw).strip().lower()
-    if s in ("push", "push_for_ci", "1", "ci"):
-        return "push"
-    if s in ("mr", "open_draft_mr", "open", "2"):
-        return "mr"
-    if s in ("both", "push_and_open", "push_and_open_draft_mr", "all"):
-        return "both"
-    raise SystemExit(
-        f"FDROID_GITLAB_STAGE must be push, mr, or both (got {raw!r}). "
-        "GitHub Actions maps workflow choices to these values."
-    )
+def _resolved_robot_branch(vname: str, vcode: int, commit_sha: str) -> str:
+    override = (os.environ.get("FDROID_GITLAB_BRANCH") or "").strip()
+    if override:
+        return override
+    prefix = (os.environ.get("FDROID_ROBOT_BRANCH_PREFIX") or "robot/tune-tangler").strip()
+    if not prefix:
+        prefix = "robot/tune-tangler"
+    return f"{prefix}-{vname}-{vcode}-{commit_sha[:8].lower()}"
+
+
+def _fork_project_tree_url(api_base: str, token: str, fork_id: int, branch: str) -> str:
+    _, data = _gitlab_request("GET", api_base, token, f"projects/{fork_id}")
+    assert isinstance(data, dict)
+    web = str(data.get("web_url", "")).rstrip("/")
+    if not web:
+        pwn = str(data["path_with_namespace"])
+        web = f"https://gitlab.com/{pwn}"
+    enc_br = urllib.parse.quote(branch, safe="")
+    return f"{web}/-/tree/{enc_br}"
+
+
+def _write_github_output(name: str, value: str) -> None:
+    outp = os.environ.get("GITHUB_OUTPUT")
+    if not outp:
+        return
+    with open(outp, "a", encoding="utf-8") as fo:
+        fo.write(f"{name}={value}\n")
 
 
 def _yaml_mapping_equal(a: str, b: str) -> bool:
@@ -391,84 +396,6 @@ def _yaml_mapping_equal(a: str, b: str) -> bool:
     except yaml.YAMLError as e:
         raise SystemExit(f"Invalid YAML while comparing metadata: {e}") from e
     return isinstance(ya, dict) and isinstance(yb, dict) and ya == yb
-
-
-def _fdroid_mr_checklist_markdown() -> str:
-    """Upstream fdroiddata MR template (boilerplate removed — no 'Please remove above lines' block)."""
-    return (
-        "## Required\n\n"
-        "<!-- Please ensure that your MR meet following requirements -->\n\n"
-        "* [ ] The app complies with the "
-        "[inclusion criteria](https://f-droid.org/docs/Inclusion_Policy)\n"
-        "* [ ] All related [fdroiddata](https://gitlab.com/fdroid/fdroiddata/issues) and "
-        "[RFP issues](https://gitlab.com/fdroid/rfp/issues) have been referenced in this merge request\n"
-        "* [ ] Builds with `fdroid build`\n\n"
-        "## Strongly Recommended\n\n"
-        "<!-- We highly encourage you doing these thing. -->\n\n"
-        "* [ ] The upstream app source code repo contains the app metadata "
-        "_(summary/description/images/changelog/etc)_ in a [Fastlane](https://gitlab.com/snippets/1895688) or "
-        "[Triple-T](https://gitlab.com/snippets/1901490) folder structure\n"
-        "* [ ] Releases are tagged "
-        "<!-- Our autoupdate workflow relies on the tag. Without this you have to add every version manually. -->\n\n"
-        "## Suggested\n\n"
-        "<!-- These suggestions may be difficult to apply on your app. Please have a try. -->\n\n"
-        "* [ ] External repos are added as git submodules instead of srclibs "
-        "<!-- You can update git submodules without opening an MR in this repo and the submodule is covered by our scanner. -->\n"
-        "* [ ] Multiple apks for native code "
-        "<!-- If your app has native code and the size is large, please consider building multiple apks instead of one universal apk. -->\n\n"
-        "---\n\n"
-        "<!-- Add the corresponding issue number or remove this if this merge request does not close an issue at fdroiddata. -->\n"
-        "Closes fdroiddata#<issue number>\n"
-    )
-
-
-def _merge_request_description(
-    *,
-    version_name: str,
-    version_code: int,
-    commit_sha: str,
-    flutter_ver: str,
-    metadata_path: str,
-) -> str:
-    head = (
-        "Automated metadata bump from GitHub Actions (`publish_fdroid_mr.py`).\n\n"
-        f"- **versionName:** {version_name}\n"
-        f"- **versionCode:** {version_code}\n"
-        f"- **commit:** `{commit_sha}`\n"
-        f"- **Flutter (recipe):** {flutter_ver}\n"
-        f"- **fdroiddata path (after merge):** `{metadata_path}` in "
-        f"[fdroid/fdroiddata](https://gitlab.com/fdroid/fdroiddata)\n"
-        f"- **Reference:** [F-Droid build metadata](https://f-droid.org/en/docs/Build_Metadata_Reference/)\n\n"
-        "Store text and screenshots come from **Fastlane/Triple-T** in the app repo "
-        "(`fastlane/metadata/android/` at the tagged revision). "
-        "`Name` / `Summary` / `Description` were removed from the YAML if present so "
-        "F-Droid does not override that source.\n\n"
-        "**Process:** GitLab CI should be green on the fork branch before clearing **Draft** "
-        "and ticking the checklist below.\n\n"
-    )
-    return head + _fdroid_mr_checklist_markdown()
-
-
-def _find_open_upstream_mr(
-    api_base: str, token: str, fork_id: int, upstream_id: int, source_branch: str
-) -> dict[str, Any] | None:
-    q = urllib.parse.urlencode(
-        {"state": "opened", "source_branch": source_branch, "target_branch": "master"}
-    )
-    _, data = _gitlab_request("GET", api_base, token, f"projects/{fork_id}/merge_requests?{q}")
-    if not isinstance(data, list):
-        return None
-    for mr in data:
-        if not isinstance(mr, dict):
-            continue
-        if mr.get("target_project_id") != upstream_id:
-            continue
-        if mr.get("source_branch") != source_branch:
-            continue
-        if mr.get("state") != "opened":
-            continue
-        return mr
-    return None
 
 
 def _dedupe_builds_keep_last(builds: list[Any]) -> list[Any]:
@@ -570,7 +497,6 @@ def main() -> None:
     api_base = os.environ.get("GITLAB_API_URL", "https://gitlab.com/api/v4").rstrip("/")
     token = _env("GITLAB_TOKEN")
     fork_id = int(_env("GITLAB_FORK_PROJECT_ID"))
-    upstream_path = os.environ.get("GITLAB_UPSTREAM_PATH", "fdroid/fdroiddata")
     metadata_path = os.environ.get("FDROID_METADATA_PATH", "metadata/pro.kwiatek.tune_tangler.yml")
     commit_sha = _env("GITHUB_SHA")
     ref_name = os.environ.get("GITHUB_REF_NAME", "")
@@ -579,8 +505,6 @@ def main() -> None:
         raise SystemExit(
             "FDROID_FLUTTER_VERSION must be set (e.g. 3.29.0 matching the Flutter stable archive name)."
         )
-
-    stage = _parse_gitlab_stage(os.environ.get("FDROID_GITLAB_STAGE"))
 
     version_override = os.environ.get("VERSION_OVERRIDE", "").strip()
 
@@ -626,12 +550,6 @@ def main() -> None:
         for b in builds:
             if isinstance(b, dict) and int(b.get("versionCode", -1)) == vcode:
                 if str(b.get("commit", "")).lower() == commit_sha.lower():
-                    if stage != "mr":
-                        print(
-                            f"fork master already lists versionCode={vcode} for commit {commit_sha[:8]}; nothing to do.",
-                            flush=True,
-                        )
-                        return
                     skip_new_build_merge = True
                 break
 
@@ -652,15 +570,17 @@ def main() -> None:
 
     body_yaml = _dump_metadata(doc)
 
-    upstream_id = _project_id_for_path(api_base, token, upstream_path)
+    branch = _resolved_robot_branch(vname, vcode, commit_sha)
+    print(f"Target fork branch: {branch}", flush=True)
 
-    branch = (os.environ.get("FDROID_METADATA_SOURCE_BRANCH") or "robot/tune-tangler").strip()
-    if not branch:
-        branch = "robot/tune-tangler"
+    skip_commit = False
+    if _branch_exists(api_base, token, fork_id, branch):
+        cur = _get_file(api_base, token, fork_id, metadata_path, ref=branch)
+        if cur is not None and _yaml_mapping_equal(cur, body_yaml):
+            skip_commit = True
+            print("Fork branch already has identical metadata YAML; skipping new commit.", flush=True)
 
-    if stage in ("push", "both"):
-        # GitLab rejects create if the path already exists on the target branch; fork `master`
-        # may lack the file while `robot/...` already has it from an earlier push.
+    if not skip_commit:
         if _branch_exists(api_base, token, fork_id, branch):
             file_on_commit_branch = _get_file(api_base, token, fork_id, metadata_path, ref=branch)
         else:
@@ -684,55 +604,21 @@ def main() -> None:
         _repository_commit_with_retry(api_base, token, fork_id, commit_payload)
         print(f"Pushed metadata commit to branch {branch}.", flush=True)
 
-    if stage == "push":
-        print(
-            "Stage is **push** only: no merge request was opened. "
-            "When GitLab CI is green on your fork, run the workflow again with **open_draft_mr** "
-            "(same **target_ref**).",
-            flush=True,
-        )
-        return
+    tree_url = _fork_project_tree_url(api_base, token, fork_id, branch)
+    print(f"::notice::GitLab fork branch (pipelines): {tree_url}", flush=True)
+    _write_github_output("gitlab_tree_url", tree_url)
+    _write_github_output("gitlab_branch", branch)
 
-    if stage == "mr":
-        remote_on_branch = _get_file(api_base, token, fork_id, metadata_path, ref=branch)
-        if remote_on_branch is None:
-            raise SystemExit(
-                f"No {metadata_path} on fork branch {branch!r}. "
-                "Run **push_for_ci** first for this ref, then **open_draft_mr**."
+    summary = os.environ.get("GITHUB_STEP_SUMMARY")
+    if summary:
+        with open(summary, "a", encoding="utf-8") as sf:
+            sf.write("\n## fdroiddata fork branch\n\n")
+            sf.write(f"- **branch:** `{branch}`\n")
+            sf.write(f"- **tree (watch CI):** [{tree_url}]({tree_url})\n")
+            sf.write(
+                "\nCreate a merge request to [`fdroid/fdroiddata`](https://gitlab.com/fdroid/fdroiddata) "
+                "from this branch in GitLab when you are ready.\n"
             )
-        if not _yaml_mapping_equal(remote_on_branch, body_yaml):
-            raise SystemExit(
-                "Fork branch metadata does not match this checkout’s computed YAML. "
-                f"Run **push_for_ci** for the same **target_ref**, then retry **open_draft_mr** "
-                f"(branch {branch!r})."
-            )
-
-    existing_mr = _find_open_upstream_mr(api_base, token, fork_id, upstream_id, branch)
-    if existing_mr is not None:
-        print(f"Open MR already exists: {existing_mr.get('web_url')}", flush=True)
-        return
-
-    mr_payload: dict[str, Any] = {
-        "source_branch": branch,
-        "target_branch": "master",
-        "target_project_id": upstream_id,
-        "title": f"Tune Tangler {vname} ({vcode})",
-        "description": _merge_request_description(
-            version_name=vname,
-            version_code=vcode,
-            commit_sha=commit_sha,
-            flutter_ver=flutter_ver,
-            metadata_path=metadata_path,
-        ),
-        "remove_source_branch": True,
-        "draft": True,
-    }
-    _, mr = _gitlab_request("POST", api_base, token, f"projects/{fork_id}/merge_requests", mr_payload)
-    assert isinstance(mr, dict)
-    print(
-        f"Opened Draft MR: {mr.get('web_url')} — complete the checklist, then clear Draft when CI is green.",
-        flush=True,
-    )
 
 
 if __name__ == "__main__":

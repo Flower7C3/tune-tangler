@@ -1,5 +1,7 @@
-name: 'F-Droid metadata MR'
-description: 'Checkout ref, run tools/fdroid/publish_fdroid_mr.py (GitLab MR to fdroiddata).'
+name: 'F-Droid GitLab branch'
+description: >-
+  Checkout release ref, run tools/fdroid/publish_fdroid_gitlab_branch.py to push metadata YAML to a
+  versioned branch on your fdroiddata fork (branch only; no merge request). Exposes gitlab_tree_url for the job summary.
 
 inputs:
   commit_sha:
@@ -16,10 +18,15 @@ inputs:
     description: 'Pin Flutter for the F-Droid recipe (e.g. from vars.FDROID_FLUTTER_VERSION in the caller workflow). Empty = latest stable from Flutter JSON.'
     required: false
     default: ''
-  metadata_source_branch:
+  robot_branch_prefix:
     description: >-
-      GitLab fork branch for metadata commits and MR source (publish_fdroid_mr.py). Pass
-      vars.FDROID_METADATA_SOURCE_BRANCH from the workflow; empty = robot/tune-tangler.
+      Prefix for auto branch name: prefix-versionName-versionCode-sha8. Pass vars.FDROID_ROBOT_BRANCH_PREFIX;
+      empty = robot/tune-tangler.
+    required: false
+    default: ''
+  gitlab_branch:
+    description: >-
+      Optional full Git branch name on the fork (overrides auto naming). Pass vars.FDROID_GITLAB_BRANCH when set.
     required: false
     default: ''
 
@@ -27,8 +34,15 @@ inputs:
 #   env:
 #     GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
 #     GITLAB_FORK_PROJECT_ID: ${{ vars.GITLAB_FORK_PROJECT_ID }}
-#     FDROID_GITLAB_STAGE: push | mr | both   # map workflow_dispatch in the workflow (not this input): checkout ref may be an old tag, so ./.github/actions would be stale.
 # (token = secret; fork project ID = repository variable — not sensitive.)
+
+outputs:
+  gitlab_tree_url:
+    description: 'HTTPS URL to the fork branch tree (CI / pipelines)'
+    value: ${{ steps.publish.outputs.gitlab_tree_url }}
+  gitlab_branch:
+    description: 'Git branch name created or updated on the fork'
+    value: ${{ steps.publish.outputs.gitlab_branch }}
 
 runs:
   using: composite
@@ -39,9 +53,8 @@ runs:
         ref: ${{ inputs.ref_name }}
         fetch-depth: 1
 
-    # Release tags predate workflow changes; run the GitLab driver from the default branch so
-    # FDROID_GITLAB_STAGE (e.g. mr) and commit retry logic apply. YAML templates stay from inputs.ref_name.
-    - name: "📌 publish_fdroid_mr.py from default branch"
+    # Release tags predate workflow changes; run the fdroiddata branch publisher from the default branch.
+    - name: "📌 publish_fdroid_gitlab_branch.py from default branch"
       shell: bash
       env:
         DEFAULT_BRANCH: ${{ github.event.repository.default_branch || 'main' }}
@@ -49,8 +62,8 @@ runs:
         set -euo pipefail
         DB="${DEFAULT_BRANCH}"
         git fetch --depth=1 origin "$DB"
-        git checkout FETCH_HEAD -- tools/fdroid/publish_fdroid_mr.py
-        echo "Using \`tools/fdroid/publish_fdroid_mr.py\` from \`origin/${DB}\` (app tree still \`${{ inputs.ref_name }}\`)." >> "$GITHUB_STEP_SUMMARY"
+        git checkout FETCH_HEAD -- tools/fdroid/publish_fdroid_gitlab_branch.py
+        echo "Using \`tools/fdroid/publish_fdroid_gitlab_branch.py\` from \`origin/${DB}\` (app tree still \`${{ inputs.ref_name }}\`)." >> "$GITHUB_STEP_SUMMARY"
 
     - name: "🐍 Setup Python"
       uses: actions/setup-python@v6
@@ -94,13 +107,14 @@ runs:
         VO: ${{ inputs.version_override }}
       run: echo "VERSION_OVERRIDE=$VO" >> "$GITHUB_ENV"
 
-    - name: "🚀 Publish metadata + MR"
+    - name: "🚀 Push fdroiddata fork branch"
+      id: publish
       shell: bash
       env:
-        GITLAB_UPSTREAM_PATH: fdroid/fdroiddata
         FDROID_METADATA_PATH: metadata/pro.kwiatek.tune_tangler.yml
         GITHUB_SHA: ${{ inputs.commit_sha }}
         GITHUB_REF_NAME: ${{ inputs.ref_name }}
         FDROID_FLUTTER_VERSION: ${{ env.FDROID_FLUTTER_VERSION }}
-        FDROID_METADATA_SOURCE_BRANCH: ${{ inputs.metadata_source_branch }}
-      run: python3 tools/fdroid/publish_fdroid_mr.py
+        FDROID_ROBOT_BRANCH_PREFIX: ${{ inputs.robot_branch_prefix }}
+        FDROID_GITLAB_BRANCH: ${{ inputs.gitlab_branch }}
+      run: python3 tools/fdroid/publish_fdroid_gitlab_branch.py

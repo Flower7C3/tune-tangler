@@ -20,7 +20,7 @@ This file in the repository root is the canonical place for rules used by AI cod
 - Commit messages: [Conventional Commits](https://www.conventionalcommits.org/).
 - Localization: `lib/l10n/*.arb`, then `flutter gen-l10n`.
 - Default branch: **`main`** (as in this repository).
-- CI / release: see [docs/development/WORKFLOWS.md](docs/development/WORKFLOWS.md) (shared **composite actions** under `.github/actions/`; **`test.yml`** runs on **PR** to `main` (and manual dispatch); **`version-tag-main`** on **push** to `main` runs **tests then** updates `pubspec` + tag; **F-Droid** (`release-fdroid-app.yml`) updates your **fdroiddata** fork via **`push_for_ci`** / **`open_draft_mr`** / **`push_and_open_draft_mr`** (**`target_ref`** optional — empty means latest tag on the default branch); **`release-apk-aab-google-play.yml`** builds signed **APK/AAB** from an **existing tag** and publishes a **GitHub Release** — no extra commits/tags in those workflows).
+- CI / release: see [docs/development/WORKFLOWS.md](docs/development/WORKFLOWS.md) (shared **composite actions** under `.github/actions/`; **`test.yml`** runs on **PR** to `main` (and manual dispatch); **`version-tag-main`** on **push** to `main` runs **tests then** updates `pubspec` + tag; **F-Droid** (`release-fdroid-app.yml`) pushes metadata to a **versioned branch** on your **fdroiddata** fork and prints the GitLab branch link (**`target_ref`** optional — empty means latest tag on the default branch); you open the fdroiddata **merge request** in GitLab manually; **`release-apk-aab-google-play.yml`** builds signed **APK/AAB** from an **existing tag** and publishes a **GitHub Release** — no extra commits/tags in those workflows).
 
 ## How assistants should work
 
@@ -40,7 +40,7 @@ This file in the repository root is the canonical place for rules used by AI cod
 ## Repository layout (short)
 
 - `.github/workflows/` — CI/CD entry workflows
-- `.github/actions/` — composite actions used by workflows (e.g. F-Droid GitLab MR)
+- `.github/actions/` — composite actions used by workflows (e.g. `fdroid-gitlab-branch`)
 - `android/`, `ios/`, … — platform projects
 - `lib/` — Flutter app code
 - `docs/` — documentation (`docs/development/`, `docs/release/`, `docs/features/`)

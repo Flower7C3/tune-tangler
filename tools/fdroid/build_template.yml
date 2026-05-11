@@ -1,4 +1,4 @@
-# One Build entry — __*__ placeholders replaced by publish_fdroid_mr.py
+# One Build entry — __*__ placeholders replaced by publish_fdroid_gitlab_branch.py
 # Key order matches fdroid rewritemeta / fdroid lint expectations.
 versionName: __VERSION_NAME__
 versionCode: __VERSION_CODE__

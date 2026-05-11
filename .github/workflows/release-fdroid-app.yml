@@ -1,5 +1,5 @@
-# F-Droid: open/update fdroiddata MR for an existing tag or branch (no pubspec edits, commits, or tags here — those come from main / your git client).
-name: Release on F-Droid (via MR)
+# F-Droid: push metadata YAML to a versioned branch on your fdroiddata fork (branch only; upstream merge request is manual in GitLab).
+name: F-Droid fork branch (fdroiddata)
 
 on:
   workflow_dispatch:
@@ -10,22 +10,10 @@ on:
         required: false
         default: ''
         type: string
-      gitlab_stage:
-        description: >-
-          push_for_ci: push metadata to your fdroiddata fork only (GitLab CI on the branch).
-          open_draft_mr: open a Draft MR + upstream checklist after CI is green (use the same resolved ref as push — leave target_ref empty both times for “latest tag”).
-          push_and_open_draft_mr: push then open Draft MR in one run (convenience).
-        required: true
-        type: choice
-        default: push_for_ci
-        options:
-          - push_for_ci
-          - open_draft_mr
-          - push_and_open_draft_mr
 
 concurrency:
   group: >-
-    ${{ github.workflow }}-${{ github.event.inputs.gitlab_stage }}-${{
+    ${{ github.workflow }}-${{
       github.event.inputs.target_ref != '' && github.event.inputs.target_ref || 'latest-tag'
     }}
   cancel-in-progress: true
@@ -35,14 +23,12 @@ permissions:
 
 jobs:
   fdroid_metadata:
-    name: "🦊 F-Droid MR (fdroiddata)"
+    name: "🦊 F-Droid fork branch (fdroiddata)"
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
       GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
       GITLAB_FORK_PROJECT_ID: ${{ vars.GITLAB_FORK_PROJECT_ID }}
-      # Set here (not as composite input): checkout uses target_ref, so ./.github/actions would load an old action.yml on release tags.
-      FDROID_GITLAB_STAGE: ${{ github.event.inputs.gitlab_stage == 'push_for_ci' && 'push' || github.event.inputs.gitlab_stage == 'open_draft_mr' && 'mr' || 'both' }}
     steps:
       - name: "🔧 Checkout default branch (resolve ref)"
         uses: actions/checkout@v6
@@ -78,11 +64,18 @@ jobs:
         id: meta
         shell: bash
         run: echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-      - name: "🦊 Publish fdroiddata MR"
-        uses: ./.github/actions/fdroid-metadata-mr
+      - name: "🦊 Push fdroiddata fork branch"
+        id: fdroid
+        uses: ./.github/actions/fdroid-gitlab-branch
         with:
           commit_sha: ${{ steps.meta.outputs.commit_sha }}
           ref_name: ${{ steps.resolve.outputs.resolved_ref }}
           version_override: ''
           flutter_version: ${{ vars.FDROID_FLUTTER_VERSION }}
-          metadata_source_branch: ${{ vars.FDROID_METADATA_SOURCE_BRANCH }}
+          robot_branch_prefix: ${{ vars.FDROID_ROBOT_BRANCH_PREFIX }}
+          gitlab_branch: ${{ vars.FDROID_GITLAB_BRANCH }}
+      - name: "🔗 GitLab branch link"
+        shell: bash
+        run: |
+          echo "**Branch URL:** ${{ steps.fdroid.outputs.gitlab_tree_url }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "::notice::fdroiddata fork branch:: ${{ steps.fdroid.outputs.gitlab_tree_url }}"

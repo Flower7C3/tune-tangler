@@ -10,7 +10,7 @@
   - [Workflows at a glance](#workflow-reference)
     - [Test Workflow (`test.yml`)](#tests-pr-main)
     - [Version & tag (`version-tag-main.yml`)](#version-tag-main)
-    - [Release on F-Droid (`release-fdroid-app.yml`)](#release-fdroid-app)
+    - [F-Droid fork branch (`release-fdroid-app.yml`)](#release-fdroid-app)
     - [Release on GitHub APK/AAB (`release-apk-aab-google-play.yml`)](#release-apk-aab-google-play)
   - [Operator runbook](#operator-runbook)
   - [Versioning policy](#versioning-policy)
@@ -67,16 +67,16 @@ Exact workflow titles in GitHub come from each file’s top-level `name:`. **[Re
 - **Checkout / jobs:** **`run_tests`**: `uses: ./.github/workflows/test.yml` (UI **`run_tests / 🧪 Test`**). **`version_tag`** (`needs: run_tests`): **`fetch-depth: 0`**
 - **Composites & wiring:** Bump **`pubspec`** ([Versioning policy](#versioning-policy)) → **[`pubspec-commit-tag-push`](../../.github/actions/pubspec-commit-tag-push/action.yml)** when the version line changes → bot commit **`[skip ci]`** ([Skip / push behavior](#skip-and-push-behavior)), push **`main`**, tag **`v…+…`**
 
-#### 📱 Release on F-Droid (via MR) — [`release-fdroid-app.yml`](../../.github/workflows/release-fdroid-app.yml) <a name="release-fdroid-app"></a>
+#### 🦊 F-Droid fork branch (fdroiddata) — [`release-fdroid-app.yml`](../../.github/workflows/release-fdroid-app.yml) <a name="release-fdroid-app"></a>
 
 <p><a href="https://github.com/Flower7C3/tune-tangler/actions/workflows/release-fdroid-app.yml"><img  alt="release-fdroid-app.yml CI" src="https://github.com/Flower7C3/tune-tangler/actions/workflows/release-fdroid-app.yml/badge.svg"></a></p>
 
-- **In Actions (approx.):** **Release on F-Droid (via MR)**
+- **In Actions (approx.):** **F-Droid fork branch (fdroiddata)**
 - **When:** Manual only
-- **Manual / inputs:** **`target_ref`** (optional — tag or branch; leave empty for **latest tag** reachable from the default branch), **`gitlab_stage`** — **`push_for_ci`** (metadata commit on your fdroiddata fork only; GitLab CI), **`open_draft_mr`** (Draft MR + checklist after CI; use the same ref resolution as push), or **`push_and_open_draft_mr`** (both in one run)
-- **Output:** Updates your **fdroiddata** fork branch; optionally opens a **Draft** MR to upstream (no commits/tags in this repo)
-- **Checkout / jobs:** Checkout default branch → resolve ref (`target_ref` or `git describe --tags`) → checkout that tree
-- **Composites & wiring:** **[`fdroid-metadata-mr`](../../.github/actions/fdroid-metadata-mr/action.yml)**. Secrets / variables: [below](#secrets-and-variables) and [FDROID.md](../release/FDROID.md)
+- **Manual / inputs:** **`target_ref`** (optional — tag or branch; leave empty for **latest tag** on the default branch)
+- **Output:** Pushes `metadata/pro.kwiatek.tune_tangler.yml` to a **versioned branch** on your fdroiddata **fork** (`robot/tune-tangler-{versionName}-{versionCode}-{sha8}` by default). Job summary and **`fdroid`** step outputs include the **GitLab branch URL**. The workflow does not open a merge request — you open one in GitLab after CI is green.
+- **Checkout / jobs:** Default branch → resolve ref → checkout **`target_ref`** → composite
+- **Composites & wiring:** **[`fdroid-gitlab-branch`](../../.github/actions/fdroid-gitlab-branch/action.yml)**. Secrets / variables: [below](#secrets-and-variables) and [FDROID.md](../release/FDROID.md)
 
 #### 🚀 Release on GitHub (APK/AAB files) — [`release-apk-aab-google-play.yml`](../../.github/workflows/release-apk-aab-google-play.yml) <a name="release-apk-aab-google-play"></a>
 
@@ -95,7 +95,7 @@ Exact workflow titles in GitHub come from each file’s top-level `name:`. **[Re
 |------|---------|
 | **CI on a PR to `main`** | Open/update the PR; [`test.yml`](../../.github/workflows/test.yml) runs ([`paths-ignore`](#shared-paths-ignore) still applies to changed files). |
 | **Version bump + tag after merge** | Push/merge to `main`; [`version-tag-main.yml`](../../.github/workflows/version-tag-main.yml) runs when paths are not all ignored ([workflow summaries](#workflow-reference)). |
-| **F-Droid metadata MR** | **Actions** → **Release on F-Droid (via MR)** → optional **`target_ref`** (empty = latest tag on default branch). Recommended: **`gitlab_stage`** **`push_for_ci`** first, then **`open_draft_mr`** (same empty or explicit ref); or **`push_and_open_draft_mr`** for one run. |
+| **F-Droid fork branch** | **Actions** → **F-Droid fork branch (fdroiddata)** → optional **`target_ref`** (empty = latest tag). Follow the **GitLab branch URL** in the summary; open a merge request to upstream manually when CI is green. |
 | **GitHub Release (APK / AAB)** | **Actions** → **Release on GitHub (APK/AAB files)** → **Run workflow** → set **`tag`** → configure keystore secrets if needed ([Keystore](#keystore-configuration)). |
 | **Ad-hoc / manual test run** | **Actions** → pick a workflow that exposes **Run workflow** → run (e.g. [`test.yml`](../../.github/workflows/test.yml)). |
 
@@ -132,7 +132,7 @@ Reusable steps under [`.github/actions/`](../../.github/actions/):
 | [`flutter-test`](../../.github/actions/flutter-test/action.yml) | `flutter analyze` + `flutter test` (+ optional `integration_test`). |
 | [`pubspec-commit-tag-push`](../../.github/actions/pubspec-commit-tag-push/action.yml) | Commit/push `pubspec` changes; optional annotated tag and changelog collection. Used by **`version-tag-main`**. |
 | [`git-config-github-actions-bot`](../../.github/actions/git-config-github-actions-bot/action.yml) | `git config` for **`github-actions[bot]`** (optional `user_name` / `user_email`). Used at the start of **`version-tag-main.yml`** and inside **`pubspec-commit-tag-push`**. |
-| [`fdroid-metadata-mr`](../../.github/actions/fdroid-metadata-mr/action.yml) | GitLab fork + optional Draft MR to fdroiddata; the **workflow** sets job **`env.FDROID_GITLAB_STAGE`**. After checkout of **`target_ref`**, the composite replaces only **`tools/fdroid/publish_fdroid_mr.py`** from the repo **default branch** so release tags still run the current driver (stages, commit retry); **`metadata_static.yml`** / **`build_template.yml`** stay from the tag. Pass **`metadata_source_branch`** from **`vars.FDROID_METADATA_SOURCE_BRANCH`** when set (see [FDROID.md](../release/FDROID.md)). |
+| [`fdroid-gitlab-branch`](../../.github/actions/fdroid-gitlab-branch/action.yml) | Checkout **`target_ref`**, overlay **`publish_fdroid_gitlab_branch.py`** from the default branch, push metadata to fork branch **`{prefix}-{version}-{code}-{sha8}`**; outputs **`gitlab_tree_url`**, **`gitlab_branch`**. Optional **`vars.FDROID_ROBOT_BRANCH_PREFIX`**, **`vars.FDROID_GITLAB_BRANCH`** (see [FDROID.md](../release/FDROID.md)). |
 | [`setup-java`](../../.github/actions/setup-java/action.yml) | JDK for Android APK/AAB builds (**`release-apk-aab-google-play.yml`** only). Run **`actions/checkout`** in the job before this step (this action does not checkout the repo). |
 
 ## 🔐 Keystore (APK/AAB release workflow only) <a name="keystore-configuration"></a>
@@ -144,8 +144,8 @@ The **`release-apk-aab-google-play.yml`** workflow decodes `KEYSTORE_BASE64` and
 | Kind | Workflow / context | Names |
 |------|-------------------|--------|
 | **Secrets** | APK/AAB ([`release-apk-aab-google-play.yml`](../../.github/workflows/release-apk-aab-google-play.yml)) | `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_PASSWORD`, `KEY_ALIAS` |
-| **Secrets** | F-Droid MR | `GITLAB_TOKEN` as **job `env`** from a repository secret ([FDROID.md](../release/FDROID.md) for fork / token pitfalls) |
-| **Variables** | F-Droid MR | **`GITLAB_FORK_PROJECT_ID`** (required). Optional **`FDROID_FLUTTER_VERSION`**, **`FDROID_METADATA_SOURCE_BRANCH`** — use `vars.*` in the workflow |
+| **Secrets** | F-Droid fork branch | `GITLAB_TOKEN` as **job `env`** from a repository secret ([FDROID.md](../release/FDROID.md) for fork / token pitfalls) |
+| **Variables** | F-Droid fork branch | **`GITLAB_FORK_PROJECT_ID`** (required). Optional **`FDROID_FLUTTER_VERSION`**, **`FDROID_ROBOT_BRANCH_PREFIX`**, **`FDROID_GITLAB_BRANCH`** — use `vars.*` in the workflow |
 
 ## 🚨 Troubleshooting <a name="troubleshooting"></a>
 
@@ -176,4 +176,4 @@ The **`release-apk-aab-google-play.yml`** workflow decodes `KEYSTORE_BASE64` and
 - **[⚡ Quick start](QUICKSTART.md)** — first run
 - **[🔨 Makefile](QUICKSTART.md#makefile)** — commands
 - **[🎣 Git hooks](GIT_HOOKS.md)** — optional `pre-commit`
-- **[📦 F-Droid](../release/FDROID.md)** — GitLab MR workflow + `tools/fdroid/`
+- **[📦 F-Droid](../release/FDROID.md)** — fork branch workflow + `tools/fdroid/`

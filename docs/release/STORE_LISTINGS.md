@@ -20,7 +20,7 @@ Copy from the `.txt` files above, or use **Fastlane supply** / Play Developer AP
 
 ### F-Droid (multiple languages)
 
-F-Droid reads **Fastlane / Triple-T** files from **your app’s source tree at the release revision** (see [All About Descriptions, Graphics, and Screenshots](https://f-droid.org/en/docs/All_About_Descriptions_Graphics_and_Screenshots/)). Texts in **`metadata/<packageId>.yml` on fdroiddata** override those files — Tune Tangler’s MR script and `metadata_static.yml` omit `Summary` / `Description` / `Name` / `AutoName` so listings stay sourced from `fastlane/metadata/android/` here.
+F-Droid reads **Fastlane / Triple-T** files from **your app’s source tree at the release revision** (see [All About Descriptions, Graphics, and Screenshots](https://f-droid.org/en/docs/All_About_Descriptions_Graphics_and_Screenshots/)). Texts in **`metadata/<packageId>.yml` on fdroiddata** override those files — Tune Tangler’s `publish_fdroid_gitlab_branch.py` and `metadata_static.yml` omit `Summary` / `Description` / `Name` / `AutoName` so listings stay sourced from `fastlane/metadata/android/` here.
 
 Add another folder under `fastlane/metadata/android/` for each extra locale (same three filenames).
 
