@@ -2,7 +2,7 @@
 """
 Push F-Droid metadata YAML to a **versioned branch** on your GitLab fork of fdroiddata.
 
-Creates `robot/tune-tangler-<versionName>-<versionCode>-<sha8>` (prefix configurable). This script
+Creates `robot/tune-tangler-<versionName>-<versionCode>` (prefix configurable). This script
 only updates the fork branch; opening a merge request to `fdroid/fdroiddata` is a separate manual step in GitLab.
 
 Required env:
@@ -18,7 +18,7 @@ Optional:
   GITHUB_WORKSPACE          — repo root (CI sets automatically)
   VERSION_OVERRIDE          — optional MAJOR.MINOR.PATCH[+CODE]
   FDROID_GITLAB_BRANCH      — if set, exact Git branch name on the fork (overrides auto name)
-  FDROID_ROBOT_BRANCH_PREFIX — default robot/tune-tangler; auto branch is prefix-versionName-versionCode-sha8
+  FDROID_ROBOT_BRANCH_PREFIX — default robot/tune-tangler; auto branch is prefix-versionName-versionCode
 
 Repo paths (under GITHUB_WORKSPACE):
   tools/fdroid/metadata_static.yml  — fdroiddata bootstrap (no Summary/Description/Name; see F-Droid docs)
@@ -360,14 +360,14 @@ def _branch_exists(api_base: str, token: str, project_id: int, branch: str) -> b
         raise SystemExit(f"GitLab HTTP {e.code} GET {url}: {raw}") from e
 
 
-def _resolved_robot_branch(vname: str, vcode: int, commit_sha: str) -> str:
+def _resolved_robot_branch(vname: str, vcode: int) -> str:
     override = (os.environ.get("FDROID_GITLAB_BRANCH") or "").strip()
     if override:
         return override
     prefix = (os.environ.get("FDROID_ROBOT_BRANCH_PREFIX") or "robot/tune-tangler").strip()
     if not prefix:
         prefix = "robot/tune-tangler"
-    return f"{prefix}-{vname}-{vcode}-{commit_sha[:8].lower()}"
+    return f"{prefix}-{vname}-{vcode}"
 
 
 def _fork_project_tree_url(api_base: str, token: str, fork_id: int, branch: str) -> str:
@@ -570,7 +570,7 @@ def main() -> None:
 
     body_yaml = _dump_metadata(doc)
 
-    branch = _resolved_robot_branch(vname, vcode, commit_sha)
+    branch = _resolved_robot_branch(vname, vcode)
     print(f"Target fork branch: {branch}", flush=True)
 
     skip_commit = False

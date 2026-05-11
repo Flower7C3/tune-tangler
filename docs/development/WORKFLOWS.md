@@ -74,7 +74,7 @@ Exact workflow titles in GitHub come from each file’s top-level `name:`. **[Re
 - **In Actions (approx.):** **F-Droid fork branch (fdroiddata)**
 - **When:** Manual only
 - **Manual / inputs:** **`target_ref`** (optional — tag or branch; leave empty for **latest tag** on the default branch)
-- **Output:** Pushes `metadata/pro.kwiatek.tune_tangler.yml` to a **versioned branch** on your fdroiddata **fork** (`robot/tune-tangler-{versionName}-{versionCode}-{sha8}` by default). Job summary and **`fdroid`** step outputs include the **GitLab branch URL**. The workflow does not open a merge request — you open one in GitLab after CI is green.
+- **Output:** Pushes `metadata/pro.kwiatek.tune_tangler.yml` to a **versioned branch** on your fdroiddata **fork** (`robot/tune-tangler-{versionName}-{versionCode}` by default). Job summary and **`fdroid`** step outputs include the **GitLab branch URL**. The workflow does not open a merge request — you open one in GitLab after CI is green.
 - **Checkout / jobs:** Default branch → resolve ref → checkout **`target_ref`** → composite
 - **Composites & wiring:** **[`fdroid-gitlab-branch`](../../.github/actions/fdroid-gitlab-branch/action.yml)**. Secrets / variables: [below](#secrets-and-variables) and [FDROID.md](../release/FDROID.md)
 
@@ -132,7 +132,7 @@ Reusable steps under [`.github/actions/`](../../.github/actions/):
 | [`flutter-test`](../../.github/actions/flutter-test/action.yml) | `flutter analyze` + `flutter test` (+ optional `integration_test`). |
 | [`pubspec-commit-tag-push`](../../.github/actions/pubspec-commit-tag-push/action.yml) | Commit/push `pubspec` changes; optional annotated tag and changelog collection. Used by **`version-tag-main`**. |
 | [`git-config-github-actions-bot`](../../.github/actions/git-config-github-actions-bot/action.yml) | `git config` for **`github-actions[bot]`** (optional `user_name` / `user_email`). Used at the start of **`version-tag-main.yml`** and inside **`pubspec-commit-tag-push`**. |
-| [`fdroid-gitlab-branch`](../../.github/actions/fdroid-gitlab-branch/action.yml) | Checkout **`target_ref`**, overlay **`publish_fdroid_gitlab_branch.py`** from the default branch, push metadata to fork branch **`{prefix}-{version}-{code}-{sha8}`**; outputs **`gitlab_tree_url`**, **`gitlab_branch`**. Optional **`vars.FDROID_ROBOT_BRANCH_PREFIX`**, **`vars.FDROID_GITLAB_BRANCH`** (see [FDROID.md](../release/FDROID.md)). |
+| [`fdroid-gitlab-branch`](../../.github/actions/fdroid-gitlab-branch/action.yml) | Checkout **`target_ref`**, overlay **`publish_fdroid_gitlab_branch.py`** from the default branch, push metadata to fork branch **`{prefix}-{version}-{code}`**; outputs **`gitlab_tree_url`**, **`gitlab_branch`**. Optional **`vars.FDROID_ROBOT_BRANCH_PREFIX`**, **`vars.FDROID_GITLAB_BRANCH`** (see [FDROID.md](../release/FDROID.md)). |
 | [`setup-java`](../../.github/actions/setup-java/action.yml) | JDK for Android APK/AAB builds (**`release-apk-aab-google-play.yml`** only). Run **`actions/checkout`** in the job before this step (this action does not checkout the repo). |
 
 ## 🔐 Keystore (APK/AAB release workflow only) <a name="keystore-configuration"></a>
