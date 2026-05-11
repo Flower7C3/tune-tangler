@@ -8,9 +8,21 @@ on:
         description: 'Existing tag or branch (e.g. v1.7.0+12) — commit must match what you want in the MR'
         required: true
         type: string
+      gitlab_stage:
+        description: >-
+          push_for_ci: push metadata to your fdroiddata fork only (GitLab CI on the branch).
+          open_draft_mr: open a Draft MR + upstream checklist (same target_ref) after CI is green.
+          push_and_open_draft_mr: push then open Draft MR in one run (convenience).
+        required: true
+        type: choice
+        default: push_for_ci
+        options:
+          - push_for_ci
+          - open_draft_mr
+          - push_and_open_draft_mr
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.inputs.target_ref }}
+  group: ${{ github.workflow }}-${{ github.event.inputs.target_ref }}-${{ github.event.inputs.gitlab_stage }}
   cancel-in-progress: true
 
 permissions:
@@ -42,3 +54,4 @@ jobs:
           version_override: ''
           flutter_version: ${{ vars.FDROID_FLUTTER_VERSION }}
           metadata_source_branch: ${{ vars.FDROID_METADATA_SOURCE_BRANCH }}
+          gitlab_stage: ${{ github.event.inputs.gitlab_stage }}

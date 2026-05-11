@@ -16,6 +16,9 @@ Optional:
   FDROID_FLUTTER_VERSION    — Flutter SDK version string for the build recipe (e.g. 3.29.0)
   GITHUB_WORKSPACE          — repo root (CI sets automatically)
   VERSION_OVERRIDE          — optional; workflow_dispatch MAJOR.MINOR.PATCH[+CODE]
+  FDROID_GITLAB_STAGE       — push | mr | both (default both). push = metadata commit only;
+                              mr = open Draft MR + checklist if missing (branch must match);
+                              both = push then open Draft MR when no MR exists yet.
 
 Repo paths (under GITHUB_WORKSPACE):
   tools/fdroid/metadata_static.yml  — fdroiddata bootstrap (no Summary/Description/Name; see F-Droid docs)
@@ -335,6 +338,88 @@ def _branch_exists(api_base: str, token: str, project_id: int, branch: str) -> b
         raise SystemExit(f"GitLab HTTP {e.code} GET {url}: {raw}") from e
 
 
+def _parse_gitlab_stage(raw: str | None) -> str:
+    """Return one of push, mr, both."""
+    if raw is None or not str(raw).strip():
+        return "both"
+    s = str(raw).strip().lower()
+    if s in ("push", "push_for_ci", "1", "ci"):
+        return "push"
+    if s in ("mr", "open_draft_mr", "open", "2"):
+        return "mr"
+    if s in ("both", "push_and_open", "push_and_open_draft_mr", "all"):
+        return "both"
+    raise SystemExit(
+        f"FDROID_GITLAB_STAGE must be push, mr, or both (got {raw!r}). "
+        "GitHub Actions maps workflow choices to these values."
+    )
+
+
+def _yaml_mapping_equal(a: str, b: str) -> bool:
+    try:
+        ya = yaml.safe_load(a)
+        yb = yaml.safe_load(b)
+    except yaml.YAMLError as e:
+        raise SystemExit(f"Invalid YAML while comparing metadata: {e}") from e
+    return isinstance(ya, dict) and isinstance(yb, dict) and ya == yb
+
+
+def _fdroid_mr_checklist_markdown() -> str:
+    """Upstream fdroiddata MR template (boilerplate removed — no 'Please remove above lines' block)."""
+    return (
+        "## Required\n\n"
+        "<!-- Please ensure that your MR meet following requirements -->\n\n"
+        "* [ ] The app complies with the "
+        "[inclusion criteria](https://f-droid.org/docs/Inclusion_Policy)\n"
+        "* [ ] All related [fdroiddata](https://gitlab.com/fdroid/fdroiddata/issues) and "
+        "[RFP issues](https://gitlab.com/fdroid/rfp/issues) have been referenced in this merge request\n"
+        "* [ ] Builds with `fdroid build`\n\n"
+        "## Strongly Recommended\n\n"
+        "<!-- We highly encourage you doing these thing. -->\n\n"
+        "* [ ] The upstream app source code repo contains the app metadata "
+        "_(summary/description/images/changelog/etc)_ in a [Fastlane](https://gitlab.com/snippets/1895688) or "
+        "[Triple-T](https://gitlab.com/snippets/1901490) folder structure\n"
+        "* [ ] Releases are tagged "
+        "<!-- Our autoupdate workflow relies on the tag. Without this you have to add every version manually. -->\n\n"
+        "## Suggested\n\n"
+        "<!-- These suggestions may be difficult to apply on your app. Please have a try. -->\n\n"
+        "* [ ] External repos are added as git submodules instead of srclibs "
+        "<!-- You can update git submodules without opening an MR in this repo and the submodule is covered by our scanner. -->\n"
+        "* [ ] Multiple apks for native code "
+        "<!-- If your app has native code and the size is large, please consider building multiple apks instead of one universal apk. -->\n\n"
+        "---\n\n"
+        "<!-- Add the corresponding issue number or remove this if this merge request does not close an issue at fdroiddata. -->\n"
+        "Closes fdroiddata#<issue number>\n"
+    )
+
+
+def _merge_request_description(
+    *,
+    version_name: str,
+    version_code: int,
+    commit_sha: str,
+    flutter_ver: str,
+    metadata_path: str,
+) -> str:
+    head = (
+        "Automated metadata bump from GitHub Actions (`publish_fdroid_mr.py`).\n\n"
+        f"- **versionName:** {version_name}\n"
+        f"- **versionCode:** {version_code}\n"
+        f"- **commit:** `{commit_sha}`\n"
+        f"- **Flutter (recipe):** {flutter_ver}\n"
+        f"- **fdroiddata path (after merge):** `{metadata_path}` in "
+        f"[fdroid/fdroiddata](https://gitlab.com/fdroid/fdroiddata)\n"
+        f"- **Reference:** [F-Droid build metadata](https://f-droid.org/en/docs/Build_Metadata_Reference/)\n\n"
+        "Store text and screenshots come from **Fastlane/Triple-T** in the app repo "
+        "(`fastlane/metadata/android/` at the tagged revision). "
+        "`Name` / `Summary` / `Description` were removed from the YAML if present so "
+        "F-Droid does not override that source.\n\n"
+        "**Process:** GitLab CI should be green on the fork branch before clearing **Draft** "
+        "and ticking the checklist below.\n\n"
+    )
+    return head + _fdroid_mr_checklist_markdown()
+
+
 def _find_open_upstream_mr(
     api_base: str, token: str, fork_id: int, upstream_id: int, source_branch: str
 ) -> dict[str, Any] | None:
@@ -466,6 +551,8 @@ def main() -> None:
             "FDROID_FLUTTER_VERSION must be set (e.g. 3.29.0 matching the Flutter stable archive name)."
         )
 
+    stage = _parse_gitlab_stage(os.environ.get("FDROID_GITLAB_STAGE"))
+
     version_override = os.environ.get("VERSION_OVERRIDE", "").strip()
 
     pub_ver = _read_pubspec_version(root)
@@ -506,23 +593,27 @@ def main() -> None:
         builds = doc.get("Builds")
         if not isinstance(builds, list):
             raise SystemExit("Remote metadata has no Builds list")
+        skip_new_build_merge = False
         for b in builds:
             if isinstance(b, dict) and int(b.get("versionCode", -1)) == vcode:
                 if str(b.get("commit", "")).lower() == commit_sha.lower():
-                    print(
-                        f"fork master already lists versionCode={vcode} for commit {commit_sha[:8]}; nothing to do.",
-                        flush=True,
-                    )
-                    return
+                    if stage != "mr":
+                        print(
+                            f"fork master already lists versionCode={vcode} for commit {commit_sha[:8]}; nothing to do.",
+                            flush=True,
+                        )
+                        return
+                    skip_new_build_merge = True
                 break
 
-        builds = [
-            b
-            for b in builds
-            if not (isinstance(b, dict) and int(b.get("versionCode", -1)) == vcode)
-        ]
-        builds.append(new_build)
-        doc["Builds"] = builds
+        if not skip_new_build_merge:
+            builds = [
+                b
+                for b in builds
+                if not (isinstance(b, dict) and int(b.get("versionCode", -1)) == vcode)
+            ]
+            builds.append(new_build)
+            doc["Builds"] = builds
 
     if isinstance(doc.get("Builds"), list):
         doc["Builds"] = _dedupe_builds_keep_last(doc["Builds"])
@@ -538,51 +629,73 @@ def main() -> None:
     if not branch:
         branch = "robot/tune-tangler"
 
-    commit_payload: dict[str, Any] = {
-        "branch": branch,
-        "commit_message": f"Tune Tangler: {vname} ({vcode}) @ {commit_sha[:8]}",
-        "actions": [
-            {
-                "action": "update" if existing_yaml is not None else "create",
-                "file_path": metadata_path,
-                "content": body_yaml,
-            }
-        ],
-    }
-    if not _branch_exists(api_base, token, fork_id, branch):
-        commit_payload["start_branch"] = "master"
+    if stage in ("push", "both"):
+        commit_payload: dict[str, Any] = {
+            "branch": branch,
+            "commit_message": f"Tune Tangler: {vname} ({vcode}) @ {commit_sha[:8]}",
+            "actions": [
+                {
+                    "action": "update" if existing_yaml is not None else "create",
+                    "file_path": metadata_path,
+                    "content": body_yaml,
+                }
+            ],
+        }
+        if not _branch_exists(api_base, token, fork_id, branch):
+            commit_payload["start_branch"] = "master"
 
-    _gitlab_request("POST", api_base, token, f"projects/{fork_id}/repository/commits", commit_payload)
-    print(f"Pushed metadata commit to branch {branch}.", flush=True)
+        _gitlab_request("POST", api_base, token, f"projects/{fork_id}/repository/commits", commit_payload)
+        print(f"Pushed metadata commit to branch {branch}.", flush=True)
+
+    if stage == "push":
+        print(
+            "Stage is **push** only: no merge request was opened. "
+            "When GitLab CI is green on your fork, run the workflow again with **open_draft_mr** "
+            "(same **target_ref**).",
+            flush=True,
+        )
+        return
+
+    if stage == "mr":
+        remote_on_branch = _get_file(api_base, token, fork_id, metadata_path, ref=branch)
+        if remote_on_branch is None:
+            raise SystemExit(
+                f"No {metadata_path} on fork branch {branch!r}. "
+                "Run **push_for_ci** first for this ref, then **open_draft_mr**."
+            )
+        if not _yaml_mapping_equal(remote_on_branch, body_yaml):
+            raise SystemExit(
+                "Fork branch metadata does not match this checkout’s computed YAML. "
+                f"Run **push_for_ci** for the same **target_ref**, then retry **open_draft_mr** "
+                f"(branch {branch!r})."
+            )
 
     existing_mr = _find_open_upstream_mr(api_base, token, fork_id, upstream_id, branch)
     if existing_mr is not None:
         print(f"Open MR already exists: {existing_mr.get('web_url')}", flush=True)
         return
 
-    mr_payload = {
+    mr_payload: dict[str, Any] = {
         "source_branch": branch,
         "target_branch": "master",
         "target_project_id": upstream_id,
         "title": f"Tune Tangler {vname} ({vcode})",
-        "description": (
-            "Automated metadata bump from tag/ref.\n\n"
-            f"- **versionName:** {vname}\n"
-            f"- **versionCode:** {vcode}\n"
-            f"- **commit:** `{commit_sha}`\n"
-            f"- **Flutter (recipe):** {flutter_ver}\n"
-            f"- **fdroiddata path (after merge):** `{metadata_path}` in [fdroid/fdroiddata](https://gitlab.com/fdroid/fdroiddata)\n"
-            f"- **Reference:** [F-Droid build metadata](https://f-droid.org/en/docs/Build_Metadata_Reference/)\n\n"
-            "Store text and screenshots come from **Fastlane/Triple-T** in the app repo "
-            "(`fastlane/metadata/android/` at the tagged revision). "
-            "`Name` / `Summary` / `Description` were removed from the YAML if present so "
-            "F-Droid does not override that source.\n"
+        "description": _merge_request_description(
+            version_name=vname,
+            version_code=vcode,
+            commit_sha=commit_sha,
+            flutter_ver=flutter_ver,
+            metadata_path=metadata_path,
         ),
         "remove_source_branch": True,
+        "draft": True,
     }
     _, mr = _gitlab_request("POST", api_base, token, f"projects/{fork_id}/merge_requests", mr_payload)
     assert isinstance(mr, dict)
-    print(f"Opened MR: {mr.get('web_url')}", flush=True)
+    print(
+        f"Opened Draft MR: {mr.get('web_url')} — complete the checklist, then clear Draft when CI is green.",
+        flush=True,
+    )
 
 
 if __name__ == "__main__":

@@ -20,7 +20,7 @@ This file in the repository root is the canonical place for rules used by AI cod
 - Commit messages: [Conventional Commits](https://www.conventionalcommits.org/).
 - Localization: `lib/l10n/*.arb`, then `flutter gen-l10n`.
 - Default branch: **`main`** (as in this repository).
-- CI / release: see [docs/development/WORKFLOWS.md](docs/development/WORKFLOWS.md) (shared **composite actions** under `.github/actions/`; **`test.yml`** runs on **PR** to `main` (and manual dispatch); **`version-tag-main`** on **push** to `main` runs **tests then** updates `pubspec` + tag; **F-Droid** (`release-fdroid-app.yml`) only opens the fdroiddata **MR** for a **ref you choose**; **`release-apk-aab-google-play.yml`** builds signed **APK/AAB** from an **existing tag** and publishes a **GitHub Release** — no extra commits/tags in those workflows).
+- CI / release: see [docs/development/WORKFLOWS.md](docs/development/WORKFLOWS.md) (shared **composite actions** under `.github/actions/`; **`test.yml`** runs on **PR** to `main` (and manual dispatch); **`version-tag-main`** on **push** to `main` runs **tests then** updates `pubspec` + tag; **F-Droid** (`release-fdroid-app.yml`) updates your **fdroiddata** fork via **`push_for_ci`** / **`open_draft_mr`** / **`push_and_open_draft_mr`** for a **ref you choose**; **`release-apk-aab-google-play.yml`** builds signed **APK/AAB** from an **existing tag** and publishes a **GitHub Release** — no extra commits/tags in those workflows).
 
 ## How assistants should work
 

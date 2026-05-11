@@ -29,11 +29,15 @@ The sections below cover **fdroiddata** metadata shape, **`publish_fdroid_mr.py`
 1. Verifies required Fastlane **`en-US`** files.
 2. Reads `versionName` / `versionCode` from the **tag name** (preferred) or from `pubspec.yaml` (`MAJOR.MINOR.PATCH` or `...+build`).
 3. Fetches `metadata/pro.kwiatek.tune_tangler.yml` from your fork on `master` (if missing — creates from `metadata_static.yml` + first Build).
-4. Merges the new **Build** into `Builds` (replaces same `versionCode` if present; dedupes by `versionCode`; skips if fork `master` already has that `versionCode` **and** `commit`).
+4. Merges the new **Build** into `Builds` (replaces same `versionCode` if present; dedupes by `versionCode`; skips if fork `master` already has that `versionCode` **and** `commit` — except **`FDROID_GITLAB_STAGE=mr`**, where it still builds YAML so you can open the MR from the fork branch).
 5. **Removes** `Name`, `AutoName`, `Summary`, `Description` from YAML (so Fastlane in source wins).
-6. Commits the full YAML to a **stable** branch on the fork (default **`robot/tune-tangler`**). If that branch does not exist yet, it is created from `master`. If an **open** MR from that branch to **`fdroid/fdroiddata`** `master` already exists, the script **does not** open another MR — it only pushes a new commit so the existing MR updates.
+6. **Stage `push`:** commits the full YAML to a **stable** branch on the fork (default **`robot/tune-tangler`**). If that branch does not exist yet, it is created from `master`. Does **not** open an MR.
+7. **Stage `mr`:** checks that the same YAML is already on the fork branch, then opens a **Draft** MR to **`fdroid/fdroiddata`** `master` with the upstream **checklist** in the description (if no open MR exists yet).
+8. **Stage `both`:** push then open Draft MR when there is no open MR yet. If an **open** MR already exists, the script only pushes so the existing MR updates.
 
 Optional env **`FDROID_METADATA_SOURCE_BRANCH`** overrides the default `robot/tune-tangler` branch name on the fork; mirror the GitHub **variable** of the same name ([WORKFLOWS](../development/WORKFLOWS.md#secrets-and-variables), [`fdroid-metadata-mr`](../../.github/actions/fdroid-metadata-mr/action.yml)).
+
+Optional env **`FDROID_GITLAB_STAGE`:** `push` | `mr` | `both` (default **`both`** when unset — e.g. local runs). GitHub Actions maps workflow choices **`push_for_ci`** → `push`, **`open_draft_mr`** → `mr`, **`push_and_open_draft_mr`** → `both` (default in the workflow is **`push_for_ci`**).
 
 **Cleaning up older spam on your fork:** close redundant open MRs to upstream and delete obsolete `robot/tune-tangler-*` branches if you no longer need them; keep one MR on `robot/tune-tangler` going forward.
 
@@ -44,6 +48,15 @@ Optional env **`FDROID_METADATA_SOURCE_BRANCH`** overrides the default `robot/tu
 1. Fork [`fdroiddata`](https://gitlab.com/fdroid/fdroiddata).
 2. File: **`metadata/pro.kwiatek.tune_tangler.yml`** (path is `metadata/<applicationId>.yml`; see [Build metadata reference](https://f-droid.org/en/docs/Build_Metadata_Reference/)) — patterns in `tools/fdroid/metadata_static.yml` and `tools/fdroid/build_template.yml`.
 3. Open an MR **to upstream** [`fdroid/fdroiddata`](https://gitlab.com/fdroid/fdroiddata): target branch **`master`**, source branch on **your fork** (CI defaults to `robot/tune-tangler` unless you set **`FDROID_METADATA_SOURCE_BRANCH`** as in [WORKFLOWS](../development/WORKFLOWS.md#secrets-and-variables)).
+
+### GitLab MR in two steps (CI, then checklist)
+
+Upstream expects a **public** fork and a **source branch that is not [protected](https://docs.gitlab.com/user/project/repository/branches/protected/)** (they rebase with fast-forward merges).
+
+1. **Push metadata to a working branch** on your fork first. That runs **fdroiddata** pipelines (lint, `fdroid build`, etc.) on GitLab without treating the change as “submitted for review” yet. In this repo: **Actions → Release on F-Droid (via MR)** → **`gitlab_stage`: `push_for_ci`** (same **`target_ref`** as the release).
+2. **Open the MR as Draft** and complete the checklist. In this repo: run the same workflow again with **`gitlab_stage`: `open_draft_mr`** after GitLab CI is green. The script embeds the checklist in the MR body (without the “Please remove above lines!” block). Set **`Closes fdroiddata#…`** in the description if needed. **Mark the MR ready for review** (clear Draft) only when you accept the checklist — that is when you ask upstream for review.
+
+**`publish_fdroid_mr.py` / Actions:** new MRs are created as **Draft** with the fdroiddata **checklist** (boilerplate that says “Please remove above lines!” is omitted — it is not part of the API body). Further pushes update the same open MR; they do not change the description. Clear **Draft** in GitLab only after CI and your checklist review.
 
 ## Official references
 
