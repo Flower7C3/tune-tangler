@@ -630,12 +630,20 @@ def main() -> None:
         branch = "robot/tune-tangler"
 
     if stage in ("push", "both"):
+        # GitLab rejects create if the path already exists on the target branch; fork `master`
+        # may lack the file while `robot/...` already has it from an earlier push.
+        if _branch_exists(api_base, token, fork_id, branch):
+            file_on_commit_branch = _get_file(api_base, token, fork_id, metadata_path, ref=branch)
+        else:
+            file_on_commit_branch = existing_yaml
+        commit_action = "update" if file_on_commit_branch is not None else "create"
+
         commit_payload: dict[str, Any] = {
             "branch": branch,
             "commit_message": f"Tune Tangler: {vname} ({vcode}) @ {commit_sha[:8]}",
             "actions": [
                 {
-                    "action": "update" if existing_yaml is not None else "create",
+                    "action": commit_action,
                     "file_path": metadata_path,
                     "content": body_yaml,
                 }
