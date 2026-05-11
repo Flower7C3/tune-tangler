@@ -65,7 +65,7 @@ Exact workflow titles in GitHub come from each file’s top-level `name:`. **[Re
 - **Manual / inputs:** —
 - **Output:** Same tests as PRs, then `pubspec` bump + annotated tag
 - **Checkout / jobs:** **`run_tests`**: `uses: ./.github/workflows/test.yml` (UI **`run_tests / 🧪 Test`**). **`version_tag`** (`needs: run_tests`): **`fetch-depth: 0`**
-- **Composites & wiring:** Bump **`pubspec`** ([Versioning policy](#versioning-policy)) → **[`pubspec-commit-tag-push`](../../.github/actions/pubspec-commit-tag-push/action.yml)** when the version line changes → bot commit **`[skip ci]`** ([Skip / push behavior](#skip-and-push-behavior)), push **`main`**, tag **`v…+…`**
+- **Composites & wiring:** Bump **`pubspec`** ([Versioning policy](#versioning-policy)) → commit **`[skip ci]`**, push **`main`**, annotated tag **`v…+…`** (steps inlined in **[`version-tag-main.yml`](../../.github/workflows/version-tag-main.yml)**; former **`pubspec-commit-tag-push`** composite removed)
 
 #### 🦊 F-Droid fork branch (fdroiddata) — [`release-fdroid-app.yml`](../../.github/workflows/release-fdroid-app.yml) <a name="release-fdroid-app"></a>
 
@@ -129,9 +129,10 @@ Reusable steps under [`.github/actions/`](../../.github/actions/):
 |--------|------|
 | [`setup-flutter`](../../.github/actions/setup-flutter/action.yml) | Flutter SDK (`subosito/flutter-action`), `flutter pub get`, optional `flutter gen-l10n`, dependency cache. Workflows run **`actions/checkout`** before this action when the tree must be present (e.g. **`test.yml`**, APK/AAB **release** builds). |
 | [`flutter-test`](../../.github/actions/flutter-test/action.yml) | `flutter analyze` + `flutter test` (+ optional `integration_test`). |
-| [`pubspec-commit-tag-push`](../../.github/actions/pubspec-commit-tag-push/action.yml) | Commit/push `pubspec` changes; optional annotated tag and changelog collection. Used by **`version-tag-main`**. |
-| [`git-config-github-actions-bot`](../../.github/actions/git-config-github-actions-bot/action.yml) | `git config` for **`github-actions[bot]`** (optional `user_name` / `user_email`). Used at the start of **`version-tag-main.yml`** and inside **`pubspec-commit-tag-push`**. |
+| [`git-config-github-actions-bot`](../../.github/actions/git-config-github-actions-bot/action.yml) | `git config` for **`github-actions[bot]`** (optional `user_name` / `user_email`). Used at the start of **`version-tag-main.yml`**. |
 | [`setup-java`](../../.github/actions/setup-java/action.yml) | JDK for Android APK/AAB builds (**`release-apk-aab-google-play.yml`** only). Run **`actions/checkout`** in the job before this step (this action does not checkout the repo). |
+
+Commit/push **`pubspec`** + annotated tag on **`main`** live inline in **[`version-tag-main.yml`](../../.github/workflows/version-tag-main.yml)** (after the bump step).
 
 F-Droid metadata publishing lives in **[`release-fdroid-app.yml`](../../.github/workflows/release-fdroid-app.yml)** (calls **`tools/fdroid/publish_fdroid_gitlab_branch.py`**); it is not a composite action.
 
