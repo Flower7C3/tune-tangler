@@ -22,17 +22,12 @@ inputs:
       vars.FDROID_METADATA_SOURCE_BRANCH from the workflow; empty = robot/tune-tangler.
     required: false
     default: ''
-  gitlab_stage:
-    description: >-
-      push_for_ci = GitLab commit only (fdroiddata CI on fork branch). open_draft_mr = Draft MR
-      + checklist after CI (same ref). push_and_open_draft_mr = both in one run.
-    required: false
-    default: 'push_for_ci'
 
 # GitLab: set on the *caller job* as env, e.g.
 #   env:
 #     GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
 #     GITLAB_FORK_PROJECT_ID: ${{ vars.GITLAB_FORK_PROJECT_ID }}
+#     FDROID_GITLAB_STAGE: push | mr | both   # map workflow_dispatch in the workflow (not this input): checkout ref may be an old tag, so ./.github/actions would be stale.
 # (token = secret; fork project ID = repository variable — not sensitive.)
 
 runs:
@@ -95,12 +90,4 @@ runs:
         GITHUB_REF_NAME: ${{ inputs.ref_name }}
         FDROID_FLUTTER_VERSION: ${{ env.FDROID_FLUTTER_VERSION }}
         FDROID_METADATA_SOURCE_BRANCH: ${{ inputs.metadata_source_branch }}
-      run: |
-        set -euo pipefail
-        case "${{ inputs.gitlab_stage }}" in
-          push_for_ci) export FDROID_GITLAB_STAGE=push ;;
-          open_draft_mr) export FDROID_GITLAB_STAGE=mr ;;
-          push_and_open_draft_mr) export FDROID_GITLAB_STAGE=both ;;
-          *) export FDROID_GITLAB_STAGE=push ;;
-        esac
-        python3 tools/fdroid/publish_fdroid_mr.py
+      run: python3 tools/fdroid/publish_fdroid_mr.py

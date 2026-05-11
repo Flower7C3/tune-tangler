@@ -73,9 +73,9 @@ Exact workflow titles in GitHub come from each file’s top-level `name:`. **[Re
 
 - **In Actions (approx.):** **Release on F-Droid (via MR)**
 - **When:** Manual only
-- **Manual / inputs:** **`target_ref`** (tag or branch on GitHub), **`gitlab_stage`** — **`push_for_ci`** (metadata commit on your fdroiddata fork only; GitLab CI), **`open_draft_mr`** (Draft MR + checklist after CI; same ref), or **`push_and_open_draft_mr`** (both in one run)
+- **Manual / inputs:** **`target_ref`** (optional — tag or branch; leave empty for **latest tag** reachable from the default branch), **`gitlab_stage`** — **`push_for_ci`** (metadata commit on your fdroiddata fork only; GitLab CI), **`open_draft_mr`** (Draft MR + checklist after CI; use the same ref resolution as push), or **`push_and_open_draft_mr`** (both in one run)
 - **Output:** Updates your **fdroiddata** fork branch; optionally opens a **Draft** MR to upstream (no commits/tags in this repo)
-- **Checkout / jobs:** Resolves **`target_ref`**, then checks out that tree
+- **Checkout / jobs:** Checkout default branch → resolve ref (`target_ref` or `git describe --tags`) → checkout that tree
 - **Composites & wiring:** **[`fdroid-metadata-mr`](../../.github/actions/fdroid-metadata-mr/action.yml)**. Secrets / variables: [below](#secrets-and-variables) and [FDROID.md](../release/FDROID.md)
 
 #### 🚀 Release on GitHub (APK/AAB files) — [`release-apk-aab-google-play.yml`](../../.github/workflows/release-apk-aab-google-play.yml) <a name="release-apk-aab-google-play"></a>
@@ -95,7 +95,7 @@ Exact workflow titles in GitHub come from each file’s top-level `name:`. **[Re
 |------|---------|
 | **CI on a PR to `main`** | Open/update the PR; [`test.yml`](../../.github/workflows/test.yml) runs ([`paths-ignore`](#shared-paths-ignore) still applies to changed files). |
 | **Version bump + tag after merge** | Push/merge to `main`; [`version-tag-main.yml`](../../.github/workflows/version-tag-main.yml) runs when paths are not all ignored ([workflow summaries](#workflow-reference)). |
-| **F-Droid metadata MR** | Tag or branch on GitHub → **Actions** → **Release on F-Droid (via MR)** → **`target_ref`**. Recommended: **`gitlab_stage`** **`push_for_ci`** first (GitLab CI on your fork), then **`open_draft_mr`** with the same ref; or **`push_and_open_draft_mr`** for a single run. |
+| **F-Droid metadata MR** | **Actions** → **Release on F-Droid (via MR)** → optional **`target_ref`** (empty = latest tag on default branch). Recommended: **`gitlab_stage`** **`push_for_ci`** first, then **`open_draft_mr`** (same empty or explicit ref); or **`push_and_open_draft_mr`** for one run. |
 | **GitHub Release (APK / AAB)** | **Actions** → **Release on GitHub (APK/AAB files)** → **Run workflow** → set **`tag`** → configure keystore secrets if needed ([Keystore](#keystore-configuration)). |
 | **Ad-hoc / manual test run** | **Actions** → pick a workflow that exposes **Run workflow** → run (e.g. [`test.yml`](../../.github/workflows/test.yml)). |
 
@@ -132,7 +132,7 @@ Reusable steps under [`.github/actions/`](../../.github/actions/):
 | [`flutter-test`](../../.github/actions/flutter-test/action.yml) | `flutter analyze` + `flutter test` (+ optional `integration_test`). |
 | [`pubspec-commit-tag-push`](../../.github/actions/pubspec-commit-tag-push/action.yml) | Commit/push `pubspec` changes; optional annotated tag and changelog collection. Used by **`version-tag-main`**. |
 | [`git-config-github-actions-bot`](../../.github/actions/git-config-github-actions-bot/action.yml) | `git config` for **`github-actions[bot]`** (optional `user_name` / `user_email`). Used at the start of **`version-tag-main.yml`** and inside **`pubspec-commit-tag-push`**. |
-| [`fdroid-metadata-mr`](../../.github/actions/fdroid-metadata-mr/action.yml) | GitLab fork + optional Draft MR to fdroiddata; **`gitlab_stage`** maps to `FDROID_GITLAB_STAGE` in `publish_fdroid_mr.py`. Pass **`metadata_source_branch`** from **`vars.FDROID_METADATA_SOURCE_BRANCH`** when set (see [FDROID.md](../release/FDROID.md)). |
+| [`fdroid-metadata-mr`](../../.github/actions/fdroid-metadata-mr/action.yml) | GitLab fork + optional Draft MR to fdroiddata; the **workflow** sets job **`env.FDROID_GITLAB_STAGE`** (`push` / `mr` / `both`) from **`gitlab_stage`** so release tags are not forced to ship a new composite. Pass **`metadata_source_branch`** from **`vars.FDROID_METADATA_SOURCE_BRANCH`** when set (see [FDROID.md](../release/FDROID.md)). |
 | [`setup-java`](../../.github/actions/setup-java/action.yml) | JDK for Android APK/AAB builds (**`release-apk-aab-google-play.yml`** only). Run **`actions/checkout`** in the job before this step (this action does not checkout the repo). |
 
 ## 🔐 Keystore (APK/AAB release workflow only) <a name="keystore-configuration"></a>

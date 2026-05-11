@@ -5,13 +5,15 @@ on:
   workflow_dispatch:
     inputs:
       target_ref:
-        description: 'Existing tag or branch (e.g. v1.7.0+12) — commit must match what you want in the MR'
-        required: true
+        description: >-
+          Tag or branch (e.g. v1.7.0+12). Leave empty to use the latest tag reachable from the repo default branch.
+        required: false
+        default: ''
         type: string
       gitlab_stage:
         description: >-
           push_for_ci: push metadata to your fdroiddata fork only (GitLab CI on the branch).
-          open_draft_mr: open a Draft MR + upstream checklist (same target_ref) after CI is green.
+          open_draft_mr: open a Draft MR + upstream checklist after CI is green (use the same resolved ref as push — leave target_ref empty both times for “latest tag”).
           push_and_open_draft_mr: push then open Draft MR in one run (convenience).
         required: true
         type: choice
@@ -22,7 +24,10 @@ on:
           - push_and_open_draft_mr
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.inputs.target_ref }}-${{ github.event.inputs.gitlab_stage }}
+  group: >-
+    ${{ github.workflow }}-${{ github.event.inputs.gitlab_stage }}-${{
+      github.event.inputs.target_ref != '' && github.event.inputs.target_ref || 'latest-tag'
+    }}
   cancel-in-progress: true
 
 permissions:
@@ -36,11 +41,38 @@ jobs:
     env:
       GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
       GITLAB_FORK_PROJECT_ID: ${{ vars.GITLAB_FORK_PROJECT_ID }}
+      # Set here (not as composite input): checkout uses target_ref, so ./.github/actions would load an old action.yml on release tags.
+      FDROID_GITLAB_STAGE: ${{ github.event.inputs.gitlab_stage == 'push_for_ci' && 'push' || github.event.inputs.gitlab_stage == 'open_draft_mr' && 'mr' || 'both' }}
     steps:
-      - name: "🔧 Checkout ref"
+      - name: "🔧 Checkout default branch (resolve ref)"
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.inputs.target_ref }}
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+          fetch-tags: true
+      - name: "Resolve target ref"
+        id: resolve
+        env:
+          REF_INPUT: ${{ github.event.inputs.target_ref }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TRIM=$(printf '%s' "${REF_INPUT:-}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+          if [ -n "$TRIM" ]; then
+            echo "resolved_ref=$TRIM" >> "$GITHUB_OUTPUT"
+            echo "Using explicit **target_ref**: \`$TRIM\`" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if ! TAG=$(git describe --tags --abbrev=0 2>/dev/null); then
+            echo "::error::No **target_ref** and no tag found on the default branch (\`git describe --tags --abbrev=0\`). Set **target_ref** or push a release tag from main."
+            exit 1
+          fi
+          echo "resolved_ref=$TAG" >> "$GITHUB_OUTPUT"
+          echo "**target_ref** empty — using latest reachable tag: \`$TAG\`" >> "$GITHUB_STEP_SUMMARY"
+      - name: "🔧 Checkout target tree"
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.resolve.outputs.resolved_ref }}
           fetch-depth: 0
       - name: "Resolve commit SHA"
         id: meta
@@ -50,8 +82,7 @@ jobs:
         uses: ./.github/actions/fdroid-metadata-mr
         with:
           commit_sha: ${{ steps.meta.outputs.commit_sha }}
-          ref_name: ${{ github.event.inputs.target_ref }}
+          ref_name: ${{ steps.resolve.outputs.resolved_ref }}
           version_override: ''
           flutter_version: ${{ vars.FDROID_FLUTTER_VERSION }}
           metadata_source_branch: ${{ vars.FDROID_METADATA_SOURCE_BRANCH }}
-          gitlab_stage: ${{ github.event.inputs.gitlab_stage }}

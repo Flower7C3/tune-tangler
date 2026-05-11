@@ -37,7 +37,7 @@ The sections below cover **fdroiddata** metadata shape, **`publish_fdroid_mr.py`
 
 Optional env **`FDROID_METADATA_SOURCE_BRANCH`** overrides the default `robot/tune-tangler` branch name on the fork; mirror the GitHub **variable** of the same name ([WORKFLOWS](../development/WORKFLOWS.md#secrets-and-variables), [`fdroid-metadata-mr`](../../.github/actions/fdroid-metadata-mr/action.yml)).
 
-Optional env **`FDROID_GITLAB_STAGE`:** `push` | `mr` | `both` (default **`both`** when unset — e.g. local runs). GitHub Actions maps workflow choices **`push_for_ci`** → `push`, **`open_draft_mr`** → `mr`, **`push_and_open_draft_mr`** → `both` (default in the workflow is **`push_for_ci`**).
+Optional env **`FDROID_GITLAB_STAGE`:** `push` | `mr` | `both` (default **`both`** when unset — e.g. local runs). In **GitHub Actions**, `release-fdroid-app.yml` sets this on the **job** `env` from **`gitlab_stage`** (`push_for_ci` → `push`, `open_draft_mr` → `mr`, `push_and_open_draft_mr` → `both`) so it still works when the second checkout is an **old tag** (local composite `uses: ./…` would otherwise load a stale `action.yml`). Workflow **`target_ref`** may be left empty: then the resolved ref is the **latest tag** on the repo default branch (`git describe --tags --abbrev=0`).
 
 **Cleaning up older spam on your fork:** close redundant open MRs to upstream and delete obsolete `robot/tune-tangler-*` branches if you no longer need them; keep one MR on `robot/tune-tangler` going forward.
 
@@ -53,8 +53,8 @@ Optional env **`FDROID_GITLAB_STAGE`:** `push` | `mr` | `both` (default **`both`
 
 Upstream expects a **public** fork and a **source branch that is not [protected](https://docs.gitlab.com/user/project/repository/branches/protected/)** (they rebase with fast-forward merges).
 
-1. **Push metadata to a working branch** on your fork first. That runs **fdroiddata** pipelines (lint, `fdroid build`, etc.) on GitLab without treating the change as “submitted for review” yet. In this repo: **Actions → Release on F-Droid (via MR)** → **`gitlab_stage`: `push_for_ci`** (same **`target_ref`** as the release).
-2. **Open the MR as Draft** and complete the checklist. In this repo: run the same workflow again with **`gitlab_stage`: `open_draft_mr`** after GitLab CI is green. The script embeds the checklist in the MR body (without the “Please remove above lines!” block). Set **`Closes fdroiddata#…`** in the description if needed. **Mark the MR ready for review** (clear Draft) only when you accept the checklist — that is when you ask upstream for review.
+1. **Push metadata to a working branch** on your fork first. That runs **fdroiddata** pipelines (lint, `fdroid build`, etc.) on GitLab without treating the change as “submitted for review” yet. In this repo: **Actions → Release on F-Droid (via MR)** → **`gitlab_stage`: `push_for_ci`**. Leave **`target_ref`** empty to use the **latest** tag on the default branch, or set the same tag/branch you want in the MR.
+2. **Open the MR as Draft** and complete the checklist. In this repo: run the same workflow again with **`gitlab_stage`: `open_draft_mr`** after GitLab CI is green (same **`target_ref`** as step 1 — again empty picks the current latest tag). The script embeds the checklist in the MR body (without the “Please remove above lines!” block). Set **`Closes fdroiddata#…`** in the description if needed. **Mark the MR ready for review** (clear Draft) only when you accept the checklist — that is when you ask upstream for review.
 
 **`publish_fdroid_mr.py` / Actions:** new MRs are created as **Draft** with the fdroiddata **checklist** (boilerplate that says “Please remove above lines!” is omitted — it is not part of the API body). Further pushes update the same open MR; they do not change the description. Clear **Draft** in GitLab only after CI and your checklist review.
 
