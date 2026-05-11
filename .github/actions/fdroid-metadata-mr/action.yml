@@ -39,6 +39,19 @@ runs:
         ref: ${{ inputs.ref_name }}
         fetch-depth: 1
 
+    # Release tags predate workflow changes; run the GitLab driver from the default branch so
+    # FDROID_GITLAB_STAGE (e.g. mr) and commit retry logic apply. YAML templates stay from inputs.ref_name.
+    - name: "📌 publish_fdroid_mr.py from default branch"
+      shell: bash
+      env:
+        DEFAULT_BRANCH: ${{ github.event.repository.default_branch || 'main' }}
+      run: |
+        set -euo pipefail
+        DB="${DEFAULT_BRANCH}"
+        git fetch --depth=1 origin "$DB"
+        git checkout FETCH_HEAD -- tools/fdroid/publish_fdroid_mr.py
+        echo "Using \`tools/fdroid/publish_fdroid_mr.py\` from \`origin/${DB}\` (app tree still \`${{ inputs.ref_name }}\`)." >> "$GITHUB_STEP_SUMMARY"
+
     - name: "🐍 Setup Python"
       uses: actions/setup-python@v6
       with:

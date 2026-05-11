@@ -301,6 +301,35 @@ def _gitlab_request(
         raise SystemExit(f"GitLab HTTP {e.code} for {method} {url}: {parsed}") from e
 
 
+def _repository_commit_with_retry(
+    api_base: str, token: str, fork_id: int, commit_payload: dict[str, Any]
+) -> None:
+    """POST repository/commits; flip create↔update once on common GitLab 400 errors."""
+    path = f"projects/{fork_id}/repository/commits"
+    action = commit_payload["actions"][0]["action"]
+    try:
+        _gitlab_request("POST", api_base, token, path, commit_payload)
+        return
+    except SystemExit as e:
+        msg = str(e).lower()
+        if "http 400" not in msg:
+            raise
+        if action == "create" and "already exists" in msg:
+            commit_payload["actions"][0]["action"] = "update"
+            _gitlab_request("POST", api_base, token, path, commit_payload)
+            return
+        if action == "update" and (
+            "doesn't exist" in msg
+            or "does not exist" in msg
+            or "couldn't find" in msg
+            or "not found" in msg
+        ):
+            commit_payload["actions"][0]["action"] = "create"
+            _gitlab_request("POST", api_base, token, path, commit_payload)
+            return
+        raise
+
+
 def _project_id_for_path(api_base: str, token: str, project_path: str) -> int:
     enc = urllib.parse.quote(project_path, safe="")
     _, data = _gitlab_request("GET", api_base, token, f"projects/{enc}")
@@ -652,7 +681,7 @@ def main() -> None:
         if not _branch_exists(api_base, token, fork_id, branch):
             commit_payload["start_branch"] = "master"
 
-        _gitlab_request("POST", api_base, token, f"projects/{fork_id}/repository/commits", commit_payload)
+        _repository_commit_with_retry(api_base, token, fork_id, commit_payload)
         print(f"Pushed metadata commit to branch {branch}.", flush=True)
 
     if stage == "push":
