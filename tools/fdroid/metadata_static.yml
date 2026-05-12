@@ -1,4 +1,5 @@
 # F-Droid fdroiddata bootstrap (Builds, Repo, License, …).
+# MaintainerNotes: keep in sync with tools/fdroid/maintainer_notes.txt (used by publish_fdroid_gitlab_branch.py).
 #
 # Do NOT put Summary / Description / Name / AutoName here: those fields in the fdroiddata
 # metadata YAML override Fastlane/Triple-T text from the app repo. Store copy lives under

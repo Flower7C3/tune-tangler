@@ -1,29 +1,34 @@
 #!/usr/bin/env python3
 """
-Push F-Droid metadata YAML to a **versioned branch** on your GitLab fork of fdroiddata.
+Push F-Droid metadata YAML to a **single named branch** on your GitLab fork of fdroiddata (no version in the branch name).
+This script only updates the fork branch; opening a merge request to upstream fdroiddata is a separate manual step in GitLab.
 
-Creates `robot/tune-tangler-<versionName>` (prefix configurable). This script
-only updates the fork branch; opening a merge request to `fdroid/fdroiddata` is a separate manual step in GitLab.
+Repo layout and app identity are driven by environment variables (nothing app-specific is required inside this file).
 
 Required env:
-  GITLAB_TOKEN              — GitLab PAT with api scope (repo write on fork)
-  GITLAB_FORK_PROJECT_ID    — numeric project ID of *your* fdroiddata fork
+  GITLAB_TOKEN                 — GitLab PAT with api scope (repo write on fork)
+  GITLAB_FORK_PROJECT_ID       — numeric project ID of *your* fdroiddata fork
+  FDROID_METADATA_PATH         — path under fork repo (e.g. metadata/<applicationId>.yml)
+  FDROID_GITLAB_BRANCH         — branch name on the fork to push commits to
+  FDROID_GIT_COMMIT_SUBJECT_PREFIX — first segment of Git commit subject (before ": version …")
+  FDROID_MAINTAINER_NOTES_PATH — repo-relative path to MaintainerNotes body (rewritemeta-style text file)
+  FDROID_GITLAB_FORK_PARENT_REF — fork branch to branch from / read baseline metadata (usually master)
 
 Optional:
-  GITLAB_API_URL            — default https://gitlab.com/api/v4
-  FDROID_METADATA_PATH      — default metadata/pro.kwiatek.tune_tangler.yml
-  GITHUB_SHA                — full 40-char app commit for Builds[].commit
-  GITHUB_REF_NAME           — tag or branch (for version inference)
-  FDROID_FLUTTER_VERSION    — Flutter SDK version for the build recipe (e.g. 3.29.0)
-  GITHUB_WORKSPACE          — repo root (CI sets automatically)
-  VERSION_OVERRIDE          — optional MAJOR.MINOR.PATCH[+CODE]
-  FDROID_GITLAB_BRANCH      — if set, exact Git branch name on the fork (overrides auto name)
-  FDROID_ROBOT_BRANCH_PREFIX — default robot/tune-tangler (automation namespace on the fork, not required by F-Droid); auto branch = prefix-versionName
-  FDROID_GITLAB_COMPARE_BASE_REF — optional left-hand side of GitLab compare URL vs robot branch (default master)
+  GITLAB_API_URL               — default https://gitlab.com/api/v4
+  GITHUB_SHA                   — full 40-char app commit for Builds[].commit
+  GITHUB_REF_NAME              — tag or branch (for version inference)
+  FDROID_FLUTTER_VERSION       — Flutter SDK version for the build recipe (e.g. 3.29.0)
+  GITHUB_WORKSPACE             — repo root (CI sets automatically)
+  VERSION_OVERRIDE             — optional MAJOR.MINOR.PATCH[+CODE]
+  FDROID_GITLAB_COMPARE_BASE_REF — left-hand side of GitLab compare URL (default: same as FDROID_GITLAB_FORK_PARENT_REF)
+  FDROID_FASTLANE_METADATA_REL_PATH — default fastlane/metadata/android/en-US
+  FDROID_UPSTREAM_MR_WEB_URL   — default https://gitlab.com/fdroid/fdroiddata (step summary MR hint)
+  FDROID_TOOLING_REL_PATH      — default tools/fdroid (build_template.yml, metadata_static.yml)
 
-Repo paths (under GITHUB_WORKSPACE):
-  tools/fdroid/metadata_static.yml  — fdroiddata bootstrap (no Summary/Description/Name; see F-Droid docs)
-  tools/fdroid/build_template.yml   — one Build entry with __PLACEHOLDERS__
+Under GITHUB_WORKSPACE, templates live under FDROID_TOOLING_REL_PATH:
+  metadata_static.yml  — fdroiddata bootstrap when fork file is missing
+  build_template.yml   — one Build entry with __PLACEHOLDERS__
 """
 
 from __future__ import annotations
@@ -74,13 +79,15 @@ def _represent_maintainer_notes_literal(dumper: yaml.SafeDumper, data: _Maintain
 
 FdroidMetadataDumper.add_representer(_MaintainerNotesLiteral, _represent_maintainer_notes_literal)
 
-# Literal block text must match `fdroid rewritemeta` (fdroiddata CI on trixie).
-_MAINTAINER_NOTES_REWRITEMETA = (
-    "MIT. Sonic (Apache 2.0) in android/app/src/main/java/sonic/.\n\n"
-    "Build: Flutter stable (version from CI / FDROID_FLUTTER_VERSION variable).\n\n"
-    "Listings (Summary/Description/screenshots): Fastlane layout in the app repo\n"
-    "(fastlane/metadata/android/) — do not duplicate those keys in this YAML.\n\n"
-)
+
+def _repo_relative_path(root: Path, rel: str) -> Path:
+    root_r = root.resolve()
+    p = (root_r / rel).resolve()
+    try:
+        p.relative_to(root_r)
+    except ValueError as e:
+        raise SystemExit(f"Resolved path escapes repo root: {rel!r}") from e
+    return p
 
 
 _BUILD_KEY_ORDER = (
@@ -167,9 +174,9 @@ def _fix_categories(doc: dict[str, Any]) -> None:
     doc["Categories"] = out
 
 
-def _normalize_maintainer_notes(doc: dict[str, Any]) -> None:
+def _normalize_maintainer_notes(doc: dict[str, Any], body: str) -> None:
     """rewritemeta emits MaintainerNotes as a literal block (|), not folded single quotes."""
-    doc["MaintainerNotes"] = _MaintainerNotesLiteral(_MAINTAINER_NOTES_REWRITEMETA)
+    doc["MaintainerNotes"] = _MaintainerNotesLiteral(body)
 
 
 def _normalize_update_check_mode(doc: dict[str, Any]) -> None:
@@ -197,13 +204,15 @@ def _canonical_github_repo_url(repo: str) -> str:
     return repo.strip()
 
 
-def _normalize_metadata(doc: dict[str, Any], version_name: str, version_code: int) -> None:
+def _normalize_metadata(
+    doc: dict[str, Any], version_name: str, version_code: int, maintainer_notes_body: str
+) -> None:
     """Match fdroiddata schemas/metadata.json, fdroid lint, and `fdroid rewritemeta` output."""
     _fix_categories(doc)
     _coerce_archive_policy(doc)
     doc["AutoUpdateMode"] = "None"
     _normalize_update_check_mode(doc)
-    _normalize_maintainer_notes(doc)
+    _normalize_maintainer_notes(doc, maintainer_notes_body)
     r = doc.get("Repo")
     if isinstance(r, str) and r.strip():
         doc["Repo"] = _canonical_github_repo_url(r)
@@ -361,17 +370,6 @@ def _branch_exists(api_base: str, token: str, project_id: int, branch: str) -> b
         raise SystemExit(f"GitLab HTTP {e.code} GET {url}: {raw}") from e
 
 
-def _resolved_robot_branch(vname: str) -> str:
-    override = (os.environ.get("FDROID_GITLAB_BRANCH") or "").strip()
-    if override:
-        return override
-    # Default `robot/…` groups CI-created branches under a clear namespace (not required by F-Droid).
-    prefix = (os.environ.get("FDROID_ROBOT_BRANCH_PREFIX") or "robot/tune-tangler").strip()
-    if not prefix:
-        prefix = "robot/tune-tangler"
-    return f"{prefix}-{vname}"
-
-
 def _fork_project_tree_url(api_base: str, token: str, fork_id: int, branch: str) -> str:
     _, data = _gitlab_request("GET", api_base, token, f"projects/{fork_id}")
     assert isinstance(data, dict)
@@ -384,7 +382,7 @@ def _fork_project_tree_url(api_base: str, token: str, fork_id: int, branch: str)
 
 
 def _fork_compare_url(tree_url: str, branch: str, fork_id: int, base_ref: str) -> str:
-    """GitLab UI: compare default branch (usually ``master`` on fdroiddata) to the robot branch."""
+    """GitLab UI: compare a base ref on fdroiddata to the fork automation branch."""
     if "/-/tree/" not in tree_url:
         raise SystemExit(f"Unexpected tree URL (no /-/tree/): {tree_url!r}")
     web_base = tree_url.split("/-/tree/", 1)[0]
@@ -492,8 +490,8 @@ def _strip_listing_fields_for_fastlane(doc: dict[str, Any]) -> None:
         doc.pop(k, None)
 
 
-def _assert_fastlane_en_us(root: Path) -> None:
-    base = root / "fastlane" / "metadata" / "android" / "en-US"
+def _assert_fastlane_en_us(root: Path, rel_dir: str) -> None:
+    base = _repo_relative_path(root, rel_dir)
     required = ("short_description.txt", "full_description.txt")
     missing = [p for p in required if not (base / p).is_file()]
     if missing:
@@ -509,7 +507,31 @@ def main() -> None:
     api_base = os.environ.get("GITLAB_API_URL", "https://gitlab.com/api/v4").rstrip("/")
     token = _env("GITLAB_TOKEN")
     fork_id = int(_env("GITLAB_FORK_PROJECT_ID"))
-    metadata_path = os.environ.get("FDROID_METADATA_PATH", "metadata/pro.kwiatek.tune_tangler.yml")
+    metadata_path = _env("FDROID_METADATA_PATH").strip()
+    fork_parent_ref = _env("FDROID_GITLAB_FORK_PARENT_REF").strip()
+    branch = _env("FDROID_GITLAB_BRANCH").strip()
+    commit_subject_prefix = _env("FDROID_GIT_COMMIT_SUBJECT_PREFIX").strip()
+    maintainer_notes_rel = _env("FDROID_MAINTAINER_NOTES_PATH").strip()
+    for label, val in (
+        ("FDROID_METADATA_PATH", metadata_path),
+        ("FDROID_GITLAB_FORK_PARENT_REF", fork_parent_ref),
+        ("FDROID_GITLAB_BRANCH", branch),
+        ("FDROID_GIT_COMMIT_SUBJECT_PREFIX", commit_subject_prefix),
+        ("FDROID_MAINTAINER_NOTES_PATH", maintainer_notes_rel),
+    ):
+        if not val:
+            raise SystemExit(f"{label} must be non-empty")
+
+    tooling_rel = (os.environ.get("FDROID_TOOLING_REL_PATH") or "tools/fdroid").strip() or "tools/fdroid"
+    fastlane_rel = (os.environ.get("FDROID_FASTLANE_METADATA_REL_PATH") or "").strip() or (
+        "fastlane/metadata/android/en-US"
+    )
+    upstream_mr_web = (os.environ.get("FDROID_UPSTREAM_MR_WEB_URL") or "").strip() or (
+        "https://gitlab.com/fdroid/fdroiddata"
+    )
+
+    maintainer_body = _repo_relative_path(root, maintainer_notes_rel).read_text(encoding="utf-8")
+
     commit_sha = _env("GITHUB_SHA")
     ref_name = os.environ.get("GITHUB_REF_NAME", "")
     flutter_ver = os.environ.get("FDROID_FLUTTER_VERSION", "").strip()
@@ -531,10 +553,11 @@ def main() -> None:
     if not re.match(r"^[0-9a-f]{40}$", commit_sha.lower()):
         raise SystemExit(f"GITHUB_SHA must be a full 40-char commit hash, got {commit_sha!r}")
 
-    _assert_fastlane_en_us(root)
+    _assert_fastlane_en_us(root, fastlane_rel)
 
-    tpl_path = root / "tools" / "fdroid" / "build_template.yml"
-    static_path = root / "tools" / "fdroid" / "metadata_static.yml"
+    tooling = _repo_relative_path(root, tooling_rel)
+    tpl_path = tooling / "build_template.yml"
+    static_path = tooling / "metadata_static.yml"
     build_template_text = tpl_path.read_text(encoding="utf-8")
     new_build = _substitute_build_template(
         build_template_text,
@@ -544,7 +567,7 @@ def main() -> None:
         flutter_ver=flutter_ver,
     )
 
-    existing_yaml = _get_file(api_base, token, fork_id, metadata_path, ref="master")
+    existing_yaml = _get_file(api_base, token, fork_id, metadata_path, ref=fork_parent_ref)
     if existing_yaml is None:
         static_doc = yaml.safe_load(static_path.read_text(encoding="utf-8"))
         if not isinstance(static_doc, dict):
@@ -578,11 +601,10 @@ def main() -> None:
         doc["Builds"] = _dedupe_builds_keep_last(doc["Builds"])
 
     _strip_listing_fields_for_fastlane(doc)
-    _normalize_metadata(doc, vname, vcode)
+    _normalize_metadata(doc, vname, vcode, maintainer_body)
 
     body_yaml = _dump_metadata(doc)
 
-    branch = _resolved_robot_branch(vname)
     print(f"Target fork branch: {branch}", flush=True)
 
     skip_commit = False
@@ -601,7 +623,7 @@ def main() -> None:
 
         commit_payload: dict[str, Any] = {
             "branch": branch,
-            "commit_message": f"Tune Tangler: {vname} ({vcode}) @ {commit_sha[:8]}",
+            "commit_message": f"{commit_subject_prefix}: {vname} ({vcode}) @ {commit_sha[:8]}",
             "actions": [
                 {
                     "action": commit_action,
@@ -611,13 +633,14 @@ def main() -> None:
             ],
         }
         if not _branch_exists(api_base, token, fork_id, branch):
-            commit_payload["start_branch"] = "master"
+            commit_payload["start_branch"] = fork_parent_ref
 
         _repository_commit_with_retry(api_base, token, fork_id, commit_payload)
         print(f"Pushed metadata commit to branch {branch}.", flush=True)
 
     tree_url = _fork_project_tree_url(api_base, token, fork_id, branch)
-    compare_base = (os.environ.get("FDROID_GITLAB_COMPARE_BASE_REF") or "master").strip() or "master"
+    compare_raw = (os.environ.get("FDROID_GITLAB_COMPARE_BASE_REF") or "").strip()
+    compare_base = compare_raw or fork_parent_ref
     compare_url = _fork_compare_url(tree_url, branch, fork_id, compare_base)
     print(f"::notice::GitLab fork branch (pipelines): {tree_url}", flush=True)
     print(f"::notice::GitLab compare vs {compare_base}: {compare_url}", flush=True)
@@ -633,7 +656,7 @@ def main() -> None:
             sf.write(f"- **tree (watch CI):** [{tree_url}]({tree_url})\n")
             sf.write(f"- **compare vs `{compare_base}`:** [{compare_url}]({compare_url})\n")
             sf.write(
-                "\nCreate a merge request to [`fdroid/fdroiddata`](https://gitlab.com/fdroid/fdroiddata) "
+                f"\nCreate a merge request to [`fdroid/fdroiddata`]({upstream_mr_web}) "
                 "from this branch in GitLab when you are ready.\n"
             )
 

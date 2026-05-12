@@ -33,7 +33,7 @@
 - **[🎨 Icon generation](docs/development/ICON_GENERATION.md)** — PNGs from SVG via config
 - **[🎣 Git hooks](docs/development/GIT_HOOKS.md)** — optional `pre-commit`: `flutter analyze`
 - **[🚀 Workflows](docs/development/WORKFLOWS.md)** — GitHub Actions and CI/CD
-- **[📦 F-Droid](docs/release/FDROID.md)** — Actions workflow creates a **versioned branch** on your fdroiddata fork (link in run summary); merge request to upstream is manual in GitLab + templates in `tools/fdroid/`
+- **[📦 F-Droid](docs/release/FDROID.md)** — Actions workflow updates a **fixed-name branch** on your fdroiddata fork (link in run summary); merge request to upstream is manual in GitLab + templates in `tools/fdroid/`
 
 ### 📋 Project <a name="project"></a>
 

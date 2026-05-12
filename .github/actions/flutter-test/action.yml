@@ -1,21 +1,55 @@
 name: 'Flutter Test'
-description: 'Run Flutter tests for TuneTangler'
+description: >-
+  Checkout the repo, set up Flutter, then run analyze, unit tests, and optional integration tests.
+  Pass channel and localization flags for your project.
+
+inputs:
+  flutter_channel:
+    description: 'Flutter channel (e.g. stable)'
+    required: false
+    default: 'stable'
+  flutter_version:
+    description: 'Pin Flutter SDK version (empty = channel default / latest from setup-flutter)'
+    required: false
+    default: ''
+  with_dependencies:
+    description: 'Run flutter pub get in setup-flutter'
+    required: false
+    default: 'true'
+  with_localization:
+    description: 'Run flutter gen-l10n in setup-flutter'
+    required: false
+    default: 'false'
+  checkout_fetch_depth:
+    description: 'actions/checkout fetch-depth'
+    required: false
+    default: '1'
 
 runs:
-  using: 'composite'
+  using: composite
   steps:
-    # Run Flutter analyze
-    - name: "🔍 Analyze code" 
+    - name: '🔧 Checkout code'
+      uses: actions/checkout@v6
+      with:
+        fetch-depth: ${{ inputs.checkout_fetch_depth }}
+
+    - name: 'Setup Flutter'
+      uses: ./.github/actions/setup-flutter
+      with:
+        flutter_version: ${{ inputs.flutter_version }}
+        flutter_channel: ${{ inputs.flutter_channel }}
+        with_dependencies: ${{ inputs.with_dependencies }}
+        with_localization: ${{ inputs.with_localization }}
+
+    - name: '🔍 Analyze code'
       shell: bash
       run: flutter analyze
-      
-    # Run Flutter tests
-    - name: "🧪 Run tests"
+
+    - name: '🧪 Run tests'
       shell: bash
       run: flutter test
-      
-    # Optional: Run integration tests if they exist
-    - name: "🧪 Run integration tests"
+
+    - name: '🧪 Run integration tests'
       shell: bash
       run: |
         if [ -d "integration_test" ]; then

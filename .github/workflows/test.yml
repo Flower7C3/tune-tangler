@@ -1,5 +1,5 @@
 # Analyzer + tests on pull requests (manual run) and when called from `version-tag-main.yml` on push to `main`.
-# `env` and paths-ignore: keep in sync with `version-tag-main.yml`.
+# `env` and paths-ignore: keep in sync with `version-tag-main.yml`. No hardcoded org/repo/product slugs (fork-friendly).
 name: Test Workflow
 
 on:
@@ -53,17 +53,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: "🔧 Checkout code"
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 1
-
-      - name: Setup Flutter
-        uses: ./.github/actions/setup-flutter
+      - uses: ./.github/actions/flutter-test
         with:
           flutter_channel: ${{ env.FLUTTER_CHANNEL }}
-          with_dependencies: true
-          with_localization: false
-
-      - name: Run tests
-        uses: ./.github/actions/flutter-test
+          with_dependencies: 'true'
+          with_localization: 'false'
+          checkout_fetch_depth: '1'

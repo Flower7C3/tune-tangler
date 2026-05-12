@@ -1,0 +1,195 @@
+name: 'Publish F-Droid metadata to GitLab fork'
+description: >-
+  Resolve release ref, overlay the publish script from the default branch, install Python/PyYAML,
+  resolve Flutter version, and run publish_fdroid_gitlab_branch.py. Repository-specific defaults
+  live in this action; the Python script stays free of app or project names.
+
+inputs:
+  target_ref:
+    description: 'Tag or branch to publish from; empty = latest tag on the repository default branch'
+    required: false
+    default: ''
+  flutter_version:
+    description: 'Flutter version for the F-Droid recipe; empty = latest stable from Google releases JSON'
+    required: false
+    default: ''
+  publish_script_path:
+    description: 'Path to publish_fdroid_gitlab_branch.py (overlaid from default branch before run)'
+    required: false
+    default: 'tools/fdroid/publish_fdroid_gitlab_branch.py'
+  fdroid_metadata_path:
+    description: >-
+      Path to metadata YAML inside the fdroiddata fork (e.g. metadata/<applicationId>.yml).
+      Empty uses the default in the publish step (Tune Tangler: metadata/pro.kwiatek.tune_tangler.yml).
+    required: false
+    default: ''
+  fdroid_gitlab_branch:
+    description: 'Git branch on the fork to push commits to; empty = robot/tune-tangler'
+    required: false
+    default: ''
+  fdroid_git_commit_subject_prefix:
+    description: 'Git commit subject prefix (before ": version (code) @ sha"); empty = Tune Tangler'
+    required: false
+    default: ''
+  fdroid_maintainer_notes_path:
+    description: 'Repo-relative path to MaintainerNotes body text file; empty = tools/fdroid/maintainer_notes.txt'
+    required: false
+    default: ''
+  fdroid_gitlab_fork_parent_ref:
+    description: 'Fork ref to read baseline metadata from and to branch new fork branches off; empty = master'
+    required: false
+    default: ''
+  fdroid_gitlab_compare_base_ref:
+    description: 'Left-hand side of GitLab compare URL; empty = same as fdroid_gitlab_fork_parent_ref'
+    required: false
+    default: ''
+  fdroid_tooling_rel_path:
+    description: 'Directory under the app repo containing build_template.yml and metadata_static.yml; empty = tools/fdroid'
+    required: false
+    default: ''
+
+outputs:
+  resolved_ref:
+    description: 'Ref used for app sources and version inference'
+    value: ${{ steps.resolve.outputs.resolved_ref }}
+  commit_sha:
+    description: 'Full commit SHA passed to the publish script'
+    value: ${{ steps.meta.outputs.commit_sha }}
+  gitlab_tree_url:
+    description: 'GitLab fork tree URL for the pushed branch'
+    value: ${{ steps.publish.outputs.gitlab_tree_url }}
+  gitlab_branch:
+    description: 'Git branch name on the fork'
+    value: ${{ steps.publish.outputs.gitlab_branch }}
+  gitlab_compare_url:
+    description: 'GitLab compare URL (fork branch vs compare base)'
+    value: ${{ steps.publish.outputs.gitlab_compare_url }}
+
+runs:
+  using: composite
+  steps:
+    - name: '🔧 Checkout default branch (resolve ref)'
+      uses: actions/checkout@v6
+      with:
+        ref: ${{ github.event.repository.default_branch }}
+        fetch-depth: 0
+        fetch-tags: true
+
+    - name: 'Resolve target ref'
+      id: resolve
+      shell: bash
+      env:
+        REF_INPUT: ${{ inputs.target_ref }}
+      run: |
+        set -euo pipefail
+        TRIM=$(printf '%s' "${REF_INPUT:-}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+        if [ -n "$TRIM" ]; then
+          echo "resolved_ref=$TRIM" >> "$GITHUB_OUTPUT"
+          echo "Using explicit **target_ref**: \`$TRIM\`" >> "$GITHUB_STEP_SUMMARY"
+          exit 0
+        fi
+        if ! TAG=$(git describe --tags --abbrev=0 2>/dev/null); then
+          echo "::error::No **target_ref** and no tag found on the default branch (\`git describe --tags --abbrev=0\`). Set **target_ref** or push a release tag from main."
+          exit 1
+        fi
+        echo "resolved_ref=$TAG" >> "$GITHUB_OUTPUT"
+        echo "**target_ref** empty — using latest reachable tag: \`$TAG\`" >> "$GITHUB_STEP_SUMMARY"
+
+    - name: 'Resolve commit SHA'
+      id: meta
+      shell: bash
+      env:
+        RESOLVED_REF: ${{ steps.resolve.outputs.resolved_ref }}
+      run: |
+        set -euo pipefail
+        git fetch origin "$RESOLVED_REF" --depth=1
+        echo "commit_sha=$(git rev-parse 'FETCH_HEAD^{commit}')" >> "$GITHUB_OUTPUT"
+
+    - name: '🔧 Checkout release tree'
+      uses: actions/checkout@v6
+      with:
+        ref: ${{ steps.resolve.outputs.resolved_ref }}
+        fetch-depth: 1
+
+    - name: '📌 Overlay publish script from default branch'
+      shell: bash
+      env:
+        DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        SCRIPT_REL: ${{ inputs.publish_script_path }}
+      run: |
+        set -euo pipefail
+        DB="${DEFAULT_BRANCH}"
+        git fetch --depth=1 origin "$DB"
+        git checkout FETCH_HEAD -- "$SCRIPT_REL"
+        echo "Using \`${SCRIPT_REL}\` from \`origin/${DB}\` (app tree still \`${{ steps.resolve.outputs.resolved_ref }}\`)." >> "$GITHUB_STEP_SUMMARY"
+
+    - name: '🐍 Setup Python'
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.12'
+
+    - name: '📦 PyYAML'
+      shell: bash
+      run: pip install pyyaml
+
+    - name: '📌 Flutter version for metadata recipe'
+      shell: bash
+      env:
+        PINNED_FLUTTER: ${{ inputs.flutter_version }}
+      run: |
+        set -euo pipefail
+        V="${PINNED_FLUTTER:-}"
+        if [ -z "${V:-}" ]; then
+          V=$(curl -fsSL "https://storage.googleapis.com/flutter_infra_release/releases/releases_linux.json" \
+            | jq -r '.releases[] | select(.channel=="stable") | .version' | head -1)
+        fi
+        echo "FDROID_FLUTTER_VERSION=$V" >> "$GITHUB_ENV"
+        echo "Using Flutter $V in F-Droid build recipe" >> "$GITHUB_STEP_SUMMARY"
+
+    - name: '🔐 Validate GitLab configuration'
+      shell: bash
+      run: |
+        set -euo pipefail
+        if [ -z "${GITLAB_TOKEN:-}" ]; then
+          echo "::error::GITLAB_TOKEN is unset or empty. Define it on the workflow job as env from secrets (see docs/release/FDROID.md)."
+          exit 1
+        fi
+        if [ -z "${GITLAB_FORK_PROJECT_ID:-}" ]; then
+          echo "::error::GITLAB_FORK_PROJECT_ID is unset or empty. Set repository variable GITLAB_FORK_PROJECT_ID (numeric GitLab project ID)."
+          exit 1
+        fi
+
+    - name: '🚀 Push fdroiddata fork branch'
+      id: publish
+      shell: bash
+      env:
+        GITHUB_SHA: ${{ steps.meta.outputs.commit_sha }}
+        GITHUB_REF_NAME: ${{ steps.resolve.outputs.resolved_ref }}
+        IN_METADATA: ${{ inputs.fdroid_metadata_path }}
+        IN_BRANCH: ${{ inputs.fdroid_gitlab_branch }}
+        IN_PREFIX: ${{ inputs.fdroid_git_commit_subject_prefix }}
+        IN_NOTES: ${{ inputs.fdroid_maintainer_notes_path }}
+        IN_FORK_PARENT: ${{ inputs.fdroid_gitlab_fork_parent_ref }}
+        IN_COMPARE: ${{ inputs.fdroid_gitlab_compare_base_ref }}
+        IN_TOOLING: ${{ inputs.fdroid_tooling_rel_path }}
+        SCRIPT_REL: ${{ inputs.publish_script_path }}
+      run: |
+        set -euo pipefail
+        echo "VERSION_OVERRIDE=" >> "$GITHUB_ENV"
+        # Empty inputs (e.g. unset repo vars forwarded as "") fall back to action defaults.
+        DEF_METADATA='metadata/pro.kwiatek.tune_tangler.yml'
+        DEF_BRANCH='robot/tune-tangler'
+        DEF_PREFIX='Tune Tangler'
+        DEF_NOTES='tools/fdroid/maintainer_notes.txt'
+        DEF_FORK_PARENT='master'
+        DEF_TOOLING='tools/fdroid'
+        export FDROID_METADATA_PATH="${IN_METADATA:-$DEF_METADATA}"
+        export FDROID_GITLAB_BRANCH="${IN_BRANCH:-$DEF_BRANCH}"
+        export FDROID_GIT_COMMIT_SUBJECT_PREFIX="${IN_PREFIX:-$DEF_PREFIX}"
+        export FDROID_MAINTAINER_NOTES_PATH="${IN_NOTES:-$DEF_NOTES}"
+        export FDROID_GITLAB_FORK_PARENT_REF="${IN_FORK_PARENT:-$DEF_FORK_PARENT}"
+        export FDROID_TOOLING_REL_PATH="${IN_TOOLING:-$DEF_TOOLING}"
+        if [ -n "${IN_COMPARE:-}" ]; then
+          export FDROID_GITLAB_COMPARE_BASE_REF="$IN_COMPARE"
+        fi
+        python3 "$SCRIPT_REL"

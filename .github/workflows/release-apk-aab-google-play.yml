@@ -8,6 +8,13 @@ on:
         description: 'Existing tag to build and release (e.g. v1.7.0+12). Create it on main first (pubspec workflow).'
         required: true
         type: string
+      release_artifact_basename:
+        description: >-
+          Base name for APK/AAB filenames and the decoded keystore temp file (e.g. my-app → my-app-1.0.0+1-arm64-v8a.apk).
+          Leave empty to use repository variable RELEASE_ARTIFACT_BASENAME, else github.event.repository.name.
+        required: false
+        default: ''
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.inputs.tag }}
@@ -16,192 +23,25 @@ concurrency:
 permissions:
   contents: write
 
-env:
-  FLUTTER_CHANNEL: 'stable'
-  JAVA_VERSION: '17'
-  JAVA_DISTRIBUTION: 'zulu'
-
 jobs:
-
-  build:
-    name: "STEP 1 — 🏗️ Build & verify"
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - name: "🔧 Checkout tag"
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event.inputs.tag }}
-          fetch-depth: 0
-
-      - name: "📲 Setup Flutter"
-        uses: ./.github/actions/setup-flutter
-        with:
-          flutter_channel: ${{ env.FLUTTER_CHANNEL }}
-          with_dependencies: true
-          with_localization: true
-
-      - name: "☕️ Setup Java"
-        uses: ./.github/actions/setup-java
-        with:
-          java_version: ${{ env.JAVA_VERSION }}
-          java_distribution: ${{ env.JAVA_DISTRIBUTION }}
-
-      - name: "🔐 Decode keystore"
-        id: android_keystore
-        uses: timheuer/base64-to-file@v2
-        with:
-          fileName: tune-tangler-release-key.jks
-          encodedString: ${{ secrets.KEYSTORE_BASE64 }}
-
-      - name: "🔐 Create key.properties"
-        env:
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: |
-          echo "storeFile=${{ steps.android_keystore.outputs.filePath }}" > android/key.properties
-          echo "storePassword=$KEYSTORE_PASSWORD" >> android/key.properties
-          echo "keyPassword=$KEY_PASSWORD" >> android/key.properties
-          echo "keyAlias=$KEY_ALIAS" >> android/key.properties
-
-      - name: "🏗️ Build APK"
-        run: flutter build apk --split-per-abi --no-tree-shake-icons
-
-      - name: "🏗️ Build App Bundle"
-        run: |
-          export GRADLE_OPTS="-Dorg.gradle.daemon=true -Dorg.gradle.parallel=true -Dorg.gradle.jvmargs=-Xmx4g"
-          flutter build appbundle --no-tree-shake-icons
-
-      - name: "🔐 Verify build"
-        run: |
-          echo "🔍 Verifying app bundle signature..."
-          if [ ! -f "build/app/outputs/bundle/release/app-release.aab" ]; then
-            echo "❌ App bundle not found!"
-            exit 1
-          fi
-          jarsigner -verify -verbose -certs build/app/outputs/bundle/release/app-release.aab
-          if [ $? -eq 0 ]; then
-            echo "✅ App bundle signature verified successfully!"
-          else
-            echo "❌ App bundle signature verification failed!"
-            exit 1
-          fi
-          echo "📱 App bundle size: $(du -h build/app/outputs/bundle/release/app-release.aab | cut -f1)"
-          echo "🔐 Build verification completed successfully!"
-
-      - name: "📤 Upload app bundle artifact"
-        uses: actions/upload-artifact@v7
-        with:
-          name: app-release-bundle-${{ github.run_id }}
-          path: |
-            build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
-            build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
-            build/app/outputs/flutter-apk/app-x86_64-release.apk
-            build/app/outputs/bundle/release/app-release.aab
-          retention-days: 1
-
   release:
-    name: "STEP 2 — 🚀 Release"
-    needs: [build]
+    name: '📦 Signed APK/AAB → GitHub Release'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-
+    timeout-minutes: 45
+    env:
+      KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
     steps:
-      - name: "🔧 Checkout (for template & changelog)"
-        uses: actions/checkout@v6
+      - uses: ./.github/actions/android-github-apk-aab-release
         with:
-          ref: ${{ github.event.inputs.tag }}
-          fetch-depth: 0
-
-      - name: "📥 Download build artifacts"
-        uses: actions/download-artifact@v8
-        with:
-          name: app-release-bundle-${{ github.run_id }}
-          path: ./
-
-      - name: "📌 Release file label from tag"
-        id: label
-        shell: bash
-        env:
-          TAG: ${{ github.event.inputs.tag }}
-        run: |
-          set -euo pipefail
-          # Strip leading "v" for filenames (e.g. v1.7.0+12 → 1.7.0+12)
-          L="${TAG#v}"
-          echo "file_label=${L}" >> "$GITHUB_OUTPUT"
-          echo "file_label=${L}"
-
-      - name: "🏷️ Rename artifacts for release"
-        env:
-          V: ${{ steps.label.outputs.file_label }}
-        run: |
-          set -euo pipefail
-          mv flutter-apk/app-arm64-v8a-release.apk "tune-tangler-${V}-arm64-v8a.apk"
-          mv flutter-apk/app-armeabi-v7a-release.apk "tune-tangler-${V}-armeabi-v7a.apk"
-          mv flutter-apk/app-x86_64-release.apk "tune-tangler-${V}-x86_64.apk"
-          mv bundle/release/app-release.aab "tune-tangler-${V}.aab"
-          echo "✅ Renamed to tune-tangler-${V}.*"
-
-      - name: "📝 Generate release body from template"
-        id: generate_release_body
-        env:
-          TAG: ${{ github.event.inputs.tag }}
-          V: ${{ steps.label.outputs.file_label }}
-        run: |
-          awk -v github_repository="${{ github.repository }}" \
-              -v github_run_id="${{ github.run_id }}" \
-              -v github_run_number="${{ github.run_number }}" \
-              -v repository_tag_name="${TAG}" \
-              -v proj_name="$(echo "${{ github.repository }}" | sed 's/.*\///' | sed 's/-/ /g' | sed 's/\b\w/\U&/g')" \
-              -v build_version="${V}" \
-              -v flutter_version="$(curl -s https://storage.googleapis.com/flutter_infra_release/releases/releases_linux.json | jq -r '.releases[] | select(.channel=="stable") | .version' | head -1)" \
-              -v java_version="${{ env.JAVA_VERSION }}" \
-              -v java_distribution="${{ env.JAVA_DISTRIBUTION }}" \
-              '{gsub(/{{ GITHUB_REPOSITORY }}/, github_repository);
-                gsub(/{{ GITHUB_RUN_ID }}/, github_run_id);
-                gsub(/{{ GITHUB_RUN_NUMBER }}/, github_run_number);
-                gsub(/{{ REPOSITORY_TAG_NAME }}/, repository_tag_name);
-                gsub(/{{ PROJECT_NAME }}/, proj_name);
-                gsub(/{{ APP_BUILD_VERSION }}/, build_version);
-                gsub(/{{ REPOSITORY_COMMITS }}/, "");
-                gsub(/{{ FLUTTER_VERSION }}/, flutter_version);
-                gsub(/{{ JAVA_VERSION }}/, java_version);
-                gsub(/{{ JAVA_DISTRIBUTION }}/, java_distribution);
-                print}' .github/templates/release.md > RELEASE_NOTE.md
-
-          if grep -q "{{ REPOSITORY_COMMITS }}" .github/templates/release.md; then
-            echo "📝 Template contains {{ REPOSITORY_COMMITS }} placeholder - appending commits since previous tag"
-            PREV=$(git describe --tags --abbrev=0 "${TAG}^" 2>/dev/null || echo "")
-            if [ -n "$PREV" ]; then
-              git log --oneline --no-merges "${PREV}..$(git rev-parse "${TAG}")" | sed 's/^/- /' >> RELEASE_NOTE.md
-            fi
-          fi
-
-          echo "✅ Release body generated from template"
-
-      - name: "🚫 Block duplicate GitHub Release"
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.event.inputs.tag }}
-        run: |
-          set -euo pipefail
-          if gh release view "$TAG" --repo "${{ github.repository }}" >/dev/null 2>&1; then
-            echo "::error::A GitHub release already exists for tag ${TAG}."
-            exit 1
-          fi
-
-      - name: "🚀 Create GitHub Release"
-        uses: softprops/action-gh-release@v3
-        with:
-          tag_name: ${{ github.event.inputs.tag }}
-          name: Release ${{ github.event.inputs.tag }}
-          body_path: RELEASE_NOTE.md
-          files: |
-            tune-tangler-${{ steps.label.outputs.file_label }}-arm64-v8a.apk
-            tune-tangler-${{ steps.label.outputs.file_label }}-armeabi-v7a.apk
-            tune-tangler-${{ steps.label.outputs.file_label }}-x86_64.apk
-            tune-tangler-${{ steps.label.outputs.file_label }}.aab
-          draft: false
-          prerelease: false
+          tag: ${{ github.event.inputs.tag }}
+          release_artifact_basename: ${{ github.event.inputs.release_artifact_basename }}
+          release_artifact_basename_var: ${{ vars.RELEASE_ARTIFACT_BASENAME }}
+          default_artifact_basename: ${{ github.event.repository.name }}
+          flutter_channel: 'stable'
+          java_version: '17'
+          java_distribution: 'zulu'
+          release_body_template: '.github/templates/release.md'
+          release_title_prefix: 'Release '

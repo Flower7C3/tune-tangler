@@ -1,5 +1,5 @@
 name: 'Setup Flutter'
-description: 'Setup Flutter environment for TuneTangler'
+description: 'Setup Flutter SDK, pub get, and optional gen-l10n for the checked-out app repo'
 inputs:
   flutter_version:
     description: 'Flutter version to use (if not provided, will fetch latest stable)'

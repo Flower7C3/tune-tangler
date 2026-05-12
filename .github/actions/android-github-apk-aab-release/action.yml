@@ -1,0 +1,221 @@
+name: 'Build signed Android APK/AAB and publish GitHub Release'
+description: >-
+  Checkout the given tag, Flutter + Java setup, keystore from env secrets, split APK + app bundle,
+  verify AAB, rename artifacts, render release notes from a template, block duplicate releases,
+  and upload with softprops/action-gh-release. Project-specific strings are inputs (artifact basename,
+  template path, Java/Flutter channels, release title prefix).
+
+inputs:
+  tag:
+    description: 'Existing annotated tag to build (e.g. v1.7.0+12)'
+    required: true
+  release_artifact_basename:
+    description: 'Override basename for APK/AAB filenames and keystore temp file (empty = fall through)'
+    required: false
+    default: ''
+  release_artifact_basename_var:
+    description: 'Second-priority basename (e.g. pass vars.RELEASE_ARTIFACT_BASENAME from the workflow; empty ok)'
+    required: false
+    default: ''
+  default_artifact_basename:
+    description: 'Final fallback basename (pass github.event.repository.name from the workflow)'
+    required: true
+  flutter_channel:
+    description: 'Flutter channel passed to setup-flutter (e.g. stable)'
+    required: false
+    default: 'stable'
+  java_version:
+    description: 'JDK major version for Gradle (passed to setup-java)'
+    required: false
+    default: '17'
+  java_distribution:
+    description: 'JDK distribution name (passed to setup-java, e.g. zulu)'
+    required: false
+    default: 'zulu'
+  release_body_template:
+    description: 'Repo-relative path to the Markdown template for the GitHub Release body'
+    required: false
+    default: '.github/templates/release.md'
+  release_title_prefix:
+    description: 'Prefix before the tag in the GitHub Release title (e.g. "Release ")'
+    required: false
+    default: 'Release '
+
+runs:
+  using: composite
+  steps:
+    - name: 'Resolve release artifact basename'
+      id: artifact
+      shell: bash
+      env:
+        O: ${{ inputs.release_artifact_basename }}
+        V: ${{ inputs.release_artifact_basename_var }}
+        R: ${{ inputs.default_artifact_basename }}
+      run: |
+        set -euo pipefail
+        x="${O:-}"
+        x=${x:-"${V:-}"}
+        x=${x:-"${R}"}
+        if [ -z "$x" ]; then
+          echo "::error::Resolved RELEASE_ARTIFACT_BASENAME is empty."
+          exit 1
+        fi
+        echo "basename=$x" >> "$GITHUB_OUTPUT"
+        echo "RELEASE_ARTIFACT_BASENAME=$x" >> "$GITHUB_ENV"
+
+    - name: '🔧 Checkout tag'
+      uses: actions/checkout@v6
+      with:
+        ref: ${{ inputs.tag }}
+        fetch-depth: 0
+
+    - name: '📲 Setup Flutter'
+      uses: ./.github/actions/setup-flutter
+      with:
+        flutter_channel: ${{ inputs.flutter_channel }}
+        with_dependencies: 'true'
+        with_localization: 'true'
+
+    - name: '☕️ Setup Java'
+      uses: ./.github/actions/setup-java
+      with:
+        java_version: ${{ inputs.java_version }}
+        java_distribution: ${{ inputs.java_distribution }}
+
+    - name: '🔐 Decode keystore'
+      id: android_keystore
+      uses: timheuer/base64-to-file@v2
+      with:
+        fileName: ${{ steps.artifact.outputs.basename }}-release-key.jks
+        encodedString: ${{ env.KEYSTORE_BASE64 }}
+
+    - name: '🔐 Create key.properties'
+      shell: bash
+      env:
+        KEYSTORE_PATH: ${{ steps.android_keystore.outputs.filePath }}
+        KEYSTORE_PASSWORD: ${{ env.KEYSTORE_PASSWORD }}
+        KEY_ALIAS: ${{ env.KEY_ALIAS }}
+        KEY_PASSWORD: ${{ env.KEY_PASSWORD }}
+      run: |
+        set -euo pipefail
+        echo "storeFile=$KEYSTORE_PATH" > android/key.properties
+        echo "storePassword=$KEYSTORE_PASSWORD" >> android/key.properties
+        echo "keyPassword=$KEY_PASSWORD" >> android/key.properties
+        echo "keyAlias=$KEY_ALIAS" >> android/key.properties
+
+    - name: '🏗️ Build APK'
+      shell: bash
+      run: flutter build apk --split-per-abi --no-tree-shake-icons
+
+    - name: '🏗️ Build App Bundle'
+      shell: bash
+      run: |
+        set -euo pipefail
+        export GRADLE_OPTS="-Dorg.gradle.daemon=true -Dorg.gradle.parallel=true -Dorg.gradle.jvmargs=-Xmx4g"
+        flutter build appbundle --no-tree-shake-icons
+
+    - name: '🔐 Verify build'
+      shell: bash
+      run: |
+        set -euo pipefail
+        echo "🔍 Verifying app bundle signature..."
+        if [ ! -f "build/app/outputs/bundle/release/app-release.aab" ]; then
+          echo "❌ App bundle not found!"
+          exit 1
+        fi
+        jarsigner -verify -verbose -certs build/app/outputs/bundle/release/app-release.aab
+        echo "📱 App bundle size: $(du -h build/app/outputs/bundle/release/app-release.aab | cut -f1)"
+        echo "🔐 Build verification completed successfully!"
+
+    - name: '📌 Release file label from tag'
+      id: label
+      shell: bash
+      env:
+        TAG: ${{ inputs.tag }}
+      run: |
+        set -euo pipefail
+        L="${TAG#v}"
+        echo "file_label=${L}" >> "$GITHUB_OUTPUT"
+        echo "file_label=${L}"
+
+    - name: '🏷️ Rename artifacts for release'
+      shell: bash
+      env:
+        V: ${{ steps.label.outputs.file_label }}
+        BASE: ${{ steps.artifact.outputs.basename }}
+      run: |
+        set -euo pipefail
+        mv build/app/outputs/flutter-apk/app-arm64-v8a-release.apk "${BASE}-${V}-arm64-v8a.apk"
+        mv build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk "${BASE}-${V}-armeabi-v7a.apk"
+        mv build/app/outputs/flutter-apk/app-x86_64-release.apk "${BASE}-${V}-x86_64.apk"
+        mv build/app/outputs/bundle/release/app-release.aab "${BASE}-${V}.aab"
+        echo "✅ Renamed to ${BASE}-${V}.*"
+
+    - name: '📝 Generate release body from template'
+      id: generate_release_body
+      shell: bash
+      env:
+        TAG: ${{ inputs.tag }}
+        V: ${{ steps.label.outputs.file_label }}
+        TEMPLATE: ${{ inputs.release_body_template }}
+        JAVA_VERSION: ${{ inputs.java_version }}
+        JAVA_DISTRIBUTION: ${{ inputs.java_distribution }}
+      run: |
+        set -euo pipefail
+        awk -v github_repository="${{ github.repository }}" \
+            -v github_run_id="${{ github.run_id }}" \
+            -v github_run_number="${{ github.run_number }}" \
+            -v repository_tag_name="${TAG}" \
+            -v proj_name="$(echo "${{ github.repository }}" | sed 's/.*\///' | sed 's/-/ /g' | sed 's/\b\w/\U&/g')" \
+            -v build_version="${V}" \
+            -v asset_basename="$RELEASE_ARTIFACT_BASENAME" \
+            -v flutter_version="$(curl -s https://storage.googleapis.com/flutter_infra_release/releases/releases_linux.json | jq -r '.releases[] | select(.channel=="stable") | .version' | head -1)" \
+            -v java_version="${JAVA_VERSION}" \
+            -v java_distribution="${JAVA_DISTRIBUTION}" \
+            '{gsub(/{{ GITHUB_REPOSITORY }}/, github_repository);
+              gsub(/{{ GITHUB_RUN_ID }}/, github_run_id);
+              gsub(/{{ GITHUB_RUN_NUMBER }}/, github_run_number);
+              gsub(/{{ REPOSITORY_TAG_NAME }}/, repository_tag_name);
+              gsub(/{{ PROJECT_NAME }}/, proj_name);
+              gsub(/{{ APP_BUILD_VERSION }}/, build_version);
+              gsub(/{{ RELEASE_ASSET_BASENAME }}/, asset_basename);
+              gsub(/{{ REPOSITORY_COMMITS }}/, "");
+              gsub(/{{ FLUTTER_VERSION }}/, flutter_version);
+              gsub(/{{ JAVA_VERSION }}/, java_version);
+              gsub(/{{ JAVA_DISTRIBUTION }}/, java_distribution);
+              print}' "$TEMPLATE" > RELEASE_NOTE.md
+
+        if grep -q "{{ REPOSITORY_COMMITS }}" "$TEMPLATE"; then
+          echo "📝 Template contains {{ REPOSITORY_COMMITS }} placeholder - appending commits since previous tag"
+          PREV=$(git describe --tags --abbrev=0 "${TAG}^" 2>/dev/null || echo "")
+          if [ -n "$PREV" ]; then
+            git log --oneline --no-merges "${PREV}..$(git rev-parse "${TAG}")" | sed 's/^/- /' >> RELEASE_NOTE.md
+          fi
+        fi
+        echo "✅ Release body generated from template"
+
+    - name: '🚫 Block duplicate GitHub Release'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        TAG: ${{ inputs.tag }}
+      run: |
+        set -euo pipefail
+        if gh release view "$TAG" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+          echo "::error::A GitHub release already exists for tag ${TAG}."
+          exit 1
+        fi
+
+    - name: '🚀 Create GitHub Release'
+      uses: softprops/action-gh-release@v3
+      with:
+        tag_name: ${{ inputs.tag }}
+        name: ${{ inputs.release_title_prefix }}${{ inputs.tag }}
+        body_path: RELEASE_NOTE.md
+        files: |
+          ${{ steps.artifact.outputs.basename }}-${{ steps.label.outputs.file_label }}-arm64-v8a.apk
+          ${{ steps.artifact.outputs.basename }}-${{ steps.label.outputs.file_label }}-armeabi-v7a.apk
+          ${{ steps.artifact.outputs.basename }}-${{ steps.label.outputs.file_label }}-x86_64.apk
+          ${{ steps.artifact.outputs.basename }}-${{ steps.label.outputs.file_label }}.aab
+        draft: false
+        prerelease: false
