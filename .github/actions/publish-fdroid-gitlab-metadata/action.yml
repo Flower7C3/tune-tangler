@@ -1,16 +1,13 @@
 name: 'Publish F-Droid metadata to GitLab fork'
 description: >-
   Resolve release ref, overlay the publish script from the default branch, install Python/PyYAML,
-  resolve Flutter version, and run publish_fdroid_gitlab_branch.py. Repository-specific defaults
+  and run publish_fdroid_gitlab_branch.py (Flutter version from .metadata on the release tree).
+  Repository-specific defaults
   live in this action; the Python script stays free of app or project names.
 
 inputs:
   target_ref:
     description: 'Tag or branch to publish from; empty = latest tag on the repository default branch'
-    required: false
-    default: ''
-  flutter_version:
-    description: 'Flutter version for the F-Droid recipe; empty = latest stable from Google releases JSON'
     required: false
     default: ''
   publish_script_path:
@@ -131,20 +128,6 @@ runs:
     - name: '📦 PyYAML'
       shell: bash
       run: pip install pyyaml
-
-    - name: '📌 Flutter version for metadata recipe'
-      shell: bash
-      env:
-        PINNED_FLUTTER: ${{ inputs.flutter_version }}
-      run: |
-        set -euo pipefail
-        V="${PINNED_FLUTTER:-}"
-        if [ -z "${V:-}" ]; then
-          V=$(curl -fsSL "https://storage.googleapis.com/flutter_infra_release/releases/releases_linux.json" \
-            | jq -r '.releases[] | select(.channel=="stable") | .version' | head -1)
-        fi
-        echo "FDROID_FLUTTER_VERSION=$V" >> "$GITHUB_ENV"
-        echo "Using Flutter $V in F-Droid build recipe" >> "$GITHUB_STEP_SUMMARY"
 
     - name: '🔐 Validate GitLab configuration'
       shell: bash

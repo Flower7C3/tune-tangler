@@ -1,24 +1,25 @@
 # One Build entry — __*__ placeholders replaced by publish_fdroid_gitlab_branch.py
-# Key order matches fdroid rewritemeta / fdroid lint expectations.
+# Aligned with fdroiddata templates/build-flutter.yml (srclib, not tarball init).
 versionName: __VERSION_NAME__
 versionCode: __VERSION_CODE__
 commit: __COMMIT_SHA__
-sudo:
-  - apt-get update || apt-get update
-  - apt-get install -y openjdk-21-jdk-headless curl ca-certificates xz-utils
-init:
-  - export FLUTTER_VERSION=__FLUTTER_VERSION__
-  - curl -fsSL -o /tmp/flutter-sdk.tar.xz 
-    "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz"
-  - tar -C "$HOME" -xf /tmp/flutter-sdk.tar.xz
-  - export PATH="$HOME/flutter/bin:$PATH"
-  - flutter config --no-analytics
-  - flutter precache --android
-  - flutter --version
 output: build/app/outputs/flutter-apk/app-release.apk
+srclibs:
+  - flutter@__FLUTTER_VERSION__
+rm:
+  - ios
+  - linux
+  - macos
+  - web
+  - windows
 prebuild:
-  - export PATH="$HOME/flutter/bin:$PATH"
-  - flutter pub get
+  - echo "flutter.sdk=$$flutter$$" >> android/local.properties
+  - export PUB_CACHE=$(pwd)/.pub-cache
+  - $$flutter$$/bin/flutter config --no-analytics
+  - $$flutter$$/bin/flutter precache --android
+  - $$flutter$$/bin/flutter pub get
+scandelete:
+  - .pub-cache
 build:
-  - export PATH="$HOME/flutter/bin:$PATH"
-  - flutter build apk --release
+  - export PUB_CACHE=$(pwd)/.pub-cache
+  - $$flutter$$/bin/flutter build apk --release

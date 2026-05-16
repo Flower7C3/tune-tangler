@@ -18,8 +18,9 @@ Optional:
   GITLAB_API_URL               — default https://gitlab.com/api/v4
   GITHUB_SHA                   — full 40-char app commit for Builds[].commit
   GITHUB_REF_NAME              — tag or branch (for version inference)
-  FDROID_FLUTTER_VERSION       — Flutter SDK version for the build recipe (e.g. 3.29.0)
   GITHUB_WORKSPACE             — repo root (CI sets automatically)
+
+Flutter SDK version for srclibs is read from `.metadata` at the release commit (version.revision → release tag).
   VERSION_OVERRIDE             — optional MAJOR.MINOR.PATCH[+CODE]
   FDROID_GITLAB_COMPARE_BASE_REF — left-hand side of GitLab compare URL (default: same as FDROID_GITLAB_FORK_PARENT_REF)
   FDROID_FASTLANE_METADATA_REL_PATH — default fastlane/metadata/android/en-US
@@ -95,10 +96,15 @@ _BUILD_KEY_ORDER = (
     "versionCode",
     "commit",
     "subdir",
+    "submodules",
+    "output",
+    "srclibs",
+    "rm",
     "sudo",
     "init",
-    "output",
     "prebuild",
+    "scanignore",
+    "scandelete",
     "build",
 )
 
@@ -252,16 +258,6 @@ def _postprocess_rewritemeta_yaml(text: str) -> str:
     body = "\n".join(_insert_rewritemeta_blank_lines(lines)) + "\n"
     body = re.sub(r"(?m)^AutoUpdateMode: ['\"]None['\"]\s*$", "AutoUpdateMode: None", body)
     body = re.sub(r"(?m)^UpdateCheckMode: ['\"]None['\"]\s*$", "UpdateCheckMode: None", body)
-    # Long init lines: rewritemeta wraps curl+URL; PyYAML keeps them on one line (width=120).
-    body = re.sub(
-        r'^      - curl -fsSL -o /tmp/flutter-sdk\.tar\.xz "'
-        r"(https://storage\.googleapis\.com/flutter_infra_release/releases/stable/linux/"
-        r'flutter_linux_\$\{FLUTTER_VERSION\}-stable\.tar\.xz)"$',
-        "      - curl -fsSL -o /tmp/flutter-sdk.tar.xz \n"
-        r'        "\1"',
-        body,
-        flags=re.MULTILINE,
-    )
     # Blank line after last build: command before MaintainerNotes (rewritemeta style).
     body = re.sub(
         r"^(      - flutter build apk --release)\n(MaintainerNotes:)",
@@ -422,12 +418,86 @@ def _dedupe_builds_keep_last(builds: list[Any]) -> list[Any]:
     return [by_vc[vc] for vc in order]
 
 
+_FLUTTER_RELEASES_URL_DEFAULT = (
+    "https://storage.googleapis.com/flutter_infra_release/releases/releases_linux.json"
+)
+
+
 def _read_pubspec_version(root: Path) -> str:
     pub = root / "pubspec.yaml"
     for line in pub.read_text(encoding="utf-8").splitlines():
         if line.strip().startswith("version:"):
             return line.split(":", 1)[1].strip().strip('"').strip("'")
     raise SystemExit("Could not find version: in pubspec.yaml")
+
+
+def _read_flutter_metadata_revision(root: Path) -> tuple[str, str]:
+    """Return (git revision, channel) from Flutter's `.metadata` at the release tree."""
+    meta_path = root / ".metadata"
+    if not meta_path.is_file():
+        raise SystemExit(
+            "Missing .metadata at repo root. Run `flutter pub get` (or upgrade) with the target "
+            "Flutter SDK, then commit .metadata before publishing F-Droid metadata."
+        )
+    try:
+        doc = yaml.safe_load(meta_path.read_text(encoding="utf-8"))
+    except yaml.YAMLError as e:
+        raise SystemExit(f"Invalid .metadata: {e}") from e
+    if not isinstance(doc, dict):
+        raise SystemExit(".metadata must be a YAML mapping")
+    version = doc.get("version")
+    if not isinstance(version, dict):
+        raise SystemExit(".metadata is missing version.revision (run flutter pub get and commit .metadata)")
+    revision = version.get("revision")
+    if not isinstance(revision, str) or not re.match(r"^[0-9a-f]{40}$", revision.lower()):
+        raise SystemExit(f".metadata version.revision must be a 40-char git hash, got {revision!r}")
+    channel = version.get("channel", "stable")
+    if not isinstance(channel, str) or not channel.strip():
+        channel = "stable"
+    return revision.lower(), channel.strip()
+
+
+def _fetch_flutter_releases_index(url: str) -> list[dict[str, Any]]:
+    req = urllib.request.Request(url, headers={"User-Agent": "tune-tangler-fdroid-publish/1"})
+    try:
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+    except (urllib.error.URLError, json.JSONDecodeError) as e:
+        raise SystemExit(f"Could not fetch Flutter releases index from {url!r}: {e}") from e
+    releases = data.get("releases") if isinstance(data, dict) else None
+    if not isinstance(releases, list):
+        raise SystemExit(f"Unexpected Flutter releases JSON at {url!r} (no releases list)")
+    out: list[dict[str, Any]] = [r for r in releases if isinstance(r, dict)]
+    return out
+
+
+def _flutter_version_for_revision(revision: str, channel: str, releases: list[dict[str, Any]]) -> str:
+    """Map `.metadata` revision to an F-Droid srclib version tag (e.g. 3.27.2)."""
+    rev = revision.lower()
+    by_hash = [r for r in releases if str(r.get("hash", "")).lower() == rev]
+    if not by_hash:
+        raise SystemExit(
+            f"Flutter revision {revision} from .metadata was not found in the releases index. "
+            "Upgrade Flutter, run `flutter pub get`, commit .metadata, and retry."
+        )
+    for r in by_hash:
+        if r.get("channel") == channel and r.get("version"):
+            return str(r["version"])
+    for r in by_hash:
+        if r.get("version"):
+            return str(r["version"])
+    raise SystemExit(f"No Flutter release version for revision {revision} in the releases index.")
+
+
+def _resolve_flutter_version(root: Path) -> str:
+    revision, channel = _read_flutter_metadata_revision(root)
+    releases = _fetch_flutter_releases_index(_FLUTTER_RELEASES_URL_DEFAULT)
+    version = _flutter_version_for_revision(revision, channel, releases)
+    print(
+        f"Flutter srclib version {version} (revision {revision[:12]}…, channel {channel}) from .metadata",
+        flush=True,
+    )
+    return version
 
 
 def _parse_version(spec: str) -> tuple[str, int]:
@@ -534,11 +604,7 @@ def main() -> None:
 
     commit_sha = _env("GITHUB_SHA")
     ref_name = os.environ.get("GITHUB_REF_NAME", "")
-    flutter_ver = os.environ.get("FDROID_FLUTTER_VERSION", "").strip()
-    if not flutter_ver:
-        raise SystemExit(
-            "FDROID_FLUTTER_VERSION must be set (e.g. 3.29.0 matching the Flutter stable archive name)."
-        )
+    flutter_ver = _resolve_flutter_version(root)
 
     version_override = os.environ.get("VERSION_OVERRIDE", "").strip()
 
