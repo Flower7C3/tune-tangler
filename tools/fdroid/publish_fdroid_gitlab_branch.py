@@ -364,25 +364,40 @@ def _branch_exists(api_base: str, token: str, project_id: int, branch: str) -> b
         raise SystemExit(f"GitLab HTTP {e.code} GET {url}: {raw}") from e
 
 
-def _fork_project_tree_url(api_base: str, token: str, fork_id: int, branch: str) -> str:
+def _fork_project_web_url(api_base: str, token: str, fork_id: int) -> str:
     _, data = _gitlab_request("GET", api_base, token, f"projects/{fork_id}")
     assert isinstance(data, dict)
     web = str(data.get("web_url", "")).rstrip("/")
     if not web:
         pwn = str(data["path_with_namespace"])
         web = f"https://gitlab.com/{pwn}"
-    enc_br = urllib.parse.quote(branch, safe="")
-    return f"{web}/-/tree/{enc_br}"
+    return web
 
 
-def _fork_compare_url(tree_url: str, branch: str, fork_id: int, base_ref: str) -> str:
+def _encode_git_branch(branch: str) -> str:
+    b = branch.strip()
+    if not b:
+        raise SystemExit("FDROID_GITLAB_BRANCH must be non-empty for GitLab URLs")
+    return urllib.parse.quote(b, safe="")
+
+
+def _fork_branch_tree_url(web: str, branch: str) -> str:
+    """GitLab file tree for FDROID_GITLAB_BRANCH (not the fork default branch)."""
+    enc = _encode_git_branch(branch)
+    return f"{web}/-/tree/{enc}?ref_type=heads"
+
+
+def _fork_branch_pipelines_url(web: str, branch: str) -> str:
+    """GitLab pipelines list filtered to FDROID_GITLAB_BRANCH."""
+    enc = _encode_git_branch(branch)
+    return f"{web}/-/pipelines?ref={enc}"
+
+
+def _fork_compare_url(web: str, branch: str, fork_id: int, base_ref: str) -> str:
     """GitLab UI: compare a base ref on fdroiddata to the fork automation branch."""
-    if "/-/tree/" not in tree_url:
-        raise SystemExit(f"Unexpected tree URL (no /-/tree/): {tree_url!r}")
-    web_base = tree_url.split("/-/tree/", 1)[0]
-    enc_br = urllib.parse.quote(branch, safe="")
-    enc_base = urllib.parse.quote(base_ref, safe="")
-    return f"{web_base}/-/compare/{enc_base}...{enc_br}?from_project_id={fork_id}"
+    enc_br = _encode_git_branch(branch)
+    enc_base = urllib.parse.quote(base_ref.strip(), safe="")
+    return f"{web}/-/compare/{enc_base}...{enc_br}?from_project_id={fork_id}"
 
 
 def _write_github_output(name: str, value: str) -> None:
@@ -701,13 +716,16 @@ def main() -> None:
         _repository_commit_with_retry(api_base, token, fork_id, commit_payload)
         print(f"Pushed metadata commit to branch {branch}.", flush=True)
 
-    tree_url = _fork_project_tree_url(api_base, token, fork_id, branch)
+    web = _fork_project_web_url(api_base, token, fork_id)
+    tree_url = _fork_branch_tree_url(web, branch)
+    pipelines_url = _fork_branch_pipelines_url(web, branch)
     compare_raw = (os.environ.get("FDROID_GITLAB_COMPARE_BASE_REF") or "").strip()
     compare_base = compare_raw or fork_parent_ref
-    compare_url = _fork_compare_url(tree_url, branch, fork_id, compare_base)
-    print(f"::notice::GitLab fork branch (pipelines): {tree_url}", flush=True)
+    compare_url = _fork_compare_url(web, branch, fork_id, compare_base)
+    print(f"::notice::GitLab fork branch `{branch}` (pipelines): {pipelines_url}", flush=True)
     print(f"::notice::GitLab compare vs {compare_base}: {compare_url}", flush=True)
-    _write_github_output("gitlab_tree_url", tree_url)
+    # Workflow output name kept for compatibility; link targets pipelines on FDROID_GITLAB_BRANCH.
+    _write_github_output("gitlab_tree_url", pipelines_url)
     _write_github_output("gitlab_branch", branch)
     _write_github_output("gitlab_compare_url", compare_url)
 
@@ -715,8 +733,9 @@ def main() -> None:
     if summary:
         with open(summary, "a", encoding="utf-8") as sf:
             sf.write("\n## fdroiddata fork branch\n\n")
-            sf.write(f"- **branch:** `{branch}`\n")
-            sf.write(f"- **tree (watch CI):** [{tree_url}]({tree_url})\n")
+            sf.write(f"- **branch (`FDROID_GITLAB_BRANCH`):** `{branch}`\n")
+            sf.write(f"- **pipelines (watch CI):** [{pipelines_url}]({pipelines_url})\n")
+            sf.write(f"- **tree:** [{tree_url}]({tree_url})\n")
             sf.write(f"- **compare vs `{compare_base}`:** [{compare_url}]({compare_url})\n")
             sf.write(
                 f"\nCreate a merge request to [`fdroid/fdroiddata`]({upstream_mr_web}) "

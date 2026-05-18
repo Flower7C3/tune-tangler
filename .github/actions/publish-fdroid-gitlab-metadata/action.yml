@@ -49,7 +49,7 @@ outputs:
     description: 'Full commit SHA passed to the publish script'
     value: ${{ steps.meta.outputs.commit_sha }}
   gitlab_tree_url:
-    description: 'GitLab fork tree URL for the pushed branch'
+    description: 'GitLab pipelines URL for FDROID_GITLAB_BRANCH on the fork (watch CI)'
     value: ${{ steps.publish.outputs.gitlab_tree_url }}
   gitlab_branch:
     description: 'Git branch name on the fork'

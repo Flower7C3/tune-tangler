@@ -74,7 +74,7 @@ Exact workflow titles in GitHub come from each file’s top-level `name:`. **[Re
 - **In Actions (approx.):** **F-Droid fork branch (fdroiddata)**
 - **When:** Manual only
 - **Manual / inputs:** **`target_ref`** (optional — tag or branch; leave empty for **latest tag** on the default branch)
-- **Output:** Pushes fdroiddata metadata YAML (path from composite / repo variables, default **`metadata/pro.kwiatek.tune_tangler.yml`**) to a **fixed-name fork branch** (default **`robot/tune-tangler`**). Job outputs **`gitlab_tree_url`**, **`gitlab_branch`**, **`gitlab_compare_url`**; step summary lists the same links. The workflow does not open a merge request — you open one in GitLab after CI is green.
+- **Output:** Pushes fdroiddata metadata YAML (path from composite / repo variables, default **`metadata/pro.kwiatek.tune_tangler.yml`**) to a **fixed-name fork branch** (default **`robot/tune-tangler`**). Job outputs **`gitlab_tree_url`** (pipelines for **`FDROID_GITLAB_BRANCH`**), **`gitlab_branch`**, **`gitlab_compare_url`**; step summary also lists the branch tree link. The workflow does not open a merge request — you open one in GitLab after CI is green.
 - **Checkout / jobs:** **[`publish-fdroid-gitlab-metadata`](../../.github/actions/publish-fdroid-gitlab-metadata/action.yml)** composite: default branch → resolve **`target_ref`** + SHA → checkout release tree → overlay **`publish_fdroid_gitlab_branch.py`** from default branch → Python + **`publish_fdroid_gitlab_branch.py`**. Secrets / variables: [below](#secrets-and-variables) and [FDROID.md](../release/FDROID.md)
 
 #### 🚀 Release on GitHub (APK/AAB files) — [`release-apk-aab-google-play.yml`](../../.github/workflows/release-apk-aab-google-play.yml) <a name="release-apk-aab-google-play"></a>
@@ -93,7 +93,7 @@ Exact workflow titles in GitHub come from each file’s top-level `name:`. **[Re
 |------|---------|
 | **CI on a PR to `main`** | Open/update the PR; [`test.yml`](../../.github/workflows/test.yml) runs ([`paths-ignore`](#shared-paths-ignore) still applies to changed files). |
 | **Version bump + tag after merge** | Push/merge to `main`; [`version-tag-main.yml`](../../.github/workflows/version-tag-main.yml) runs when paths are not all ignored ([workflow summaries](#workflow-reference)). |
-| **F-Droid fork branch** | **Actions** → **F-Droid fork branch (fdroiddata)** → optional **`target_ref`** (empty = latest tag). Use the **tree** and **compare** links in the summary (baseline ref from **`FDROID_GITLAB_COMPARE_BASE_REF`** / **`FDROID_GITLAB_FORK_PARENT_REF`**); open a merge request to upstream manually when CI is green. |
+| **F-Droid fork branch** | **Actions** → **F-Droid fork branch (fdroiddata)** → optional **`target_ref`** (empty = latest tag). Use the **pipelines** (watch CI on **`FDROID_GITLAB_BRANCH`**) and **compare** links in the summary (baseline ref from **`FDROID_GITLAB_COMPARE_BASE_REF`** / **`FDROID_GITLAB_FORK_PARENT_REF`**); open a merge request to upstream manually when CI is green. |
 | **GitHub Release (APK / AAB)** | **Actions** → **Release on GitHub (APK/AAB files)** → **Run workflow** → set **`tag`**; optional **`release_artifact_basename`** or repo variable **`RELEASE_ARTIFACT_BASENAME`** for artifact filenames (default: GitHub **repository name**). Configure keystore secrets ([Keystore](#keystore-configuration)). |
 | **Ad-hoc / manual test run** | **Actions** → pick a workflow that exposes **Run workflow** → run (e.g. [`test.yml`](../../.github/workflows/test.yml)). |
 
