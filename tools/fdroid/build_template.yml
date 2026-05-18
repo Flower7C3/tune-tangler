@@ -1,17 +1,20 @@
-# One Build entry — __*__ placeholders replaced by publish_fdroid_gitlab_branch.py
-# Aligned with fdroiddata templates/build-flutter.yml (srclib, not tarball init).
+# One ABI Build entry — placeholders replaced by publish_fdroid_gitlab_branch.py
+# Aligned with fdroiddata templates/build-flutter.yml (srclib + pubspec flutter_sdk_version checkout).
 versionName: __VERSION_NAME__
 versionCode: __VERSION_CODE__
 commit: __COMMIT_SHA__
-output: build/app/outputs/flutter-apk/app-release.apk
+output: build/app/outputs/flutter-apk/app-__ABI_APK_SUFFIX__-release.apk
 srclibs:
-  - flutter@__FLUTTER_VERSION__
+  - flutter@stable
 rm:
   - ios
   - linux
   - macos
   - windows
 prebuild:
+  - flutterVersion=$(sed -n -E 's/^flutter_sdk_version:\s*([0-9.]+)/\1/p' pubspec.yaml)
+  - '[[ $flutterVersion ]] || exit 1'
+  - git -C $$flutter$$ checkout -f $flutterVersion
   - echo "flutter.sdk=$$flutter$$" >> android/local.properties
   - export PUB_CACHE=$(pwd)/.pub-cache
   - $$flutter$$/bin/flutter config --no-analytics
@@ -21,4 +24,4 @@ scandelete:
   - .pub-cache
 build:
   - export PUB_CACHE=$(pwd)/.pub-cache
-  - $$flutter$$/bin/flutter build apk --release
+  - $$flutter$$/bin/flutter build apk --release --split-per-abi --target-platform="__TARGET_PLATFORM__"

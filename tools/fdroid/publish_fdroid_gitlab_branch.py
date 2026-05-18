@@ -19,7 +19,8 @@ Optional:
   GITHUB_REF_NAME              — tag or branch (for version inference)
   GITHUB_WORKSPACE             — repo root (CI sets automatically)
 
-Flutter SDK version for srclibs is read from `.metadata` at the release commit (version.revision → release tag).
+Flutter SDK is pinned in `pubspec.yaml` (`flutter_sdk_version`) and checked out in prebuild; the publish
+  script verifies it matches `.metadata` at the release commit.
   VERSION_OVERRIDE             — optional MAJOR.MINOR.PATCH[+CODE]
   FDROID_GITLAB_COMPARE_BASE_REF — left-hand side of GitLab compare URL (default: same as FDROID_GITLAB_FORK_PARENT_REF)
   FDROID_FASTLANE_METADATA_REL_PATH — default fastlane/metadata/android/en-US
@@ -28,7 +29,7 @@ Flutter SDK version for srclibs is read from `.metadata` at the release commit (
 
 Under GITHUB_WORKSPACE, templates live under FDROID_TOOLING_REL_PATH:
   metadata_static.yml  — fdroiddata bootstrap when fork file is missing
-  build_template.yml   — one Build entry with __PLACEHOLDERS__
+  build_template.yml   — per-ABI Build template with __PLACEHOLDERS__ (three entries per release)
 """
 
 from __future__ import annotations
@@ -89,6 +90,15 @@ def _repo_relative_path(root: Path, rel: str) -> Path:
         raise SystemExit(f"Resolved path escapes repo root: {rel!r}") from e
     return p
 
+
+# (apk suffix in output filename, flutter --target-platform, VercodeOperation slot 1..3)
+_FROID_ABI_TARGETS = (
+    ("armeabi-v7a", "android-arm", 1),
+    ("arm64-v8a", "android-arm64", 2),
+    ("x86_64", "android-x64", 3),
+)
+_FROID_VERCODE_OPERATIONS = ("%c * 10 + 1", "%c * 10 + 2", "%c * 10 + 3")
+_FROID_UPDATE_CHECK_DATA = "pubspec.yaml|version:\\s.+\\+(\\d+)|.|version:\\s(.+)\\+"
 
 _BUILD_KEY_ORDER = (
     "versionName",
@@ -238,15 +248,31 @@ def _normalize_maintainer_notes(doc: dict[str, Any], body: str) -> None:
     doc["MaintainerNotes"] = _MaintainerNotesLiteral(body)
 
 
+def _normalize_auto_update_mode(doc: dict[str, Any]) -> None:
+    am = doc.get("AutoUpdateMode")
+    if am is None or (isinstance(am, str) and am.strip() in ("", "None")):
+        doc["AutoUpdateMode"] = "Version"
+
+
 def _normalize_update_check_mode(doc: dict[str, Any]) -> None:
-    """Store modes as strings; _postprocess_rewritemeta_yaml emits plain `None` like rewritemeta."""
     um = doc.get("UpdateCheckMode")
-    if um is None or (isinstance(um, str) and um.strip() == "None"):
-        doc["UpdateCheckMode"] = "None"
+    if um is None or (isinstance(um, str) and um.strip() in ("", "None")):
+        doc["UpdateCheckMode"] = "Tags"
+    elif um == "Tags":
+        doc["UpdateCheckMode"] = "Tags"
     elif isinstance(um, str):
         doc["UpdateCheckMode"] = _QuotedScalar(um)
     else:
         doc["UpdateCheckMode"] = _QuotedScalar(str(um))
+
+
+def _normalize_vercode_and_update_check(doc: dict[str, Any]) -> None:
+    doc["VercodeOperation"] = list(_FROID_VERCODE_OPERATIONS)
+    doc["UpdateCheckData"] = _FROID_UPDATE_CHECK_DATA
+
+
+def _vercode_slots(base: int) -> frozenset[int]:
+    return frozenset(base * 10 + slot for _, _, slot in _FROID_ABI_TARGETS)
 
 
 def _canonical_github_repo_url(repo: str) -> str:
@@ -269,14 +295,16 @@ def _normalize_metadata(
     """Match fdroiddata schemas/metadata.json, fdroid lint, and `fdroid rewritemeta` output."""
     _fix_categories(doc)
     _coerce_archive_policy(doc)
-    doc["AutoUpdateMode"] = "None"
+    _normalize_auto_update_mode(doc)
     _normalize_update_check_mode(doc)
+    _normalize_vercode_and_update_check(doc)
     _normalize_maintainer_notes(doc, maintainer_notes_body)
     r = doc.get("Repo")
     if isinstance(r, str) and r.strip():
         doc["Repo"] = _canonical_github_repo_url(r)
     doc["CurrentVersion"] = version_name
-    doc["CurrentVersionCode"] = int(version_code)
+    # Highest per-ABI versionCode (pubspec build * 10 + 3).
+    doc["CurrentVersionCode"] = int(version_code) * 10 + 3
     builds = doc.get("Builds")
     if isinstance(builds, list):
         for i, b in enumerate(builds):
@@ -653,26 +681,54 @@ def _parse_version(spec: str) -> tuple[str, int]:
     return name, code
 
 
-def _substitute_build_template(
+def _read_pubspec_flutter_sdk_version(root: Path) -> str:
+    pub = root / "pubspec.yaml"
+    for line in pub.read_text(encoding="utf-8").splitlines():
+        m = re.match(r"^flutter_sdk_version:\s*([0-9.]+)\s*$", line.strip())
+        if m:
+            return m.group(1)
+    raise SystemExit(
+        "Missing flutter_sdk_version in pubspec.yaml (F-Droid prebuild checkout pin; see templates/build-flutter.yml)"
+    )
+
+
+def _assert_flutter_sdk_pin_matches_metadata(root: Path) -> None:
+    pinned = _read_pubspec_flutter_sdk_version(root)
+    from_metadata = _resolve_flutter_version(root)
+    if pinned != from_metadata:
+        raise SystemExit(
+            f"pubspec flutter_sdk_version ({pinned}) must match .metadata ({from_metadata}). "
+            "Run `make sdk-upgrade` and commit pubspec.yaml + .metadata."
+        )
+
+
+def _substitute_abi_builds(
     template_text: str,
     *,
     version_name: str,
-    version_code: int,
+    base_version_code: int,
     commit_sha: str,
-    flutter_ver: str,
-) -> dict[str, Any]:
-    text = template_text
-    text = text.replace("__VERSION_NAME__", version_name)
-    text = text.replace("__VERSION_CODE__", str(version_code))
-    text = text.replace("__COMMIT_SHA__", commit_sha)
-    text = text.replace("__FLUTTER_VERSION__", flutter_ver)
-    loaded = yaml.safe_load(text)
-    if not isinstance(loaded, dict):
-        raise SystemExit("build_template.yml must be a single YAML mapping")
-    loaded["versionName"] = version_name
-    loaded["versionCode"] = int(version_code)
-    loaded["commit"] = commit_sha
-    return loaded
+) -> list[dict[str, Any]]:
+    builds: list[dict[str, Any]] = []
+    for abi_suffix, target_platform, abi_slot in _FROID_ABI_TARGETS:
+        text = template_text
+        vercode = base_version_code * 10 + abi_slot
+        for key, val in (
+            ("__VERSION_NAME__", version_name),
+            ("__VERSION_CODE__", str(vercode)),
+            ("__COMMIT_SHA__", commit_sha),
+            ("__ABI_APK_SUFFIX__", abi_suffix),
+            ("__TARGET_PLATFORM__", target_platform),
+        ):
+            text = text.replace(key, val)
+        loaded = yaml.safe_load(text)
+        if not isinstance(loaded, dict):
+            raise SystemExit("build_template.yml must be a single YAML mapping")
+        loaded["versionName"] = version_name
+        loaded["versionCode"] = int(vercode)
+        loaded["commit"] = commit_sha
+        builds.append(_canonical_build(loaded))
+    return builds
 
 
 def _dump_metadata(doc: dict[str, Any]) -> str:
@@ -740,7 +796,7 @@ def main() -> None:
 
     commit_sha = _env("GITHUB_SHA")
     ref_name = os.environ.get("GITHUB_REF_NAME", "")
-    flutter_ver = _resolve_flutter_version(root)
+    _assert_flutter_sdk_pin_matches_metadata(root)
 
     version_override = os.environ.get("VERSION_OVERRIDE", "").strip()
 
@@ -761,13 +817,13 @@ def main() -> None:
     tpl_path = tooling / "build_template.yml"
     static_path = tooling / "metadata_static.yml"
     build_template_text = tpl_path.read_text(encoding="utf-8")
-    new_build = _substitute_build_template(
+    new_builds = _substitute_abi_builds(
         build_template_text,
         version_name=vname,
-        version_code=vcode,
+        base_version_code=vcode,
         commit_sha=commit_sha,
-        flutter_ver=flutter_ver,
     )
+    vercode_slots = _vercode_slots(vcode)
 
     existing_yaml = _get_file(api_base, token, fork_id, metadata_path, ref=fork_parent_ref)
     if existing_yaml is None:
@@ -775,7 +831,7 @@ def main() -> None:
         if not isinstance(static_doc, dict):
             raise SystemExit("metadata_static.yml must be a mapping")
         doc = static_doc
-        doc["Builds"] = [new_build]
+        doc["Builds"] = new_builds
     else:
         doc = yaml.safe_load(existing_yaml)
         if not isinstance(doc, dict):
@@ -783,16 +839,16 @@ def main() -> None:
         builds = doc.get("Builds")
         if not isinstance(builds, list):
             raise SystemExit("Remote metadata has no Builds list")
-        # Always refresh the Build recipe for this versionCode (srclibs, prebuild, …) even when
-        # commit is unchanged — e.g. after .metadata / build_template.yml updates on the same tag.
-        replaced = False
-        for i, b in enumerate(builds):
-            if isinstance(b, dict) and int(b.get("versionCode", -1)) == vcode:
-                builds[i] = new_build
-                replaced = True
-                break
-        if not replaced:
-            builds.append(new_build)
+        # Drop prior per-ABI rows (or legacy universal row) for this pubspec build number.
+        builds = [
+            b
+            for b in builds
+            if not (
+                isinstance(b, dict)
+                and int(b.get("versionCode", -1)) in vercode_slots | {vcode}
+            )
+        ]
+        builds.extend(new_builds)
         doc["Builds"] = builds
 
     if isinstance(doc.get("Builds"), list):

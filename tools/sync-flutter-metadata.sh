@@ -77,4 +77,15 @@ else
   sed -i "s/${OLD}/${NEW}/g" "$META"
 fi
 
+FLUTTER_VERSION="$(flutter --version --machine | python3 -c 'import json,sys; print(json.load(sys.stdin)["frameworkVersion"])')"
+PUBSPEC="$PROJECT_DIR/pubspec.yaml"
+if [[ -f "$PUBSPEC" ]] && grep -q '^flutter_sdk_version:' "$PUBSPEC"; then
+  if [[ "$(uname -s)" == Darwin ]]; then
+    sed -i '' -E "s/^flutter_sdk_version:.*/flutter_sdk_version: ${FLUTTER_VERSION}/" "$PUBSPEC"
+  else
+    sed -i -E "s/^flutter_sdk_version:.*/flutter_sdk_version: ${FLUTTER_VERSION}/" "$PUBSPEC"
+  fi
+  echo "✓ Wrote pubspec.yaml flutter_sdk_version: ${FLUTTER_VERSION}"
+fi
+
 echo "✓ Wrote $META — commit this file with your Flutter SDK upgrade (F-Droid reads version.revision)."
