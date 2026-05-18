@@ -29,7 +29,6 @@ MaintainerNotes: |
   Listings (Summary/Description/screenshots): Fastlane layout in the app repo
   (fastlane/metadata/android/) — do not duplicate those keys in this YAML.
 
-ArchivePolicy: 6
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 VercodeOperation:
