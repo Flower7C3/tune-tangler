@@ -783,21 +783,17 @@ def main() -> None:
         builds = doc.get("Builds")
         if not isinstance(builds, list):
             raise SystemExit("Remote metadata has no Builds list")
-        skip_new_build_merge = False
-        for b in builds:
+        # Always refresh the Build recipe for this versionCode (srclibs, prebuild, …) even when
+        # commit is unchanged — e.g. after .metadata / build_template.yml updates on the same tag.
+        replaced = False
+        for i, b in enumerate(builds):
             if isinstance(b, dict) and int(b.get("versionCode", -1)) == vcode:
-                if str(b.get("commit", "")).lower() == commit_sha.lower():
-                    skip_new_build_merge = True
+                builds[i] = new_build
+                replaced = True
                 break
-
-        if not skip_new_build_merge:
-            builds = [
-                b
-                for b in builds
-                if not (isinstance(b, dict) and int(b.get("versionCode", -1)) == vcode)
-            ]
+        if not replaced:
             builds.append(new_build)
-            doc["Builds"] = builds
+        doc["Builds"] = builds
 
     if isinstance(doc.get("Builds"), list):
         doc["Builds"] = _dedupe_builds_keep_last(doc["Builds"])
