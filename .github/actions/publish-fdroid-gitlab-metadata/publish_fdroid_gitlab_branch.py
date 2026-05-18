@@ -25,11 +25,11 @@ Flutter SDK is pinned in `pubspec.yaml` (`flutter_sdk_version`) and checked out 
   FDROID_GITLAB_COMPARE_BASE_REF — left-hand side of GitLab compare URL (default: same as FDROID_GITLAB_FORK_PARENT_REF)
   FDROID_FASTLANE_METADATA_REL_PATH — default fastlane/metadata/android/en-US
   FDROID_UPSTREAM_MR_WEB_URL   — default https://gitlab.com/fdroid/fdroiddata (step summary MR hint)
-  FDROID_TOOLING_REL_PATH      — default tools/fdroid (build_template.yml, metadata_static.yml)
-
-Under GITHUB_WORKSPACE, templates live under FDROID_TOOLING_REL_PATH:
+Under GITHUB_WORKSPACE, F-Droid YAML templates live in `.github/templates/fdroid/`:
   metadata_static.yml  — fdroiddata bootstrap when fork file is missing
   build_template.yml   — per-ABI Build template with __PLACEHOLDERS__ (three entries per release)
+
+This script lives next to fdroid_yaml_dump.py under .github/actions/publish-fdroid-gitlab-metadata/.
 """
 
 from __future__ import annotations
@@ -397,6 +397,7 @@ def _dedupe_builds_keep_last(builds: list[Any]) -> list[Any]:
 _FLUTTER_RELEASES_URL_DEFAULT = (
     "https://storage.googleapis.com/flutter_infra_release/releases/releases_linux.json"
 )
+_FDROID_TEMPLATES_REL = ".github/templates/fdroid"
 
 
 def _load_metadata_static(static_path: Path) -> dict[str, Any]:
@@ -671,7 +672,6 @@ def main() -> None:
         if not val:
             raise SystemExit(f"{label} must be non-empty")
 
-    tooling_rel = (os.environ.get("FDROID_TOOLING_REL_PATH") or "tools/fdroid").strip() or "tools/fdroid"
     fastlane_rel = (os.environ.get("FDROID_FASTLANE_METADATA_REL_PATH") or "").strip() or (
         "fastlane/metadata/android/en-US"
     )
@@ -698,9 +698,9 @@ def main() -> None:
 
     _assert_fastlane_en_us(root, fastlane_rel)
 
-    tooling = _repo_relative_path(root, tooling_rel)
-    tpl_path = tooling / "build_template.yml"
-    static_path = tooling / "metadata_static.yml"
+    templates = _repo_relative_path(root, _FDROID_TEMPLATES_REL)
+    tpl_path = templates / "build_template.yml"
+    static_path = templates / "metadata_static.yml"
     static_doc = _load_metadata_static(static_path)
     maintainer_body = str(static_doc["MaintainerNotes"])
     build_template_text = tpl_path.read_text(encoding="utf-8")

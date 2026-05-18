@@ -3,7 +3,7 @@ description: >-
   Checkout the given tag, Flutter + Java setup, keystore from env secrets, split APK + app bundle,
   verify AAB, rename artifacts, render release notes from a template, block duplicate releases,
   and upload with softprops/action-gh-release. Project-specific strings are inputs (artifact basename,
-  template path, Java/Flutter channels, release title prefix).
+  Java/Flutter channels, release title prefix). Release notes from `.github/templates/release.md`.
 
 inputs:
   tag:
@@ -32,10 +32,6 @@ inputs:
     description: 'JDK distribution name (passed to setup-java, e.g. zulu)'
     required: false
     default: 'zulu'
-  release_body_template:
-    description: 'Repo-relative path to the Markdown template for the GitHub Release body'
-    required: false
-    default: '.github/templates/release.md'
   release_title_prefix:
     description: 'Prefix before the tag in the GitHub Release title (e.g. "Release ")'
     required: false
@@ -157,11 +153,11 @@ runs:
       env:
         TAG: ${{ inputs.tag }}
         V: ${{ steps.label.outputs.file_label }}
-        TEMPLATE: ${{ inputs.release_body_template }}
         JAVA_VERSION: ${{ inputs.java_version }}
         JAVA_DISTRIBUTION: ${{ inputs.java_distribution }}
       run: |
         set -euo pipefail
+        TEMPLATE='.github/templates/release.md'
         awk -v github_repository="${{ github.repository }}" \
             -v github_run_id="${{ github.run_id }}" \
             -v github_run_number="${{ github.run_number }}" \

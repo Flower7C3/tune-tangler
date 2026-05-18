@@ -1,5 +1,5 @@
 # F-Droid fdroiddata bootstrap (Builds, Repo, License, …).
-# MaintainerNotes: applied on every publish by publish_fdroid_gitlab_branch.py (bootstrap + fork updates).
+# MaintainerNotes: applied on every publish by .github/actions/publish-fdroid-gitlab-metadata/ (bootstrap + fork updates).
 #
 # Do NOT put Summary / Description / Name / AutoName here: those fields in the fdroiddata
 # metadata YAML override Fastlane/Triple-T text from the app repo. Store copy lives under

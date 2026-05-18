@@ -1,4 +1,4 @@
-# One ABI Build entry — placeholders replaced by publish_fdroid_gitlab_branch.py
+# One ABI Build entry — placeholders replaced by .github/actions/publish-fdroid-gitlab-metadata/publish_fdroid_gitlab_branch.py
 # Aligned with fdroiddata templates/build-flutter.yml (srclib + pubspec flutter_sdk_version checkout).
 versionName: __VERSION_NAME__
 versionCode: __VERSION_CODE__

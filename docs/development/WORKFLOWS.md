@@ -75,7 +75,7 @@ Exact workflow titles in GitHub come from each file’s top-level `name:`. **[Re
 - **When:** Manual only
 - **Manual / inputs:** **`target_ref`** (optional — tag or branch; leave empty for **latest tag** on the default branch)
 - **Output:** Pushes fdroiddata metadata YAML (path from composite / repo variables, default **`metadata/pro.kwiatek.tune_tangler.yml`**) to a **fixed-name fork branch** (default **`robot/tune-tangler`**). Job outputs **`gitlab_tree_url`** (pipelines for **`FDROID_GITLAB_BRANCH`**), **`gitlab_branch`**, **`gitlab_compare_url`**; step summary also lists the branch tree link. The workflow does not open a merge request — you open one in GitLab after CI is green.
-- **Checkout / jobs:** **[`publish-fdroid-gitlab-metadata`](../../.github/actions/publish-fdroid-gitlab-metadata/action.yml)** composite: default branch → resolve **`target_ref`** + SHA → checkout release tree → overlay **`publish_fdroid_gitlab_branch.py`** from default branch → Python + **`publish_fdroid_gitlab_branch.py`**. Secrets / variables: [below](#secrets-and-variables) and [FDROID.md](../release/FDROID.md)
+- **Checkout / jobs:** **[`publish-fdroid-gitlab-metadata`](../../.github/actions/publish-fdroid-gitlab-metadata/action.yml)** composite: default branch → resolve **`target_ref`** + SHA → checkout release tree → overlay **`.github/templates/fdroid/`** from default branch → Python + **`publish_fdroid_gitlab_branch.py`** from the action. Secrets / variables: [below](#secrets-and-variables) and [FDROID.md](../release/FDROID.md)
 
 #### 🚀 Release on GitHub (APK/AAB files) — [`release-apk-aab-google-play.yml`](../../.github/workflows/release-apk-aab-google-play.yml) <a name="release-apk-aab-google-play"></a>
 
@@ -143,7 +143,7 @@ The **`release-apk-aab-google-play.yml`** workflow decodes `KEYSTORE_BASE64` and
 | **Secrets** | APK/AAB ([`release-apk-aab-google-play.yml`](../../.github/workflows/release-apk-aab-google-play.yml)) | `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_PASSWORD`, `KEY_ALIAS` |
 | **Variables** | APK/AAB release | Optional **`RELEASE_ARTIFACT_BASENAME`** — prefix for release APK/AAB filenames and the temp decoded keystore file (default: **`github.event.repository.name`**; overridable per run with workflow input **`release_artifact_basename`**) |
 | **Secrets** | F-Droid fork branch | `GITLAB_TOKEN` as **job `env`** from a repository secret ([FDROID.md](../release/FDROID.md) for fork / token pitfalls) |
-| **Variables** | F-Droid fork branch | **`GITLAB_FORK_PROJECT_ID`** (required). Optional: **`FDROID_METADATA_PATH`**, **`FDROID_GITLAB_BRANCH`**, **`FDROID_GIT_COMMIT_SUBJECT_PREFIX`**, **`FDROID_GITLAB_FORK_PARENT_REF`**, **`FDROID_GITLAB_COMPARE_BASE_REF`** — forwarded to **[`publish-fdroid-gitlab-metadata`](../../.github/actions/publish-fdroid-gitlab-metadata/action.yml)**; empty values fall back to that action’s defaults ([FDROID.md](../release/FDROID.md)). Flutter SDK version comes from **`.metadata`** on the release ref; **`tools/fdroid/`** is overlaid from the default branch in CI. |
+| **Variables** | F-Droid fork branch | **`GITLAB_FORK_PROJECT_ID`** (required). Optional: **`FDROID_METADATA_PATH`**, **`FDROID_GITLAB_BRANCH`**, **`FDROID_GIT_COMMIT_SUBJECT_PREFIX`**, **`FDROID_GITLAB_FORK_PARENT_REF`**, **`FDROID_GITLAB_COMPARE_BASE_REF`** — forwarded to **[`publish-fdroid-gitlab-metadata`](../../.github/actions/publish-fdroid-gitlab-metadata/action.yml)**; empty values fall back to that action’s defaults ([FDROID.md](../release/FDROID.md)). Flutter SDK version comes from **`.metadata`** on the release ref; **`.github/templates/fdroid/`** is overlaid from the default branch in CI. |
 
 ## 🚨 Troubleshooting <a name="troubleshooting"></a>
 
@@ -174,4 +174,4 @@ The **`release-apk-aab-google-play.yml`** workflow decodes `KEYSTORE_BASE64` and
 - **[⚡ Quick start](QUICKSTART.md)** — first run
 - **[🔨 Makefile](QUICKSTART.md#makefile)** — commands
 - **[🎣 Git hooks](GIT_HOOKS.md)** — optional `pre-commit`
-- **[📦 F-Droid](../release/FDROID.md)** — fork branch workflow + `tools/fdroid/`
+- **[📦 F-Droid](../release/FDROID.md)** — fork branch workflow + `.github/templates/fdroid/`

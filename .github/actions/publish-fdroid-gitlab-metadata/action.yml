@@ -1,19 +1,14 @@
 name: 'Publish F-Droid metadata to GitLab fork'
 description: >-
-  Resolve release ref, overlay the publish script from the default branch, install PyYAML and
-  ruamel.yaml, and run publish_fdroid_gitlab_branch.py (YAML layout matches fdroid rewritemeta).
-  Repository-specific defaults
-  live in this action; the Python script stays free of app or project names.
+  Resolve release ref, overlay F-Droid YAML templates from the default branch, install PyYAML and
+  ruamel.yaml, and run publish_fdroid_gitlab_branch.py from this action (YAML layout matches fdroid rewritemeta).
+  Repository-specific defaults live in this action; the Python script stays free of app or project names.
 
 inputs:
   target_ref:
     description: 'Tag or branch to publish from; empty = latest tag on the repository default branch'
     required: false
     default: ''
-  publish_script_path:
-    description: 'Path to publish_fdroid_gitlab_branch.py (overlaid from default branch before run)'
-    required: false
-    default: 'tools/fdroid/publish_fdroid_gitlab_branch.py'
   fdroid_metadata_path:
     description: >-
       Path to metadata YAML inside the fdroiddata fork (e.g. metadata/<applicationId>.yml).
@@ -34,10 +29,6 @@ inputs:
     default: ''
   fdroid_gitlab_compare_base_ref:
     description: 'Left-hand side of GitLab compare URL; empty = same as fdroid_gitlab_fork_parent_ref'
-    required: false
-    default: ''
-  fdroid_tooling_rel_path:
-    description: 'Directory under the app repo containing build_template.yml and metadata_static.yml; empty = tools/fdroid'
     required: false
     default: ''
 
@@ -106,19 +97,16 @@ runs:
         # Keep workspace root (.github/actions for composite post-run) on the default branch checkout above.
         path: app
 
-    - name: '📌 Overlay F-Droid tooling from default branch'
+    - name: '📌 Overlay F-Droid templates from default branch'
       shell: bash
-      env:
-        DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-        IN_TOOLING: ${{ inputs.fdroid_tooling_rel_path }}
       run: |
         set -euo pipefail
-        DB="${DEFAULT_BRANCH}"
-        TOOLING="${IN_TOOLING:-tools/fdroid}"
+        DB="${{ github.event.repository.default_branch }}"
+        TEMPLATES='.github/templates/fdroid'
         cd app
         git fetch --depth=1 origin "$DB"
-        git checkout FETCH_HEAD -- "$TOOLING"
-        echo "Using \`app/${TOOLING}/\` from \`origin/${DB}\` (app sources: \`${{ steps.resolve.outputs.resolved_ref }}\`)." >> "$GITHUB_STEP_SUMMARY"
+        git checkout FETCH_HEAD -- "$TEMPLATES"
+        echo "Using \`app/${TEMPLATES}/\` from \`origin/${DB}\` (app sources: \`${{ steps.resolve.outputs.resolved_ref }}\`)." >> "$GITHUB_STEP_SUMMARY"
 
     - name: '🐍 Setup Python'
       uses: actions/setup-python@v6
@@ -153,8 +141,7 @@ runs:
         IN_PREFIX: ${{ inputs.fdroid_git_commit_subject_prefix }}
         IN_FORK_PARENT: ${{ inputs.fdroid_gitlab_fork_parent_ref }}
         IN_COMPARE: ${{ inputs.fdroid_gitlab_compare_base_ref }}
-        IN_TOOLING: ${{ inputs.fdroid_tooling_rel_path }}
-        SCRIPT_REL: ${{ inputs.publish_script_path }}
+        ACTION_DIR: ${{ github.action_path }}
       run: |
         set -euo pipefail
         echo "VERSION_OVERRIDE=" >> "$GITHUB_ENV"
@@ -163,15 +150,13 @@ runs:
         DEF_BRANCH='robot/tune-tangler'
         DEF_PREFIX='Tune Tangler'
         DEF_FORK_PARENT='master'
-        DEF_TOOLING='tools/fdroid'
         export FDROID_METADATA_PATH="${IN_METADATA:-$DEF_METADATA}"
         export FDROID_GITLAB_BRANCH="${IN_BRANCH:-$DEF_BRANCH}"
         export FDROID_GIT_COMMIT_SUBJECT_PREFIX="${IN_PREFIX:-$DEF_PREFIX}"
         export FDROID_GITLAB_FORK_PARENT_REF="${IN_FORK_PARENT:-$DEF_FORK_PARENT}"
-        export FDROID_TOOLING_REL_PATH="${IN_TOOLING:-$DEF_TOOLING}"
         if [ -n "${IN_COMPARE:-}" ]; then
           export FDROID_GITLAB_COMPARE_BASE_REF="$IN_COMPARE"
         fi
         export GITHUB_WORKSPACE="${GITHUB_WORKSPACE}/app"
-        export PYTHONPATH="${GITHUB_WORKSPACE}/app/tools/fdroid${PYTHONPATH:+:$PYTHONPATH}"
-        python3 "$SCRIPT_REL"
+        export PYTHONPATH="${ACTION_DIR}${PYTHONPATH:+:$PYTHONPATH}"
+        python3 "${ACTION_DIR}/publish_fdroid_gitlab_branch.py"

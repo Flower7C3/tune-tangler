@@ -45,5 +45,4 @@ jobs:
           flutter_channel: 'stable'
           java_version: '17'
           java_distribution: 'zulu'
-          release_body_template: '.github/templates/release.md'
           release_title_prefix: 'Release '
