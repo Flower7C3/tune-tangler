@@ -245,7 +245,7 @@ def _fix_categories(doc: dict[str, Any]) -> None:
 
 def _normalize_maintainer_notes(doc: dict[str, Any], body: str) -> None:
     """rewritemeta emits MaintainerNotes as a literal block (|), not folded single quotes."""
-    doc["MaintainerNotes"] = _MaintainerNotesLiteral(body)
+    doc["MaintainerNotes"] = _MaintainerNotesLiteral(body.rstrip("\n"))
 
 
 def _normalize_auto_update_mode(doc: dict[str, Any]) -> None:
@@ -333,6 +333,18 @@ def _insert_rewritemeta_blank_lines(lines: list[str]) -> list[str]:
     return out
 
 
+def _strip_rewritemeta_extra_blanks(body: str) -> str:
+    """PyYAML inserts blank lines rewritemeta rejects (between Builds entries; after MaintainerNotes)."""
+    while re.search(r"\n\n  - versionName:", body):
+        body = re.sub(r"\n\n(  - versionName:)", r"\n\1", body)
+    body = re.sub(
+        r"(MaintainerNotes: \|\n(?:  .*\n)*?)\n\n(?=ArchivePolicy:)",
+        r"\1",
+        body,
+    )
+    return body
+
+
 def _postprocess_rewritemeta_yaml(text: str) -> str:
     """PyYAML differs from `fdroid rewritemeta` on None quoting and section spacing."""
     lines = text.splitlines()
@@ -348,7 +360,7 @@ def _postprocess_rewritemeta_yaml(text: str) -> str:
     )
     # PyYAML uses |+ for trailing newlines in literal blocks; fdroid rewritemeta uses |.
     body = body.replace("MaintainerNotes: |+\n", "MaintainerNotes: |\n")
-    return body
+    return _strip_rewritemeta_extra_blanks(body)
 
 
 def _env(name: str, default: str | None = None) -> str:
@@ -839,7 +851,13 @@ def main() -> None:
         builds = doc.get("Builds")
         if not isinstance(builds, list):
             raise SystemExit("Remote metadata has no Builds list")
-        # Drop prior per-ABI rows (or legacy universal row) for this pubspec build number.
+        # Robot branch holds the release under publish only (avoids stale versionName rows
+        # with higher versionCode confusing checkupdates when pubspec +N decreases).
+        builds = [
+            b
+            for b in builds
+            if not (isinstance(b, dict) and str(b.get("versionName", "")).strip() != vname)
+        ]
         builds = [
             b
             for b in builds
