@@ -34,6 +34,8 @@ jobs:
       gitlab_branch: ${{ steps.fdroid.outputs.gitlab_branch }}
       gitlab_compare_url: ${{ steps.fdroid.outputs.gitlab_compare_url }}
     steps:
+      - uses: actions/checkout@v6
+
       - id: fdroid
         uses: ./.github/actions/publish-fdroid-gitlab-metadata
         with:

@@ -53,6 +53,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - uses: actions/checkout@v6
+
       - uses: ./.github/actions/flutter-test
         with:
           flutter_channel: ${{ env.FLUTTER_CHANNEL }}
