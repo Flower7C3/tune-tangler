@@ -257,12 +257,14 @@ def _postprocess_rewritemeta_yaml(text: str) -> str:
     body = "\n".join(_insert_rewritemeta_blank_lines(lines)) + "\n"
     body = re.sub(r"(?m)^AutoUpdateMode: ['\"]None['\"]\s*$", "AutoUpdateMode: None", body)
     body = re.sub(r"(?m)^UpdateCheckMode: ['\"]None['\"]\s*$", "UpdateCheckMode: None", body)
+    # rewritemeta: no blank line between last Builds[] command and MaintainerNotes.
     body = re.sub(
-        r"^(      - \$\$flutter\$\$/bin/flutter build apk --release)\n\n(MaintainerNotes:)",
+        r"(      - \$\$flutter\$\$/bin/flutter build apk --release)\n\n+(MaintainerNotes:)",
         r"\1\n\2",
         body,
         flags=re.MULTILINE,
     )
+    body = re.sub(r"\n\n+(MaintainerNotes:)", r"\n\1", body)
     # PyYAML uses |+ for trailing newlines in literal blocks; fdroid rewritemeta uses |.
     body = body.replace("MaintainerNotes: |+\n", "MaintainerNotes: |\n")
     return body
