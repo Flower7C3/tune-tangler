@@ -29,7 +29,7 @@ The sections below cover **fdroiddata** metadata shape, **`publish_fdroid_gitlab
 1. Verifies required Fastlane **`en-US`** files (unless you override **`FDROID_FASTLANE_METADATA_REL_PATH`**).
 2. Reads `versionName` / `versionCode` from the **tag name** (preferred) or from `pubspec.yaml` (`MAJOR.MINOR.PATCH` or `...+build`).
 3. Fetches the metadata file on your fork at **`FDROID_GITLAB_FORK_PARENT_REF`** (e.g. **`master`**) — if missing, bootstraps from **`FDROID_TOOLING_REL_PATH`** / **`metadata_static.yml`** + first **Build**.
-4. Merges the new **Build** into `Builds` (replaces same `versionCode` if present; dedupes by `versionCode`; if the fork parent ref already lists the same `versionCode` **and** `commit`, reuses that YAML as the base).
+4. Merges the new **Build** into `Builds` (replaces same `versionCode` if present, including when `commit` is unchanged, so `srclibs` / recipe track `.metadata` and `build_template.yml`; dedupes by `versionCode`).
 5. **Removes** `Name`, `AutoName`, `Summary`, `Description` from YAML (so Fastlane in source wins).
 6. Normalizes **MaintainerNotes** from **`tools/fdroid/maintainer_notes.txt`** (overlaid from the default branch in CI; keep aligned with **`metadata_static.yml`**).
 7. Pushes the full YAML to **`FDROID_GITLAB_BRANCH`** on your fork (fixed name, **no version in the branch**). New fork branches are created from **`FDROID_GITLAB_FORK_PARENT_REF`** when the target branch does not exist yet. Skips a commit only when the fork file is **byte-identical** to the generated YAML (semantic equality is not enough — `fdroid rewritemeta` is formatting-sensitive).
