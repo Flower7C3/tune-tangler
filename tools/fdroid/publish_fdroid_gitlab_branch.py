@@ -75,7 +75,11 @@ class _MaintainerNotesLiteral(str):
 
 
 def _represent_maintainer_notes_literal(dumper: yaml.SafeDumper, data: _MaintainerNotesLiteral):
-    return dumper.represent_scalar("tag:yaml.org,2002:str", str(data), style="|")
+    # Trailing newline → literal `|` (not strip-chomping `|-`) per fdroid rewritemeta.
+    text = str(data)
+    if not text.endswith("\n"):
+        text += "\n"
+    return dumper.represent_scalar("tag:yaml.org,2002:str", text, style="|")
 
 
 FdroidMetadataDumper.add_representer(_MaintainerNotesLiteral, _represent_maintainer_notes_literal)
@@ -333,16 +337,22 @@ def _insert_rewritemeta_blank_lines(lines: list[str]) -> list[str]:
     return out
 
 
-def _strip_rewritemeta_extra_blanks(body: str) -> str:
-    """PyYAML inserts blank lines rewritemeta rejects (between Builds entries; after MaintainerNotes)."""
-    while re.search(r"\n\n  - versionName:", body):
-        body = re.sub(r"\n\n(  - versionName:)", r"\n\1", body)
-    body = re.sub(
-        r"(MaintainerNotes: \|\n(?:  .*\n)*?)\n\n(?=ArchivePolicy:)",
-        r"\1",
+def _insert_rewritemeta_build_blanks(body: str) -> str:
+    """fdroid rewritemeta inserts a blank line between each Builds list entry."""
+    return re.sub(
+        r"(\n      - [^\n]+target-platform=\"[^\"]+\")\n(  - versionName:)",
+        r"\1\n\n\2",
         body,
     )
-    return body
+
+
+def _insert_rewritemeta_section_blanks(body: str) -> str:
+    """Blank line after MaintainerNotes literal block before ArchivePolicy (rewritemeta style)."""
+    return re.sub(
+        r"(MaintainerNotes: \|[-+]?\n(?:  .*\n)+)(?=\nArchivePolicy:)",
+        r"\1\n",
+        body,
+    )
 
 
 def _postprocess_rewritemeta_yaml(text: str) -> str:
@@ -360,7 +370,8 @@ def _postprocess_rewritemeta_yaml(text: str) -> str:
     )
     # PyYAML uses |+ for trailing newlines in literal blocks; fdroid rewritemeta uses |.
     body = body.replace("MaintainerNotes: |+\n", "MaintainerNotes: |\n")
-    return _strip_rewritemeta_extra_blanks(body)
+    body = _insert_rewritemeta_build_blanks(body)
+    return _insert_rewritemeta_section_blanks(body)
 
 
 def _env(name: str, default: str | None = None) -> str:
@@ -926,14 +937,10 @@ def main() -> None:
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary:
         with open(summary, "a", encoding="utf-8") as sf:
-            sf.write("\n## fdroiddata fork branch\n\n")
-            sf.write(f"- **branch (`FDROID_GITLAB_BRANCH`):** `{branch}`\n")
-            sf.write(f"- **pipelines (watch CI):** [{pipelines_url}]({pipelines_url})\n")
-            sf.write(f"- **tree:** [{tree_url}]({tree_url})\n")
-            sf.write(f"- **compare vs `{compare_base}`:** [{compare_url}]({compare_url})\n")
-            sf.write(
-                f"\nCreate a merge request to [`fdroid/fdroiddata`]({upstream_mr_web}) "
-                "from this branch in GitLab when you are ready.\n"
+            sf.write("\n## fdroiddata fork on `{branch}` branch \n\n")
+            sf.write(f"- [pipelines (watch CI)]({pipelines_url})\n")
+            sf.write(f"- [browse tree]({tree_url})\n")
+            sf.write(f"- [compare vs `{compare_base}`]({compare_url}) and create [merge request]({upstream_mr_web}) when you are ready\n"
             )
 
 
