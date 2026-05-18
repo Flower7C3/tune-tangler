@@ -410,13 +410,9 @@ def _write_github_output(name: str, value: str) -> None:
         fo.write(f"{name}={value}\n")
 
 
-def _yaml_mapping_equal(a: str, b: str) -> bool:
-    try:
-        ya = yaml.safe_load(a)
-        yb = yaml.safe_load(b)
-    except yaml.YAMLError as e:
-        raise SystemExit(f"Invalid YAML while comparing metadata: {e}") from e
-    return isinstance(ya, dict) and isinstance(yb, dict) and ya == yb
+def _metadata_yaml_identical(a: str, b: str) -> bool:
+    """Byte-identical after normalizing trailing newlines (fdroid rewritemeta is formatting-sensitive)."""
+    return a.rstrip("\n") + "\n" == b.rstrip("\n") + "\n"
 
 
 def _dedupe_builds_keep_last(builds: list[Any]) -> list[Any]:
@@ -690,7 +686,7 @@ def main() -> None:
     skip_commit = False
     if _branch_exists(api_base, token, fork_id, branch):
         cur = _get_file(api_base, token, fork_id, metadata_path, ref=branch)
-        if cur is not None and _yaml_mapping_equal(cur, body_yaml):
+        if cur is not None and _metadata_yaml_identical(cur, body_yaml):
             skip_commit = True
             print("Fork branch already has identical metadata YAML; skipping new commit.", flush=True)
 
