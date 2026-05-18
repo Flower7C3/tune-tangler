@@ -103,6 +103,8 @@ runs:
       with:
         ref: ${{ steps.resolve.outputs.resolved_ref }}
         fetch-depth: 1
+        # Keep workspace root (.github/actions for composite post-run) on the default branch checkout above.
+        path: app
 
     - name: '📌 Overlay F-Droid tooling from default branch'
       shell: bash
@@ -113,9 +115,10 @@ runs:
         set -euo pipefail
         DB="${DEFAULT_BRANCH}"
         TOOLING="${IN_TOOLING:-tools/fdroid}"
+        cd app
         git fetch --depth=1 origin "$DB"
         git checkout FETCH_HEAD -- "$TOOLING"
-        echo "Using \`${TOOLING}/\` from \`origin/${DB}\` (app sources still \`${{ steps.resolve.outputs.resolved_ref }}\`)." >> "$GITHUB_STEP_SUMMARY"
+        echo "Using \`app/${TOOLING}/\` from \`origin/${DB}\` (app sources: \`${{ steps.resolve.outputs.resolved_ref }}\`)." >> "$GITHUB_STEP_SUMMARY"
 
     - name: '🐍 Setup Python'
       uses: actions/setup-python@v6
@@ -169,4 +172,5 @@ runs:
         if [ -n "${IN_COMPARE:-}" ]; then
           export FDROID_GITLAB_COMPARE_BASE_REF="$IN_COMPARE"
         fi
+        export GITHUB_WORKSPACE="${GITHUB_WORKSPACE}/app"
         python3 "$SCRIPT_REL"
