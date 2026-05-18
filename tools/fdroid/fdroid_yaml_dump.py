@@ -303,6 +303,8 @@ def dump_fdroid_metadata_yml(app: dict[str, Any]) -> str:
     cm = _app_to_yaml(app)
     yaml_writer = ruamel.yaml.YAML(typ="rt")
     yaml_writer.indent(mapping=2, sequence=4, offset=2)
+    # Default width (80) wraps long prebuild/build script lines; rewritemeta keeps them on one line.
+    yaml_writer.width = 4096
     buf = StringIO()
     yaml_writer.dump(cm, buf)
     return buf.getvalue()
