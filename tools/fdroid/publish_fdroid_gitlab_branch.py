@@ -937,7 +937,7 @@ def main() -> None:
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary:
         with open(summary, "a", encoding="utf-8") as sf:
-            sf.write("\n## fdroiddata fork on `{branch}` branch \n\n")
+            sf.write(f"\n## fdroiddata fork on `{branch}` branch \n\n")
             sf.write(f"- [pipelines (watch CI)]({pipelines_url})\n")
             sf.write(f"- [browse tree]({tree_url})\n")
             sf.write(f"- [compare vs `{compare_base}`]({compare_url}) and create [merge request]({upstream_mr_web}) when you are ready\n"
