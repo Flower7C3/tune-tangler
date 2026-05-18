@@ -17,6 +17,8 @@ This document describes the automated icon generation system for TuneTangler.
 - [💡 Benefits](#benefits)
 - [🔐 Security and best practices](#security-and-best-practices)
 
+---
+
 ## 📖 Overview <a name="overview"></a>
 
 The system generates multiple PNG variants from a single SVG source file (`logo-rgb.svg`) using configuration-driven approach with JSON files. The source SVG contains clipPath masks and uses fill attributes for Flutter compatibility.

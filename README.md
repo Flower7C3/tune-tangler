@@ -17,7 +17,7 @@
 - **Localization**: EN/PL (switch at runtime)
 - **Permissions**: microphone, notifications (Android), file access where applicable
 - **Profiles**: save/load/delete setting profiles
-- **Project export/import**: save the whole project (grid, all tracks, recordings) to ZIP and load it later with full validation
+- **Project export/import**: save the whole project (grid, all tracks, recordings) to ZIP and load it later with full validation — main menu → *Save project* / *Load project* ([guide](docs/features/PROJECT_EXPORT_IMPORT.md))
 
 ### 🚀 Quick start <a name="quick-start"></a>
 
@@ -25,9 +25,21 @@
 - **[🔧 Setup](docs/development/SETUP.md)** — developer toolchain and environment
 - **[⚡ Quick start](docs/development/QUICKSTART.md)** — run the project quickly
 
+### 🔧 One-time configuration <a name="one-time-configuration"></a>
+
+Do these **once** per machine or repository; see each doc for details.
+
+| Topic | Doc |
+|-------|-----|
+| Developer machine (Flutter, SDK, `make dev-setup`) | [Setup](docs/development/SETUP.md#one-time-configuration), [Quick start](docs/development/QUICKSTART.md#one-time-configuration) |
+| Optional `pre-commit` hook | [Git hooks](docs/development/GIT_HOOKS.md#one-time-configuration) |
+| CI secrets overview | [Workflows](docs/development/WORKFLOWS.md#one-time-configuration) |
+| APK/AAB release signing | [Release signing](docs/release/RELEASE_SIGNING.md#one-time-configuration) |
+| F-Droid (GitLab + fdroiddata fork) | [F-Droid](docs/release/FDROID.md#one-time-configuration) |
+
 ### 🛠️ Development <a name="development"></a>
 
-- **[🔧 Setup](docs/development/SETUP.md)** — detailed environment configuration
+- **[🔧 Setup](docs/development/SETUP.md#one-time-configuration)** — detailed environment configuration
 - **[⚡ Quick start](docs/development/QUICKSTART.md)** — first run
 - **[🔨 Makefile](docs/development/QUICKSTART.md#makefile)** — daily commands
 - **[🎨 Icon generation](docs/development/ICON_GENERATION.md)** — PNGs from SVG via config
@@ -47,8 +59,8 @@
 ### 🆕 New developer <a name="new-developer"></a>
 
 1. **[📱 Installation](docs/release/INSTALLATION.md)** — basics
-2. **[🔧 Setup](docs/development/SETUP.md)** — environment
-3. **[⚡ Quick start](docs/development/QUICKSTART.md)** — first successful run
+2. **[🔧 Setup](docs/development/SETUP.md#one-time-configuration)** — one-time environment
+3. **[⚡ Quick start](docs/development/QUICKSTART.md#one-time-configuration)** — first successful run
 
 ### 🔧 Day-to-day development <a name="daily-development"></a>
 
@@ -59,8 +71,9 @@
 ### 🚀 Release and deployment <a name="release-and-deployment"></a>
 
 1. **[🚀 Workflows](docs/development/WORKFLOWS.md)** — what runs on `main` and manual release
-2. **[🔐 Release signing](docs/release/RELEASE_SIGNING.md)** — signing for the release workflow
-3. **[📝 Store listings & screenshots](docs/release/STORE_LISTINGS.md)** — Fastlane text + `make screenshots` → `metadata/android/…/images/`
+2. **[🔐 Release signing](docs/release/RELEASE_SIGNING.md#one-time-configuration)** — one-time keystore + GitHub secrets
+3. **[📦 F-Droid](docs/release/FDROID.md#one-time-configuration)** — one-time GitLab/fork setup, then per-release workflow
+4. **[📝 Store listings & screenshots](docs/release/STORE_LISTINGS.md)** — Fastlane text + `make screenshots` → `metadata/android/…/images/`
 
 ---
 

@@ -1,12 +1,52 @@
 # 📦 Project export and import
 
-## Overview
+> Save and restore the full app session (grid, tracks, recordings) as a ZIP archive.
+
+## 📋 Table of contents
+
+- [🌐 Overview](#overview)
+- [✨ Features](#features)
+  - [📤 Export](#export)
+  - [📥 Import](#import)
+- [⚙️ Technical details](#technical-details)
+- [🎨 UI/UX](#ui-ux)
+- [🌐 Localization](#localization)
+- [🐛 Fixed issues](#fixed-issues)
+- [📂 Related source files](#related-source-files)
+- [🔗 See also](#see-also)
+
+---
+
+## 🌐 Overview <a name="overview"></a>
 
 Export/import saves the full app state (grid, all tracks with recordings) to a ZIP file and restores it later with validation and an import preview.
 
-## Features
+```mermaid
+sequenceDiagram
+  autonumber
+  actor U as User
+  participant UI as ProjectExportImportManager
+  participant Exp as ProjectExportService
+  participant Imp as ProjectImportService
+  participant FS as File system
 
-### Export
+  U->>UI: Save project
+  UI->>Exp: build ZIP
+  Exp->>FS: metadata.json, tracks/, recordings/
+  Exp-->>U: share / save archive
+
+  U->>UI: Load project
+  UI->>Imp: validate ZIP
+  Imp-->>UI: preview + warnings
+  U->>UI: confirm overwrite
+  UI->>Imp: import
+  Imp->>FS: replace recordings, reload settings
+  Imp-->>UI: refresh grid
+```
+
+## ✨ Features <a name="features"></a>
+
+### 📤 Export <a name="export"></a>
 
 - **Location:** main menu (AppBar) → “Save project”
 - **Filename pattern:** `tune_tangler_project_[name]_YYYYMMDD_HHMMSS.zip`
@@ -17,7 +57,7 @@ Export/import saves the full app state (grid, all tracks with recordings) to a Z
   - `recordings/[TrackId].[ext]` — audio files
   - `recordings/checksums.json` — SHA256 checksums for recordings
 
-### Import
+### 📥 Import <a name="import"></a>
 
 - **Location:** main menu (AppBar) → “Load project”
 - **Flow:**
@@ -41,21 +81,35 @@ Export/import saves the full app state (grid, all tracks with recordings) to a Z
      - Import recordings with checksum verification
      - Refresh UI
 
-## Technical details
+```mermaid
+stateDiagram-v2
+  [*] --> PickZip
+  PickZip --> Validate: file chosen
+  Validate --> Preview: OK
+  Validate --> Error: invalid
+  Preview --> Confirm: user continues
+  Confirm --> Importing
+  Importing --> Done: success
+  Importing --> Error: failure
+  Done --> [*]
+  Error --> [*]
+```
 
-### Export
+## ⚙️ Technical details <a name="technical-details"></a>
 
-- **Code:** `lib/service/project_export_service.dart`
-- **UI coordinator:** `lib/manager/project_export_import_manager.dart`
+### 📤 Export
+
+- **Code:** [`lib/service/project_export_service.dart`](../../lib/service/project_export_service.dart)
+- **UI coordinator:** [`lib/manager/project_export_import_manager.dart`](../../lib/manager/project_export_import_manager.dart)
 - **Serialization:**
   - `TrackId` → `[row, col]` list
   - `Duration` → milliseconds (`int`)
   - Strip control characters from track names
   - UTF-8 for all JSON files
 
-### Import
+### 📥 Import
 
-- **Code:** `lib/service/project_import_service.dart`
+- **Code:** [`lib/service/project_import_service.dart`](../../lib/service/project_import_service.dart)
 - **Validation:** complete validation before any mutation
 - **Errors:**
   - Detailed user-facing errors
@@ -66,7 +120,7 @@ Export/import saves the full app state (grid, all tracks with recordings) to a Z
   - Restore after file load completes
   - Ensure `playbackEndAtPosition` does not exceed file `duration`
 
-### UI refresh
+### 🔄 UI refresh
 
 - **Cache:** clear `LazyLoadingManager` cache after import
 - **State:**
@@ -74,27 +128,27 @@ Export/import saves the full app state (grid, all tracks with recordings) to a Z
   - `context.watch<HiveSettingsProvider>()` in `MainScreenApp` for rebuilds
   - Widget keys include version to force `ListView.builder` rebuild
 
-## UI/UX
+## 🎨 UI/UX <a name="ui-ux"></a>
 
-### Preview
+### 👁️ Preview
 
 - **Icons:** calendar (`Icons.calendar_today_rounded`), storage (`Icons.storage_rounded`), grid (`Icons.grid_4x4_rounded`)
 - Grid size line also shows derived track count (e.g. `6 x 4 (24 tracks)`)
 - NBSP in translations for stable wrapping
 
-### Dialogs
+### 💬 Dialogs
 
 - Progress during validation/import
 - Error list after failed import
 - Overwrite warning before import proceeds
 
-## Localization
+## 🌐 Localization <a name="localization"></a>
 
 - Keys for all export/import strings
 - NBSP (`\u00A0`) before units (MB, min, Hz, kbps) and in Polish phrasing where needed
 - Clearer overwrite warnings for track settings
 
-## Fixed issues
+## 🐛 Fixed issues <a name="fixed-issues"></a>
 
 1. **Trim not applied on import** — save before `setPath()`, restore after load
 2. **UI stale after import** — cache clear + `context.watch()`
@@ -102,15 +156,15 @@ Export/import saves the full app state (grid, all tracks with recordings) to a Z
 4. **`FormatException` from control chars** — sanitize on export/import
 5. **Missing recordings on import** — metadata mapping → filename → `trackId` matching
 
-## Related source files
+## 📂 Related source files <a name="related-source-files"></a>
 
-- `lib/service/project_export_service.dart`
-- `lib/service/project_import_service.dart`
-- `lib/manager/project_export_import_manager.dart`
-- `lib/config/app_icon.dart`
-- `lib/l10n/app_*.arb`
+- [`lib/service/project_export_service.dart`](../../lib/service/project_export_service.dart)
+- [`lib/service/project_import_service.dart`](../../lib/service/project_import_service.dart)
+- [`lib/manager/project_export_import_manager.dart`](../../lib/manager/project_export_import_manager.dart)
+- [`lib/config/app_icon.dart`](../../lib/config/app_icon.dart)
+- [`lib/l10n/app_*.arb`](../../lib/l10n/)
 
-## See also
+## 🔗 See also <a name="see-also"></a>
 
-- [Pre-implementation analysis](../PROJECT_EXPORT_IMPORT_ANALYSIS.md) (if tracked in the repo)
 - [Shipped items](./COMPLETED.md)
+- [Roadmap](./ROADMAP.md)

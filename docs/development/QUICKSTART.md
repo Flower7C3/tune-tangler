@@ -6,7 +6,7 @@
 
 - [🚀 Five steps](#5-steps)
   - [1️⃣ Clone the project](#clone-project)
-  - [2️⃣ Set up the environment](#setup-environment)
+  - [2️⃣ One-time configuration](#one-time-configuration)
   - [3️⃣ Check devices](#check-devices)
   - [4️⃣ Run the app](#run-app)
   - [5️⃣ Done 🎉](#ready)
@@ -20,6 +20,8 @@
 - [📚 What’s next](#what-next)
 - [🆘 Quick help](#quick-help)
 
+---
+
 ## 🚀 Five steps <a name="5-steps"></a>
 
 ### 1️⃣ Clone the project <a name="clone-project"></a>
@@ -32,7 +34,7 @@ git branch
 
 You should see: `* main`
 
-### 2️⃣ Set up the environment <a name="setup-environment"></a>
+### 2️⃣ One-time configuration <a name="one-time-configuration"></a><a name="setup-environment"></a>
 
 ```bash
 make dev-setup
@@ -145,7 +147,8 @@ make remove-pre-commit-hook
 
 ## 📚 What’s next <a name="what-next"></a>
 
-- **[🔧 Setup](SETUP.md)** — deeper environment notes
+- **[🔧 Setup](SETUP.md#one-time-configuration)** — full one-time environment (Android/iOS details)
+- **[Workflows — One-time configuration](WORKFLOWS.md#one-time-configuration)** — CI secrets index
 - **[🎣 Git hooks](GIT_HOOKS.md)** — optional `pre-commit`: `flutter analyze`
 - **[🚀 Workflows](WORKFLOWS.md)** — CI/CD
 

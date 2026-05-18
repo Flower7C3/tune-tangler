@@ -1,65 +1,322 @@
-# F-Droid publication (fdroiddata)
+# 🦊 F-Droid publication (fdroiddata)
 
-> Tune Tangler — `applicationId`: `pro.kwiatek.tune_tangler`, **MIT** license (`LICENSE`).
+> Tune Tangler — `applicationId`: **`pro.kwiatek.tune_tangler`**, **MIT** ([`LICENSE`](../../LICENSE)).
 
-F-Droid builds and signs binaries. This app repo holds **F-Droid YAML templates** (`.github/templates/fdroid/`), the **publish composite action** (`.github/actions/publish-fdroid-gitlab-metadata/`), and workflows.
+F-Droid **builds and signs** APKs from source. This repository does **not** ship binaries to F-Droid directly: it maintains **metadata** for the fdroiddata index and pushes updates to **your GitLab fork**, then you open a **merge request** to upstream when CI is green.
 
-**GitHub Actions:** the **F-Droid fork branch** workflow needs **`GITLAB_TOKEN`**, **`GITLAB_FORK_PROJECT_ID`**, and optional overrides forwarded to **[`publish-fdroid-gitlab-metadata`](../../.github/actions/publish-fdroid-gitlab-metadata/action.yml)** (see **[`release-fdroid-app.yml`](../../.github/workflows/release-fdroid-app.yml)** and [Secrets and variables](../development/WORKFLOWS.md#secrets-and-variables)). Flutter is **pinned** in **`pubspec.yaml`** (`flutter_sdk_version`, synced with **`.metadata`** via `make sdk-upgrade`) and checked out in fdroiddata **prebuild** (see [`templates/build-flutter.yml`](https://gitlab.com/fdroid/fdroiddata/-/blob/master/templates/build-flutter.yml)). **`publish_fdroid_gitlab_branch.py`** lives in that composite action and has **no** app or project names baked in — it reads **`FDROID_*`** / **`GITLAB_*`** environment variables; Tune Tangler defaults are set in the action’s **`inputs`**. Details are in **[`docs/development/WORKFLOWS.md`](../development/WORKFLOWS.md)** — see the **F-Droid** rows and [Operator runbook](../development/WORKFLOWS.md#operator-runbook). Versioning on **`main`** and **`[skip ci]`** behavior live there too.
+- Upstream index: [fdroid/fdroiddata](https://gitlab.com/fdroid/fdroiddata)
+- Upstream metadata example: [metadata/pro.kwiatek.tune_tangler.yml](https://gitlab.com/fdroid/fdroiddata/-/blob/master/metadata/pro.kwiatek.tune_tangler.yml)
 
-The sections below cover **fdroiddata** metadata shape, the publish action, GitLab CI on your fork branch, and **manually opening a merge request to upstream** after the fork pipeline is green.
+<p><a href="https://github.com/Flower7C3/tune-tangler/actions/workflows/release-fdroid-app.yml"><img alt="release-fdroid-app.yml CI" src="https://github.com/Flower7C3/tune-tangler/actions/workflows/release-fdroid-app.yml/badge.svg"></a></p>
 
-### Token or fork ID missing in CI
+## 📋 Table of contents
 
-1. Open the failed run and check the **repository** in the header — secrets and variables exist **per repo**. If you use a **fork**, configure them **on that fork**, not only on the upstream repository.
-2. **`GITLAB_TOKEN`:** create as an **Actions** repository **secret** (not only Dependabot). Name exactly `GITLAB_TOKEN`.
-3. **`GITLAB_FORK_PROJECT_ID`:** create as an **Actions** repository **variable** (same settings page → **Variables** tab). Name exactly `GITLAB_FORK_PROJECT_ID` (digits only, no spaces).
-4. **Organization secrets / variables:** an org owner must grant **Repository access** to this repository for each item.
-5. Re-run the workflow after saving (no code change required beyond this repo’s workflow expecting a variable for the fork ID).
+- [🌐 Overview](#overview)
+- [📁 Repository layout](#repository-layout)
+- [🔧 One-time configuration](#one-time-configuration)
+  - [🔐 GitHub secrets and variables](#github-secrets-and-variables)
+  - [🍴 Fork and upstream](#fork-and-upstream)
+- [📝 Project files you edit](#files-you-edit)
+- [⚙️ How it works](#how-it-works)
+  - [📊 Publish pipeline (diagram)](#publish-pipeline-diagram)
+  - [🔢 ABI version codes (diagram)](#abi-version-codes-diagram)
+- [✅ Operator checklist](#operator-checklist)
+- [🏪 Listings: Fastlane vs metadata YAML](#listings-fastlane-vs-metadata-yaml)
+- [🏷️ Versioning and ABI builds](#versioning-and-abi-builds)
+- [🧪 fdroiddata CI on your fork](#fdroiddata-ci-on-your-fork)
+- [🚨 Troubleshooting](#troubleshooting)
+- [📚 Official F-Droid documentation](#official-f-droid-documentation)
+- [🔗 Related docs in this repo](#related-docs-in-this-repo)
+- [📦 Native dependencies (Android)](#native-dependencies)
 
-**fdroiddata CI (schema / lint):** Merge requests are validated against [`schemas/metadata.json`](https://gitlab.com/fdroid/fdroiddata/-/blob/master/schemas/metadata.json) (`fdroid lint`, `fdroid rewritemeta`, etc.). The **`git redirect`** job (artifact `codequality.json`) runs `tools/rewrite-git-redirects.py` then `git diff --exit-code`: if **`Repo:`** is a Git URL that Git’s HTTP client treats as a redirect (common on **GitHub** without the **`.git`** suffix from GitLab runners), the job fails — use `https://github.com/OWNER/REPO.git` in metadata. This repo’s publish script normalizes GitHub **`Repo`** to the `.git` form. Field meanings follow the [F-Droid build metadata reference](https://f-droid.org/en/docs/Build_Metadata_Reference/). `publish_fdroid_gitlab_branch.py` normalizes values to that schema (integer `ArchivePolicy`, **Categories** enum — this repo uses **`Multimedia`**), `CurrentVersion` / `CurrentVersionCode`, **no `subdir` key** for repo root (`path` forbids `.` and values matching `^\./`), and writes YAML via **`fdroid_yaml_dump.py`** in the publish action using the same **ruamel.yaml** layout as **`fdroid rewritemeta`** ([Build metadata reference](https://f-droid.org/en/docs/Build_Metadata_Reference/) — canonical YAML 1.2, section blank lines, literal `MaintainerNotes`). **Per-ABI APKs:** `android/app/build.gradle` sets `versionCodeOverride = versionCode * 10 + {1,2,3}`; fdroiddata gets **three** `Builds` entries (`--split-per-abi`) plus **`VercodeOperation`** (`%c * 10 + 1` … `+ 3`). **`AutoUpdateMode: Version`** and **`UpdateCheckMode: Tags`** with **`UpdateCheckData`** on `pubspec.yaml` (see [`templates/build-flutter.yml`](https://gitlab.com/fdroid/fdroiddata/-/blob/master/templates/build-flutter.yml)). After changing templates or the script, re-run the GitHub workflow or amend the branch on your fork.
+---
 
-**`metadata_static.yml` vs Fastlane**
+## 🌐 Overview <a name="overview"></a>
 
-- **Fastlane** (`fastlane/metadata/android/…`) — **source of listing text and graphics for F-Droid**: `title.txt`, `short_description.txt`, `full_description.txt`, `images/…` directories (**`en-US`** with short and full description is required). F-Droid copies these from the **tagged app commit** into the repo index (see [All About Descriptions…](https://f-droid.org/en/docs/All_About_Descriptions_Graphics_and_Screenshots/)).
-- **`.github/templates/fdroid/metadata_static.yml`** — skeleton **YAML in fdroiddata** (`License`, `Repo`, `Categories`, `Builds`, …). **Without** `Summary` / `Description` / `Name` / `AutoName`, because those keys in the fdroiddata `.yml` **override** Fastlane in the app source.
-- **`publish_fdroid_gitlab_branch.py`** (in the composite action) strips those keys from existing YAML before pushing to your fork branch (if they were left from older edits) so F-Droid can take descriptions from the GitHub repo. The script also checks for Fastlane **`en-US`** `short_description.txt` and `full_description.txt` (path overridable with **`FDROID_FASTLANE_METADATA_REL_PATH`**).
+| Layer | Role |
+|-------|------|
+| **This app repo** | Source code, Fastlane store text, Flutter pin ([`pubspec.yaml`](../../pubspec.yaml)), signing for GitHub Releases |
+| **Your fdroiddata fork** | Metadata YAML on branch **`robot/tune-tangler`** (default); path `metadata/pro.kwiatek.tune_tangler.yml` |
+| **Upstream fdroiddata** | Index + buildbot; merge request after your fork CI passes |
+| **F-Droid users** | Install from the F-Droid client / website |
 
-**What the publish action does** (`.github/actions/publish-fdroid-gitlab-metadata/publish_fdroid_gitlab_branch.py`)
+**Automation path:** GitHub [`release-fdroid-app.yml`](../../.github/workflows/release-fdroid-app.yml) → [`publish-fdroid-gitlab-metadata`](../../.github/actions/publish-fdroid-gitlab-metadata/action.yml) → commit on your fork → GitLab CI (`rewritemeta`, `lint`, `checkupdates`, …) → **you** open the upstream MR manually.
 
-1. Verifies required Fastlane **`en-US`** files (unless you override **`FDROID_FASTLANE_METADATA_REL_PATH`**).
-2. Reads `versionName` / `versionCode` from the **tag name** (preferred) or from `pubspec.yaml` (`MAJOR.MINOR.PATCH` or `...+build`).
-3. Fetches the metadata file on your fork at **`FDROID_GITLAB_FORK_PARENT_REF`** (e.g. **`master`**) — if missing, bootstraps from **`.github/templates/fdroid/metadata_static.yml`** + first **Build**.
-4. Merges **three** per-ABI **Build** rows into `Builds` (replaces other `versionName` rows on the fork branch and prior ABI slots for the same pubspec `+build`; dedupes by `versionCode`). **Pubspec `+build` must only increase** across releases (ABI `versionCode` = build × 10 + {1,2,3}).
-5. **Removes** `Name`, `AutoName`, `Summary`, `Description` from YAML (so Fastlane in source wins).
-6. Normalizes **MaintainerNotes** from **`metadata_static.yml`** (overlaid from the default branch in CI on every publish).
-7. Serializes metadata with **`fdroid_yaml_dump.py`** (same ruamel.yaml rules as **`fdroid rewritemeta`**) and pushes to **`FDROID_GITLAB_BRANCH`** on your fork (fixed name, **no version in the branch**). New fork branches are created from **`FDROID_GITLAB_FORK_PARENT_REF`** when the target branch does not exist yet. Skips a commit only when the fork file is **byte-identical** to the generated YAML.
-8. Prints **pipelines** and **tree** URLs for **`FDROID_GITLAB_BRANCH`** on the fork, plus a **compare link** (defaults in CI: compare vs **`FDROID_GITLAB_COMPARE_BASE_REF`** when set, otherwise vs **`FDROID_GITLAB_FORK_PARENT_REF`**). It does **not** create an upstream merge request — you do that in GitLab when ready.
+More context: [GitHub workflows — F-Droid](../development/WORKFLOWS.md#release-fdroid-app), [operator runbook](../development/WORKFLOWS.md#operator-runbook).
 
-Optional GitHub **variables** (all forwarded from **[`release-fdroid-app.yml`](../../.github/workflows/release-fdroid-app.yml)**; empty → composite **[`publish-fdroid-gitlab-metadata`](../../.github/actions/publish-fdroid-gitlab-metadata/action.yml)** defaults): **`FDROID_METADATA_PATH`**, **`FDROID_GITLAB_BRANCH`**, **`FDROID_GIT_COMMIT_SUBJECT_PREFIX`**, **`FDROID_GITLAB_FORK_PARENT_REF`**, **`FDROID_GITLAB_COMPARE_BASE_REF`**. See [WORKFLOWS](../development/WORKFLOWS.md#secrets-and-variables). The workflow checks out **`target_ref`** into **`app/`** (pubspec, `.metadata`, Fastlane, …) while the publish script runs from the composite action on the default branch checkout. It overlays **`.github/templates/fdroid/`** from the **default branch** into **`app/`** so old tags still get the current **`metadata_static.yml`** and **`build_template.yml`**. **`target_ref`** may be left empty to use the **latest tag** on the default branch.
+## 📁 Repository layout <a name="repository-layout"></a>
 
-**Cleaning up on your fork:** delete obsolete automation branches you no longer need (for example if you renamed **`FDROID_GITLAB_BRANCH`** or used older per-version branch names).
+| Path | Purpose |
+|------|---------|
+| [`/.github/workflows/release-fdroid-app.yml`](../../.github/workflows/release-fdroid-app.yml) | Manual workflow: publish metadata for a tag |
+| [`/.github/actions/publish-fdroid-gitlab-metadata/action.yml`](../../.github/actions/publish-fdroid-gitlab-metadata/action.yml) | Composite action (checkout, overlay templates, Python publish) |
+| [`/.github/actions/publish-fdroid-gitlab-metadata/publish_fdroid_gitlab_branch.py`](../../.github/actions/publish-fdroid-gitlab-metadata/publish_fdroid_gitlab_branch.py) | Builds/updates YAML, pushes to GitLab fork |
+| [`/.github/actions/publish-fdroid-gitlab-metadata/fdroid_yaml_dump.py`](../../.github/actions/publish-fdroid-gitlab-metadata/fdroid_yaml_dump.py) | Serializes metadata like `fdroid rewritemeta` (ruamel.yaml) |
+| [`/.github/templates/fdroid/metadata_static.yml`](../../.github/templates/fdroid/metadata_static.yml) | Bootstrap skeleton + **MaintainerNotes** (applied every publish) |
+| [`/.github/templates/fdroid/build_template.yml`](../../.github/templates/fdroid/build_template.yml) | One **Build** entry template → three ABI rows per release |
+| [`/android/app/build.gradle`](../../android/app/build.gradle) | `versionCodeOverride` for split APKs (×10 + ABI slot) |
+| [`/fastlane/metadata/android/en-US/`](../../fastlane/metadata/android/en-US/) | Store listings (required for publish) |
 
-**Keep your fork in sync** with upstream (`fdroid/fdroiddata`) or a later merge request may conflict. First time: add a minimal metadata file in the fork manually or let the workflow create it from `metadata_static.yml` — F-Droid **buildbot** must still accept the recipe (`srclibs` / `prebuild` / `build` per [`templates/build-flutter.yml`](https://gitlab.com/fdroid/fdroiddata/-/blob/master/templates/build-flutter.yml)); if rejected, fix `.github/templates/fdroid/build_template.yml` and re-run the workflow or fix the branch manually.
+```mermaid
+flowchart TB
+  subgraph action [".github/actions/publish-fdroid-gitlab-metadata/"]
+    PY[publish_fdroid_gitlab_branch.py]
+    DUMP[fdroid_yaml_dump.py]
+    PY --> DUMP
+  end
+  subgraph templates [".github/templates/fdroid/"]
+    STATIC[metadata_static.yml]
+    BUILD[build_template.yml]
+  end
+  subgraph app_repo ["App repo at release tag"]
+    PUB[pubspec.yaml + .metadata]
+    FL[fastlane/metadata/android/]
+    GRADLE[android/app/build.gradle]
+  end
+  templates --> PY
+  app_repo --> PY
+  PY -->|GitLab API| FORK[(fdroiddata fork YAML)]
+```
 
-## Manual path (no workflow)
+## 🔧 One-time configuration <a name="one-time-configuration"></a>
 
-1. Fork [`fdroiddata`](https://gitlab.com/fdroid/fdroiddata).
-2. File: **`metadata/pro.kwiatek.tune_tangler.yml`** (path is `metadata/<applicationId>.yml`; see [Build metadata reference](https://f-droid.org/en/docs/Build_Metadata_Reference/)) — patterns in `.github/templates/fdroid/metadata_static.yml` and `.github/templates/fdroid/build_template.yml`.
-3. Open a **merge request to upstream** [`fdroid/fdroiddata`](https://gitlab.com/fdroid/fdroiddata): target branch **`master`**, source branch on **your fork** (the branch created by Actions, e.g. `robot/tune-tangler-1.7.1`).
+Do these steps **once per GitHub repository** (and once per fdroiddata fork). Day-to-day releases only need the [operator checklist](#operator-checklist).
 
-### After Actions: upstream merge request (manual in GitLab)
+### 🔐 GitHub secrets and variables <a name="github-secrets-and-variables"></a>
 
-Upstream expects a **public** fork and a **source branch that is not [protected](https://docs.gitlab.com/user/project/repository/branches/protected/)** (they rebase with fast-forward merges).
+Configure on the **same GitHub repository** that runs the workflow (if you use a fork of Tune Tangler, set secrets/variables **on that fork**).
 
-1. Run **Actions → F-Droid fork branch (fdroiddata)** with **`target_ref`** (tag/branch) or leave it empty for the latest tag. The run ends with a **link to your fork branch** in the job summary.
-2. Wait for **fdroiddata** CI on that branch in GitLab. When it is green, open a **merge request from that branch** to **`fdroid/fdroiddata`** `master` using GitLab’s **App update** merge request template (remove the “Please remove above lines!” block, fill the checklist).
+**Secrets** (Settings → Secrets and variables → Actions → **Secrets**):
 
-## Official references
+| Name | Description |
+|------|-------------|
+| **`GITLAB_TOKEN`** | GitLab PAT with **`api`** scope and write access to **your** fdroiddata fork |
 
-- [Contributing to F-Droid](https://gitlab.com/fdroid/fdroiddata/-/blob/master/CONTRIBUTING.md)
+**Variables** (Settings → **Variables**):
+
+| Name | Required | Default (Tune Tangler) | Description |
+|------|----------|------------------------|-------------|
+| **`GITLAB_FORK_PROJECT_ID`** | ✅ | — | Numeric GitLab **project ID** of your fdroiddata fork |
+| **`FDROID_METADATA_PATH`** | | `metadata/pro.kwiatek.tune_tangler.yml` | Path inside the fork repo |
+| **`FDROID_GITLAB_BRANCH`** | | `robot/tune-tangler` | Branch on the fork that receives automation commits |
+| **`FDROID_GIT_COMMIT_SUBJECT_PREFIX`** | | `Tune Tangler` | First part of Git commit subject on the fork |
+| **`FDROID_GITLAB_FORK_PARENT_REF`** | | `master` | Ref to read baseline metadata / start new fork branches |
+| **`FDROID_GITLAB_COMPARE_BASE_REF`** | | same as fork parent | Left-hand side of GitLab compare URL in the job summary |
+
+Empty optional variables fall back to defaults in [`publish-fdroid-gitlab-metadata/action.yml`](../../.github/actions/publish-fdroid-gitlab-metadata/action.yml).
+
+### 🍴 Fork and upstream <a name="fork-and-upstream"></a>
+
+1. Fork [fdroid/fdroiddata](https://gitlab.com/fdroid/fdroiddata) on GitLab (public fork).
+2. Note the fork **project ID** → GitHub variable **`GITLAB_FORK_PROJECT_ID`**.
+3. Create a GitLab PAT with **`api`** scope → GitHub secret **`GITLAB_TOKEN`**.
+4. Keep your fork **in sync** with upstream `master` to reduce merge request conflicts later.
+
+## 📝 Project files you edit <a name="files-you-edit"></a>
+
+Per release or when changing build/listing policy (not part of [one-time configuration](#one-time-configuration)):
+
+| When | Edit |
+|------|------|
+| **App identity / license / links / maintainer notes** | [`metadata_static.yml`](../../.github/templates/fdroid/metadata_static.yml) — especially **`MaintainerNotes`**, `Repo`, `License`, `Categories` |
+| **Build recipe** (Flutter srclib, prebuild, `flutter build apk`) | [`build_template.yml`](../../.github/templates/fdroid/build_template.yml) — align with upstream Flutter template (see [official links](#official-f-droid-documentation)) |
+| **Per-ABI version codes** | [`android/app/build.gradle`](../../android/app/build.gradle) and **`VercodeOperation`** in [`metadata_static.yml`](../../.github/templates/fdroid/metadata_static.yml) |
+| **Flutter SDK for F-Droid builds** | [`pubspec.yaml`](../../pubspec.yaml) (`flutter_sdk_version`, synced with [`.metadata`](../../.metadata) via `make sdk-upgrade`) |
+| **Store description & screenshots** | [`fastlane/metadata/android/…`](../../fastlane/metadata/android/) — see [Store listings](STORE_LISTINGS.md) |
+| **Publish logic** (rare) | [`publish_fdroid_gitlab_branch.py`](../../.github/actions/publish-fdroid-gitlab-metadata/publish_fdroid_gitlab_branch.py), [`fdroid_yaml_dump.py`](../../.github/actions/publish-fdroid-gitlab-metadata/fdroid_yaml_dump.py) |
+
+Do **not** put `Summary`, `Description`, `Name`, or `AutoName` in fdroiddata YAML — they **override** Fastlane; the publish script strips them if present.
+
+## ⚙️ How it works <a name="how-it-works"></a>
+
+### 📊 Publish pipeline (diagram) <a name="publish-pipeline-diagram"></a>
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor M as Maintainer
+  participant GH as GitHub Actions
+  participant App as app/ checkout
+  participant Pub as publish script
+  participant Fork as GitLab fork
+  participant CI as fdroiddata CI
+  participant Up as fdroid/fdroiddata
+
+  M->>GH: F-Droid fork branch workflow
+  GH->>App: checkout target_ref tag
+  GH->>App: overlay .github/templates/fdroid from main
+  GH->>Pub: run publish_fdroid_gitlab_branch.py
+  Pub->>Fork: commit metadata YAML
+  Fork->>CI: pipeline on FDROID_GITLAB_BRANCH
+  CI-->>M: pass or fail (rewritemeta, lint, …)
+  M->>Up: open merge request (manual)
+  Up-->>M: buildbot queue / publish
+```
+
+**High-level flow:**
+
+```mermaid
+flowchart LR
+  subgraph gh [GitHub]
+    Tag[Release tag on main]
+    WF[release-fdroid-app.yml]
+    Act[publish-fdroid-gitlab-metadata]
+    Tag --> WF --> Act
+  end
+  subgraph fork [Your GitLab fork]
+    Branch[robot/tune-tangler branch]
+    YAML[metadata YAML]
+    CI[fdroiddata CI]
+    Branch --> YAML --> CI
+  end
+  subgraph up [Upstream]
+    MR[Merge request]
+    Bot[F-Droid buildbot]
+    MR --> Bot
+  end
+  Act -->|commit| Branch
+  CI -->|green| MR
+```
+
+**Publish steps** ([`publish_fdroid_gitlab_branch.py`](../../.github/actions/publish-fdroid-gitlab-metadata/publish_fdroid_gitlab_branch.py)):
+
+1. Resolve **`target_ref`** (workflow input) or latest tag on default branch.
+2. Check out the **release tree** into `app/` (pubspec, `.metadata`, Fastlane at that tag).
+3. Overlay [`.github/templates/fdroid/`](../../.github/templates/fdroid/) from **default branch** into `app/` (so old tags still get current templates).
+4. Run the publish script from the composite action (`github.action_path`); app paths use `GITHUB_WORKSPACE=app/`.
+5. Read **version** from tag name (`v1.7.4+6`) or [`pubspec.yaml`](../../pubspec.yaml).
+6. Require Fastlane **`en-US`** [`short_description.txt`](../../fastlane/metadata/android/en-US/short_description.txt) and [`full_description.txt`](../../fastlane/metadata/android/en-US/full_description.txt).
+7. Load fork metadata from **`FDROID_GITLAB_FORK_PARENT_REF`**; if missing, bootstrap from [`metadata_static.yml`](../../.github/templates/fdroid/metadata_static.yml).
+8. Replace stale **`Builds`** for other `versionName` values; add **three** ABI builds from [`build_template.yml`](../../.github/templates/fdroid/build_template.yml).
+9. Refresh **`MaintainerNotes`** from [`metadata_static.yml`](../../.github/templates/fdroid/metadata_static.yml).
+10. Dump YAML via [`fdroid_yaml_dump.py`](../../.github/actions/publish-fdroid-gitlab-metadata/fdroid_yaml_dump.py) (byte-compatible with **`fdroid rewritemeta`**).
+11. Push to **`FDROID_GITLAB_BRANCH`** on the fork (skip commit if file is already identical).
+
+The workflow does **not** open an upstream merge request — only updates your fork branch.
+
+### 🔢 ABI version codes (diagram) <a name="abi-version-codes-diagram"></a>
+
+```mermaid
+flowchart LR
+  T["Tag v1.7.4+6"] --> B["pubspec build = 6"]
+  B --> C["base × 10 = 60"]
+  C --> V61["61 armeabi-v7a"]
+  C --> V62["62 arm64-v8a"]
+  C --> V63["63 x86_64 → CurrentVersionCode"]
+```
+
+## ✅ Operator checklist <a name="operator-checklist"></a>
+
+1. **Merge to `main`** and wait for [version & tag](../development/WORKFLOWS.md#version-tag-main) (or ensure the release **tag** already exists).
+2. **Actions** → **F-Droid fork branch (fdroiddata)** → run with optional **`target_ref`** (empty = latest tag).
+3. Open **pipelines** / **compare** links in the job summary; wait for **GitLab CI** on `FDROID_GITLAB_BRANCH` to pass.
+4. In GitLab: **merge request** from your fork branch → [fdroid/fdroiddata](https://gitlab.com/fdroid/fdroiddata) **`master`** — use the [App update MR template](https://gitlab.com/fdroid/fdroiddata/-/blob/master/.gitlab/merge_request_templates/App%20update.md).
+5. After upstream merge: F-Droid buildbot picks up the change (timing depends on the queue).
+
+**Upstream MR requirements:** public fork; source branch **not** [protected](https://docs.gitlab.com/user/project/repository/branches/protected/) (maintainers rebase with fast-forward).
+
+## 🏪 Listings: Fastlane vs metadata YAML <a name="listings-fastlane-vs-metadata-yaml"></a>
+
+| Source | Location | Used for |
+|--------|----------|----------|
+| **Fastlane / Triple-T** | [`fastlane/metadata/android/`](../../fastlane/metadata/android/) | Title, short/full description, graphics — read from the **tagged app commit** |
+| **fdroiddata YAML** | [`metadata_static.yml`](../../.github/templates/fdroid/metadata_static.yml) on fork | License, repo URLs, build recipe, maintainer notes — **not** store listing text |
+
+Details: [Store listings (F-Droid)](STORE_LISTINGS.md).
+
+External reference:
+
+- [F-Droid — All About Descriptions, Graphics, and Screenshots](https://f-droid.org/en/docs/All_About_Descriptions_Graphics_and_Screenshots/)
+
+## 🏷️ Versioning and ABI builds <a name="versioning-and-abi-builds"></a>
+
+- **Tag / pubspec:** `MAJOR.MINOR.PATCH+BUILD` (e.g. `v1.7.4+6` → versionName `1.7.4`, base build `6`).
+- **Three APKs:** `armeabi-v7a`, `arm64-v8a`, `x86_64` via `--split-per-abi` in [`build_template.yml`](../../.github/templates/fdroid/build_template.yml).
+- **versionCode:** `pubspec build × 10 + {1,2,3}` in [`android/app/build.gradle`](../../android/app/build.gradle); **`CurrentVersionCode`** = highest slot (+3).
+- **`VercodeOperation`:** `%c * 10 + 1` … `+ 3` in [`metadata_static.yml`](../../.github/templates/fdroid/metadata_static.yml) for autoupdate.
+- **Pubspec `+build` must only increase** across releases; remove obsolete Git tags that imply a higher vercode than your current release (confuses **`checkupdates`**).
+
+Autoupdate: **`AutoUpdateMode: Version`**, **`UpdateCheckMode: Tags`**, **`UpdateCheckData`** on [`pubspec.yaml`](../../pubspec.yaml).
+
+## 🧪 fdroiddata CI on your fork <a name="fdroiddata-ci-on-your-fork"></a>
+
+Your fork pipeline validates the metadata file before you propose upstream:
+
+| Check | What it enforces |
+|-------|------------------|
+| **`fdroid rewritemeta`** | Canonical YAML 1.2 layout — must match [`fdroid_yaml_dump.py`](../../.github/actions/publish-fdroid-gitlab-metadata/fdroid_yaml_dump.py) output |
+| **`fdroid lint`** | fdroiddata JSON schema (`schemas/metadata.json`) |
+| **`checkupdates`** | `CurrentVersion` / `CurrentVersionCode` consistent with latest **tags** on `Repo` |
+| **`git redirect`** | `Repo:` must be a stable Git URL ending in `.git` (script normalizes GitHub smart-HTTP URLs) |
+
+Schema and field reference (external):
+
+- [fdroiddata metadata schema](https://gitlab.com/fdroid/fdroiddata/-/blob/master/schemas/metadata.json)
 - [Build metadata reference](https://f-droid.org/en/docs/Build_Metadata_Reference/)
-- [Inclusion policy](https://f-droid.org/en/docs/Inclusion_Policy/)
 
-## Native dependencies (Android)
+## 🚨 Troubleshooting <a name="troubleshooting"></a>
 
-“Modified” audio export: **MediaCodec** + **Sonic** (`android/app/src/main/java/sonic/`, Apache 2.0).
+### ❌ `GITLAB_TOKEN` or `GITLAB_FORK_PROJECT_ID` missing
+
+1. Confirm the failed run’s **repository** (fork vs upstream) — secrets/variables are per repo.
+2. **`GITLAB_TOKEN`:** Actions **secret**, name exactly `GITLAB_TOKEN`, `api` scope, access to your fork.
+3. **`GITLAB_FORK_PROJECT_ID`:** Actions **variable**, numeric project ID only.
+4. Org secrets/variables: grant this repository access.
+5. Re-run the workflow (no code change needed).
+
+### ❌ GitLab job `rewritemeta` fails (YAML diff)
+
+The generated file must be **byte-identical** to what `fdroid rewritemeta` would write.
+
+| Symptom | Fix |
+|---------|-----|
+| Extra/missing blank lines between sections | Regenerate with current [`fdroid_yaml_dump.py`](../../.github/actions/publish-fdroid-gitlab-metadata/fdroid_yaml_dump.py); re-run GitHub workflow |
+| Long `prebuild` / `build` lines split across two YAML lines | Fixed in dumper (`width = 4096`); update action and re-publish |
+| `MaintainerNotes: \|-` vs `\|` | Notes must end with a newline in [`metadata_static.yml`](../../.github/templates/fdroid/metadata_static.yml) |
+
+### ❌ `checkupdates` — wrong `CurrentVersion` / `CurrentVersionCode`
+
+- Usually **stale or conflicting Git tags** on the app repo (e.g. old `v1.7.0+8` with higher vercode than `v1.7.4+6`).
+- Delete misleading tags on GitHub; ensure latest tag matches the release you publish.
+- Fork branch should not keep old **`versionName`** rows — publish script removes them; re-run workflow from current **`main`**.
+
+### ❌ `git redirect` / `Repo` URL
+
+Use **`https://github.com/OWNER/REPO.git`** in [`metadata_static.yml`](../../.github/templates/fdroid/metadata_static.yml). The publish script adds `.git` for GitHub smart-HTTP URLs.
+
+### ❌ Fastlane files missing
+
+Publish requires [`short_description.txt`](../../fastlane/metadata/android/en-US/short_description.txt) and [`full_description.txt`](../../fastlane/metadata/android/en-US/full_description.txt) at the **release commit**. Add them under `fastlane/metadata/android/<locale>/` before tagging.
+
+### ❌ `flutter_sdk_version` / `.metadata` mismatch
+
+Run `make sdk-upgrade`, commit [`pubspec.yaml`](../../pubspec.yaml) and [`.metadata`](../../.metadata), then tag and publish again.
+
+### ❌ F-Droid buildbot rejects the recipe
+
+Compare [`build_template.yml`](../../.github/templates/fdroid/build_template.yml) with upstream [fdroiddata `templates/build-flutter.yml`](https://gitlab.com/fdroid/fdroiddata/-/blob/master/templates/build-flutter.yml). Adjust prebuild/srclibs, re-run the GitHub workflow.
+
+### ❌ Upstream merge request conflicts
+
+Rebase or merge **latest `fdroid/fdroiddata` `master`** into your fork before opening the MR. Delete obsolete automation branches on the fork if you renamed **`FDROID_GITLAB_BRANCH`**.
+
+## 📚 Official F-Droid documentation <a name="official-f-droid-documentation"></a>
+
+- [Inclusion Policy](https://f-droid.org/en/docs/Inclusion_Policy/)
+- [Build Metadata Reference](https://f-droid.org/en/docs/Build_Metadata_Reference/)
+- [All About Descriptions, Graphics, and Screenshots](https://f-droid.org/en/docs/All_About_Descriptions_Graphics_and_Screenshots/)
+- [Contributing to fdroiddata (CONTRIBUTING.md)](https://gitlab.com/fdroid/fdroiddata/-/blob/master/CONTRIBUTING.md)
+- [fdroiddata metadata schema (schemas/metadata.json)](https://gitlab.com/fdroid/fdroiddata/-/blob/master/schemas/metadata.json)
+- [fdroiddata Flutter build template (templates/build-flutter.yml)](https://gitlab.com/fdroid/fdroiddata/-/blob/master/templates/build-flutter.yml)
+- [fdroidserver (build tools)](https://gitlab.com/fdroid/fdroidserver)
+
+## 🔗 Related docs in this repo <a name="related-docs-in-this-repo"></a>
+
+- [GitHub workflows guide](../development/WORKFLOWS.md#one-time-configuration) — CI secrets index
+- [Release signing](RELEASE_SIGNING.md#one-time-configuration) — APK/AAB keystore (separate from F-Droid)
+- [Store listings](STORE_LISTINGS.md) — Fastlane paths and F-Droid copy
+- [Installation](INSTALLATION.md) — end-user install paths
+
+## 📦 Native dependencies (Android) <a name="native-dependencies"></a>
+
+“Modified” audio export uses **MediaCodec** + **Sonic** ([`android/app/src/main/java/sonic/`](../../android/app/src/main/java/sonic/), Apache 2.0). Mentioned in [`metadata_static.yml`](../../.github/templates/fdroid/metadata_static.yml) **MaintainerNotes**.

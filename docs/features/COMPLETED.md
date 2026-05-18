@@ -34,7 +34,7 @@
   - Non-breaking spaces in translations for nicer typography
   - Detailed format doc: [PROJECT_EXPORT_IMPORT.md](./PROJECT_EXPORT_IMPORT.md)
 
-Related docs:
+## 🔗 Related docs
 
 - Roadmap: [ROADMAP.md](./ROADMAP.md)
 - App capabilities: [README.md#capabilities](../../README.md#capabilities)

@@ -17,7 +17,9 @@
   - [Shared `paths-ignore`](#shared-paths-ignore)
   - [Skip / `push` (`[skip ci]`)](#skip-and-push-behavior)
 - [🧩 Composite actions](#composite-actions)
-- [🔐 Keystore (APK/AAB release workflow only)](#keystore-configuration)
+- [🔧 One-time configuration](#one-time-configuration)
+  - [🔐 Keystore (APK/AAB release)](#keystore-configuration)
+  - [🦊 F-Droid fork](#fdroid-one-time-configuration)
 - [🔑 Secrets and variables](#secrets-and-variables)
 - [🚨 Troubleshooting](#troubleshooting)
   - [❌ Permission denied](#permission-denied-error)
@@ -26,6 +28,8 @@
   - [❌ Keystore issues](#keystore-problem)
   - [❌ Keystore password incorrect](#keystore-password-incorrect-error)
 - [📚 Additional resources](#additional-resources)
+
+---
 
 ## ⚙️ Requirements <a name="requirements"></a>
 
@@ -43,7 +47,20 @@ Workflows may cache `~/.pub-cache` and `~/.gradle/caches` (see each YAML).
 
 Exact workflow titles in GitHub come from each file’s top-level `name:`. **[Requirements](#requirements)** and **[Cache](#cache)** above are what the runners assume. Each workflow below has its **own status badge**, **trigger summary**, and **implementation notes** (no wide table). The **[operator runbook](#operator-runbook)** lists common tasks.
 
-### Workflows at a glance <a name="workflow-reference"></a><a name="quick-reference"></a><a name="implementation-checkout-jobs"></a><a name="workflows"></a><a name="ci-status-badges"></a>
+```mermaid
+flowchart TB
+  PR[PR to main] --> Test[test.yml]
+  Push[push to main] --> VT[version-tag-main.yml]
+  VT --> Test
+  VT --> Tag[pubspec bump + tag vX.Y.Z+N]
+  Tag --> Manual{Manual Actions}
+  Manual --> FD[release-fdroid-app.yml]
+  Manual --> Rel[release-apk-aab-google-play.yml]
+  FD --> Fork[GitLab fdroiddata fork]
+  Rel --> GHRel[GitHub Release APK/AAB]
+```
+
+### 👀 Workflows at a glance <a name="workflow-reference"></a><a name="quick-reference"></a><a name="implementation-checkout-jobs"></a><a name="workflows"></a><a name="ci-status-badges"></a>
 
 #### 🧪 Test Workflow — [`test.yml`](../../.github/workflows/test.yml) <a name="tests-pr-main"></a>
 
@@ -87,17 +104,17 @@ Exact workflow titles in GitHub come from each file’s top-level `name:`. **[Re
 - **Output:** Signed APK + `.aab` + GitHub Release (single job; no intermediate artifact upload).
 - **Checkout / jobs:** One job runs **[`android-github-apk-aab-release`](../../.github/actions/android-github-apk-aab-release/action.yml)** end-to-end. The workflow passes **`with:`** for tag, artifact basename resolution, Flutter/Java channels, release template path, and title prefix ([Keystore](#keystore-configuration)).
 
-### Operator runbook <a name="operator-runbook"></a><a name="how-to-use"></a><a name="ci-on-main"></a><a name="fdroid-one-click"></a><a name="manual-release-only-option"></a><a name="testing-build-process"></a>
+### 📋 Operator runbook <a name="operator-runbook"></a><a name="how-to-use"></a><a name="ci-on-main"></a><a name="fdroid-one-click"></a><a name="manual-release-only-option"></a><a name="testing-build-process"></a>
 
 | Goal | Do this |
 |------|---------|
 | **CI on a PR to `main`** | Open/update the PR; [`test.yml`](../../.github/workflows/test.yml) runs ([`paths-ignore`](#shared-paths-ignore) still applies to changed files). |
 | **Version bump + tag after merge** | Push/merge to `main`; [`version-tag-main.yml`](../../.github/workflows/version-tag-main.yml) runs when paths are not all ignored ([workflow summaries](#workflow-reference)). |
-| **F-Droid fork branch** | **Actions** → **F-Droid fork branch (fdroiddata)** → optional **`target_ref`** (empty = latest tag). Use the **pipelines** (watch CI on **`FDROID_GITLAB_BRANCH`**) and **compare** links in the summary (baseline ref from **`FDROID_GITLAB_COMPARE_BASE_REF`** / **`FDROID_GITLAB_FORK_PARENT_REF`**); open a merge request to upstream manually when CI is green. |
-| **GitHub Release (APK / AAB)** | **Actions** → **Release on GitHub (APK/AAB files)** → **Run workflow** → set **`tag`**; optional **`release_artifact_basename`** or repo variable **`RELEASE_ARTIFACT_BASENAME`** for artifact filenames (default: GitHub **repository name**). Configure keystore secrets ([Keystore](#keystore-configuration)). |
+| **F-Droid fork branch** | **Actions** → **F-Droid fork branch (fdroiddata)** → optional **`target_ref`** (empty = latest tag). Requires [one-time configuration](../release/FDROID.md#one-time-configuration). Use **pipelines** / **compare** links in the summary; open upstream MR manually when CI is green. |
+| **GitHub Release (APK / AAB)** | **Actions** → **Release on GitHub (APK/AAB files)** → set **`tag`**; optional **`release_artifact_basename`**. Requires [release signing one-time configuration](../release/RELEASE_SIGNING.md#one-time-configuration). |
 | **Ad-hoc / manual test run** | **Actions** → pick a workflow that exposes **Run workflow** → run (e.g. [`test.yml`](../../.github/workflows/test.yml)). |
 
-### Versioning policy <a name="versioning-policy"></a>
+### 🏷️ Versioning policy <a name="versioning-policy"></a>
 
 Applies to **[`version-tag-main.yml`](../../.github/workflows/version-tag-main.yml)** on eligible **`push` to `main`**:
 
@@ -108,11 +125,11 @@ Applies to **[`version-tag-main.yml`](../../.github/workflows/version-tag-main.y
 | Push **does** change **`version:`** | **No** extra PATCH bump; align **`base+GITHUB_RUN_NUMBER`** to the new base only |
 | After the bot pushes | Bot commit uses **`[skip ci]`** — see [Skip / `push` behavior](#skip-and-push-behavior) |
 
-### Shared `paths-ignore` <a name="shared-paths-ignore"></a>
+### 🚫 Shared `paths-ignore` <a name="shared-paths-ignore"></a>
 
 [`test.yml`](../../.github/workflows/test.yml) (PRs) and [`version-tag-main.yml`](../../.github/workflows/version-tag-main.yml) (`push` to `main`) use the **same ignore list**. Change **both** YAML files together when you edit it.
 
-### Skip / `push` behavior (`[skip ci]`) <a name="skip-workflow"></a><a name="skip-and-push-behavior"></a>
+### ⏭️ Skip / `push` behavior (`[skip ci]`) <a name="skip-workflow"></a><a name="skip-and-push-behavior"></a>
 
 | Situation | What happens |
 |-----------|----------------|
@@ -132,11 +149,28 @@ Reusable steps under [`.github/actions/`](../../.github/actions/):
 | [`setup-java`](../../.github/actions/setup-java/action.yml) | JDK for Android APK/AAB builds. Used from **`android-github-apk-aab-release`**. |
 | [`android-github-apk-aab-release`](../../.github/actions/android-github-apk-aab-release/action.yml) | Checkout tag → Flutter + Java → keystore → **`flutter build`** APK + app bundle → verify → rename → release notes from template → duplicate guard → **`softprops/action-gh-release`**. Project-specific values come from workflow **`with:`** inputs. |
 | [`pubspec-bump-tag-push`](../../.github/actions/pubspec-bump-tag-push/action.yml) | Used by **[`version-tag-main.yml`](../../.github/workflows/version-tag-main.yml)** after tests: checkout, git bot config, **`pubspec`** bump (+`GITHUB_RUN_NUMBER`), commit suffix, push branch, annotated tag. Pass **`before_sha`**, **`checkout_token`**, and commit/tag message **`inputs`**. |
-## 🔐 Keystore (APK/AAB release workflow only) <a name="keystore-configuration"></a>
+## 🔧 One-time configuration <a name="one-time-configuration"></a>
+
+Configure these **once per repository** (or once per machine for local signing). Ongoing releases use the [operator runbook](#operator-runbook) only.
+
+| Topic | Doc |
+|-------|-----|
+| **Developer machine** (Flutter, SDK, `make dev-setup`) | [Setup](SETUP.md#one-time-configuration), [Quick start](QUICKSTART.md#one-time-configuration) |
+| **Optional `pre-commit` hook** | [Git hooks](GIT_HOOKS.md#one-time-configuration) |
+| **APK/AAB keystore** (GitHub Actions secrets) | [Release signing](../release/RELEASE_SIGNING.md#one-time-configuration) |
+| **F-Droid** (GitLab token, fork ID, fdroiddata fork) | [F-Droid](../release/FDROID.md#one-time-configuration) |
+
+### 🔐 Keystore (APK/AAB release workflow only) <a name="keystore-configuration"></a>
 
 The **`release-apk-aab-google-play.yml`** workflow decodes `KEYSTORE_BASE64` and writes `android/key.properties` for Gradle signing. The decoded keystore is written to a temp file named **`{RELEASE_ARTIFACT_BASENAME}-release-key.jks`** (see [Secrets and variables](#secrets-and-variables) for how that basename is chosen). **`test.yml`** does not use a keystore.
 
+### 🦊 F-Droid fork <a name="fdroid-one-time-configuration"></a>
+
+See **[F-Droid — One-time configuration](../release/FDROID.md#one-time-configuration)** (`GITLAB_TOKEN`, `GITLAB_FORK_PROJECT_ID`, optional `FDROID_*` variables).
+
 ## 🔑 Secrets and variables <a name="secrets-and-variables"></a>
+
+Reference for workflow env names (details under [One-time configuration](#one-time-configuration)):
 
 | Kind | Workflow / context | Names |
 |------|-------------------|--------|
@@ -170,7 +204,7 @@ The **`release-apk-aab-google-play.yml`** workflow decodes `KEYSTORE_BASE64` and
 ## 📚 Additional resources <a name="additional-resources"></a>
 
 - **[📖 Development guide](../../README.md)** — main entry
-- **[🔧 Setup](SETUP.md)** — environment
+- **[🔧 Setup](SETUP.md#one-time-configuration)** — developer machine (one-time configuration)
 - **[⚡ Quick start](QUICKSTART.md)** — first run
 - **[🔨 Makefile](QUICKSTART.md#makefile)** — commands
 - **[🎣 Git hooks](GIT_HOOKS.md)** — optional `pre-commit`

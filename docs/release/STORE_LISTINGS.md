@@ -1,6 +1,6 @@
 # 🏪 Store listings & screenshots (Play, Fastlane, F-Droid)
 
-## Text listings (source of truth)
+## 📝 Text listings (source of truth)
 
 Edit the **plain-text** files under:
 
@@ -14,11 +14,11 @@ For each locale (e.g. **`en-US`**, **`pl-PL`**) keep:
 
 No Markdown in these files: Play Console treats them as plain text.
 
-### Google Play Console
+### ▶️ Google Play Console
 
 Copy from the `.txt` files above, or use **Fastlane supply** / Play Developer API pointing at the same paths.
 
-### F-Droid (multiple languages)
+### 🦊 F-Droid (multiple languages)
 
 F-Droid reads **Fastlane / Triple-T** files from **your app’s source tree at the release revision** (see [All About Descriptions, Graphics, and Screenshots](https://f-droid.org/en/docs/All_About_Descriptions_Graphics_and_Screenshots/)). Texts in **`metadata/<packageId>.yml` on fdroiddata** override those files — Tune Tangler’s publish action and `.github/templates/fdroid/metadata_static.yml` omit `Summary` / `Description` / `Name` / `AutoName` so listings stay sourced from `fastlane/metadata/android/` here.
 
@@ -26,7 +26,7 @@ Add another folder under `fastlane/metadata/android/` for each extra locale (sam
 
 ---
 
-## Screenshots
+## 📸 Screenshots
 
 Captured files live next to the text metadata, under Fastlane **images** folders (Play / F-Droid):
 
@@ -43,7 +43,7 @@ Filenames from the script:
 `{file_prefix}-{device}-{theme}-{index}-{screen}.png`  
 (e.g. `tune-tangler-phone-light-1-main.png`) — **no language in the filename**; language is the parent folder.
 
-### Batch capture: `make screenshots`
+### 🖼️ Batch capture: `make screenshots`
 
 Full set: every key in **`locale_map`** (e.g. `en` → `en-US`, `pl` → `pl-PL`), themes light/dark, all screens from `tools/screenshots.json`.
 
@@ -60,7 +60,7 @@ make screenshots DEVICE_ID=emulator-5554 DEVICE_NAME=tablet7
 
 For each **app locale + theme** pair the script waits for **Enter** after switching locale/theme (adjust the app if needed, then press Enter).
 
-### Google Play requirements
+### 📏 Google Play requirements
 
 | Type | Minimum resolution |
 |------|---------------------|
@@ -70,14 +70,14 @@ For each **app locale + theme** pair the script waits for **Enter** after switch
 
 [Tablet optimization (Google)](https://support.google.com/googleplay/android-developer/answer/2617018)
 
-### Emulators
+### 📱 Emulators
 
 **Android Studio → Device Manager → Create Device**: pick a phone (e.g. Pixel 7), 7" tablet (e.g. Nexus 7, 1920×1200), or 10" (e.g. Pixel Tablet, 2560×1600). System image e.g. API 34.
 
 Start the AVD, install the app (`make run`), then e.g. `make screenshots DEVICE_NAME=tablet7`.  
 On a physical phone: power + volume down for a screenshot.
 
-### Single screenshot (ADB)
+### 📷 Single screenshot (ADB)
 
 Pick the right `images/` folder and locale, then for example:
 
