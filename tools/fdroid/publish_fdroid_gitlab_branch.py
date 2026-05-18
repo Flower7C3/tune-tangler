@@ -44,45 +44,15 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
+import sys
+
 import yaml
 
+_fdroid_tools = Path(__file__).resolve().parent
+if str(_fdroid_tools) not in sys.path:
+    sys.path.insert(0, str(_fdroid_tools))
 
-class _QuotedScalar:
-    """YAML scalar serialized quoted (AutoUpdateMode must not become a YAML null)."""
-
-    __slots__ = ("value",)
-
-    def __init__(self, value: str) -> None:
-        self.value = value
-
-
-class FdroidMetadataDumper(yaml.SafeDumper):
-    """Indent list items under mapping keys (fdroid lint / rewritemeta style)."""
-
-    def increase_indent(self, flow: bool = False, indentless: bool = False):
-        return super().increase_indent(flow, indentless=False)
-
-
-def _represent_quoted_scalar(dumper: yaml.SafeDumper, data: _QuotedScalar):
-    return dumper.represent_scalar("tag:yaml.org,2002:str", data.value, style="'")
-
-
-FdroidMetadataDumper.add_representer(_QuotedScalar, _represent_quoted_scalar)
-
-
-class _MaintainerNotesLiteral(str):
-    """Serialize as YAML literal block (|) like `fdroid rewritemeta`."""
-
-
-def _represent_maintainer_notes_literal(dumper: yaml.SafeDumper, data: _MaintainerNotesLiteral):
-    # Trailing newline → literal `|` (not strip-chomping `|-`) per fdroid rewritemeta.
-    text = str(data)
-    if not text.endswith("\n"):
-        text += "\n"
-    return dumper.represent_scalar("tag:yaml.org,2002:str", text, style="|")
-
-
-FdroidMetadataDumper.add_representer(_MaintainerNotesLiteral, _represent_maintainer_notes_literal)
+from fdroid_yaml_dump import dump_fdroid_metadata_yml  # noqa: E402
 
 
 def _repo_relative_path(root: Path, rel: str) -> Path:
@@ -121,48 +91,6 @@ _BUILD_KEY_ORDER = (
     "build",
 )
 
-# fdroidserver/metadata.py yaml_app_field_order (section breaks at '\n' entries).
-_METADATA_FIELD_ORDER = (
-    "Disabled",
-    "AntiFeatures",
-    "Categories",
-    "License",
-    "AuthorName",
-    "AuthorEmail",
-    "AuthorWebSite",
-    "WebSite",
-    "SourceCode",
-    "IssueTracker",
-    "Translation",
-    "Changelog",
-    "Donate",
-    "Liberapay",
-    "OpenCollective",
-    "Bitcoin",
-    "Litecoin",
-    "Name",
-    "AutoName",
-    "Summary",
-    "Description",
-    "RequiresRoot",
-    "RepoType",
-    "Repo",
-    "Binaries",
-    "Builds",
-    "AllowedAPKSigningKeys",
-    "MaintainerNotes",
-    "ArchivePolicy",
-    "AutoUpdateMode",
-    "UpdateCheckMode",
-    "UpdateCheckIgnore",
-    "VercodeOperation",
-    "UpdateCheckName",
-    "UpdateCheckData",
-    "CurrentVersion",
-    "CurrentVersionCode",
-    "NoSourceSince",
-)
-
 
 def _normalize_subdir_value(sd: Any) -> str | None:
     """schemas/metadata.json #/definitions/path: NOT (const '.' OR pattern '^\\./'). Omit key for repo root."""
@@ -177,18 +105,6 @@ def _normalize_subdir_value(sd: Any) -> str | None:
         inner = s[2:].lstrip("/")
         return inner or None
     return s.lstrip("/") or None
-
-
-def _canonical_metadata_document(doc: dict[str, Any]) -> dict[str, Any]:
-    """Match fdroid rewritemeta / yaml_app_field_order (MaintainerNotes directly after Builds)."""
-    ordered: dict[str, Any] = {}
-    for key in _METADATA_FIELD_ORDER:
-        if key in doc:
-            ordered[key] = doc[key]
-    for key, val in doc.items():
-        if key not in ordered:
-            ordered[key] = val
-    return ordered
 
 
 def _canonical_build(build: dict[str, Any]) -> dict[str, Any]:
@@ -248,8 +164,8 @@ def _fix_categories(doc: dict[str, Any]) -> None:
 
 
 def _normalize_maintainer_notes(doc: dict[str, Any], body: str) -> None:
-    """rewritemeta emits MaintainerNotes as a literal block (|), not folded single quotes."""
-    doc["MaintainerNotes"] = _MaintainerNotesLiteral(body.rstrip("\n"))
+    # Trailing newline → literal ``|`` (not strip-chomping ``|-``); matches fdroid rewritemeta.
+    doc["MaintainerNotes"] = body.rstrip("\n") + "\n"
 
 
 def _normalize_auto_update_mode(doc: dict[str, Any]) -> None:
@@ -262,12 +178,6 @@ def _normalize_update_check_mode(doc: dict[str, Any]) -> None:
     um = doc.get("UpdateCheckMode")
     if um is None or (isinstance(um, str) and um.strip() in ("", "None")):
         doc["UpdateCheckMode"] = "Tags"
-    elif um == "Tags":
-        doc["UpdateCheckMode"] = "Tags"
-    elif isinstance(um, str):
-        doc["UpdateCheckMode"] = _QuotedScalar(um)
-    else:
-        doc["UpdateCheckMode"] = _QuotedScalar(str(um))
 
 
 def _normalize_vercode_and_update_check(doc: dict[str, Any]) -> None:
@@ -316,62 +226,13 @@ def _normalize_metadata(
                 builds[i] = _canonical_build(b)
 
 
-def _insert_rewritemeta_blank_lines(lines: list[str]) -> list[str]:
-    """Blank line after IssueTracker before RepoType; after Repo before Builds (rewritemeta style)."""
-    out: list[str] = []
-    for i, line in enumerate(lines):
-        prev_non_empty = ""
-        j = i - 1
-        while j >= 0:
-            if lines[j].strip():
-                prev_non_empty = lines[j]
-                break
-            j -= 1
-        if line.startswith("RepoType:") and prev_non_empty.startswith("IssueTracker:"):
-            if out and out[-1].strip():
-                out.append("")
-        if line.startswith("Builds:") and prev_non_empty.startswith("Repo:"):
-            if out and out[-1].strip():
-                out.append("")
-        out.append(line)
-    return out
-
-
-def _insert_rewritemeta_build_blanks(body: str) -> str:
-    """fdroid rewritemeta inserts a blank line between each Builds list entry."""
-    return re.sub(
-        r"(\n      - [^\n]+target-platform=\"[^\"]+\")\n(  - versionName:)",
-        r"\1\n\n\2",
-        body,
-    )
-
-
-def _insert_rewritemeta_section_blanks(body: str) -> str:
-    """Blank line after MaintainerNotes literal block before ArchivePolicy (rewritemeta style)."""
-    return re.sub(
-        r"(MaintainerNotes: \|[-+]?\n(?:  .*\n)+)(?=\nArchivePolicy:)",
-        r"\1\n",
-        body,
-    )
-
-
-def _postprocess_rewritemeta_yaml(text: str) -> str:
-    """PyYAML differs from `fdroid rewritemeta` on None quoting and section spacing."""
-    lines = text.splitlines()
-    body = "\n".join(_insert_rewritemeta_blank_lines(lines)) + "\n"
-    body = re.sub(r"(?m)^AutoUpdateMode: ['\"]None['\"]\s*$", "AutoUpdateMode: None", body)
-    body = re.sub(r"(?m)^UpdateCheckMode: ['\"]None['\"]\s*$", "UpdateCheckMode: None", body)
-    # rewritemeta: one blank line between Builds block and MaintainerNotes (yaml_app_field_order).
-    body = re.sub(
-        r"^(Builds:\n(?:  .*\n)*?)(MaintainerNotes:)",
-        r"\1\n\2",
-        body,
-        flags=re.MULTILINE,
-    )
-    # PyYAML uses |+ for trailing newlines in literal blocks; fdroid rewritemeta uses |.
-    body = body.replace("MaintainerNotes: |+\n", "MaintainerNotes: |\n")
-    body = _insert_rewritemeta_build_blanks(body)
-    return _insert_rewritemeta_section_blanks(body)
+def _app_id_from_metadata_path(metadata_path: str) -> str:
+    name = Path(metadata_path.strip()).name
+    if name.endswith(".yml"):
+        return name[:-4]
+    if name.endswith(".yaml"):
+        return name[:-5]
+    raise SystemExit(f"FDROID_METADATA_PATH must end with .yml or .yaml, got {metadata_path!r}")
 
 
 def _env(name: str, default: str | None = None) -> str:
@@ -754,17 +615,10 @@ def _substitute_abi_builds(
     return builds
 
 
-def _dump_metadata(doc: dict[str, Any]) -> str:
-    doc = _canonical_metadata_document(doc)
-    raw = yaml.dump(
-        doc,
-        Dumper=FdroidMetadataDumper,
-        allow_unicode=True,
-        default_flow_style=False,
-        sort_keys=False,
-        width=120,
-    )
-    return _postprocess_rewritemeta_yaml(raw)
+def _dump_metadata(doc: dict[str, Any], app_id: str) -> str:
+    out = dict(doc)
+    out["id"] = app_id
+    return dump_fdroid_metadata_yml(out)
 
 
 # If present in fdroiddata metadata YAML, these override Fastlane/Triple-T files in the app
@@ -886,7 +740,8 @@ def main() -> None:
     _strip_listing_fields_for_fastlane(doc)
     _normalize_metadata(doc, vname, vcode, maintainer_body)
 
-    body_yaml = _dump_metadata(doc)
+    app_id = _app_id_from_metadata_path(metadata_path)
+    body_yaml = _dump_metadata(doc, app_id)
 
     print(f"Target fork branch: {branch}", flush=True)
 

@@ -1,7 +1,7 @@
 name: 'Publish F-Droid metadata to GitLab fork'
 description: >-
-  Resolve release ref, overlay the publish script from the default branch, install Python/PyYAML,
-  and run publish_fdroid_gitlab_branch.py (Flutter version from .metadata on the release tree).
+  Resolve release ref, overlay the publish script from the default branch, install PyYAML and
+  ruamel.yaml, and run publish_fdroid_gitlab_branch.py (YAML layout matches fdroid rewritemeta).
   Repository-specific defaults
   live in this action; the Python script stays free of app or project names.
 
@@ -125,9 +125,9 @@ runs:
       with:
         python-version: '3.12'
 
-    - name: '📦 PyYAML'
+    - name: '📦 Python deps (PyYAML + ruamel.yaml)'
       shell: bash
-      run: pip install pyyaml
+      run: pip install pyyaml 'ruamel.yaml>=0.18'
 
     - name: '🔐 Validate GitLab configuration'
       shell: bash
@@ -173,4 +173,5 @@ runs:
           export FDROID_GITLAB_COMPARE_BASE_REF="$IN_COMPARE"
         fi
         export GITHUB_WORKSPACE="${GITHUB_WORKSPACE}/app"
+        export PYTHONPATH="${GITHUB_WORKSPACE}/app/tools/fdroid${PYTHONPATH:+:$PYTHONPATH}"
         python3 "$SCRIPT_REL"
