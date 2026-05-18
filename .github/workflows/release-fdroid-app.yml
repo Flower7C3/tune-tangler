@@ -43,6 +43,5 @@ jobs:
           fdroid_metadata_path: ${{ vars.FDROID_METADATA_PATH }}
           fdroid_gitlab_branch: ${{ vars.FDROID_GITLAB_BRANCH }}
           fdroid_git_commit_subject_prefix: ${{ vars.FDROID_GIT_COMMIT_SUBJECT_PREFIX }}
-          fdroid_maintainer_notes_path: ${{ vars.FDROID_MAINTAINER_NOTES_PATH }}
           fdroid_gitlab_fork_parent_ref: ${{ vars.FDROID_GITLAB_FORK_PARENT_REF }}
           fdroid_gitlab_compare_base_ref: ${{ vars.FDROID_GITLAB_COMPARE_BASE_REF }}

@@ -11,7 +11,6 @@ Required env:
   FDROID_METADATA_PATH         — path under fork repo (e.g. metadata/<applicationId>.yml)
   FDROID_GITLAB_BRANCH         — branch name on the fork to push commits to
   FDROID_GIT_COMMIT_SUBJECT_PREFIX — first segment of Git commit subject (before ": version …")
-  FDROID_MAINTAINER_NOTES_PATH — repo-relative path to MaintainerNotes body (rewritemeta-style text file)
   FDROID_GITLAB_FORK_PARENT_REF — fork branch to branch from / read baseline metadata (usually master)
 
 Optional:
@@ -421,6 +420,7 @@ def _dedupe_builds_keep_last(builds: list[Any]) -> list[Any]:
 _FLUTTER_RELEASES_URL_DEFAULT = (
     "https://storage.googleapis.com/flutter_infra_release/releases/releases_linux.json"
 )
+_MAINTAINER_NOTES_REL = "tools/fdroid/maintainer_notes.txt"
 
 
 def _read_pubspec_version(root: Path) -> str:
@@ -581,13 +581,11 @@ def main() -> None:
     fork_parent_ref = _env("FDROID_GITLAB_FORK_PARENT_REF").strip()
     branch = _env("FDROID_GITLAB_BRANCH").strip()
     commit_subject_prefix = _env("FDROID_GIT_COMMIT_SUBJECT_PREFIX").strip()
-    maintainer_notes_rel = _env("FDROID_MAINTAINER_NOTES_PATH").strip()
     for label, val in (
         ("FDROID_METADATA_PATH", metadata_path),
         ("FDROID_GITLAB_FORK_PARENT_REF", fork_parent_ref),
         ("FDROID_GITLAB_BRANCH", branch),
         ("FDROID_GIT_COMMIT_SUBJECT_PREFIX", commit_subject_prefix),
-        ("FDROID_MAINTAINER_NOTES_PATH", maintainer_notes_rel),
     ):
         if not val:
             raise SystemExit(f"{label} must be non-empty")
@@ -600,7 +598,7 @@ def main() -> None:
         "https://gitlab.com/fdroid/fdroiddata"
     )
 
-    maintainer_body = _repo_relative_path(root, maintainer_notes_rel).read_text(encoding="utf-8")
+    maintainer_body = _repo_relative_path(root, _MAINTAINER_NOTES_REL).read_text(encoding="utf-8")
 
     commit_sha = _env("GITHUB_SHA")
     ref_name = os.environ.get("GITHUB_REF_NAME", "")

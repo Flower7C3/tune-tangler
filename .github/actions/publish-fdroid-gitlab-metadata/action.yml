@@ -28,10 +28,6 @@ inputs:
     description: 'Git commit subject prefix (before ": version (code) @ sha"); empty = Tune Tangler'
     required: false
     default: ''
-  fdroid_maintainer_notes_path:
-    description: 'Repo-relative path to MaintainerNotes body text file; empty = tools/fdroid/maintainer_notes.txt'
-    required: false
-    default: ''
   fdroid_gitlab_fork_parent_ref:
     description: 'Fork ref to read baseline metadata from and to branch new fork branches off; empty = master'
     required: false
@@ -108,17 +104,18 @@ runs:
         ref: ${{ steps.resolve.outputs.resolved_ref }}
         fetch-depth: 1
 
-    - name: '📌 Overlay publish script from default branch'
+    - name: '📌 Overlay F-Droid tooling from default branch'
       shell: bash
       env:
         DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-        SCRIPT_REL: ${{ inputs.publish_script_path }}
+        IN_TOOLING: ${{ inputs.fdroid_tooling_rel_path }}
       run: |
         set -euo pipefail
         DB="${DEFAULT_BRANCH}"
+        TOOLING="${IN_TOOLING:-tools/fdroid}"
         git fetch --depth=1 origin "$DB"
-        git checkout FETCH_HEAD -- "$SCRIPT_REL"
-        echo "Using \`${SCRIPT_REL}\` from \`origin/${DB}\` (app tree still \`${{ steps.resolve.outputs.resolved_ref }}\`)." >> "$GITHUB_STEP_SUMMARY"
+        git checkout FETCH_HEAD -- "$TOOLING"
+        echo "Using \`${TOOLING}/\` from \`origin/${DB}\` (app sources still \`${{ steps.resolve.outputs.resolved_ref }}\`)." >> "$GITHUB_STEP_SUMMARY"
 
     - name: '🐍 Setup Python'
       uses: actions/setup-python@v6
@@ -151,7 +148,6 @@ runs:
         IN_METADATA: ${{ inputs.fdroid_metadata_path }}
         IN_BRANCH: ${{ inputs.fdroid_gitlab_branch }}
         IN_PREFIX: ${{ inputs.fdroid_git_commit_subject_prefix }}
-        IN_NOTES: ${{ inputs.fdroid_maintainer_notes_path }}
         IN_FORK_PARENT: ${{ inputs.fdroid_gitlab_fork_parent_ref }}
         IN_COMPARE: ${{ inputs.fdroid_gitlab_compare_base_ref }}
         IN_TOOLING: ${{ inputs.fdroid_tooling_rel_path }}
@@ -163,13 +159,11 @@ runs:
         DEF_METADATA='metadata/pro.kwiatek.tune_tangler.yml'
         DEF_BRANCH='robot/tune-tangler'
         DEF_PREFIX='Tune Tangler'
-        DEF_NOTES='tools/fdroid/maintainer_notes.txt'
         DEF_FORK_PARENT='master'
         DEF_TOOLING='tools/fdroid'
         export FDROID_METADATA_PATH="${IN_METADATA:-$DEF_METADATA}"
         export FDROID_GITLAB_BRANCH="${IN_BRANCH:-$DEF_BRANCH}"
         export FDROID_GIT_COMMIT_SUBJECT_PREFIX="${IN_PREFIX:-$DEF_PREFIX}"
-        export FDROID_MAINTAINER_NOTES_PATH="${IN_NOTES:-$DEF_NOTES}"
         export FDROID_GITLAB_FORK_PARENT_REF="${IN_FORK_PARENT:-$DEF_FORK_PARENT}"
         export FDROID_TOOLING_REL_PATH="${IN_TOOLING:-$DEF_TOOLING}"
         if [ -n "${IN_COMPARE:-}" ]; then
