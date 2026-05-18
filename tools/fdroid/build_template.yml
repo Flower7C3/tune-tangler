@@ -10,7 +10,6 @@ rm:
   - ios
   - linux
   - macos
-  - web
   - windows
 prebuild:
   - echo "flutter.sdk=$$flutter$$" >> android/local.properties

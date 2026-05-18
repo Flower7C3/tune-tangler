@@ -107,6 +107,48 @@ _BUILD_KEY_ORDER = (
     "build",
 )
 
+# fdroidserver/metadata.py yaml_app_field_order (section breaks at '\n' entries).
+_METADATA_FIELD_ORDER = (
+    "Disabled",
+    "AntiFeatures",
+    "Categories",
+    "License",
+    "AuthorName",
+    "AuthorEmail",
+    "AuthorWebSite",
+    "WebSite",
+    "SourceCode",
+    "IssueTracker",
+    "Translation",
+    "Changelog",
+    "Donate",
+    "Liberapay",
+    "OpenCollective",
+    "Bitcoin",
+    "Litecoin",
+    "Name",
+    "AutoName",
+    "Summary",
+    "Description",
+    "RequiresRoot",
+    "RepoType",
+    "Repo",
+    "Binaries",
+    "Builds",
+    "AllowedAPKSigningKeys",
+    "MaintainerNotes",
+    "ArchivePolicy",
+    "AutoUpdateMode",
+    "UpdateCheckMode",
+    "UpdateCheckIgnore",
+    "VercodeOperation",
+    "UpdateCheckName",
+    "UpdateCheckData",
+    "CurrentVersion",
+    "CurrentVersionCode",
+    "NoSourceSince",
+)
+
 
 def _normalize_subdir_value(sd: Any) -> str | None:
     """schemas/metadata.json #/definitions/path: NOT (const '.' OR pattern '^\\./'). Omit key for repo root."""
@@ -121,6 +163,18 @@ def _normalize_subdir_value(sd: Any) -> str | None:
         inner = s[2:].lstrip("/")
         return inner or None
     return s.lstrip("/") or None
+
+
+def _canonical_metadata_document(doc: dict[str, Any]) -> dict[str, Any]:
+    """Match fdroid rewritemeta / yaml_app_field_order (MaintainerNotes directly after Builds)."""
+    ordered: dict[str, Any] = {}
+    for key in _METADATA_FIELD_ORDER:
+        if key in doc:
+            ordered[key] = doc[key]
+    for key, val in doc.items():
+        if key not in ordered:
+            ordered[key] = val
+    return ordered
 
 
 def _canonical_build(build: dict[str, Any]) -> dict[str, Any]:
@@ -257,14 +311,13 @@ def _postprocess_rewritemeta_yaml(text: str) -> str:
     body = "\n".join(_insert_rewritemeta_blank_lines(lines)) + "\n"
     body = re.sub(r"(?m)^AutoUpdateMode: ['\"]None['\"]\s*$", "AutoUpdateMode: None", body)
     body = re.sub(r"(?m)^UpdateCheckMode: ['\"]None['\"]\s*$", "UpdateCheckMode: None", body)
-    # rewritemeta: no blank line between last Builds[] command and MaintainerNotes.
+    # rewritemeta: one blank line between Builds block and MaintainerNotes (yaml_app_field_order).
     body = re.sub(
-        r"(      - \$\$flutter\$\$/bin/flutter build apk --release)\n\n+(MaintainerNotes:)",
+        r"^(Builds:\n(?:  .*\n)*?)(MaintainerNotes:)",
         r"\1\n\2",
         body,
         flags=re.MULTILINE,
     )
-    body = re.sub(r"\n\n+(MaintainerNotes:)", r"\n\1", body)
     # PyYAML uses |+ for trailing newlines in literal blocks; fdroid rewritemeta uses |.
     body = body.replace("MaintainerNotes: |+\n", "MaintainerNotes: |\n")
     return body
@@ -551,6 +604,7 @@ def _substitute_build_template(
 
 
 def _dump_metadata(doc: dict[str, Any]) -> str:
+    doc = _canonical_metadata_document(doc)
     raw = yaml.dump(
         doc,
         Dumper=FdroidMetadataDumper,
