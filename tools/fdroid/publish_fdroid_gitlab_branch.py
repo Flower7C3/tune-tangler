@@ -496,13 +496,60 @@ def _read_pubspec_version(root: Path) -> str:
     raise SystemExit("Could not find version: in pubspec.yaml")
 
 
+def _parse_dart_triple(version: str) -> tuple[int, int, int]:
+    m = re.match(r"^(\d+)\.(\d+)\.(\d+)", version.strip())
+    if not m:
+        return (0, 0, 0)
+    return int(m.group(1)), int(m.group(2)), int(m.group(3))
+
+
+def _read_pubspec_dart_sdk_min(root: Path) -> tuple[int, int, int] | None:
+    """Minimum Dart SDK from pubspec environment.sdk (e.g. ^3.9.0 -> (3, 9, 0))."""
+    pub = root / "pubspec.yaml"
+    for line in pub.read_text(encoding="utf-8").splitlines():
+        s = line.strip()
+        if not s.startswith("sdk:"):
+            continue
+        spec = s.split(":", 1)[1].strip().strip('"').strip("'")
+        m = re.match(r"^\^(\d+)\.(\d+)\.(\d+)$", spec)
+        if m:
+            return int(m.group(1)), int(m.group(2)), int(m.group(3))
+        m = re.match(r"^>=\s*(\d+)\.(\d+)\.(\d+)", spec)
+        if m:
+            return int(m.group(1)), int(m.group(2)), int(m.group(3))
+        return None
+    return None
+
+
+def _release_by_version(releases: list[dict[str, Any]], version: str) -> dict[str, Any] | None:
+    for r in releases:
+        if str(r.get("version", "")) == version:
+            return r
+    return None
+
+
+def _oldest_stable_flutter_for_dart(
+    releases: list[dict[str, Any]], min_dart: tuple[int, int, int]
+) -> str:
+    """Oldest stable Flutter whose bundled Dart satisfies pubspec (reproducible F-Droid builds)."""
+    for r in reversed(releases):
+        if r.get("channel") != "stable":
+            continue
+        if _parse_dart_triple(str(r.get("dart_sdk_version", ""))) >= min_dart:
+            return str(r["version"])
+    need = ".".join(str(x) for x in min_dart)
+    raise SystemExit(
+        f"No stable Flutter release in the index ships Dart SDK >= {need} (required by pubspec.yaml)."
+    )
+
+
 def _read_flutter_metadata_revision(root: Path) -> tuple[str, str]:
     """Return (git revision, channel) from Flutter's `.metadata` at the release tree."""
     meta_path = root / ".metadata"
     if not meta_path.is_file():
         raise SystemExit(
             "Missing .metadata at repo root. Run `flutter pub get` (or upgrade) with the target "
-            "Flutter SDK, then commit .metadata before publishing F-Droid metadata."
+            "Flutter SDK (`make sdk-upgrade`), then commit `.metadata` before publishing F-Droid metadata."
         )
     try:
         doc = yaml.safe_load(meta_path.read_text(encoding="utf-8"))
@@ -512,7 +559,7 @@ def _read_flutter_metadata_revision(root: Path) -> tuple[str, str]:
         raise SystemExit(".metadata must be a YAML mapping")
     version = doc.get("version")
     if not isinstance(version, dict):
-        raise SystemExit(".metadata is missing version.revision (run flutter pub get and commit .metadata)")
+        raise SystemExit(".metadata is missing version.revision (run `make sdk-upgrade` and commit `.metadata`)")
     revision = version.get("revision")
     if not isinstance(revision, str) or not re.match(r"^[0-9a-f]{40}$", revision.lower()):
         raise SystemExit(f".metadata version.revision must be a 40-char git hash, got {revision!r}")
@@ -543,7 +590,7 @@ def _flutter_version_for_revision(revision: str, channel: str, releases: list[di
     if not by_hash:
         raise SystemExit(
             f"Flutter revision {revision} from .metadata was not found in the releases index. "
-            "Upgrade Flutter, run `flutter pub get`, commit .metadata, and retry."
+            "Upgrade Flutter (`make sdk-upgrade`), commit `.metadata`, and retry."
         )
     for r in by_hash:
         if r.get("channel") == channel and r.get("version"):
@@ -557,9 +604,34 @@ def _flutter_version_for_revision(revision: str, channel: str, releases: list[di
 def _resolve_flutter_version(root: Path) -> str:
     revision, channel = _read_flutter_metadata_revision(root)
     releases = _fetch_flutter_releases_index(_FLUTTER_RELEASES_URL_DEFAULT)
-    version = _flutter_version_for_revision(revision, channel, releases)
+    from_metadata = _flutter_version_for_revision(revision, channel, releases)
+    min_dart = _read_pubspec_dart_sdk_min(root)
+
+    if min_dart is None:
+        print(
+            f"Flutter srclib {from_metadata} (revision {revision[:12]}…, channel {channel}) from .metadata",
+            flush=True,
+        )
+        return from_metadata
+
+    meta_rel = _release_by_version(releases, from_metadata)
+    meta_dart = _parse_dart_triple(str(meta_rel.get("dart_sdk_version", ""))) if meta_rel else (0, 0, 0)
+    if meta_dart >= min_dart:
+        print(
+            f"Flutter srclib {from_metadata} (Dart {meta_rel.get('dart_sdk_version') if meta_rel else '?'}) "
+            f"from .metadata; satisfies pubspec sdk",
+            flush=True,
+        )
+        return from_metadata
+
+    version = _oldest_stable_flutter_for_dart(releases, min_dart)
+    bumped = _release_by_version(releases, version)
     print(
-        f"Flutter srclib version {version} (revision {revision[:12]}…, channel {channel}) from .metadata",
+        f"::warning::.metadata → Flutter {from_metadata} (Dart "
+        f"{meta_rel.get('dart_sdk_version') if meta_rel else '?'}), below pubspec minimum "
+        f"{'.'.join(map(str, min_dart))}+; F-Droid srclib uses Flutter {version} "
+        f"(Dart {bumped.get('dart_sdk_version') if bumped else '?'}). "
+        "Run `make sdk-upgrade` and commit `.metadata`.",
         flush=True,
     )
     return version

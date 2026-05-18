@@ -261,9 +261,12 @@ pub-upgrade: ##MAINTENANCE## Aggressive: `flutter pub upgrade --major-versions` 
 	fi
 
 .PHONY: sdk-upgrade
-sdk-upgrade: ##MAINTENANCE## Upgrade Flutter SDK
-	@echo "$(FORMAT_HIGHLIGHT)$(ICON_UPGRADE) Upgrading Flutter SDK...$(FORMAT_RESET)"
+sdk-upgrade: ##MAINTENANCE## `flutter upgrade`, `flutter pub get`, sync `.metadata` (F-Droid / CI)
+	@echo "$(FORMAT_HIGHLIGHT)$(ICON_UPGRADE) Upgrading Flutter SDK (SDK + deps + .metadata)...$(FORMAT_RESET)"
 	@flutter upgrade
+	@$(MAKE) pub-get
+	@echo "$(FORMAT_HIGHLIGHT)$(ICON_INFO) Syncing .metadata with Flutter SDK...$(FORMAT_RESET)"
+	@bash tools/sync-flutter-metadata.sh
 
 # =============================================================================
 # UTILITIES

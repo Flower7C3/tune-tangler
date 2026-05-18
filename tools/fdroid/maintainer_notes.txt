@@ -1,6 +1,6 @@
 MIT. Sonic (Apache 2.0) in android/app/src/main/java/sonic/.
 
-Build: Flutter srclib (version from .metadata at the release commit).
+Build: Flutter srclib (from .metadata at the release commit, or oldest stable Flutter whose Dart SDK satisfies pubspec environment.sdk).
 
 Listings (Summary/Description/screenshots): Fastlane layout in the app repo
 (fastlane/metadata/android/) — do not duplicate those keys in this YAML.
