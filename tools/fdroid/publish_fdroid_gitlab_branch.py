@@ -257,10 +257,9 @@ def _postprocess_rewritemeta_yaml(text: str) -> str:
     body = "\n".join(_insert_rewritemeta_blank_lines(lines)) + "\n"
     body = re.sub(r"(?m)^AutoUpdateMode: ['\"]None['\"]\s*$", "AutoUpdateMode: None", body)
     body = re.sub(r"(?m)^UpdateCheckMode: ['\"]None['\"]\s*$", "UpdateCheckMode: None", body)
-    # Blank line after last build: command before MaintainerNotes (rewritemeta style).
     body = re.sub(
-        r"^(      - flutter build apk --release)\n(MaintainerNotes:)",
-        r"\1\n\n\2",
+        r"^(      - \$\$flutter\$\$/bin/flutter build apk --release)\n\n(MaintainerNotes:)",
+        r"\1\n\2",
         body,
         flags=re.MULTILINE,
     )
