@@ -397,7 +397,17 @@ def _dedupe_builds_keep_last(builds: list[Any]) -> list[Any]:
 _FLUTTER_RELEASES_URL_DEFAULT = (
     "https://storage.googleapis.com/flutter_infra_release/releases/releases_linux.json"
 )
-_MAINTAINER_NOTES_REL = "tools/fdroid/maintainer_notes.txt"
+
+
+def _load_metadata_static(static_path: Path) -> dict[str, Any]:
+    """Bootstrap skeleton and single source for MaintainerNotes on every publish."""
+    doc = yaml.safe_load(static_path.read_text(encoding="utf-8"))
+    if not isinstance(doc, dict):
+        raise SystemExit(f"{static_path}: expected YAML mapping")
+    notes = doc.get("MaintainerNotes")
+    if not isinstance(notes, str) or not notes.strip():
+        raise SystemExit(f"{static_path}: MaintainerNotes must be a non-empty string")
+    return doc
 
 
 def _read_pubspec_version(root: Path) -> str:
@@ -669,8 +679,6 @@ def main() -> None:
         "https://gitlab.com/fdroid/fdroiddata"
     )
 
-    maintainer_body = _repo_relative_path(root, _MAINTAINER_NOTES_REL).read_text(encoding="utf-8")
-
     commit_sha = _env("GITHUB_SHA")
     ref_name = os.environ.get("GITHUB_REF_NAME", "")
     _assert_flutter_sdk_pin_matches_metadata(root)
@@ -693,6 +701,8 @@ def main() -> None:
     tooling = _repo_relative_path(root, tooling_rel)
     tpl_path = tooling / "build_template.yml"
     static_path = tooling / "metadata_static.yml"
+    static_doc = _load_metadata_static(static_path)
+    maintainer_body = str(static_doc["MaintainerNotes"])
     build_template_text = tpl_path.read_text(encoding="utf-8")
     new_builds = _substitute_abi_builds(
         build_template_text,
@@ -704,11 +714,7 @@ def main() -> None:
 
     existing_yaml = _get_file(api_base, token, fork_id, metadata_path, ref=fork_parent_ref)
     if existing_yaml is None:
-        static_doc = yaml.safe_load(static_path.read_text(encoding="utf-8"))
-        if not isinstance(static_doc, dict):
-            raise SystemExit("metadata_static.yml must be a mapping")
-        doc = static_doc
-        doc["Builds"] = new_builds
+        doc = {**static_doc, "Builds": new_builds}
     else:
         doc = yaml.safe_load(existing_yaml)
         if not isinstance(doc, dict):

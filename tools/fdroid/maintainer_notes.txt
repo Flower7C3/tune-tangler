@@ -1,7 +1,0 @@
-MIT. Sonic (Apache 2.0) in android/app/src/main/java/sonic/.
-
-Build: Flutter srclib @stable, checkout `flutter_sdk_version` from pubspec.yaml; per-ABI APKs
-(--split-per-abi) with versionCode = pubspec build * 10 + {1,2,3} (see android/app/build.gradle).
-
-Listings (Summary/Description/screenshots): Fastlane layout in the app repo
-(fastlane/metadata/android/) — do not duplicate those keys in this YAML.
