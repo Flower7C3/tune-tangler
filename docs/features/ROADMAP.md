@@ -1,5 +1,7 @@
 # 🗺️ Tune Tangler — roadmap
 
+> Planned and deferred work — what’s next for Tune Tangler.
+
 ## 📋 Table of contents
 
 - [🎯 Planned work](#planned-work)

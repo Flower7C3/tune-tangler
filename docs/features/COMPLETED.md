@@ -1,5 +1,7 @@
 # ✅ Shipped items (with commits)
 
+> Shipped features and milestones, with links to the commits that introduced them.
+
 - Performance work (throttling, lazy loading, multi–`ValueListenable`):  
   [de16e9e](https://github.com/Flower7C3/tune-tangler/commit/de16e9e),  
   [d71fd92](https://github.com/Flower7C3/tune-tangler/commit/d71fd92),  

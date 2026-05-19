@@ -1,5 +1,7 @@
 # Agent / assistant rules (Tune Tangler)
 
+> Where AI assistant rules live and how to edit them for this repository.
+
 **Canonical rules** for AI assistants (including Cursor) live under **`.cursor/rules/`** as `.mdc` files. Each file sets `alwaysApply` / `globs` in YAML frontmatter — do not duplicate long policy text here; **edit the `.mdc` files**.
 
 | File | Role |

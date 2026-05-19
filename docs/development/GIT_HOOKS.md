@@ -1,5 +1,7 @@
 # 🎣 Git hooks in Tune Tangler
 
+> Optional local Git hooks for formatting and checks before each commit.
+
 ## 📋 Table of contents
 
 - [🔧 One-time configuration](#one-time-configuration)

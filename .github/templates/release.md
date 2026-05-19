@@ -1,3 +1,5 @@
+> Official release builds — pick an APK for your device’s ABI (see links below).
+
 ### 🔧 Build Info
 
 - **Flutter Version:** {{ FLUTTER_VERSION }}

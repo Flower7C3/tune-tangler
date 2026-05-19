@@ -1,6 +1,6 @@
 # 🚀 GitHub workflows guide
 
-> GitHub Actions for Tune Tangler
+> CI and release automation — GitHub Actions workflows for Tune Tangler.
 
 ## 📋 Table of contents
 

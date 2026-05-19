@@ -1,6 +1,6 @@
 # 🎨 Icon Generation System
 
-This document describes the automated icon generation system for TuneTangler.
+> Generate app icons and splash images from SVG templates and YAML config.
 
 ## 📋 Table of contents
 

@@ -1,6 +1,6 @@
 # 🔧 Developer environment setup
 
-> **One-time configuration** per developer machine — detailed environment setup for Tune Tangler
+> One-time developer machine setup — Flutter, Android, signing, and tooling for Tune Tangler.
 
 ## 📋 Table of contents
 

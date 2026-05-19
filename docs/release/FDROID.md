@@ -1,6 +1,6 @@
 # 🦊 F-Droid publication (fdroiddata)
 
-> Tune Tangler — `applicationId`: **`pro.kwiatek.tune_tangler`**, **MIT** ([`LICENSE`](../../LICENSE)).
+> Publish Tune Tangler on F-Droid — metadata, CI, and merge requests to fdroiddata.
 
 F-Droid **builds and signs** APKs from source. This repository does **not** ship binaries to F-Droid directly: it maintains **metadata** for the fdroiddata index and pushes updates to **your GitLab fork**, then you open a **merge request** to upstream when CI is green.
 

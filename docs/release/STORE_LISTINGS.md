@@ -1,5 +1,7 @@
 # 🏪 Store listings & screenshots (Play, Fastlane, F-Droid)
 
+> Maintain Play Store and F-Droid listing text and screenshot assets via Fastlane.
+
 ## 📝 Text listings (source of truth)
 
 Edit the **plain-text** files under:
