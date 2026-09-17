@@ -26,6 +26,9 @@ ICON_EMULATOR := 🖥
 ICON_UPGRADE := ⬆
 ICON_HELP := ❓
 
+ANDROID_SDK := $(HOME)/Library/Android/sdk
+ADB := $(ANDROID_SDK)/platform-tools/adb
+
 define choose-device
 	DEVICES=($$(adb devices | grep -E "^[^[:space:]]+[[:space:]]+device" | awk "{print \$$1}")); \
 	if [ $${#DEVICES[@]} -eq 0 ]; then \
@@ -67,6 +70,25 @@ define choose-emulator
 		fi; \
 	fi; \
 	echo "$(COLOR_BLUE)$(ICON_INFO) Selected $(FORMAT_BOLD)$$EMULATOR$(FORMAT_RESET)$(COLOR_BLUE) emulator$(FORMAT_RESET)"
+endef
+
+define wait-for-android
+	echo "$(COLOR_BLUE)$(ICON_INFO) Waiting for Android device...$(FORMAT_RESET)"; \
+	$(ADB) wait-for-device; \
+	i=0; \
+	until [ "$$($(ADB) shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; do \
+		i=$$((i+1)); \
+		if [ $$i -gt 90 ]; then \
+			echo "$(COLOR_RED)$(ICON_ERROR) Emulator boot timeout$(FORMAT_RESET)"; \
+			exit 1; \
+		fi; \
+		sleep 2; \
+	done; \
+	echo "$(COLOR_GREEN)$(ICON_CHECK) Android ready$(FORMAT_RESET)"
+endef
+
+define running-emulator
+	$(ADB) devices | awk '/^emulator-/{print $$1; exit}'
 endef
 
 .PHONY: help
@@ -134,7 +156,7 @@ lint: ##QA## Check code style
 .PHONY: run
 run: ##BUILD## Run app in debug mode. Options: `DEVICE=`
 	@echo "$(FORMAT_HIGHLIGHT)$(ICON_ROCKET) Running app in $(FORMAT_BOLD)debug$(FORMAT_RESET)$(FORMAT_HIGHLIGHT) build type...$(FORMAT_RESET)"
-	@flutter run --debug
+	@flutter run --debug $(if $(DEVICE),-d $(DEVICE))
 
 .PHONY: build-apk
 build-apk: ##BUILD## Build APK in debug mode
@@ -213,17 +235,30 @@ list-emulators: ##DEVICE## Show available emulators
 start-emulator: ##DEVICE## Start emulator. Options: `EMULATOR=`
 	@EMULATOR=$(EMULATOR); \
 	$(choose-emulator); \
-	echo "$(COLOR_BLUE)$(ICON_INFO) Starting $(FORMAT_BOLD)$$EMULATOR$(FORMAT_RESET)$(COLOR_BLUE) emulator...$(FORMAT_RESET)"; \
-	flutter emulators --launch $$EMULATOR
+	RUNNING=$$($(running-emulator)); \
+	if [ -n "$$RUNNING" ]; then \
+		echo "$(COLOR_YELLOW)$(ICON_WARN) Emulator already running ($$RUNNING)$(FORMAT_RESET)"; \
+	else \
+		echo "$(COLOR_BLUE)$(ICON_INFO) Starting $(FORMAT_BOLD)$$EMULATOR$(FORMAT_RESET)$(COLOR_BLUE) emulator...$(FORMAT_RESET)"; \
+		flutter emulators --launch $$EMULATOR; \
+	fi; \
+	$(wait-for-android)
 
 .PHONY: run-emulator
 run-emulator: ##DEVICE## Run app on emulator. Options: `EMULATOR=`
 	@EMULATOR=$(EMULATOR); \
 	$(choose-emulator); \
-	echo "$(COLOR_BLUE)$(ICON_INFO) Starting $(FORMAT_BOLD)$$EMULATOR$(FORMAT_RESET)$(COLOR_BLUE) emulator and running app...$(FORMAT_RESET)"; \
-	flutter emulators --launch $$EMULATOR; \
-	echo "$(COLOR_GREEN)$(ICON_CHECK) Emulator $(FORMAT_BOLD)$$EMULATOR$(FORMAT_RESET)$(COLOR_GREEN) started! Running app...$(FORMAT_RESET)"; \
-	make run
+	RUNNING=$$($(running-emulator)); \
+	if [ -n "$$RUNNING" ]; then \
+		echo "$(COLOR_YELLOW)$(ICON_WARN) Emulator already running ($$RUNNING)$(FORMAT_RESET)"; \
+	else \
+		echo "$(COLOR_BLUE)$(ICON_INFO) Starting $(FORMAT_BOLD)$$EMULATOR$(FORMAT_RESET)$(COLOR_BLUE) emulator and running app...$(FORMAT_RESET)"; \
+		flutter emulators --launch $$EMULATOR; \
+	fi; \
+	$(wait-for-android); \
+	DEVICE=$$($(running-emulator)); \
+	echo "$(COLOR_GREEN)$(ICON_CHECK) Running app on $$DEVICE...$(FORMAT_RESET)"; \
+	$(MAKE) run DEVICE=$$DEVICE
 
 # =============================================================================
 # MAINTENANCE
@@ -278,7 +313,7 @@ gen-l10n: ##UTILITIES## Generate l10n files
 	@flutter gen-l10n
 
 .PHONY: gen-assets
-gen-assets: ##UTILITIES## Generate all icons and splash screens from SVG. Requires: `rsvg-convert` `jq` `sips`
+gen-assets: ##UTILITIES## Generate all icons and splash screens from SVG. Requires: `rsvg-convert` `jq` `python3` and `sips` or ImageMagick
 	@bash tools/generate-icons.sh
 
 .PHONY: screenshots
