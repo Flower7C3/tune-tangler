@@ -986,7 +986,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpScreenMessageGridScreenContent.
   ///
   /// In en, this message translates to:
-  /// **'Each colored block is a quick control. Tap it, or — with a keyboard connected — press the matching shortcut key. Want sliders and finer options? Hold the block — or, with an external keyboard connected — press your shortcut together with Control \$[controlKey] to open track details. Set each track’s shortcut in its details.\n\nEach grid row also has start/stop for that row and a “⋮” menu with bulk actions for every track in that row (playback mode, level, balance, speed, trim resets, delete that row’s recordings).\n\nIn the side menu, pick a preset shortcut map for your keyboard: standard (PC-style, flexible grid) or the 24-key 6×4 layout.'**
+  /// **'Each colored block is a quick control. Tap it, or — with a keyboard connected — press the matching shortcut key. Want sliders and finer options? Hold the block — or, with an external keyboard connected — press your shortcut together with Control \$[controlKey] (Command ⌘ on Mac) to open track details. Set each track’s shortcut in its details.\n\nEach grid row also has start/stop for that row and a “⋮” menu with bulk actions for every track in that row (playback mode, level, balance, speed, trim resets, delete that row’s recordings).\n\nIn the side menu, pick a preset shortcut map for your keyboard: standard (PC-style, flexible grid) or the 24-key 6×4 layout.'**
   String get helpScreenMessageGridScreenContent;
 
   /// No description provided for @helpScreenMessageDetailsScreenTitle.

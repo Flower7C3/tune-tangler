@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:tune_tangler/entity/track.dart';
-import 'package:tune_tangler/src/icon_optimization_service.dart';
 
 import '../config/app_global_config.dart';
 import '../config/app_icon.dart';
@@ -87,8 +86,8 @@ class UIHelper {
     bool? dense,
   }) => statusWidgetTile(
     Icon(
-      IconOptimizationService().getOptimizedIcon(icon),
-      size: iconSize ?? IconOptimizationService().getOptimizedIconSize(context, IconSize.medium),
+      icon,
+      size: iconSize ?? IconTheme.of(context).size ?? 24,
       color: iconColor,
     ),
     text,
@@ -141,8 +140,8 @@ class UIHelper {
     children: [
       if (iconAlignment == IconAlignment.start)
         Icon(
-          IconOptimizationService().getOptimizedIcon(icon),
-          size: iconSize ?? IconOptimizationService().getOptimizedIconSize(context, IconSize.medium),
+          icon,
+          size: iconSize ?? IconTheme.of(context).size ?? 24,
           color: iconColor,
         ),
       if (iconAlignment == IconAlignment.start) SizedBox(width: separatorSize),
@@ -160,8 +159,8 @@ class UIHelper {
       if (iconAlignment == IconAlignment.end) SizedBox(width: separatorSize),
       if (iconAlignment == IconAlignment.end)
         Icon(
-          IconOptimizationService().getOptimizedIcon(icon),
-          size: iconSize ?? IconOptimizationService().getOptimizedIconSize(context, IconSize.medium),
+          icon,
+          size: iconSize ?? IconTheme.of(context).size ?? 24,
           color: iconColor,
         ),
     ],
@@ -226,6 +225,12 @@ class UIHelper {
     ),
   );
 
+  static const double helpMinTextScale = 1.0;
+  static const double helpMaxTextScale = 1.6;
+
+  static TextScaler helpTextScaler(TextScaler input) =>
+      input.clamp(minScaleFactor: helpMinTextScale, maxScaleFactor: helpMaxTextScale);
+
   void aboutDialog(
     PackageInfo packageInfo,
     List<Widget> content, {
@@ -233,13 +238,41 @@ class UIHelper {
     String? applicationVersion,
     String? applicationLegalese,
     Widget? applicationIcon,
-  }) => showAboutDialog(
-    context: context,
-    applicationName: applicationName ?? packageInfo.appName,
-    applicationVersion: applicationVersion ?? "${packageInfo.version} (${packageInfo.buildNumber})",
-    applicationLegalese: applicationLegalese,
-    applicationIcon: applicationIcon,
-    children: content.toList(),
+  }) {
+    final media = MediaQuery.of(context);
+    showAboutDialog(
+      context: context,
+      applicationName: applicationName ?? packageInfo.appName,
+      applicationVersion: applicationVersion ?? "${packageInfo.version} (${packageInfo.buildNumber})",
+      applicationLegalese: applicationLegalese,
+      applicationIcon: applicationIcon,
+      children: [
+        MediaQuery(
+          data: media.copyWith(textScaler: helpTextScaler(media.textScaler)),
+          child: DefaultTextStyle.merge(
+            style: const TextStyle(height: 1.35),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: content,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget helpSection(String title, List<Widget> children) => Semantics(
+    header: true,
+    label: title,
+    child: ExpansionTile(
+      title: Text(title),
+      children: children,
+    ),
+  );
+
+  Widget helpLegend(Widget leading, String label) => Semantics(
+    label: label,
+    child: ExcludeSemantics(child: statusWidgetTile(leading, label)),
   );
 
   void alertDialog(
@@ -504,22 +537,27 @@ class UIHelper {
     ),
   );
 
-  Widget helpTrackState(TrackState state, String message) => RepaintBoundary(
-    child: AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      padding: EdgeInsets.zero,
-      color: AppGlobalConfig.trackState.color(
-        state,
-        context: context,
-        domain: ConfigItemPropertyDomain.backgroundColor,
-      ),
-      child: statusIconTile(
-        AppGlobalConfig.trackState.icon(state),
-        message,
-        textColor: AppGlobalConfig.trackState.color(
-          state,
-          context: context,
-          domain: ConfigItemPropertyDomain.foregroundColor,
+  Widget helpTrackState(TrackState state, String message) => Semantics(
+    label: message,
+    child: ExcludeSemantics(
+      child: RepaintBoundary(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          padding: EdgeInsets.zero,
+          color: AppGlobalConfig.trackState.color(
+            state,
+            context: context,
+            domain: ConfigItemPropertyDomain.backgroundColor,
+          ),
+          child: statusIconTile(
+            AppGlobalConfig.trackState.icon(state),
+            message,
+            textColor: AppGlobalConfig.trackState.color(
+              state,
+              context: context,
+              domain: ConfigItemPropertyDomain.foregroundColor,
+            ),
+          ),
         ),
       ),
     ),
@@ -1051,7 +1089,16 @@ class UIHelper {
         String key = exp.allMatches(template).elementAt(matchIndex).group(1)!;
         if (data.containsKey(key)) {
           if (data[key] is IconData) {
-            spans.add(WidgetSpan(child: Icon(data[key], size: iconSize)));
+            spans.add(
+              WidgetSpan(
+                alignment: PlaceholderAlignment.middle,
+                child: Semantics(
+                  label: key,
+                  image: true,
+                  child: Icon(data[key] as IconData, size: iconSize),
+                ),
+              ),
+            );
           } else {
             spans.add(TextSpan(text: data[key].toString()));
           }

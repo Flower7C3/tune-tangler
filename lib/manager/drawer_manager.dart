@@ -731,156 +731,113 @@ class DrawerManager {
 
   Future<void> _helpDialog() async {
     List<Widget> details = [
-      ExpansionTile(
-        title: Text(_trans.helpScreenMessageAboutTitle),
-        children: [Text(_trans.helpScreenMessageAboutContent)],
-      ),
-      ExpansionTile(
-        title: Text(_trans.helpScreenMessageGridScreenTitle),
-        children: [
-          _uiHelper.buildRichText(
-            _trans.helpScreenMessageGridScreenContent,
-            data: {'controlKey': Icons.keyboard_control_key},
+      _uiHelper.helpSection(_trans.helpScreenMessageAboutTitle, [
+        Text(_trans.helpScreenMessageAboutContent),
+      ]),
+      _uiHelper.helpSection(_trans.helpScreenMessageGridScreenTitle, [
+        _uiHelper.buildRichText(
+          _trans.helpScreenMessageGridScreenContent,
+          data: {'controlKey': Icons.keyboard_control_key},
+        ),
+      ]),
+      _uiHelper.helpSection(_trans.helpScreenMessageDetailsScreenTitle, [
+        _uiHelper.buildRichText(
+          _trans.helpScreenMessageDetailsScreenContent,
+          data: {
+            'recordingClip': AppIcon.recordingClipSlider,
+            'trackPlaybackMode': AppIcon.trackPlaybackMode,
+            'trackPlaybackVolume': AppIcon.trackPlaybackVolume,
+            'trackPlaybackBalance': AppIcon.trackPlaybackBalance,
+            'trackPlaybackSpeed': AppIcon.trackPlaybackSpeed,
+            'trackName': AppIcon.trackName,
+            'trackKeyboardKey': AppIcon.trackKeyboardKey,
+            'trackRecordingMove': AppIcon.trackRecordingMove,
+            'trackRecordingImport': AppIcon.trackRecordingImport,
+            'trackRecordingShare': AppIcon.trackRecordingShare,
+            'deleteForever': AppIcon.deleteForever,
+          },
+        ),
+      ]),
+      _uiHelper.helpSection(_trans.helpScreenMessageTrackStates, [
+        _uiHelper.buildRichText(_trans.helpScreenMessageTrackStatesInfo, data: {}),
+        _uiHelper.helpTrackState(TrackState.empty, _trans.stateEmpty),
+        _uiHelper.helpTrackState(TrackState.recording, _trans.stateRecording),
+        _uiHelper.helpTrackState(TrackState.processing, _trans.stateProcessing),
+        _uiHelper.helpTrackState(TrackState.idle, _trans.stateIdle),
+        _uiHelper.helpTrackState(TrackState.playing, _trans.statePlaying),
+        _uiHelper.helpTrackState(TrackState.paused, _trans.statePaused),
+      ]),
+      _uiHelper.helpSection(_trans.helpScreenMessageTrackIcons, [
+        _uiHelper.buildRichText(_trans.helpScreenMessageTrackIconsInfo, data: {}),
+        _uiHelper.helpLegend(
+          AppIcon.trackKeyboardKeyBox(
+            'x',
+            size: Theme.of(_context).textTheme.titleMedium!.fontSize!,
+            backgroundColor: Theme.of(_context).colorScheme.primaryContainer,
+            foregroundColor: Theme.of(_context).colorScheme.primary,
           ),
-        ],
-      ),
-      ExpansionTile(
-        title: Text(_trans.helpScreenMessageDetailsScreenTitle),
-        children: [
-          _uiHelper.buildRichText(
-            _trans.helpScreenMessageDetailsScreenContent,
-            data: {
-              'recordingClip': AppIcon.recordingClipSlider,
-              'trackPlaybackMode': AppIcon.trackPlaybackMode,
-              'trackPlaybackVolume': AppIcon.trackPlaybackVolume,
-              'trackPlaybackBalance': AppIcon.trackPlaybackBalance,
-              'trackPlaybackSpeed': AppIcon.trackPlaybackSpeed,
-              'trackName': AppIcon.trackName,
-              'trackKeyboardKey': AppIcon.trackKeyboardKey,
-              'trackRecordingMove': AppIcon.trackRecordingMove,
-              'trackRecordingImport': AppIcon.trackRecordingImport,
-              'trackRecordingShare': AppIcon.trackRecordingShare,
-              'deleteForever': AppIcon.deleteForever,
-            },
-          ),
-        ],
-      ),
-      ExpansionTile(
-        title: Text(_trans.helpScreenMessageTrackStates),
-        children: [
-          _uiHelper.buildRichText(_trans.helpScreenMessageTrackStatesInfo, data: {}),
-          _uiHelper.helpTrackState(TrackState.empty, _trans.stateEmpty),
-          _uiHelper.helpTrackState(TrackState.recording, _trans.stateRecording),
-          _uiHelper.helpTrackState(TrackState.processing, _trans.stateProcessing),
-          _uiHelper.helpTrackState(TrackState.idle, _trans.stateIdle),
-          _uiHelper.helpTrackState(TrackState.playing, _trans.statePlaying),
-          _uiHelper.helpTrackState(TrackState.paused, _trans.statePaused),
-        ],
-      ),
-      ExpansionTile(
-        title: Text(_trans.helpScreenMessageTrackIcons),
-        children: [
-          _uiHelper.buildRichText(_trans.helpScreenMessageTrackIconsInfo, data: {}),
-          _uiHelper.statusWidgetTile(
-            AppIcon.trackKeyboardKeyBox(
-              'x',
-              size: Theme.of(_context).textTheme.titleMedium!.fontSize!,
-              backgroundColor: Theme.of(_context).colorScheme.primaryContainer,
-              foregroundColor: Theme.of(_context).colorScheme.primary,
-            ),
-            _trans.theKeyboardKey.toLowerCase(),
-          ),
-          _uiHelper.statusIconTile(AppIcon.trackAudioSourceRecorded, _trans.theAudioSourceRecorded.toLowerCase()),
-          _uiHelper.statusIconTile(AppIcon.trackAudioSourceImported, _trans.theAudioSourceImported.toLowerCase()),
-          _uiHelper.statusIconTile(AppIcon.trackPlaybackVolume, _trans.thePlaybackVolume.toLowerCase()),
-          _uiHelper.statusIconTile(
-            AppIcon.trackPlaybackBalanceLeft,
-            _trans.helpTrackIconBalanceLeftLegend,
-          ),
-          _uiHelper.statusIconTile(
-            AppIcon.trackPlaybackBalanceCenter,
-            _trans.helpTrackIconBalanceCenterLegend,
-          ),
-          _uiHelper.statusIconTile(
-            AppIcon.trackPlaybackBalanceRight,
-            _trans.helpTrackIconBalanceRightLegend,
-          ),
-          _uiHelper.statusIconTile(
-            AppIcon.trackPlaybackStartAtPosition,
-            _trans.helpTrackIconPlaybackStartTrimLegend,
-          ),
-          _uiHelper.statusIconTile(
-            AppIcon.trackPlaybackEndAtPosition,
-            _trans.helpTrackIconPlaybackEndTrimLegend,
-          ),
-          _uiHelper.statusIconTile(
-            AppIcon.trackSinglePlaybackMode,
-            _trans.helpTrackIconSinglePlaybackModeLegend,
-          ),
-          _uiHelper.statusIconTile(
-            AppIcon.trackRepeatPlaybackMode,
-            _trans.helpTrackIconRepeatPlaybackModeLegend,
-          ),
-        ],
-      ),
-      ExpansionTile(
-        title: Text(_trans.helpScreenMessageProjectExportImportTitle),
-        children: [
-          _uiHelper.buildRichText(
-            _trans.helpScreenMessageProjectExportImportContent,
-            data: {'projectExport': AppIcon.projectExport, 'projectImport': AppIcon.projectImport},
-          ),
-        ],
-      ),
-      ExpansionTile(
-        title: Text(_trans.helpScreenMessageSettingsProfilesTitle),
-        children: [
-          _uiHelper.buildRichText(
-            _trans.helpScreenMessageSettingsProfilesContent,
-            data: {
-              'settingsProfiles': AppIcon.settingsProfiles,
-              'recordingAudioEncoder': AppIcon.recordingAudioEncoder,
-              'recordingInputDevice': AppIcon.recordingInputDevice,
-              'recordingSampleRate': AppIcon.recordingSampleRate,
-              'recordingBitRate': AppIcon.recordingBitRate,
-              'recordingAudioMode': AppIcon.recordingAudioMode,
-              'recordingAutoGain': AppIcon.recordingAutoGain,
-              'recordingEchoCancel': AppIcon.recordingEchoCancel,
-              'recordingNoiseSuppress': AppIcon.recordingNoiseSuppress,
-              'language': AppIcon.language,
-              'screenThemeMode': AppIcon.screenThemeMode,
-              'screenThemeColor': AppIcon.screenThemeColor,
-              'keepScreenOn': AppIcon.keepScreenOn,
-              'touchLong': AppIcon.touchLong,
-              'create': AppIcon.create,
-              'deleteForever': AppIcon.deleteForever,
-            },
-          ),
-        ],
-      ),
-      ExpansionTile(
-        title: Text(_trans.recordingSettings),
-        children: [
-          _uiHelper.buildRichText(
-            _trans.helpScreenMessageSettingsInfo,
-            data: {
-              'recordingAudioEncoder': AppIcon.recordingAudioEncoder,
-              'recordingSampleRate': AppIcon.recordingSampleRate,
-              'recordingBitRate': AppIcon.recordingBitRate,
-              'recordingAudioMode': AppIcon.recordingAudioMode,
-              'recordingAutoGain': AppIcon.recordingAutoGain,
-              'recordingEchoCancel': AppIcon.recordingEchoCancel,
-              'recordingNoiseSuppress': AppIcon.recordingNoiseSuppress,
-            },
-          ),
-          ListTile(leading: Icon(AppIcon.recordingAutoGain), title: Text(_trans.recordingAutoGain)),
-          Text(_trans.recordingAutoGainInfo),
-          ListTile(leading: Icon(AppIcon.recordingEchoCancel), title: Text(_trans.recordingEchoCancel)),
-          Text(_trans.recordingEchoCancelInfo),
-          ListTile(leading: Icon(AppIcon.recordingNoiseSuppress), title: Text(_trans.recordingNoiseSuppress)),
-          Text(_trans.recordingNoiseSuppressInfo),
-        ],
-      ),
+          _trans.theKeyboardKey.toLowerCase(),
+        ),
+        _uiHelper.helpLegend(Icon(AppIcon.trackAudioSourceRecorded), _trans.theAudioSourceRecorded.toLowerCase()),
+        _uiHelper.helpLegend(Icon(AppIcon.trackAudioSourceImported), _trans.theAudioSourceImported.toLowerCase()),
+        _uiHelper.helpLegend(Icon(AppIcon.trackPlaybackVolume), _trans.thePlaybackVolume.toLowerCase()),
+        _uiHelper.helpLegend(Icon(AppIcon.trackPlaybackBalanceLeft), _trans.helpTrackIconBalanceLeftLegend),
+        _uiHelper.helpLegend(Icon(AppIcon.trackPlaybackBalanceCenter), _trans.helpTrackIconBalanceCenterLegend),
+        _uiHelper.helpLegend(Icon(AppIcon.trackPlaybackBalanceRight), _trans.helpTrackIconBalanceRightLegend),
+        _uiHelper.helpLegend(Icon(AppIcon.trackPlaybackStartAtPosition), _trans.helpTrackIconPlaybackStartTrimLegend),
+        _uiHelper.helpLegend(Icon(AppIcon.trackPlaybackEndAtPosition), _trans.helpTrackIconPlaybackEndTrimLegend),
+        _uiHelper.helpLegend(Icon(AppIcon.trackSinglePlaybackMode), _trans.helpTrackIconSinglePlaybackModeLegend),
+        _uiHelper.helpLegend(Icon(AppIcon.trackRepeatPlaybackMode), _trans.helpTrackIconRepeatPlaybackModeLegend),
+      ]),
+      _uiHelper.helpSection(_trans.helpScreenMessageProjectExportImportTitle, [
+        _uiHelper.buildRichText(
+          _trans.helpScreenMessageProjectExportImportContent,
+          data: {'projectExport': AppIcon.projectExport, 'projectImport': AppIcon.projectImport},
+        ),
+      ]),
+      _uiHelper.helpSection(_trans.helpScreenMessageSettingsProfilesTitle, [
+        _uiHelper.buildRichText(
+          _trans.helpScreenMessageSettingsProfilesContent,
+          data: {
+            'settingsProfiles': AppIcon.settingsProfiles,
+            'recordingAudioEncoder': AppIcon.recordingAudioEncoder,
+            'recordingInputDevice': AppIcon.recordingInputDevice,
+            'recordingSampleRate': AppIcon.recordingSampleRate,
+            'recordingBitRate': AppIcon.recordingBitRate,
+            'recordingAudioMode': AppIcon.recordingAudioMode,
+            'recordingAutoGain': AppIcon.recordingAutoGain,
+            'recordingEchoCancel': AppIcon.recordingEchoCancel,
+            'recordingNoiseSuppress': AppIcon.recordingNoiseSuppress,
+            'language': AppIcon.language,
+            'screenThemeMode': AppIcon.screenThemeMode,
+            'screenThemeColor': AppIcon.screenThemeColor,
+            'keepScreenOn': AppIcon.keepScreenOn,
+            'touchLong': AppIcon.touchLong,
+            'create': AppIcon.create,
+            'deleteForever': AppIcon.deleteForever,
+          },
+        ),
+      ]),
+      _uiHelper.helpSection(_trans.recordingSettings, [
+        _uiHelper.buildRichText(
+          _trans.helpScreenMessageSettingsInfo,
+          data: {
+            'recordingAudioEncoder': AppIcon.recordingAudioEncoder,
+            'recordingSampleRate': AppIcon.recordingSampleRate,
+            'recordingBitRate': AppIcon.recordingBitRate,
+            'recordingAudioMode': AppIcon.recordingAudioMode,
+            'recordingAutoGain': AppIcon.recordingAutoGain,
+            'recordingEchoCancel': AppIcon.recordingEchoCancel,
+            'recordingNoiseSuppress': AppIcon.recordingNoiseSuppress,
+          },
+        ),
+        _uiHelper.helpLegend(Icon(AppIcon.recordingAutoGain), _trans.recordingAutoGain),
+        Text(_trans.recordingAutoGainInfo),
+        _uiHelper.helpLegend(Icon(AppIcon.recordingEchoCancel), _trans.recordingEchoCancel),
+        Text(_trans.recordingEchoCancelInfo),
+        _uiHelper.helpLegend(Icon(AppIcon.recordingNoiseSuppress), _trans.recordingNoiseSuppress),
+        Text(_trans.recordingNoiseSuppressInfo),
+      ]),
       ExpansionTile(
         title: Text(_trans.recordingAudioEncoders),
         children: AppGlobalConfig.recordingAudioEncoder

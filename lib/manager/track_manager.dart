@@ -7,6 +7,7 @@ import 'package:tune_tangler/manager/track_details_manager.dart';
 import '../config/app_global_config.dart';
 import '../config/app_icon.dart';
 import '../config/keyboard.dart';
+import '../helper/keyboard_modifier.dart';
 import '../entity/track.dart';
 import '../repository/track_repository.dart';
 import '../src/combined_notifier.dart';
@@ -56,21 +57,12 @@ class TrackManager {
       return;
     }
 
-    bool withControl =
-        (HardwareKeyboard.instance.logicalKeysPressed.contains(
-          LogicalKeyboardKey.controlLeft,
-        ) ||
-        HardwareKeyboard.instance.logicalKeysPressed.contains(
-          LogicalKeyboardKey.controlRight,
-        ) ||
-        HardwareKeyboard.instance.logicalKeysPressed.contains(
-          LogicalKeyboardKey.control,
-        ));
+    final withDetailsModifier = isTrackDetailsModifierPressed();
 
     String? pressedKeyName = AppKeyboardKeyMap.findPressedKeyName(event);
     for (Track track in _trackRepository.allTracks()) {
       if (track.keyboardKey.value == pressedKeyName) {
-        if (withControl) {
+        if (withDetailsModifier) {
           _trackDetailsManager.openModal(track);
         } else {
           _trackDetailsManager.runClickAction(track);

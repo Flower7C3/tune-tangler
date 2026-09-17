@@ -602,7 +602,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get helpScreenMessageGridScreenContent =>
-      'Kolorowy blok to szybki przycisk. Stuknij go lub – używając podłączonej klawiatury – wciśnij odpowiedni klawisz skrótu. Chcesz suwaków i bardziej szczegółowych opcji? Przytrzymaj blok albo — przy podłączonej klawiaturze zewnętrznej — naciśnij skrót razem z klawiszem Control \$[controlKey], aby otworzyć szczegóły ścieżki. Skrót do ścieżki ustawisz w jej szczegółach.\n\nPrzy każdym wierszu siatki są przyciski startu i zatrzymania odtwarzania dla tego wiersza oraz menu „⋮” z opcjami dla wszystkich ścieżek w tym wierszu (m.in. tryb odtwarzania, głośność, balans, prędkość, reset przycięć, usunięcie nagrań z wiersza).\n\nW menu bocznym wybierzesz gotowy zestaw skrótów na klawiaturę: standard (jak klawiatura PC, elastyczna siatka) albo 24 klawisze (6×4).';
+      'Kolorowy blok to szybki przycisk. Stuknij go lub – używając podłączonej klawiatury – wciśnij odpowiedni klawisz skrótu. Chcesz suwaków i bardziej szczegółowych opcji? Przytrzymaj blok albo — przy podłączonej klawiaturze zewnętrznej — naciśnij skrót razem z klawiszem Control \$[controlKey] (Command ⌘ na Macu), aby otworzyć szczegóły ścieżki. Skrót do ścieżki ustawisz w jej szczegółach.\n\nPrzy każdym wierszu siatki są przyciski startu i zatrzymania odtwarzania dla tego wiersza oraz menu „⋮” z opcjami dla wszystkich ścieżek w tym wierszu (m.in. tryb odtwarzania, głośność, balans, prędkość, reset przycięć, usunięcie nagrań z wiersza).\n\nW menu bocznym wybierzesz gotowy zestaw skrótów na klawiaturę: standard (jak klawiatura PC, elastyczna siatka) albo 24 klawisze (6×4).';
 
   @override
   String get helpScreenMessageDetailsScreenTitle => 'Ekran szczegółów ścieżki';
