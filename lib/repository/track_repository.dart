@@ -150,7 +150,7 @@ class TrackRepository {
 
   void resetTracksKeyboardKey(Set<Track> tracksList) async {
     for (Track track in tracksList) {
-      track.resetKeyboardKey;
+      track.resetKeyboardKey();
       save(track);
     }
   }

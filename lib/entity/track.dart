@@ -20,6 +20,8 @@ import 'track_state.dart';
 export 'track_id.dart';
 export 'track_state.dart';
 
+part 'track_codec.dart';
+
 class Track {
   ///*************************************************************************************************************************************************
   /// INDEX
@@ -28,7 +30,7 @@ class Track {
 
   Track(this.id) {
     setName(id.toString());
-    resetKeyboardKey;
+    resetKeyboardKey();
     _player = AudioPlayer();
     // Użyj normalnego trybu ale z konfiguracją audio pozwalającą na mieszanie
     _player.setPlayerMode(PlayerMode.mediaPlayer);
@@ -616,276 +618,24 @@ class Track {
     keyboardKey.value = key;
   }
 
-  void get resetKeyboardKey {
+  void resetKeyboardKey() {
     setKeyboardKey(id.keyboardKey);
   }
 
-  Future<void> fromTrack(Track track) async {
-    if (track.id.toString() == track.name.value) {
-      setName(id.toString());
-    } else {
-      setName(track.name.value);
-    }
-    setPlaybackReleaseMode(track.playbackReleaseMode.value);
-    setPlaybackVolume(track.playbackVolume.value);
-    setPlaybackBalance(track.playbackBalance.value);
-    setPlaybackSpeed(track.playbackSpeed.value);
-    setDuration(track.duration.value);
+  Future<void> fromTrack(Track track) => TrackCodec.copyOnto(this, track);
 
-    try {
-      if (track.path == null) {
-        throw Exception();
-      }
-      File oldFile = File(track.path!);
-      if (!oldFile.existsSync()) {
-        throw Exception();
-      }
-      Directory appDir = await getApplicationDocumentsDirectory();
-      String newFileName = path_provider
-          .basename(track.path!)
-          .replaceFirst(RegExp(r'^[^.]+'), id.toString());
-      String newFilePath = "${appDir.path}/$newFileName";
-      File newFile = oldFile.renameSync(newFilePath);
-      await setPath(
-        newFile.path,
-        preserveDuration: true,
-        preservePlaybackPositions: true,
-      );
-    } catch (e) {
-      _path = null;
-      setRecorderState(RecorderState.empty);
-      updateState();
-    }
+  static Track fromMap(Map data) => TrackCodec.fromMap(data);
 
-    setAudioSource(track.audioSource);
-    setAudioEncoder(track.audioEncoder);
-    setSampleRate(track.sampleRate);
-    setBitRate(track.bitRate);
+  Map<TrackAdapterKey, dynamic> toMap() => TrackCodec.toMap(this);
 
-    // Ustaw pozycje odtwarzania po przeniesieniu ścieżki
-    setPlaybackStartAtPosition(track.playbackStartAtPosition.value);
-    setPlaybackEndAtPosition(track.playbackEndAtPosition.value);
-
-    // Ustaw pozycję po przeniesieniu ścieżki
-    setPosition(track.position.value);
-
-    // Aktualizuj progress po ustawieniu wszystkich wartości
-    _updateProgress();
-  }
-
-  static Track fromMap(Map data) {
-    TrackId trackId = data[TrackAdapterKey.trackId];
-    Track track = Track(trackId);
-    track.setName(data[TrackAdapterKey.name]);
-    track.setPlaybackReleaseMode(
-      ReleaseMode.values[data[TrackAdapterKey.playbackReleaseMode]],
-    );
-    track.setPlaybackVolume(
-      data[TrackAdapterKey.playbackVolume] ??
-          AppGlobalConfig.trackPlaybackVolume.defaultValue,
-    );
-    track.setPlaybackBalance(
-      data[TrackAdapterKey.playbackBalance] ??
-          AppGlobalConfig.trackPlaybackBalance.defaultValue,
-    );
-    track.setPlaybackSpeed(
-      data[TrackAdapterKey.playbackSpeed] ??
-          AppGlobalConfig.trackPlaybackSpeed.defaultValue,
-    );
-    track.setKeyboardKey(data[TrackAdapterKey.keyboardKey] ?? '');
-    track.setAudioSource(
-      data[TrackAdapterKey.audioSource] != null
-          ? TrackAudioSource.values[data[TrackAdapterKey.audioSource]]
-          : null,
-    );
-    track.setAudioEncoder(
-      data[TrackAdapterKey.audioEncoder] != null
-          ? AudioEncoder.values[data[TrackAdapterKey.audioEncoder]]
-          : null,
-    );
-    track.setSampleRate(data[TrackAdapterKey.sampleRate]);
-    track.setBitRate(data[TrackAdapterKey.bitRate]);
-    track.setPath(
-      data[TrackAdapterKey.path],
-      playbackStartAtPosition: data[TrackAdapterKey.playbackStartAtPosition],
-      playbackEndAtPosition: data[TrackAdapterKey.playbackEndAtPosition],
-      clearMetadata: false,
-    );
-    track.updateState();
-    return track;
-  }
-
-  Map<TrackAdapterKey, dynamic> toMap() => {
-    TrackAdapterKey.trackId: id,
-    TrackAdapterKey.name: name.value,
-    TrackAdapterKey.path: path,
-    TrackAdapterKey.playbackReleaseMode: playbackReleaseMode.value.index,
-    TrackAdapterKey.playbackVolume: playbackVolume.value,
-    TrackAdapterKey.playbackBalance: playbackBalance.value,
-    TrackAdapterKey.playbackSpeed: playbackSpeed.value,
-    TrackAdapterKey.playbackStartAtPosition: playbackStartAtPosition.value,
-    TrackAdapterKey.playbackEndAtPosition: playbackEndAtPosition.value,
-    TrackAdapterKey.keyboardKey: keyboardKey.value,
-    TrackAdapterKey.audioSource: audioSource?.index,
-    TrackAdapterKey.audioEncoder: audioEncoder?.index,
-    TrackAdapterKey.sampleRate: sampleRate,
-    TrackAdapterKey.bitRate: bitRate,
-  };
-
-  /// Stosuje właściwości z mapy danych na docelowym tracku
   Future<void> applyTrackPropertiesFromMap(
     Map<TrackAdapterKey, dynamic> properties,
     String tempSourcePath, {
     bool preserveKeyboardKey = true,
-  }) async {
-    final originalId = properties[TrackAdapterKey.trackId] as TrackId;
-
-    // 1. Ustawiamy podstawowe właściwości
-    setName(
-      properties[TrackAdapterKey.name] == originalId.toString()
-          ? id.toString()
-          : properties[TrackAdapterKey.name],
-    );
-
-    setAudioSource(
-      properties[TrackAdapterKey.audioSource] != null
-          ? TrackAudioSource.values[properties[TrackAdapterKey.audioSource]]
-          : null,
-    );
-
-    setAudioEncoder(
-      properties[TrackAdapterKey.audioEncoder] != null
-          ? AudioEncoder.values[properties[TrackAdapterKey.audioEncoder]]
-          : null,
-    );
-
-    setSampleRate(properties[TrackAdapterKey.sampleRate]);
-    setBitRate(properties[TrackAdapterKey.bitRate]);
-    if (!preserveKeyboardKey) {
-      setKeyboardKey(properties[TrackAdapterKey.keyboardKey] ?? '');
-    }
-
-    // 2. Przenoszenie pliku audio z tymczasowej lokalizacji do finalnej
-    String? newPath;
-    if (tempSourcePath.isNotEmpty && File(tempSourcePath).existsSync()) {
-      final appDir = await getApplicationDocumentsDirectory();
-      final originalExtension = path_provider.extension(tempSourcePath);
-      final newFileName = '${id.toString()}$originalExtension';
-      newPath = "${appDir.path}/$newFileName";
-      // Jeśli plik docelowy już istnieje, usuwamy go
-      if (File(newPath).existsSync()) {
-        await File(newPath).delete();
-      }
-      // Przeniesienie z fallbackiem na kopiowanie
-      try {
-        await File(tempSourcePath).rename(newPath);
-      } catch (_) {
-        // Fallback to copy+delete to support cross-filesystem moves
-        await File(tempSourcePath).copy(newPath);
-        await File(tempSourcePath).delete();
-      }
-    } else if (properties[TrackAdapterKey.path] != null &&
-        File(properties[TrackAdapterKey.path]!).existsSync()) {
-      // Fallback: jeśli nie ma tymczasowej ścieżki, ale oryginalny plik istnieje
-      final oldFile = File(properties[TrackAdapterKey.path]!);
-      final appDir = await getApplicationDocumentsDirectory();
-      final originalExtension = path_provider.extension(
-        properties[TrackAdapterKey.path]!,
-      );
-      final newFileName = '${id.toString()}$originalExtension';
-      newPath = "${appDir.path}/$newFileName";
-      if (File(newPath).existsSync()) {
-        await File(newPath).delete();
-      }
-      try {
-        await oldFile.rename(newPath);
-      } catch (_) {
-        // Fallback to copy+delete to support cross-filesystem moves
-        await oldFile.copy(newPath);
-        await oldFile.delete();
-      }
-    }
-
-    // 3. Ustawiamy ścieżkę BEZ używania setPath()
-    _path = newPath;
-
-    // 4. Ustawiamy duration i position
-    setDuration(
-      properties[TrackAdapterKey.playbackEndAtPosition] ?? Duration(),
-    );
-    setPosition(
-      properties[TrackAdapterKey.playbackStartAtPosition] ?? Duration(),
-    );
-
-    // 5. Ustawiamy playback positions
-    playbackStartAtPosition.value =
-        properties[TrackAdapterKey.playbackStartAtPosition] ?? Duration();
-    playbackEndAtPosition.value =
-        properties[TrackAdapterKey.playbackEndAtPosition] ?? Duration();
-
-    _updatePositionCut();
-    _updateDurationCut();
-
-    // 6. Ustawiamy player jeśli ścieżka istnieje
-    if (newPath != null && File(newPath).existsSync()) {
-      try {
-        await player.stop();
-        await player.setSourceDeviceFile(newPath);
-
-        // Ustaw parametry odtwarzania z properties
-        final volume =
-            properties[TrackAdapterKey.playbackVolume] ??
-            AppGlobalConfig.trackPlaybackVolume.defaultValue;
-        final balance =
-            properties[TrackAdapterKey.playbackBalance] ??
-            AppGlobalConfig.trackPlaybackBalance.defaultValue;
-        final releaseMode =
-            ReleaseMode.values[properties[TrackAdapterKey
-                    .playbackReleaseMode] ??
-                AppGlobalConfig.trackPlaybackReleaseMode.defaultValue.index];
-        final speed =
-            properties[TrackAdapterKey.playbackSpeed] ??
-            AppGlobalConfig.trackPlaybackSpeed.defaultValue;
-
-        player.setVolume(volume);
-        player.setBalance(balance);
-        player.setReleaseMode(releaseMode);
-        player.setPlaybackRate(speed);
-
-        await player.seek(playbackStartAtPosition.value);
-      } catch (e) {
-        debugPrint('Error setting player source: $e');
-        _path = null;
-      }
-    } else {
-      await player.stop();
-      _path = null;
-    }
-
-    // 7. Ustawiamy playback controls z properties
-    setPlaybackVolume(
-      properties[TrackAdapterKey.playbackVolume] ??
-          AppGlobalConfig.trackPlaybackVolume.defaultValue,
-    );
-    setPlaybackBalance(
-      properties[TrackAdapterKey.playbackBalance] ??
-          AppGlobalConfig.trackPlaybackBalance.defaultValue,
-    );
-    setPlaybackReleaseMode(
-      ReleaseMode.values[properties[TrackAdapterKey.playbackReleaseMode] ??
-          AppGlobalConfig.trackPlaybackReleaseMode.defaultValue.index],
-    );
-    setPlaybackSpeed(
-      properties[TrackAdapterKey.playbackSpeed] ??
-          AppGlobalConfig.trackPlaybackSpeed.defaultValue,
-    );
-
-    // 8. Przywracamy recorderState na podstawie dostępności pliku
-    recorderState.value = (newPath != null && File(newPath).existsSync())
-        ? RecorderState.ready
-        : RecorderState.empty;
-
-    // 9. Aktualizujemy stan
-    updateState();
-  }
+  }) => TrackCodec.apply(
+    this,
+    properties,
+    tempSourcePath,
+    preserveKeyboardKey: preserveKeyboardKey,
+  );
 }
