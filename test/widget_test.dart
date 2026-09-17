@@ -5,6 +5,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tune_tangler/adapter/track_audio_source.dart';
+import 'package:tune_tangler/config/keyboard.dart';
 import 'package:tune_tangler/config/keyboard_layout_preset.dart';
 import 'package:tune_tangler/entity/track.dart';
 import 'package:tune_tangler/helper/keyboard_modifier.dart';
@@ -39,6 +40,15 @@ void main() {
       expect(KeyboardLayoutPreset.fromStored('grid24'), KeyboardLayoutPreset.grid24);
       expect(KeyboardLayoutPreset.fromStored('nope'), KeyboardLayoutPreset.qwerty);
       expect(KeyboardLayoutPreset.fromStored(null), KeyboardLayoutPreset.qwerty);
+    });
+
+    test('row names without Hive', () {
+      expect(AppKeyboardKeyMap.gridRowName(0, preset: KeyboardLayoutPreset.qwerty), 'A');
+      expect(AppKeyboardKeyMap.gridRowName(5, preset: KeyboardLayoutPreset.grid24), 'F');
+      expect(
+        AppKeyboardKeyMap.trackKeyboardKeyName('A', 0, preset: KeyboardLayoutPreset.qwerty),
+        '1',
+      );
     });
 
     test('coerceGridInt', () {

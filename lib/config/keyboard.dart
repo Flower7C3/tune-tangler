@@ -180,18 +180,29 @@ class AppKeyboardKeyMap {
     },
   };
 
-  static Map<String, Map<String, String>> get _keyboardKeysRows =>
-      KeyboardLayoutPreset.fromStored(HiveService.get(AppConfigFieldKey.keyboardLayoutPreset)) ==
-              KeyboardLayoutPreset.grid24
+  static Map<String, Map<String, String>> rowsFor(KeyboardLayoutPreset preset) =>
+      preset == KeyboardLayoutPreset.grid24
           ? _grid24KeyboardKeysRows
           : _qwertyKeyboardKeysRows;
 
-  static String trackKeyboardKeyName(String rowName, int colIndex) =>
-      _keyboardKeysRows[rowName]?.keys.elementAt(colIndex) ?? '';
+  static KeyboardLayoutPreset get _activePreset =>
+      KeyboardLayoutPreset.fromStored(HiveService.get(AppConfigFieldKey.keyboardLayoutPreset));
 
-  static Iterable<String> gridRowNames() => _keyboardKeysRows.keys;
+  static Map<String, Map<String, String>> get _keyboardKeysRows =>
+      rowsFor(_activePreset);
 
-  static String gridRowName(int position) => gridRowNames().elementAt(position);
+  static String trackKeyboardKeyName(
+    String rowName,
+    int colIndex, {
+    KeyboardLayoutPreset? preset,
+  }) =>
+      rowsFor(preset ?? _activePreset)[rowName]?.keys.elementAt(colIndex) ?? '';
+
+  static Iterable<String> gridRowNames({KeyboardLayoutPreset? preset}) =>
+      rowsFor(preset ?? _activePreset).keys;
+
+  static String gridRowName(int position, {KeyboardLayoutPreset? preset}) =>
+      gridRowNames(preset: preset).elementAt(position);
 
   static Iterable<String> keyboardKeyNames() {
     var items = <String>[];
