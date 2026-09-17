@@ -1,37 +1,19 @@
-# 🎨 Icon Generation System
+# Icon generation
 
-> Generate app icons and splash images from SVG templates and YAML config.
+Generate app icons and splash images from `assets/svg/logo-rgb.svg` plus JSON config.
 
-## 📋 Table of contents
+## Files
 
-- [📖 Overview](#overview)
-- [📁 Files](#files)
-- [⚙️ Configuration format](#configuration-format)
-  - [🧩 Configuration parameters](#configuration-parameters)
-- [🛠️ Usage](#usage)
-  - [✨ Generate all icons](#generate-all-icons)
-  - [🖼️ Generate all images (including app icons and splash)](#generate-all-images)
-- [📦 Dependencies](#dependencies)
-- [⚡ How it works](#how-it-works)
-- [➕ Adding new icon variants](#adding-new-icon-variants)
-- [💡 Benefits](#benefits)
-- [🔐 Security and best practices](#security-and-best-practices)
+- **Source SVG**: `assets/svg/logo-rgb.svg` (also listed as `svg_source` in the config)
+- **Config**: `assets/svg/logo-rgb.svg.json`
+- **Script**: `tools/generate-icons.sh`
+- **Master PNGs**: `assets/png/logo-*.png` (generated)
+- **Android**: `android/app/src/main/res/`
+- **iOS**: `ios/Runner/Assets.xcassets/AppIcon.appiconset/` (including dark/tinted + `Contents.json`)
 
----
+## Config
 
-## 📖 Overview <a name="overview"></a>
-
-The system generates multiple PNG variants from a single SVG source file (`logo-rgb.svg`) using configuration-driven approach with JSON files. The source SVG contains clipPath masks and uses fill attributes for Flutter compatibility.
-
-## 📁 Files <a name="files"></a>
-
-- **Source**: Defined in `assets/icon-config.json` (`svg_source` field) - Master SVG file with clipPath masks and fill attributes
-- **Configuration**: `assets/icon-config.json` - JSON configuration defining source SVG and all icon variants
-- **Output**: `assets/png/logo-*.png` - Generated PNG files (ignored by git)
-
-## ⚙️ Configuration format <a name="configuration-format"></a>
-
-The `assets/icon-config.json` file contains source SVG path and an array of icon configurations:
+Each icon variant sets canvas size, root-group transform, and CSS class fills:
 
 ```json
 {
@@ -40,93 +22,55 @@ The `assets/icon-config.json` file contains source SVG path and an array of icon
     {
       "name": "dark-mode-launcher",
       "display_name": "Dark Mode Launcher",
-      "width": 1152,
-      "height": 1152,
-      "viewbox": "0 0 1152 1152",
-      "translate_x": 168,
-      "translate_y": 168,
-      "scale": 1.0,
-      "shape_color": "#eee",
-      "wave_color": "#111",
-      "mic_color": "#111",
-      "sliders_color": "#111",
-      "text_color": "#111"
+      "width": 1024,
+      "height": 1024,
+      "translate_x": 122.4,
+      "translate_y": 122.4,
+      "scale": 0.7,
+      "colors": {
+        "shape": "#eee",
+        "wave": "#111",
+        "mic": "#111",
+        "sliders": "#111",
+        "text": "#111"
+      }
     }
   ]
 }
 ```
 
-### 🧩 Configuration parameters <a name="configuration-parameters"></a>
+`android` / `ios` blocks map those variants to launcher, monochrome, splash, and iOS light/dark/tinted.
 
-- **svg_source**: Path to the source SVG file
-- **name**: Output filename (without extension)
-- **display_name**: Human-readable name for logging
-- **width/height**: PNG output dimensions
-- **translate_x/translate_y**: Logo container translation (centers logo in target dimensions)
-- **scale**: Logo scaling factor
-- **shape_color**: Background shape color (#00ff00 in source)
-- **text_color**: Detail elements color (#0000ff in source, used for wave, mic, sliders, text)
-
-## 🛠️ Usage <a name="usage"></a>
-
-### ✨ Generate all icons <a name="generate-all-icons"></a>
+## Usage
 
 ```bash
-make gen-png-logos
+make gen-assets
 ```
 
-### 🖼️ Generate all images (including app icons and splash) <a name="generate-all-images"></a>
+Optional config path:
 
 ```bash
-make gen-images
+bash tools/generate-icons.sh assets/svg/logo-rgb.svg.json
 ```
 
-## 📦 Dependencies <a name="dependencies"></a>
+## Dependencies
 
-- **rsvg-convert**: SVG to PNG conversion
-  - Ubuntu/Debian: `sudo apt-get install librsvg2-bin`
-  - macOS: `brew install librsvg`
-  - Windows: Download from [GitHub](https://github.com/miyako/console-rsvg-convert)
+- **rsvg-convert** (`librsvg`)
+- **jq**
+- **python3**
+- **awk**
+- **sips** (macOS) or ImageMagick (`magick` / `convert`)
 
-- **jq**: JSON processing
-  - Ubuntu/Debian: `sudo apt-get install jq`
-  - macOS: `brew install jq`
-  - Windows: Download from [jqlang.github.io](https://jqlang.github.io/jq/download/)
+## How it works
 
-## ⚡ How it works <a name="how-it-works"></a>
+1. Read `assets/svg/logo-rgb.svg.json`.
+2. For each icon, rewrite the first SVG `width`/`height` and the first root `<g transform="translate(...)scale(...)">`, then class fills.
+3. Rasterize with `rsvg-convert`.
+4. Resize into Android densities and iOS icon slots.
+5. Write iOS `Contents.json` with light + dark + tinted appearances.
 
-1. **Configuration Parsing**: Reads `assets/icon-config.json` and processes each icon definition
-2. **Temporary Directory**: Creates a unique temporary directory using `mktemp -d -t tunetangler-icons-XXXXXX`
-3. **SVG Generation**: For each icon, creates a temporary SVG file by:
-   - Replacing dimensions and viewBox
-   - Updating main container transform with translate and scale values
-   - Replacing fill color attributes
-4. **PNG Conversion**: Converts temporary SVG files to PNG using `rsvg-convert`
-5. **Cleanup**: Automatically removes the entire temporary directory and all files
+## Adding a variant
 
-## ➕ Adding new icon variants <a name="adding-new-icon-variants"></a>
-
-To add a new icon variant:
-
-1. Add a new entry to the `icons` array in `assets/icon-config.json`
-2. Run `make gen-png-logos`
-3. The new PNG file will be generated as `assets/png/logo-{name}.png`
-
-## 💡 Benefits <a name="benefits"></a>
-
-- **Configuration-driven**: Easy to add/modify icon variants
-- **Consistent**: All variants use the same source SVG
-- **Maintainable**: Single source of truth for logo design
-- **Automated**: No manual image editing required
-- **Version controlled**: Configuration can be tracked in git
-- **Safe**: Uses system temporary directories with automatic cleanup
-- **Efficient**: No temporary files left in the project directory
-- **Robust**: Uses `mktemp` for unique temporary directory creation
-
-## 🔐 Security and best practices <a name="security-and-best-practices"></a>
-
-- **Temporary Files**: Uses system temporary directory (`/tmp/`) with unique names
-- **Automatic Cleanup**: No temporary files are left behind after execution
-- **No Hardcoded Paths**: All paths are configurable through JSON
-- **Error Handling**: Proper error messages for missing dependencies
-- **Atomic Operations**: Each icon is generated and converted in one operation
+1. Add an entry to `icons` in `assets/svg/logo-rgb.svg.json`.
+2. Point `android` / `ios` at it if it should ship as a launcher or splash.
+3. Run `make gen-assets`.
