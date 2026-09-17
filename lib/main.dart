@@ -19,9 +19,6 @@ import 'adapter/track_adapter_key.dart';
 import 'adapter/track_audio_source.dart';
 import 'adapter/track_id.dart';
 import 'screen/main_screen.dart';
-import 'src/audio_isolate_service.dart';
-import 'src/audio_memory_pool.dart';
-import 'src/icon_optimization_service.dart';
 import 'service/keyboard_layout_sync.dart';
 import 'wrapper/hive_service.dart';
 
@@ -51,11 +48,6 @@ Future<void> main() async {
   Hive.registerAdapter(AppConfigFieldKeyAdapter());
   await HiveService.init();
   await KeyboardLayoutSync.ensureGridMatchesPreset();
-  await AudioIsolateService.initialize();
-
-  // Initialize optimization services
-  AudioMemoryPool();
-  IconOptimizationService();
 
   const AndroidInitializationSettings androidSettings =
       AndroidInitializationSettings('@mipmap/ic_launcher');
