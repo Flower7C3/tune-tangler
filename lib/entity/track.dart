@@ -13,33 +13,12 @@ import '../adapter/track_adapter_key.dart';
 import '../adapter/track_audio_source.dart';
 import '../config/app_icon.dart';
 import '../config/config_collection.dart';
-import '../config/keyboard.dart';
 import '../helper/track_trim.dart';
-import 'track_row.dart';
+import 'track_id.dart';
+import 'track_state.dart';
 
-enum RecorderState { empty, recording, processing, ready }
-
-enum TrackState { empty, recording, processing, idle, playing, paused }
-
-class TrackId {
-  final int _rowIndex;
-  final int _colIndex;
-
-  TrackId(this._rowIndex, this._colIndex);
-
-  /// Stable Hive / export id (`A1`, `B2`, …). Both keyboard layouts use A–H
-  /// row letters, so this must not read Hive.
-  @override
-  String toString() =>
-      '${String.fromCharCode(0x41 + _rowIndex)}${_colIndex + 1}';
-
-  List<int> toList() => [_rowIndex, _colIndex];
-
-  String get keyboardKey => AppKeyboardKeyMap.trackKeyboardKeyName(
-    TrackRow.name(_rowIndex),
-    _colIndex,
-  );
-}
+export 'track_id.dart';
+export 'track_state.dart';
 
 class Track {
   ///*************************************************************************************************************************************************
