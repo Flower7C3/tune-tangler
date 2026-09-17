@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:tune_tangler/helper/blocking_progress.dart';
 import 'package:tune_tangler/helper/ui_helper.dart';
 
 import '../config/app_global_config.dart';
@@ -137,9 +138,7 @@ class TrackShare {
     void closeProgressDialog() {
       final c = progressDialogContext;
       progressDialogContext = null;
-      if (c != null && c.mounted) {
-        Navigator.of(c, rootNavigator: true).pop();
-      }
+      BlockingProgress.close(c);
     }
 
     try {
@@ -150,77 +149,29 @@ class TrackShare {
       if (!_context.mounted) return;
 
       // Show immediately — existsSync() can block the UI thread on slow storage; run it after the first paint.
-      showDialog<void>(
+      BlockingProgress.show(
         context: _context,
-        useRootNavigator: true,
-        barrierDismissible: false,
-        barrierColor: Colors.black54,
-        builder: (BuildContext dialogCtx) {
-          progressDialogContext = dialogCtx;
-          return ValueListenableBuilder<double>(
-            valueListenable: exportProgress,
-            builder: (BuildContext context, double value, _) {
-              final v = value.clamp(0.0, 1.0);
-              final pct = (v * 100).round().clamp(0, 100);
-              final theme = Theme.of(context);
-              final trackColor = theme.colorScheme.primary;
-              final trackBg = theme.colorScheme.surfaceContainerHighest;
-              return AlertDialog(
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    SizedBox(
-                      height: 10,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            ColoredBox(color: trackBg),
-                            FractionallySizedBox(
-                              alignment: Alignment.centerLeft,
-                              widthFactor: v <= 0 ? 0.04 : v,
-                              child: ColoredBox(color: trackColor),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      '$pct%',
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _trans.trackRecordingSharePreparingModified,
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyLarge,
-                    ),
-                  ],
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      _kAudioExportChannel.invokeMethod<void>('cancelExportProcessed');
-                    },
-                    child: Text(_trans.buttonCancel),
-                  ),
-                ],
-              );
-            },
-          );
-        },
+        onContext: (BuildContext dialogCtx) => progressDialogContext = dialogCtx,
+        builder: (BuildContext dialogCtx) => ValueListenableBuilder<double>(
+          valueListenable: exportProgress,
+          builder: (BuildContext context, double value, _) =>
+              BlockingProgress.determinate(
+            value: value,
+            label: _trans.trackRecordingSharePreparingModified,
+            actions: [
+              TextButton(
+                onPressed: () {
+                  _kAudioExportChannel.invokeMethod<void>('cancelExportProcessed');
+                },
+                child: Text(_trans.buttonCancel),
+              ),
+            ],
+          ),
+        ),
       );
 
       exportProgress.value = 0.0;
-
-      await WidgetsBinding.instance.endOfFrame;
-      await Future<void>.delayed(Duration.zero);
-      await WidgetsBinding.instance.endOfFrame;
-      await Future<void>.delayed(const Duration(milliseconds: 32));
+      await BlockingProgress.yieldForPaint();
 
       if (!File(track.path!).existsSync()) {
         throw Exception(_trans.trackRecordingShareNoFile(track.name.value));
