@@ -56,7 +56,7 @@ class RecordingManager {
     File sourceFile = File(sourcePath);
     await sourceFile.copy(destinationPath);
 
-    track.setPath(destinationPath);
+    await track.setPath(destinationPath);
     track.setAudioSource(TrackAudioSource.file);
     _trackRepository.save(track);
 
@@ -176,7 +176,7 @@ class RecordingManager {
     _audioRecorder.cancel();
     flutterLocalNotificationsPlugin.cancel(id: 0);
     track.stopTimer();
-    track.setPath(null);
+    await track.setPath(null);
     _trackRepository.save(track);
     _uiHelper.toast(
       _trans.trackRecordingCancelled(track.name.value),
@@ -188,7 +188,7 @@ class RecordingManager {
     try {
       String? path = await _audioRecorder.stop();
       // [setPath] drives empty → processing → ready; avoid a redundant ready frame before processing.
-      track.setPath(path);
+      await track.setPath(path);
       _uiHelper.toast(
         _trans.trackRecordingStopSuccess(track.name.value),
         icon: AppGlobalConfig.trackState.icon(TrackState.idle),
@@ -200,7 +200,7 @@ class RecordingManager {
       track.setAudioEncoder(null);
       track.setSampleRate(null);
       track.setBitRate(null);
-      track.setPath(null);
+      await track.setPath(null);
       _trackRepository.save(track);
       _uiHelper.toast(
         _trans.trackRecordingStopError(e.toString(), track.name.value),

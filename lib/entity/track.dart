@@ -14,6 +14,7 @@ import '../adapter/track_audio_source.dart';
 import '../config/app_icon.dart';
 import '../config/config_collection.dart';
 import '../config/keyboard.dart';
+import '../helper/track_trim.dart';
 import 'track_row.dart';
 
 enum RecorderState { empty, recording, processing, ready }
@@ -26,8 +27,11 @@ class TrackId {
 
   TrackId(this._rowIndex, this._colIndex);
 
+  /// Stable Hive / export id (`A1`, `B2`, …). Both keyboard layouts use A–H
+  /// row letters, so this must not read Hive.
   @override
-  String toString() => (TrackRow.name(_rowIndex)) + (_colIndex + 1).toString();
+  String toString() =>
+      '${String.fromCharCode(0x41 + _rowIndex)}${_colIndex + 1}';
 
   List<int> toList() => [_rowIndex, _colIndex];
 
@@ -171,7 +175,7 @@ class Track {
     }
   }
 
-  void dispose() {
+  Future<void> dispose() async {
     _throttleTimer?.cancel();
     _throttleTimer = null;
 
@@ -180,9 +184,7 @@ class Track {
     playerCompleteSubscription?.cancel();
     playerStateChangeSubscription?.cancel();
 
-    player.dispose().then((status) {
-      // Cleanup completed
-    });
+    await player.dispose();
   }
 
   ///*************************************************************************************************************************************************
@@ -279,17 +281,12 @@ class Track {
   }
 
   void changePlaybackStartAtPosition(int value) {
-    Duration zero = Duration();
-    Duration startAt = playbackStartAtPosition.value;
-    Duration endAt = playbackEndAtPosition.value;
-    Duration newValue = Duration(milliseconds: startAt.inMilliseconds + value);
-    if (newValue < zero) {
-      newValue = zero;
-    }
-    if (newValue > endAt) {
-      newValue = endAt;
-    }
-    setPlaybackStartAtPosition(newValue);
+    setPlaybackStartAtPosition(
+      TrackTrim.clampStart(
+        Duration(milliseconds: playbackStartAtPosition.value.inMilliseconds + value),
+        playbackEndAtPosition.value,
+      ),
+    );
   }
 
   ///*************************************************************************************************************************************************
@@ -316,17 +313,13 @@ class Track {
   }
 
   void changePlaybackEndAtPosition(int value) {
-    Duration startAt = playbackStartAtPosition.value;
-    Duration endAt = playbackEndAtPosition.value;
-    Duration trackDuration = duration.value;
-    Duration newValue = Duration(milliseconds: endAt.inMilliseconds + value);
-    if (newValue < startAt) {
-      newValue = startAt;
-    }
-    if (newValue > trackDuration) {
-      newValue = trackDuration;
-    }
-    setPlaybackEndAtPosition(newValue);
+    setPlaybackEndAtPosition(
+      TrackTrim.clampEnd(
+        Duration(milliseconds: playbackEndAtPosition.value.inMilliseconds + value),
+        playbackStartAtPosition.value,
+        duration.value,
+      ),
+    );
   }
 
   void setPlaybackStartEndAtPosition(RangeValues value) {
@@ -380,14 +373,14 @@ class Track {
 
   String? get path => _path;
 
-  void setPath(
+  Future<void> setPath(
     String? newPath, {
     Duration? playbackStartAtPosition,
     Duration? playbackEndAtPosition,
     bool preserveDuration = false,
     bool preservePlaybackPositions = false,
     bool clearMetadata = true,
-  }) {
+  }) async {
     if (newPath == null) {
       if (path != null && File(path!).existsSync()) {
         File(path!).delete();
@@ -395,12 +388,9 @@ class Track {
       if (clearMetadata) {
         _clearPath();
       } else {
-        // Clear only path-related state, preserve metadata and playback positions
         setRecorderState(RecorderState.processing);
         setPosition(Duration());
         setDuration(Duration());
-        // Don't reset playback positions when clearMetadata: false
-        // They will be set explicitly if needed
         setRecorderState(RecorderState.empty);
         _path = null;
       }
@@ -411,12 +401,9 @@ class Track {
       if (clearMetadata) {
         _clearPath();
       } else {
-        // Clear only path-related state, preserve metadata and playback positions
         setRecorderState(RecorderState.processing);
         setPosition(Duration());
         setDuration(Duration());
-        // Don't reset playback positions when clearMetadata: false
-        // They will be set explicitly if needed
         setRecorderState(RecorderState.empty);
         _path = null;
       }
@@ -429,39 +416,32 @@ class Track {
     player.setReleaseMode(playbackReleaseMode.value);
     player.setPlaybackRate(playbackSpeed.value);
     _path = newPath;
-    player
-        .setSourceDeviceFile(newPath)
-        .then((value) async {
-          Duration trackDuration = await player.getDuration() ?? Duration();
-          if (!preserveDuration) {
-            setDuration(trackDuration);
-          }
-          if (!preservePlaybackPositions) {
-            setPosition(Duration());
-            setPlaybackStartAtPosition(playbackStartAtPosition ?? Duration());
-            setPlaybackEndAtPosition(playbackEndAtPosition ?? trackDuration);
-          } else {
-            // Gdy preservePlaybackPositions=true, ustaw pozycję na Duration()
-            // Pozycje odtwarzania będą ustawione po wywołaniu setPath
-            setPosition(Duration());
-          }
-          setRecorderState(RecorderState.ready);
-        })
-        .onError((error, stack) {
-          debugPrint('Error in setPath: $error');
-          if (clearMetadata) {
-            _clearPath();
-          } else {
-            // Clear only path-related state, preserve metadata and playback positions
-            setRecorderState(RecorderState.processing);
-            setPosition(Duration());
-            setDuration(Duration());
-            // Don't reset playback positions when clearMetadata: false
-            // They will be set explicitly if needed
-            setRecorderState(RecorderState.empty);
-            _path = null;
-          }
-        });
+    try {
+      await player.setSourceDeviceFile(newPath);
+      final trackDuration = await player.getDuration() ?? Duration();
+      if (!preserveDuration) {
+        setDuration(trackDuration);
+      }
+      if (!preservePlaybackPositions) {
+        setPosition(Duration());
+        setPlaybackStartAtPosition(playbackStartAtPosition ?? Duration());
+        setPlaybackEndAtPosition(playbackEndAtPosition ?? trackDuration);
+      } else {
+        setPosition(Duration());
+      }
+      setRecorderState(RecorderState.ready);
+    } catch (error) {
+      debugPrint('Error in setPath: $error');
+      if (clearMetadata) {
+        _clearPath();
+      } else {
+        setRecorderState(RecorderState.processing);
+        setPosition(Duration());
+        setDuration(Duration());
+        setRecorderState(RecorderState.empty);
+        _path = null;
+      }
+    }
   }
 
   void _clearPath() {
@@ -687,7 +667,7 @@ class Track {
           .replaceFirst(RegExp(r'^[^.]+'), id.toString());
       String newFilePath = "${appDir.path}/$newFileName";
       File newFile = oldFile.renameSync(newFilePath);
-      setPath(
+      await setPath(
         newFile.path,
         preserveDuration: true,
         preservePlaybackPositions: true,

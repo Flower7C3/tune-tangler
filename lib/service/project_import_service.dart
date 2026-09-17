@@ -10,6 +10,8 @@ import 'package:path_provider/path_provider.dart';
 import '../adapter/track_adapter_key.dart';
 import '../config/app_config_fields.dart';
 import '../entity/track.dart';
+import '../helper/project_io.dart';
+import '../helper/track_trim.dart';
 import '../repository/track_repository.dart';
 import '../src/generated/app_localizations.dart';
 import '../wrapper/hive_settings_provider.dart';
@@ -68,7 +70,7 @@ class ProjectImportService {
           if (track is Map<String, dynamic> && track.containsKey('name')) {
             final originalName = track['name'] as String?;
             if (originalName != null) {
-              final cleanName = originalName.replaceAll(RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F]'), '');
+              final cleanName = ProjectIo.stripControlChars(originalName);
               if (cleanName != originalName) {
                 track['name'] = cleanName;
               }
@@ -81,7 +83,7 @@ class ProjectImportService {
       debugPrint('[ProjectImport] JSON content: $metadataJson');
       // Try to clean control characters and parse again
       try {
-        String cleanedJson = metadataJson.replaceAll(RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F]'), '');
+        String cleanedJson = metadataJson.replaceAll(ProjectIo.controlChars, '');
         metadata = jsonDecode(cleanedJson) as Map<String, dynamic>;
 
         // Clean names in tracks
@@ -91,7 +93,7 @@ class ProjectImportService {
             if (track is Map<String, dynamic> && track.containsKey('name')) {
               final originalName = track['name'] as String?;
               if (originalName != null) {
-                final cleanName = originalName.replaceAll(RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F]'), '');
+                final cleanName = ProjectIo.stripControlChars(originalName);
                 track['name'] = cleanName;
               }
             }
@@ -121,16 +123,10 @@ class ProjectImportService {
       final archive = ZipDecoder().decodeBytes(bytes);
 
       // 1. Basic structure validation
-      if (archive.findFile('metadata.json') == null) {
-        errors.add(ProjectImportError(message: _trans.projectFileMissing('metadata.json'), fileName: 'metadata.json'));
-        return errors;
-      }
-      if (archive.findFile('settings/grid_settings.json') == null) {
+      final missingFiles = ProjectIo.missingArchiveFiles(archive.files.map((f) => f.name));
+      if (missingFiles.isNotEmpty) {
         errors.add(
-          ProjectImportError(
-            message: _trans.projectFileMissing('settings/grid_settings.json'),
-            fileName: 'settings/grid_settings.json',
-          ),
+          ProjectImportError(message: _trans.projectFileMissing(missingFiles.first), fileName: missingFiles.first),
         );
         return errors;
       }
@@ -242,27 +238,11 @@ class ProjectImportService {
       final metadataJson = utf8.decode(metadataBytes, allowMalformed: false);
       final metadata = jsonDecode(metadataJson) as Map<String, dynamic>;
 
-      // Check required fields
-      if (!metadata.containsKey('version')) {
+      final missing = ProjectIo.missingKeys(metadata, ProjectIo.requiredMetadataKeys);
+      if (missing.isNotEmpty) {
         errors.add(
           ProjectImportError(
-            message: _trans.projectFileStructureError('metadata.json', 'version'),
-            fileName: 'metadata.json',
-          ),
-        );
-      }
-      if (!metadata.containsKey('gridSize')) {
-        errors.add(
-          ProjectImportError(
-            message: _trans.projectFileStructureError('metadata.json', 'gridSize'),
-            fileName: 'metadata.json',
-          ),
-        );
-      }
-      if (!metadata.containsKey('tracks')) {
-        errors.add(
-          ProjectImportError(
-            message: _trans.projectFileStructureError('metadata.json', 'tracks'),
+            message: _trans.projectFileStructureError('metadata.json', missing.join(', ')),
             fileName: 'metadata.json',
           ),
         );
@@ -300,14 +280,7 @@ class ProjectImportService {
       final settingsJson = utf8.decode(settingsBytes, allowMalformed: false);
       final settings = jsonDecode(settingsJson) as Map<String, dynamic>;
 
-      final missingFields = <String>[];
-      if (!settings.containsKey('gridRowsAmount')) {
-        missingFields.add('gridRowsAmount');
-      }
-      if (!settings.containsKey('gridColsAmount')) {
-        missingFields.add('gridColsAmount');
-      }
-
+      final missingFields = ProjectIo.missingKeys(settings, ProjectIo.requiredGridKeys);
       if (missingFields.isNotEmpty) {
         errors.add(
           ProjectImportError(
@@ -321,7 +294,7 @@ class ProjectImportService {
       final rows = settings['gridRowsAmount'] as int?;
       final cols = settings['gridColsAmount'] as int?;
 
-      if (rows == null || cols == null || rows < 1 || cols < 1) {
+      if (!ProjectIo.isValidGridSize(rows, cols)) {
         String details = 'gridRowsAmount=${rows ?? 'null'}, gridColsAmount=${cols ?? 'null'}';
         errors.add(
           ProjectImportError(
@@ -434,7 +407,7 @@ class ProjectImportService {
         try {
           jsonDecode(metadataJson);
         } catch (_) {
-          metadataJson = metadataJson.replaceAll(RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F]'), '');
+          metadataJson = metadataJson.replaceAll(ProjectIo.controlChars, '');
         }
 
         final metadata = jsonDecode(metadataJson) as Map<String, dynamic>;
@@ -783,7 +756,7 @@ class ProjectImportService {
         debugPrint('[ProjectImport] JSON content: $metadataJson');
         // Try to clean control characters and parse again
         try {
-          String cleanedJson = metadataJson.replaceAll(RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F]'), '');
+          String cleanedJson = metadataJson.replaceAll(ProjectIo.controlChars, '');
           metadata = jsonDecode(cleanedJson) as Map<String, dynamic>;
         } catch (e2) {
           debugPrint('[ProjectImport] ERROR parsing cleaned metadata.json JSON (second time): $e2');
@@ -908,7 +881,7 @@ class ProjectImportService {
 
         // Sanitize filename to prevent invalid characters
         // Replace invalid characters with underscore (same as in export)
-        newFileName = newFileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '_');
+        newFileName = ProjectIo.sanitizeFileName(newFileName);
 
         final newFilePath = path.join(appDir.path, newFileName);
         final savedFile = File(newFilePath);
@@ -953,60 +926,23 @@ class ProjectImportService {
         // We use preservePlaybackPositions: true to not overwrite positions during setPath()
         // We use clearMetadata: false to preserve audioSource, audioEncoder, sampleRate, bitRate
         // After setPath() completes, we will manually set positions from imported data
-        targetTrack.setPath(
+        await targetTrack.setPath(
           newFilePath,
-          preserveDuration: false, // Allow setPath() to set duration from file
+          preserveDuration: false,
           preservePlaybackPositions: true,
-          clearMetadata: false, // Preserve metadata imported in _importTracks
+          clearMetadata: false,
         );
 
-        // Wait for setPath() to complete (state will change from processing to ready/idle)
-        // setPath() sets state to processing, then asynchronously to ready/idle
-        // Check state every 100ms, maximum 5 seconds (50 attempts)
-        const int maxAttempts = 50;
-        const int delayMs = 100;
-        int attempts = 0;
-
-        // Wait a moment for setPath() to set state to processing
-        await Future.delayed(Duration(milliseconds: 50));
-
-        // Check if state is processing - if yes, wait for change
-        // If not, setPath() may have already completed or was not called
-        if (targetTrack.state.value == TrackState.processing) {
-          // Wait for state change from processing to ready/idle/empty
-          while (targetTrack.state.value == TrackState.processing && attempts < maxAttempts) {
-            await Future.delayed(Duration(milliseconds: delayMs));
-            attempts++;
-            // Check if state has changed (no longer processing)
-            if (targetTrack.state.value != TrackState.processing) {
-              break;
-            }
-          }
-
-          // If still processing after maxAttempts, it's a timeout
-          if (targetTrack.state.value == TrackState.processing && attempts >= maxAttempts) {
-            debugPrint(
-              '[ProjectImport] WARNING: setPath() did not complete within ${maxAttempts * delayMs / 1000}s for track ${targetTrack.id.toString()}, state: ${targetTrack.state.value}',
-            );
-            // Add error to list, but continue import
-            errors.add(
-              ProjectImportError(
-                message: 'Track ${targetTrack.id.toString()} did not finish loading within timeout',
-                fileName: fileName,
-                isWarning: true,
-              ),
-            );
-          }
-        }
-
-        // After setPath() completes, set playback positions from imported data
-        // (preservePlaybackPositions: true means setPath() doesn't set positions)
-        // Make sure playbackEndAtPosition doesn't exceed duration from file
         final actualDuration = targetTrack.duration.value;
-        final finalPlaybackStartAtPosition = savedPlaybackStartAtPosition;
-        final finalPlaybackEndAtPosition = savedPlaybackEndAtPosition.inMilliseconds > actualDuration.inMilliseconds
-            ? actualDuration
-            : savedPlaybackEndAtPosition;
+        final finalPlaybackStartAtPosition = TrackTrim.clampStart(
+          savedPlaybackStartAtPosition,
+          savedPlaybackEndAtPosition,
+        );
+        final finalPlaybackEndAtPosition = TrackTrim.clampEnd(
+          savedPlaybackEndAtPosition,
+          finalPlaybackStartAtPosition,
+          actualDuration,
+        );
 
         targetTrack.setPlaybackStartAtPosition(finalPlaybackStartAtPosition);
         targetTrack.setPlaybackEndAtPosition(finalPlaybackEndAtPosition);

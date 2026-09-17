@@ -11,6 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import '../adapter/track_adapter_key.dart';
 import '../config/app_config_fields.dart';
 import '../entity/track.dart';
+import '../helper/project_io.dart';
 import '../repository/track_repository.dart';
 import '../wrapper/hive_settings_provider.dart';
 
@@ -256,7 +257,7 @@ class ProjectExportService {
           trackMapJson[key.name] = value.inMilliseconds;
         } else if (key == TrackAdapterKey.name && value is String) {
           // Clean name from control characters
-          String cleanName = value.replaceAll(RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F]'), '');
+          String cleanName = value.replaceAll(ProjectIo.controlChars, '');
           trackMapJson[key.name] = cleanName;
         } else {
           // Export all other fields, including null values
@@ -382,7 +383,7 @@ class ProjectExportService {
       // Wyczyść nazwę z znaków kontrolnych przed dodaniem do JSON
       String cleanName = track.name.value;
       // Usuń znaki kontrolne (kody 0-31 oprócz tab, newline, carriage return)
-      cleanName = cleanName.replaceAll(RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F]'), '');
+      cleanName = cleanName.replaceAll(ProjectIo.controlChars, '');
       
       
       String? recordingFileName;
@@ -433,25 +434,6 @@ class ProjectExportService {
     return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
   }
 
-  String _generateFileName(String? projectName) {
-    final now = DateTime.now();
-    final dateStr = '${now.year.toString().padLeft(4, '0')}'
-        '${now.month.toString().padLeft(2, '0')}'
-        '${now.day.toString().padLeft(2, '0')}_'
-        '${now.hour.toString().padLeft(2, '0')}'
-        '${now.minute.toString().padLeft(2, '0')}'
-        '${now.second.toString().padLeft(2, '0')}';
-
-    String namePart = '';
-    if (projectName != null && projectName.trim().isNotEmpty) {
-      // Usuń nieprawidłowe znaki z nazwy pliku
-      namePart = projectName
-          .trim()
-          .replaceAll(RegExp(r'[<>:"/\\|?*]'), '_')
-          .replaceAll(' ', '_');
-      namePart = '_$namePart';
-    }
-
-    return 'tune_tangler_project${namePart}_$dateStr.zip';
-  }
+  String _generateFileName(String? projectName) =>
+      ProjectIo.projectZipName(projectName, DateTime.now());
 }

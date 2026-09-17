@@ -178,9 +178,9 @@ class TrackRepository {
     resetTracksKeyboardKey(tracksList);
   }
 
-  void dispose(Set<Track> tracksList) async {
+  Future<void> dispose(Set<Track> tracksList) async {
     for (Track track in tracksList) {
-      track.dispose();
+      await track.dispose();
     }
   }
 
@@ -259,14 +259,17 @@ class TrackRepository {
   }
 
   /// Sprawdza czy tracki mogą być bezpiecznie zamienione
-  bool canSwapTracks(Track track1, Track track2) {
-    return track1.state.value != TrackState.recording &&
-        track2.state.value != TrackState.recording &&
-        track1.state.value != TrackState.playing &&
-        track2.state.value != TrackState.playing &&
-        track1.state.value != TrackState.processing &&
-        track2.state.value != TrackState.processing;
+  static bool canSwapTrackStates(TrackState a, TrackState b) {
+    const blocked = {
+      TrackState.recording,
+      TrackState.playing,
+      TrackState.processing,
+    };
+    return !blocked.contains(a) && !blocked.contains(b);
   }
+
+  bool canSwapTracks(Track track1, Track track2) =>
+      canSwapTrackStates(track1.state.value, track2.state.value);
 
   /// Tworzy tymczasową ścieżkę dla zamiany
   Future<String> _createTempPathForSwap(

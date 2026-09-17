@@ -19,9 +19,9 @@ class HiveService {
   }
 
   static Future<void> dispose() async {
-    _settingsProfilesBox.close();
-    _globalSettingsBox.close();
-    _trackSettingsBox.close();
+    await _settingsProfilesBox.close();
+    await _globalSettingsBox.close();
+    await _trackSettingsBox.close();
   }
 
   static Future<void> set(dynamic key, dynamic value, {bool updateState = false}) async {
@@ -46,10 +46,19 @@ class HiveService {
       AppConfigFieldsCollection.get(key).key.name,
       defaultValue: defaultValue ?? AppConfigFieldsCollection.get(key).defaultValue,
     ),
-    TrackId _ => _trackSettingsBox.get(key.toString(), defaultValue: defaultValue ?? Track(key)),
+    TrackId id => _readTrack(id, defaultValue: defaultValue),
     Object() => throw UnimplementedError(),
     null => throw UnimplementedError(),
   };
+
+  /// Avoid `defaultValue: Track(id)` — Dart evaluates it even when the key exists,
+  /// leaking an [AudioPlayer] on every grid rebuild.
+  static Track _readTrack(TrackId id, {dynamic defaultValue}) {
+    final stored = _trackSettingsBox.get(id.toString());
+    if (stored is Track) return stored;
+    if (defaultValue is Track) return defaultValue;
+    return Track(id);
+  }
 
   static Future<void> delete(dynamic key) async => switch (key) {
     AppConfigFieldKey _ => await _globalSettingsBox.delete(AppConfigFieldsCollection.get(key).key.name),
