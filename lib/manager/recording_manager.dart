@@ -36,9 +36,9 @@ class RecordingManager {
       );
       return;
     }
-    FilePickerResult? result = await FilePicker.pickFiles(type: FileType.audio);
+    final picked = await FilePicker.pickFile(type: FileType.audio);
 
-    if (result == null) {
+    if (picked == null || picked.path == null) {
       _uiHelper.toast(
         _trans.trackRecordingImportCancelled(track.name.value),
         icon: AppIcon.trackRecordingImport,
@@ -47,8 +47,8 @@ class RecordingManager {
       );
       return;
     }
-    String sourcePath = result.files.single.path!;
-    String fileName = result.files.single.name;
+    String sourcePath = picked.path!;
+    String fileName = picked.name;
 
     Directory appDir = await getApplicationDocumentsDirectory();
     String destinationPath = "${appDir.path}/${track.id}.$fileName";

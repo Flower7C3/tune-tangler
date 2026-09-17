@@ -8,7 +8,7 @@ import Foundation
 import audioplayers_darwin
 import dynamic_color
 import emoji_picker_flutter
-import file_picker
+import file_picker_darwin
 import flutter_local_notifications
 import package_info_plus
 import record_macos

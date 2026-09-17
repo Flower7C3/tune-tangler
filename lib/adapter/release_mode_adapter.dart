@@ -1,5 +1,5 @@
 import 'package:audioplayers/audioplayers.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive.dart';
 
 class ReleaseModeAdapter extends TypeAdapter<ReleaseMode> {
   @override

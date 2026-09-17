@@ -1,4 +1,4 @@
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive.dart';
 import 'package:tune_tangler/entity/settings_profile.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 

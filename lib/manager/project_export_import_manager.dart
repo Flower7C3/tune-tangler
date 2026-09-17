@@ -277,12 +277,12 @@ class ProjectExportImportManager {
   /// Selects ZIP file for import
   Future<String?> _selectZipFile() async {
     try {
-      final result = await FilePicker.pickFiles(
+      final picked = await FilePicker.pickFile(
         type: FileType.custom,
         allowedExtensions: ['zip'],
       );
 
-      if (result == null || result.files.single.path == null) {
+      if (picked == null || picked.path == null) {
         _uiHelper.toast(
           _trans.projectImportCancel,
           icon: AppIcon.projectImport,
@@ -290,7 +290,7 @@ class ProjectExportImportManager {
         return null;
       }
 
-      return result.files.single.path!;
+      return picked.path!;
     } catch (e) {
       debugPrint('[ProjectImport] Error selecting ZIP file: $e');
       if (_context.mounted) {
