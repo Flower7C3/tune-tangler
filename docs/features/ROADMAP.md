@@ -71,13 +71,13 @@ This section summarizes repo review notes (`git log`, `flutter pub outdated`). S
 - **Android 15 edge-to-edge:** native setup (`WindowCompat.setDecorFitsSystemWindows(false)` before the `FlutterActivity` lifecycle), themes without `windowOptOutEdgeToEdgeEnforcement`, `SystemUiMode.edgeToEdge` on the Dart side; consistent with earlier grid padding for the navigation bar (see commits around `fix(android): enable edge-to-edge for Android 15` and related inset fixes).
 - **Share export:** hide “processed” when playback and trim are default (fewer unnecessary choices).
 - **Help (l10n):** icon legend tweaks (balance, trim, loop mode), grid/keyboard docs (drawer mode, modifier Control / often Cmd on Mac), EN copy cleanups, consistent tap wording in track states.
+- **Dependencies:** `hive_ce`, `share_plus` 13, `package_info_plus` 10, `file_picker` 12 (re-check `flutter pub outdated` on each release).
+- **Help a11y:** `textScaler` clamp (1.0–1.6) and Semantics on icon legends.
 
 #### ⚠️ Still needs attention
 
-- **Dependencies:** `flutter pub outdated` still shows minor bumps (`file_picker` 11.0.1→11.0.2, `path_provider_android` 2.2.23→2.3.1) and possible majors (`share_plus` 12→13, `package_info_plus` 9→10)—each major needs changelog review and smoke tests (record, file import, share, project export).
 - **Google Play / Android 15 — deprecated window APIs** (`setStatusBarColor`, traces in `PlatformPlugin`, sometimes Material date picker): may **persist** until Flutter/engine dependencies stop calling those paths. Re-check Flutter stable release notes each release and re-run **Pre-launch report** after bumping compile/target SDK tooling.
 - **Manual QA on API 35+:** visual pass after edge-to-edge (drawer, dialogs, bottom sheet, rotation if enabled, light/dark, gesture nav vs three-button). Static analysis alone is not enough.
-- **Accessibility:** Help (`Drawer` → Help) still lacks dedicated handling for **high `textScaler`** and richer **TalkBack** semantics for long icon legends—plan separately (`ExpansionTile` contrast, minimum readable typography, optional `Semantics`).
 
 #### ☑️ Short QA checklist (Android 15+)
 
