@@ -26,6 +26,8 @@ ICON_EMULATOR := 🖥
 ICON_UPGRADE := ⬆
 ICON_HELP := ❓
 
+PACKAGE := pro.kwiatek.tune_tangler
+APK_DIR := build/app/outputs/flutter-apk
 ANDROID_SDK := $(HOME)/Library/Android/sdk
 ADB := $(ANDROID_SDK)/platform-tools/adb
 
@@ -35,7 +37,7 @@ define choose-device
 		echo "$(COLOR_RED)$(ICON_ERROR) No devices found!$(FORMAT_RESET)"; \
 		exit 1; \
 	else \
-		echo "$(COLOR_CYAN)$(ICON_INFO) Select device to install on:$(FORMAT_RESET)"; \
+		echo "$(COLOR_CYAN)$(ICON_INFO) Select device:$(FORMAT_RESET)"; \
 		select DEVICE in "$${DEVICES[@]}"; do \
 			if [ -n "$$DEVICE" ]; then \
 				break; \
@@ -89,6 +91,48 @@ endef
 
 define running-emulator
 	$(ADB) devices | awk '/^emulator-/{print $$1; exit}'
+endef
+
+define resolve-apk
+	if [ "$$FLAVOR" = release ]; then \
+		ABI=$$(adb -s $$DEVICE shell getprop ro.product.cpu.abi | tr -d '\r'); \
+		APK="$(APK_DIR)/app-release.apk"; \
+		CANDIDATE="$(APK_DIR)/app-$$ABI-release.apk"; \
+		if [ -f "$$CANDIDATE" ]; then \
+			APK="$$CANDIDATE"; \
+			echo "$(COLOR_BLUE)$(ICON_INFO) Split release APK ($$ABI): $$APK$(FORMAT_RESET)"; \
+		elif [ -f "$$APK" ]; then \
+			echo "$(COLOR_YELLOW)$(ICON_WARN) Split APK not found; using universal $$APK$(FORMAT_RESET)"; \
+		else \
+			echo "$(COLOR_RED)$(ICON_ERROR) No release APK under $(APK_DIR)/. Run make build-apk-release first.$(FORMAT_RESET)"; \
+			exit 1; \
+		fi; \
+		DEST="$(PACKAGE).apk"; \
+	else \
+		APK="$(APK_DIR)/app-debug.apk"; \
+		if [ ! -f "$$APK" ]; then \
+			echo "$(COLOR_RED)$(ICON_ERROR) No debug APK under $(APK_DIR)/. Run make build-apk first.$(FORMAT_RESET)"; \
+			exit 1; \
+		fi; \
+		echo "$(COLOR_BLUE)$(ICON_INFO) Debug APK: $$APK$(FORMAT_RESET)"; \
+		DEST="$(PACKAGE)-debug.apk"; \
+	fi
+endef
+
+define apk-do
+	DEVICE=$(DEVICE); $(choose-device); \
+	$(resolve-apk); \
+	if [ "$$ACTION" = install ]; then \
+		if [ "$$FLAVOR" = release ]; then \
+			echo "$(COLOR_BLUE)$(ICON_INFO) Uninstalling previous release on $$DEVICE (if any)...$(FORMAT_RESET)"; \
+			adb -s $$DEVICE uninstall $(PACKAGE) 2>/dev/null || true; \
+		fi; \
+		adb -s $$DEVICE install -r "$$APK"; \
+		echo "$(COLOR_GREEN)$(ICON_CHECK)APK installed on $(FORMAT_BOLD)$$DEVICE$(FORMAT_RESET)$(COLOR_GREEN) device!$(FORMAT_RESET)"; \
+	else \
+		adb -s $$DEVICE push "$$APK" /sdcard/Download/$$DEST; \
+		echo "$(COLOR_GREEN)$(ICON_CHECK)APK pushed to $(FORMAT_BOLD)$$DEVICE$(FORMAT_RESET)$(COLOR_GREEN) device!$(FORMAT_RESET)"; \
+	fi
 endef
 
 .PHONY: help
@@ -171,38 +215,24 @@ build-apk-release:
 	flutter build appbundle --no-tree-shake-icons
 
 .PHONY: install-apk
-install-apk: ##BUILD## Build and install APK in debug mode. Options: `DEVICE=`
+install-apk: ##BUILD## Install debug APK. Options: `DEVICE=`
 	@echo "$(FORMAT_HIGHLIGHT)$(ICON_BUILD) APK Installation$(FORMAT_RESET)"
-	@DEVICE=$(DEVICE); $(choose-device); \
-	echo "$(COLOR_BLUE)$(ICON_INFO) Installing $(FORMAT_BOLD)debug$(FORMAT_RESET)$(COLOR_BLUE) APK on $(FORMAT_BOLD)$$DEVICE$(FORMAT_RESET)$(COLOR_BLUE) device...$(FORMAT_RESET)"; \
-	adb -s $$DEVICE install -r build/app/outputs/flutter-apk/app-debug.apk; \
-	echo "$(COLOR_GREEN)$(ICON_CHECK)APK installed on $(FORMAT_BOLD)$$DEVICE$(FORMAT_RESET)$(COLOR_GREEN) device!$(FORMAT_RESET)"
+	@FLAVOR=debug ACTION=install; $(apk-do)
+
+.PHONY: push-apk
+push-apk: ##BUILD## Push debug APK. Options: `DEVICE=`
+	@echo "$(FORMAT_HIGHLIGHT)$(ICON_BUILD) APK Push$(FORMAT_RESET)"
+	@FLAVOR=debug ACTION=push; $(apk-do)
 
 .PHONY: install-apk-release
-install-apk-release:
+install-apk-release: ##BUILD## Install release APK. Options: `DEVICE=`
 	@echo "$(FORMAT_HIGHLIGHT)$(ICON_BUILD) APK Installation$(FORMAT_RESET)"
-	@DEVICE=$(DEVICE); $(choose-device); \
-	ABI=$$(adb -s $$DEVICE shell getprop ro.product.cpu.abi | tr -d '\r'); \
-	APK="build/app/outputs/flutter-apk/app-release.apk"; \
-	case "$$ABI" in \
-		arm64-v8a) CANDIDATE="build/app/outputs/flutter-apk/app-arm64-v8a-release.apk" ;; \
-		armeabi-v7a) CANDIDATE="build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk" ;; \
-		x86_64) CANDIDATE="build/app/outputs/flutter-apk/app-x86_64-release.apk" ;; \
-		*) CANDIDATE="" ;; \
-	esac; \
-	if [ -n "$$CANDIDATE" ] && [ -f "$$CANDIDATE" ]; then \
-		APK="$$CANDIDATE"; \
-		echo "$(COLOR_BLUE)$(ICON_INFO) Installing split release APK ($$ABI): $$APK$(FORMAT_RESET)"; \
-	elif [ -f "$$APK" ]; then \
-		echo "$(COLOR_YELLOW)$(ICON_WARN) Split APK not found; using universal $$APK (rebuild with make build-apk-release if icons are wrong)$(FORMAT_RESET)"; \
-	else \
-		echo "$(COLOR_RED)$(ICON_ERROR) No release APK under build/app/outputs/flutter-apk/. Run make build-apk-release first.$(FORMAT_RESET)"; \
-		exit 1; \
-	fi; \
-	echo "$(COLOR_BLUE)$(ICON_INFO) Uninstalling previous release on $$DEVICE (if any)...$(FORMAT_RESET)"; \
-	adb -s $$DEVICE uninstall pro.kwiatek.tune_tangler 2>/dev/null || true; \
-	adb -s $$DEVICE install -r "$$APK"; \
-	echo "$(COLOR_GREEN)$(ICON_CHECK)APK installed on $(FORMAT_BOLD)$$DEVICE$(FORMAT_RESET)$(COLOR_GREEN) device!$(FORMAT_RESET)"
+	@FLAVOR=release ACTION=install; $(apk-do)
+
+.PHONY: push-apk-release
+push-apk-release: ##BUILD## Push release APK. Options: `DEVICE=`
+	@echo "$(FORMAT_HIGHLIGHT)$(ICON_BUILD) APK Push$(FORMAT_RESET)"
+	@FLAVOR=release ACTION=push; $(apk-do)
 
 .PHONY: clean
 clean: ##BUILD## Clean build and cache
@@ -245,18 +275,8 @@ start-emulator: ##DEVICE## Start emulator. Options: `EMULATOR=`
 	$(wait-for-android)
 
 .PHONY: run-emulator
-run-emulator: ##DEVICE## Run app on emulator. Options: `EMULATOR=`
-	@EMULATOR=$(EMULATOR); \
-	$(choose-emulator); \
-	RUNNING=$$($(running-emulator)); \
-	if [ -n "$$RUNNING" ]; then \
-		echo "$(COLOR_YELLOW)$(ICON_WARN) Emulator already running ($$RUNNING)$(FORMAT_RESET)"; \
-	else \
-		echo "$(COLOR_BLUE)$(ICON_INFO) Starting $(FORMAT_BOLD)$$EMULATOR$(FORMAT_RESET)$(COLOR_BLUE) emulator and running app...$(FORMAT_RESET)"; \
-		flutter emulators --launch $$EMULATOR; \
-	fi; \
-	$(wait-for-android); \
-	DEVICE=$$($(running-emulator)); \
+run-emulator: start-emulator ##DEVICE## Run app on emulator. Options: `EMULATOR=`
+	@DEVICE=$$($(running-emulator)); \
 	echo "$(COLOR_GREEN)$(ICON_CHECK) Running app on $$DEVICE...$(FORMAT_RESET)"; \
 	$(MAKE) run DEVICE=$$DEVICE
 
