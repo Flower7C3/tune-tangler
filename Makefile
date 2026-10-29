@@ -28,6 +28,7 @@ ICON_HELP := ❓
 
 PACKAGE := pro.kwiatek.tune_tangler
 APK_DIR := build/app/outputs/flutter-apk
+DEVICE_FILE := .make-device
 ANDROID_SDK := $(HOME)/Library/Android/sdk
 ADB := $(ANDROID_SDK)/platform-tools/adb
 
@@ -36,16 +37,27 @@ define choose-device
 	if [ $${#DEVICES[@]} -eq 0 ]; then \
 		echo "$(COLOR_RED)$(ICON_ERROR) No devices found!$(FORMAT_RESET)"; \
 		exit 1; \
-	else \
-		echo "$(COLOR_CYAN)$(ICON_INFO) Select device:$(FORMAT_RESET)"; \
-		select DEVICE in "$${DEVICES[@]}"; do \
-			if [ -n "$$DEVICE" ]; then \
-				break; \
-			else \
-				echo "$(COLOR_RED)$(ICON_ERROR) Invalid selection. Please choose a number.$(FORMAT_RESET)"; \
-			fi; \
-		done; \
 	fi; \
+	if [ -z "$$DEVICE" ] && [ -f "$(DEVICE_FILE)" ]; then \
+		DEVICE=$$(tr -d '[:space:]' < "$(DEVICE_FILE)"); \
+	fi; \
+	OK=; \
+	for d in "$${DEVICES[@]}"; do \
+		if [ "$$d" = "$$DEVICE" ]; then OK=1; break; fi; \
+	done; \
+	if [ -z "$$OK" ]; then DEVICE=; fi; \
+	if [ -z "$$DEVICE" ]; then \
+		if [ $${#DEVICES[@]} -eq 1 ]; then \
+			DEVICE=$${DEVICES[0]}; \
+		else \
+			echo "$(COLOR_CYAN)$(ICON_INFO) Select device:$(FORMAT_RESET)"; \
+			select DEVICE in "$${DEVICES[@]}"; do \
+				if [ -n "$$DEVICE" ]; then break; fi; \
+				echo "$(COLOR_RED)$(ICON_ERROR) Invalid selection. Please choose a number.$(FORMAT_RESET)"; \
+			done; \
+		fi; \
+	fi; \
+	echo "$$DEVICE" > "$(DEVICE_FILE)"; \
 	echo "$(COLOR_BLUE)$(ICON_INFO) Selected $(FORMAT_BOLD)$$DEVICE$(FORMAT_RESET)$(COLOR_BLUE) device$(FORMAT_RESET)"
 endef
 
@@ -124,8 +136,7 @@ define apk-do
 	$(resolve-apk); \
 	if [ "$$ACTION" = install ]; then \
 		if [ "$$FLAVOR" = release ]; then \
-			echo "$(COLOR_BLUE)$(ICON_INFO) Uninstalling previous release on $$DEVICE (if any)...$(FORMAT_RESET)"; \
-			adb -s $$DEVICE uninstall $(PACKAGE) 2>/dev/null || true; \
+			adb -s $$DEVICE uninstall $(PACKAGE) >/dev/null 2>&1 || true; \
 		fi; \
 		adb -s $$DEVICE install -r "$$APK"; \
 		echo "$(COLOR_GREEN)$(ICON_CHECK)APK installed on $(FORMAT_BOLD)$$DEVICE$(FORMAT_RESET)$(COLOR_GREEN) device!$(FORMAT_RESET)"; \
